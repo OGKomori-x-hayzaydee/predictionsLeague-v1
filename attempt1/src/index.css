@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-500: #021526;
+  --color-primary-600: #17153b;
+  --text-xl: 4.5rem;
+  --font-dmSerif: "DM Serif Text", serif;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.heroSection {
+  height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: "Outfit", sans-serif !important;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(56, 189, 248, 0.3);
+  border-radius: 2px;
+}
