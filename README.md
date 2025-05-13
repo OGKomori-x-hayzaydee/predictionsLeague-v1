@@ -1,1 +1,0 @@
-# predictionsLeague-v1
