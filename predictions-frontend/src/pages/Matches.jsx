@@ -2,16 +2,11 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Box, Container, Section, Button, Tabs, Text } from "@radix-ui/themes";
 import { format, parseISO, isAfter } from "date-fns";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/landingPage/Navbar";
+import Footer from "../components/landingPage/Footer";
 
-// Import club logos
-import arsenalLogo from "../assets/clubs/arsenal.png";
-import chelseaLogo from "../assets/clubs/chelsea.png";
-import liverpoolLogo from "../assets/clubs/liverpool.png";
-import manCityLogo from "../assets/clubs/mancity.png";
-import manUtdLogo from "../assets/clubs/manutd.png";
-import tottenhamLogo from "../assets/clubs/tottenham.png";
+// Import from centralized data file
+import { matches, gameweeks, teams, teamLogos } from "../data/sampleData";
 
 import {
   CalendarIcon,
@@ -33,85 +28,7 @@ export default function Matches() {
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Sample data - would be replaced by API calls
-  const matches = [
-    {
-      id: 1,
-      gameweek: 36,
-      homeTeam: "Arsenal",
-      awayTeam: "Tottenham",
-      date: "2025-05-12T15:00:00",
-      venue: "Emirates Stadium",
-      predicted: true,
-      result: null, // null means match hasn't happened yet
-      status: "upcoming"
-    },
-    {
-      id: 2,
-      gameweek: 36,
-      homeTeam: "Manchester City",
-      awayTeam: "Manchester United",
-      date: "2025-05-12T17:30:00",
-      venue: "Etihad Stadium",
-      predicted: false,
-      result: null,
-      status: "upcoming"
-    },
-    {
-      id: 3,
-      gameweek: 36,
-      homeTeam: "Chelsea",
-      awayTeam: "Liverpool",
-      date: "2025-05-13T20:00:00",
-      venue: "Stamford Bridge",
-      predicted: false,
-      result: null,
-      status: "upcoming"
-    },
-    {
-      id: 4,
-      gameweek: 35,
-      homeTeam: "Liverpool",
-      awayTeam: "Tottenham",
-      date: "2025-05-04T16:30:00",
-      venue: "Anfield",
-      predicted: true,
-      result: { homeGoals: 3, awayGoals: 1 },
-      status: "completed"
-    },
-    {
-      id: 5,
-      gameweek: 35,
-      homeTeam: "Manchester United",
-      awayTeam: "Arsenal",
-      date: "2025-05-05T20:00:00",
-      venue: "Old Trafford",
-      predicted: true,
-      result: { homeGoals: 1, awayGoals: 2 },
-      status: "completed"
-    },
-    {
-      id: 6,
-      gameweek: 35,
-      homeTeam: "Chelsea",
-      awayTeam: "Manchester City",
-      date: "2025-05-06T19:45:00",
-      venue: "Stamford Bridge",
-      predicted: true,
-      result: { homeGoals: 0, awayGoals: 0 },
-      status: "completed"
-    },
-  ];
-
-  // Teams for filtering
-  const teams = [
-    "Arsenal", "Chelsea", "Liverpool", 
-    "Manchester City", "Manchester United", "Tottenham", 
-    "All Teams"
-  ];
-
-  // Gameweeks for filtering
-  const gameweeks = Array.from({ length: 38 }, (_, i) => i + 1);
+  // Data imports from centralized file
 
   // Simulate API loading
   useEffect(() => {

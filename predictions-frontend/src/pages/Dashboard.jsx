@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import StatusBar from "../components/StatusBar";
-import VerticalMenu from "../components/VerticalMenu";
-import ContentPane from "../components/ContentPane";
+import StatusBar from "../components/layout/StatusBar";
+import VerticalMenu from "../components/layout/VerticalMenu";
+import ContentPane from "../components/layout/ContentPane";
 import { Box } from "@radix-ui/themes";
-import Footer2 from "../components/Footer2"; 
 
-import { 
-  HamburgerMenuIcon, 
+// Import from centralized data file
+import { upcomingMatches, recentPredictions, leagues } from "../data/sampleData";
+
+import {
+  HamburgerMenuIcon,
   MagnifyingGlassIcon,
   ChevronRightIcon,
   Cross2Icon
@@ -31,13 +33,13 @@ export default function Dashboard() {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 300);
-    
+
     return () => clearTimeout(timer);
   }, [activeItem]);
 
   // Get breadcrumb title
   const getBreadcrumbTitle = () => {
-    switch(activeItem) {
+    switch (activeItem) {
       case "dashboard": return "Dashboard";
       case "profile": return "My Profile";
       case "predictions": return "My Predictions";
@@ -83,7 +85,7 @@ export default function Dashboard() {
       <div className="relative z-10 flex h-screen">
         {/* Left Menu - Full Height */}
         <AnimatePresence>
-          <motion.div 
+          <motion.div
             className={`h-full hidden md:block ${isMenuCollapsed ? "w-16" : "w-64"}`}
             animate={{ width: isMenuCollapsed ? "4rem" : "16rem" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -122,14 +124,14 @@ export default function Dashboard() {
           <div className="bg-primary-600/40 px-4 py-2 border-b border-primary-400/20 flex items-center justify-between font-outfit">
             <div className="flex items-center">
               {/* Menu toggle button */}
-              <button 
+              <button
                 onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
                 className="mr-3 text-white/60 hover:text-white p-1 hidden md:block"
                 aria-label={isMenuCollapsed ? "Expand menu" : "Collapse menu"}
               >
                 <HamburgerMenuIcon />
               </button>
-              
+
               {/* Breadcrumbs */}
               <div className="flex items-center text-sm">
                 <span className="text-white/60">Home</span>
@@ -137,7 +139,7 @@ export default function Dashboard() {
                 <span className="text-teal-300 font-medium">{getBreadcrumbTitle()}</span>
               </div>
             </div>
-            
+
             {/* Search */}
             <div className="relative">
               {isSearchOpen ? (
@@ -183,10 +185,16 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : null}
-            <ContentPane activeItem={activeItem} navigateToSection={navigateToSection} />
+            
+            <ContentPane 
+              activeItem={activeItem} 
+              navigateToSection={navigateToSection}
+              upcomingMatches={upcomingMatches}
+              recentPredictions={recentPredictions}
+              leagues={leagues}
+            />
           </div>
 
-          {/* <Footer2 /> */}
         </div>
       </div>
     </Box>

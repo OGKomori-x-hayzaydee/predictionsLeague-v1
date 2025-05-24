@@ -3,7 +3,7 @@
 @theme {
   --color-primary-500: #021526;
   --color-primary-600: #17153b;
-  --text-xl: 4.5rem;
+  /* --text-xl: 4.5rem; */
   --font-dmSerif: "DM Serif Text", serif;
   --font-outfit: "Outfit", sans-serif;
 }
@@ -34,20 +34,69 @@ select {
   animation: marquee 30s linear infinite;
 }
 
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
+
+.fixture-swiper-container {
+  width: 100%;
+  height: 450px;
+  position: relative;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
+.fixture-stack-swiper {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.fixture-stack-slide {
+  background-color: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.fixture-stack-slide::-webkit-scrollbar {
   width: 4px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.fixture-stack-slide::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+.fixture-stack-slide::-webkit-scrollbar-thumb {
   background-color: rgba(56, 189, 248, 0.3);
   border-radius: 2px;
+}
+
+/* Add these styles to your CSS file */
+.fixtures-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+}
+
+.fixtures-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.fixtures-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fixtures-container::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 20px;
+}
+
+/* Add some animation for the bounce indicator */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+.animate-bounce {
+  animation: bounce 2s infinite ease-in-out;
 }

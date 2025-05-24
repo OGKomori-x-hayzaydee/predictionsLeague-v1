@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Box, Container, Tabs, Text } from "@radix-ui/themes";
 import { motion } from "framer-motion";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/landingPage/Navbar";
+import Footer from "../components/landingPage/Footer";
 
 export default function HowToPlay() {
   const [activeTab, setActiveTab] = useState("basics");

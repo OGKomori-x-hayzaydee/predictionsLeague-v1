@@ -3,8 +3,8 @@ import { Box, Container, Button, TextField } from "@radix-ui/themes";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { EyeOpenIcon, EyeClosedIcon } from "@radix-ui/react-icons";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Navbar from "../components/landingPage/Navbar";
+import Footer from "../components/landingPage/Footer";
 
 export default function Login() {
   const [email, setEmail] = useState("");
