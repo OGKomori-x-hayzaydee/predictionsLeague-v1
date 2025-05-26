@@ -1,4 +1,5 @@
 import React from "react";
+import LogoManager from "../common/LogoManager";
 
 const SettingsView = () => {
   return (
@@ -12,10 +13,22 @@ const SettingsView = () => {
         </p>
       </div>
 
-      <div className="bg-primary-600/40 rounded-lg p-6 border border-primary-400/20">
-        <p className="text-white font-outfit">
-          Settings management interface would be displayed here.
-        </p>
+      <div className="space-y-6">
+        {/* Team Logo Management Section */}
+        <section>
+          <h2 className="text-teal-100 text-xl font-bold mb-3">Team Logos</h2>
+          <LogoManager />
+        </section>
+
+        {/* General Settings Section */}
+        <section>
+          <h2 className="text-teal-100 text-xl font-bold mb-3">General Settings</h2>
+          <div className="bg-primary-600/40 rounded-lg p-6 border border-primary-400/20">
+            <p className="text-white font-outfit">
+              Additional settings management interface would be displayed here.
+            </p>
+          </div>
+        </section>
       </div>
     </>
   );

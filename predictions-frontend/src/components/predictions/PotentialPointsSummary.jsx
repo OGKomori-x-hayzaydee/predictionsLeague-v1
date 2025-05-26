@@ -7,9 +7,9 @@ const PotentialPointsSummary = ({ predictions, teamLogos }) => {
   const [showDetailedPointsBreakdown, setShowDetailedPointsBreakdown] = useState(false);
 
   return (
-    <div className="bg-primary-600/40 backdrop-blur-md rounded-lg border border-primary-400/20 mb-6 overflow-hidden">
+    <div className="bg-primary-600/40 backdrop-blur-md rounded-lg border border-primary-400/20 mb-6 overflow-hidden font-outfit">
       <div className="bg-primary-700/30 px-5 py-3 border-b border-primary-400/20">
-        <h3 className="text-teal-100 text-lg font-dmSerif">
+        <h3 className="text-teal-200 text-lg">
           Potential Points Summary
         </h3>
         <p className="text-white/60 text-sm">
@@ -170,7 +170,7 @@ const PotentialPointsSummary = ({ predictions, teamLogos }) => {
               transition={{ duration: 0.3 }}
               className="mt-4 pt-4 border-t border-primary-400/20"
             >
-              <h4 className="text-teal-200 text-lg font-medium mb-3 font-dmSerif">
+              <h4 className="text-teal-200 text-lg mb-3">
                 Detailed Points Calculation
               </h4>
               <div className="space-y-4 font-outfit">

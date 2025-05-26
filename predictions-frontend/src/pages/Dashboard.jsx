@@ -45,7 +45,6 @@ export default function Dashboard() {
       case "predictions": return "My Predictions";
       case "fixtures": return "Fixtures";
       case "leagues": return "My Leagues";
-      case "community": return "Community";
       case "settings": return "Settings";
       default: return "Dashboard";
     }
@@ -112,7 +111,6 @@ export default function Dashboard() {
               <option value="predictions">My Predictions</option>
               <option value="fixtures">Fixtures</option>
               <option value="leagues">My Leagues</option>
-              <option value="community">Community</option>
               <option value="settings">Settings</option>
             </select>
           </div>

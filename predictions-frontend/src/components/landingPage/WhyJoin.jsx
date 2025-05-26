@@ -9,27 +9,49 @@ import {
   PersonIcon, 
   UpdateIcon,
   MagicWandIcon, 
+   
 } from '@radix-ui/react-icons';
 
-// Import from centralized data file
-import { features } from "../../data/sampleData";
-
 export default function WhyJoin() {
-  // Map icons to features
-  const featuresWithIcons = features.map((feature, index) => {
-    const icons = [
-      <StarIcon className="w-8 h-8" />,
-      <BarChartIcon className="w-8 h-8" />,
-      <LightningBoltIcon className="w-8 h-8" />,
-      <PersonIcon className="w-8 h-8" />,
-      <UpdateIcon className="w-8 h-8" />,
-      <MagicWandIcon className="w-8 h-8" />
-    ];
-    return {
-      ...feature,
-      icon: icons[index % icons.length]
-    };
-  });
+  // Features with Radix icons
+  const features = [
+    {
+      title: "'Big Six' focus",
+      description:
+        "concentrate on the most exciting matches featuring Manchester United, Manchester City, Liverpool, Chelsea, Arsenal, and Tottenham.",
+      icon: <StarIcon className="w-8 h-8" />,
+    },
+    {
+      title: "multi-dimensional scoring",
+      description:
+        "earn points for correct winners, exact scores, goalscorers, and special events like clean sheets and comebacks.",
+      icon: <BarChartIcon className="w-8 h-8" />,
+    },
+    {
+      title: "strategic gameplay",
+      description:
+        "use special 'chips' like Double Down, Wildcard, and All-In Week to maximize your points at crucial moments.",
+      icon: <LightningBoltIcon className="w-8 h-8" />,
+    },
+    {
+      title: "private leagues",
+      description:
+        "create private leagues to compete with friends, family, or colleagues in your own exclusive competition.",
+      icon: <PersonIcon className="w-8 h-8" />,
+    },
+    {
+      title: "real-time updates",
+      description:
+        "experience the excitement of live score updates and see your points change as matches unfold.",
+      icon: <UpdateIcon className="w-8 h-8" />,
+    },
+    {
+      title: "seasonal awards",
+      description:
+        "compete for prestigious end-of-season awards like Prediction Champion, Oracle Award, and Goalscorer Guru.",
+      icon: <MagicWandIcon className="w-8 h-8" />,
+    },
+  ];
 
   // Animation controls
   const controls = useAnimation();
@@ -108,7 +130,7 @@ export default function WhyJoin() {
           variants={containerVariants}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {featuresWithIcons.map((feature, index) => (
+          {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={childVariants}

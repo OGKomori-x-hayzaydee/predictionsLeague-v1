@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import GameweekChipsPanel from "../panels/GameweekChipsPanel";
-import { fixtures } from "../../data/sampleData";
 import ViewToggleBar from "../ui/ViewToggleBar";
 import ActiveChipsBanner from "../ui/ActiveChipsBanner";
 import ContentView from "../fixtures/ContentView";
+import { fixtures, gameweeks, upcomingMatches } from "../../data/sampleData";
 
 const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
-  const [currentGameweek, setCurrentGameweek] = useState(36);
+  const [currentGameweek, setCurrentGameweek] = useState(
+    gameweeks?.[0]?.id || 36
+  );
   const [activeGameweekChips, setActiveGameweekChips] = useState([]);
-  const [viewMode, setViewMode] = useState("carousel");
+  const [viewMode, setViewMode] = useState("teams");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Handle applying gameweek chips
@@ -20,7 +22,6 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
       setActiveGameweekChips((prev) => [...prev, chipId]);
     }
 
-    // In a real app, you'd make an API call here to update the user's chip selections
     console.log(
       `${
         isRemoval ? "Removed" : "Applied"
@@ -48,7 +49,6 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
         {/* View toggle controls */}
         <ViewToggleBar viewMode={viewMode} setViewMode={setViewMode} />
       </div>
-
       {/* Collapsible Gameweek Chips Panel */}
       <motion.div
         initial={{ height: "auto" }}
@@ -60,28 +60,30 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
           onApplyChip={handleApplyGameweekChip}
           toggleChipInfoModal={toggleChipInfoModal}
           activeMatchChips={[]}
-          upcomingFixtures={[]}
+          upcomingFixtures={upcomingMatches || []}
         />
       </motion.div>
-
       {/* Content container with active chips banner */}
       <div className="backdrop-blur-md rounded-lg border border-primary-400/20 p-5 font-outfit">
-        {/* Active gameweek chips banner */}
-        <AnimatePresence>
-          <ActiveChipsBanner
-            activeGameweekChips={activeGameweekChips}
-            currentGameweek={currentGameweek}
-          />
-        </AnimatePresence>
-
         {/* Content view */}
-        <ContentView
-          viewMode={viewMode}
-          fixtures={fixtures}
-          onFixtureSelect={onFixtureSelect}
-          activeGameweekChips={activeGameweekChips}
-          searchQuery={searchQuery}
-        />
+        <>
+          {/* Active gameweek chips banner */}
+          <AnimatePresence>
+            <ActiveChipsBanner
+              activeGameweekChips={activeGameweekChips}
+              currentGameweek={currentGameweek}
+            />
+          </AnimatePresence>
+
+          {/* Content view */}
+          <ContentView
+            viewMode={viewMode}
+            fixtures={fixtures}
+            onFixtureSelect={onFixtureSelect}
+            activeGameweekChips={activeGameweekChips}
+            searchQuery={searchQuery}
+          />
+        </>
       </div>
     </div>
   );

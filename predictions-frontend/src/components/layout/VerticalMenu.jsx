@@ -42,11 +42,6 @@ export default function VerticalMenu({
       icon: <StackIcon />,
     },
     {
-      id: "community",
-      label: "Community",
-      icon: <ChatBubbleIcon />,
-    },
-    {
       id: "profile",
       label: "My Profile",
       icon: <PersonIcon />,

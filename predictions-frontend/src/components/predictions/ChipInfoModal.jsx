@@ -1,9 +1,7 @@
 import { motion } from "framer-motion";
 import { Cross2Icon } from "@radix-ui/react-icons";
 
-const ChipInfoModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-
+const ChipInfoModal = ({ onClose }) => {
   return (
     <motion.div
       className="fixed inset-0 bg-slate-900/70 backdrop-blur-lg z-50 flex items-center justify-center overflow-y-auto p-4"

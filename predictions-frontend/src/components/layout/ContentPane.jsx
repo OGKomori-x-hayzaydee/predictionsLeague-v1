@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { NavLink, useNavigate } from "react-router-dom";
 import PredictionsModal from "../predictions/PredictionsModal";
 import ChipInfoModal from "../predictions/ChipInfoModal";
 
@@ -14,7 +13,6 @@ import {
   FixturesView,
   PredictionsView,
   LeaguesView,
-  CommunityView,
   SettingsView,
   LeagueDetailView, // New component
   LeagueManagementView, // New component
@@ -224,8 +222,6 @@ export default function ContentPane({
         );
       case "settings":
         return <SettingsView />;
-      case "community":
-        return <CommunityView />;
       default:
         return (
           <DashboardView

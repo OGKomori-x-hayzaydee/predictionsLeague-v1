@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { format, parseISO } from "date-fns";
 import { ClockIcon } from "@radix-ui/react-icons";
+import { getTeamLogo } from "../../utils/teamUtils";
 
 const FixtureCard = ({ 
   fixture, 
@@ -9,6 +10,10 @@ const FixtureCard = ({
   onClick,
   teamLogos = {},
 }) => {
+  // Use getTeamLogo utility with fallback to context logos
+  const getLogoSrc = (teamName) => {
+    return teamLogos[teamName] || getTeamLogo(teamName);
+  };
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -25,25 +30,21 @@ const FixtureCard = ({
           {format(parseISO(fixture.date), "h:mm a")}
         </span>
       </div>
-      
-      <div className="flex items-center">
+        <div className="flex items-center">
         <img
-          src={teamLogos[fixture.homeTeam] || `https://via.placeholder.com/40?text=${fixture.homeTeam.substring(0, 3)}`}
+          src={getLogoSrc(fixture.homeTeam)}
           alt={fixture.homeTeam}
           className="w-10 h-10 object-contain"
-        />
-        <div className="mx-2 flex-grow">
+        />        <div className="mx-2 flex-grow">
           <div className="flex justify-between items-center">
             <span className="text-white font-medium">{fixture.homeTeam}</span>
             <span className="text-slate-400 font-outfit">vs</span>
             <span className="text-white font-medium">{fixture.awayTeam}</span>
           </div>
-          {/* <div className="text-white/40 text-xs mt-1">
-            {fixture.venue}
-          </div> */}
+
         </div>
         <img
-          src={teamLogos[fixture.awayTeam] || `https://via.placeholder.com/40?text=${fixture.awayTeam.substring(0, 3)}`}
+          src={getLogoSrc(fixture.awayTeam)}
           alt={fixture.awayTeam}
           className="w-10 h-10 object-contain"
         />

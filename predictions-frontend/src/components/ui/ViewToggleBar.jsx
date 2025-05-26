@@ -1,5 +1,5 @@
-import React from 'react';
-import ViewToggleButton from './ViewToggleButton';
+import React from "react";
+import ViewToggleButton from "./ViewToggleButton";
 import {
   LayoutIcon,
   PersonIcon,
@@ -15,18 +15,18 @@ const ViewToggleBar = ({ viewMode, setViewMode }) => {
     <div className="flex flex-col space-y-2">
       <div className="bg-primary-800/50 rounded-lg border border-primary-700/30 p-1 flex">
         <ViewToggleButton
-          icon={<LayoutIcon />}
-          active={viewMode === "carousel"}
-          onClick={() => setViewMode("carousel")}
-          tooltip="Carousel View"
-          label="Carousel"
-        />
-        <ViewToggleButton
           icon={<PersonIcon />}
           active={viewMode === "teams"}
           onClick={() => setViewMode("teams")}
           tooltip="By Team"
           label="Teams"
+        />
+        <ViewToggleButton
+          icon={<ListBulletIcon />}
+          active={viewMode === "list"}
+          onClick={() => setViewMode("list")}
+          tooltip="List View"
+          label="List"
         />
         <ViewToggleButton
           icon={<StackIcon />}
@@ -57,11 +57,11 @@ const ViewToggleBar = ({ viewMode, setViewMode }) => {
           label="Table"
         />
         <ViewToggleButton
-          icon={<ListBulletIcon />}
-          active={viewMode === "list"}
-          onClick={() => setViewMode("list")}
-          tooltip="List View"
-          label="List"
+          icon={<LayoutIcon />}
+          active={viewMode === "carousel"}
+          onClick={() => setViewMode("carousel")}
+          tooltip="Carousel View"
+          label="Carousel"
         />
       </div>
     </div>

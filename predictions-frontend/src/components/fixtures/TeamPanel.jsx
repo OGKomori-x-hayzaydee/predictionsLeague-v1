@@ -1,12 +1,40 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusIcon, MinusIcon } from "@radix-ui/react-icons";
-import { getTeamLogo } from "../../data/sampleData";
 import { getPredictionStats } from "../../utils/fixtureUtils";
 import TeamFixtureItem from "./TeamFixtureItem";
+import { normalizeTeamName, getTeamLogo } from "../../utils/teamUtils";
+import { getLogoUrl } from "../../utils/logoCache";
+import { teamLogos } from "../../data/sampleData";
 
 const TeamPanel = ({ team, fixtures, isExpanded, onToggle, onFixtureSelect }) => {
   const stats = getPredictionStats(fixtures);
+  
+  // Handle team logo with better caching and fallbacks
+  const getTeamLogoSrc = (teamName) => {
+    // Use the getLogoUrl helper first to try all variants with context logos
+    if (teamLogos) {
+      const logoUrl = getLogoUrl(teamName, teamLogos, normalizeTeamName);
+      
+      // If we got a non-placeholder logo, use it
+      if (!logoUrl.includes('placeholder')) {
+        return logoUrl;
+      }
+    }
+    
+    // Fall back to the utility function which uses local assets
+    const logo = getTeamLogo(teamName);
+    
+    // Debug logging
+    if (logo.includes('placeholder')) {
+      console.log(`No logo found for ${teamName} in either context or local assets`);
+      if (teamLogos) {
+        console.log('Available logo team names:', Object.keys(teamLogos).sort().join(', '));
+      }
+    }
+    
+    return logo;
+  };
 
   return (
     <div className="bg-primary-800/30 rounded-lg border border-primary-700/30 overflow-hidden">
@@ -17,7 +45,7 @@ const TeamPanel = ({ team, fixtures, isExpanded, onToggle, onFixtureSelect }) =>
       >
         <div className="flex items-center">
           <img 
-            src={getTeamLogo(team)} 
+            src={getTeamLogoSrc(team)} 
             alt={team} 
             className="w-8 h-8 object-contain mr-3" 
           />

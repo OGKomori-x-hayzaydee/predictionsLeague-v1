@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
-import { fixtures as sampleFixtures, teamLogos } from "../../data/sampleData";
 import FixtureCard from "./FixtureCard";
 import DateHeader from "./DateHeader";
 import EmptyFixtureState from "./EmptyFixtureState";
+import { fixtures, teamLogos } from "../../data/sampleData";
 
-function FixtureList({ onFixtureSelect, activeGameweekChips = [], searchQuery = "" }) {
+function FixtureList({ onFixtureSelect, searchQuery = "" }) {
   const [selectedFixture, setSelectedFixture] = useState(null);
 
   // Filter fixtures based on search query - using common utility function
-  const filteredFixtures = filterFixturesByQuery(sampleFixtures, searchQuery);
-  
+  const filteredFixtures = filterFixturesByQuery(fixtures, searchQuery);
+
   // Group fixtures by date for the list view - using common utility function
   const fixturesByDate = groupFixturesByDate(filteredFixtures);
 

@@ -11,6 +11,7 @@ import { EffectCards } from "swiper/modules";
 
 // Import club logos
 import { getTeamLogo, fixtures } from "../../data/sampleData";
+import EmptyFixtureState from "./EmptyFixtureState";
 
 export default function FixtureStack({
   onFixtureSelect,
@@ -248,30 +249,8 @@ export default function FixtureStack({
               {format(parseISO(dates[visibleSlideIndex]), "EEEE, MMM d")}
             </div>
           )}
-        </div>
-
-        {dates.length === 0 ? (
-          <div className="bg-primary-800/30 rounded-lg p-8 text-center my-12">
-            <div className="text-white/50 text-lg mb-2">No fixtures found</div>
-            <div className="text-white/40 text-sm mb-4">
-              {searchQuery
-                ? `No fixtures match your search for "${searchQuery}"`
-                : "There are no upcoming fixtures scheduled at this time"}
-            </div>
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  // Use an onClearSearch callback provided by the parent
-                  if (onClearSearch) {
-                    onClearSearch();
-                  }
-                }}
-                className="bg-indigo-600/60 hover:bg-indigo-600/80 text-white rounded px-3 py-1 text-sm transition-colors"
-              >
-                Clear Search
-              </button>
-            )}
-          </div>
+        </div>        {dates.length === 0 ? (
+          <EmptyFixtureState searchQuery={searchQuery} />
         ) : (
           <div className="relative">
             {/* Date navigation pills */}
@@ -413,7 +392,10 @@ export default function FixtureStack({
                               </div>
                             </div>
 
-                            <div className="mt-2 text-center">
+                            <div className="mt-2 flex justify-between items-center">
+                              <div className="text-xs text-white/60">
+                                {fixture.venue}
+                              </div>
                               <div
                                 className={`text-xs py-1 px-2 rounded ${
                                   fixture.predicted

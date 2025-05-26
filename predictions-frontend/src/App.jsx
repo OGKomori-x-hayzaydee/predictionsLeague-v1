@@ -12,16 +12,16 @@ import Matches from "./pages/Matches";
 function App() {
   return (
     <ThemeProvider>
-      <Theme>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/howToPlay" element={<HowToPlay />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/matches" element={<Matches />} />
-          </Routes>
-      </Theme>
+        <Theme>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/howToPlay" element={<HowToPlay />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/matches" element={<Matches />} />
+            </Routes>
+        </Theme>
     </ThemeProvider>
   );
 }

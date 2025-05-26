@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { CaretSortIcon, CheckCircledIcon, LightningBoltIcon } from "@radix-ui/react-icons";
+import EmptyFixtureState from "./EmptyFixtureState";
 
 function FixtureTable({ fixtures, onFixtureSelect, searchQuery = "" }) {
   const [sortField, setSortField] = useState('date');
@@ -164,12 +165,8 @@ function FixtureTable({ fixtures, onFixtureSelect, searchQuery = "" }) {
           </tbody>
         </table>
       </div>
-      
-      {sortedFixtures.length === 0 && (
-        <div className="p-8 text-center">
-          <div className="text-white/50 text-lg mb-2">No fixtures found</div>
-          <div className="text-white/40 text-sm">Try adjusting your search query</div>
-        </div>
+        {sortedFixtures.length === 0 && (
+        <EmptyFixtureState searchQuery={searchQuery} />
       )}
     </div>
   );

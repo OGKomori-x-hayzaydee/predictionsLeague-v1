@@ -3,6 +3,7 @@ import StatCard from "../common/StatCard";
 import UpcomingMatchesPanel from "../panels/UpcomingMatchesPanel";
 import RecentPredictionsPanel from "../panels/RecentPredictionsPanel";
 import LeaguesTable from "../tables/LeaguesTable";
+// import ApiTestComponent from "../common/ApiTestComponent";
 
 const DashboardView = ({
   upcomingMatches,
@@ -89,6 +90,8 @@ const DashboardView = ({
         onViewAll={() => navigateToSection("leagues")}
         onViewLeague={(leagueId) => navigateToSection("leagues", { leagueId })}
       />
+
+      {/* <ApiTestComponent /> */}
     </>
   );
 };

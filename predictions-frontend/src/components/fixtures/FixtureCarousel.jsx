@@ -2,20 +2,42 @@ import { useState, useRef } from "react";
 import DateGroup from "./DateGroup";
 import CarouselNavButton from "../ui/CarouselNavButton";
 import useCarouselScroll from "../../hooks/useCarouselScroll";
-import { groupFixturesByDate } from "../../utils/fixtureUtils";
+import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
+import { normalizeTeamName } from "../../utils/teamUtils";
+import { fixtures, teamLogos } from "../../data/sampleData";
+import EmptyFixtureState from "./EmptyFixtureState";
 
-// Import from centralized data file
-import { fixtures as sampleFixtures, teamLogos } from "../../data/sampleData";
-
-export default function FixtureCarousel({ onFixtureSelect, activeGameweekChips = [] }) {
+export default function FixtureCarousel({
+  onFixtureSelect,
+  activeGameweekChips = [],
+  searchQuery = ""
+}) {
   const carouselRef = useRef();
   const [selectedFixture, setSelectedFixture] = useState(null);
-  
-  // Use custom hook for carousel scroll logic
-  const { canScrollLeft, canScrollRight, scroll, checkScrollability } = useCarouselScroll(carouselRef);
 
-  // Use data from centralized data file
-  const fixtures = sampleFixtures;
+  // Use custom hook for carousel scroll logic
+  const { canScrollLeft, canScrollRight, scroll, checkScrollability } =
+    useCarouselScroll(carouselRef);
+
+  // Define the Big Six teams with their standardized names
+  const bigSixTeams = [
+    "Arsenal",
+    "Chelsea",
+    "Liverpool",
+    "Man. City",
+    "Man. United",
+    "Tottenham",
+  ];
+
+  // Filter fixtures based on search query - using common utility function
+  const filteredFixtures = filterFixturesByQuery(fixtures, searchQuery);
+
+  // Normalize the team names in fixtures using our centralized utility function
+  const normalizedFixtures = filteredFixtures.map((fixture) => ({
+    ...fixture,
+    homeTeam: normalizeTeamName(fixture.homeTeam),
+    awayTeam: normalizeTeamName(fixture.awayTeam),
+  }));
 
   // Handle selection
   const handleFixtureClick = (fixture) => {
@@ -25,46 +47,53 @@ export default function FixtureCarousel({ onFixtureSelect, activeGameweekChips =
     }
   };
 
-  // Group fixtures by date for the carousel
-  const fixturesByDate = groupFixturesByDate(fixtures);
+  // Group fixtures by date for the carousel - using normalized fixtures
+  const fixturesByDate = groupFixturesByDate(normalizedFixtures);
+
+  // Check if we have any fixtures to display
+  const hasFixtures = Object.keys(fixturesByDate).length > 0;
 
   return (
     <div className="relative backdrop-blur-md to-primary-700/40 rounded-lg">
-      <div className="relative">
-        {/* Left scroll button */}
-        <CarouselNavButton 
-          direction="left" 
-          onClick={() => scroll("left")} 
-          visible={canScrollLeft}
-        />
+      {hasFixtures ? (
+        <div className="relative">
+          {/* Left scroll button */}
+          <CarouselNavButton
+            direction="left"
+            onClick={() => scroll("left")}
+            visible={canScrollLeft}
+          />
 
-        {/* carousel */}
-        <div
-          className="overflow-x-auto hide-scrollbar pb-2 font-outfit"
-          ref={carouselRef}
-          onScroll={checkScrollability}
-        >
-          <div className="grid grid-flow-col auto-cols-max gap-4 p-0.5">
-            {Object.entries(fixturesByDate).map(([date, dayFixtures]) => (
-              <DateGroup
-                key={date}
-                date={date}
-                fixtures={dayFixtures}
-                selectedFixture={selectedFixture}
-                onFixtureClick={handleFixtureClick}
-                teamLogos={teamLogos}
-              />
-            ))}
+          {/* carousel */}
+          <div
+            className="overflow-x-auto hide-scrollbar pb-2 font-outfit"
+            ref={carouselRef}
+            onScroll={checkScrollability}
+          >
+            <div className="grid grid-flow-col auto-cols-max gap-4 p-0.5">
+              {Object.entries(fixturesByDate).map(([date, dayFixtures]) => (
+                <DateGroup
+                  key={date}
+                  date={date}
+                  fixtures={dayFixtures}
+                  selectedFixture={selectedFixture}
+                  onFixtureClick={handleFixtureClick}
+                  teamLogos={teamLogos}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* Right scroll button */}
+          <CarouselNavButton
+            direction="right"
+            onClick={() => scroll("right")}
+            visible={canScrollRight}
+          />
         </div>
-        
-        {/* Right scroll button */}
-        <CarouselNavButton 
-          direction="right" 
-          onClick={() => scroll("right")} 
-          visible={canScrollRight}
-        />
-      </div>
+      ) : (
+        <EmptyFixtureState searchQuery={searchQuery} />
+      )}
     </div>
   );
 }

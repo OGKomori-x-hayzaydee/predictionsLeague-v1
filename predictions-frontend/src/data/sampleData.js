@@ -467,3 +467,85 @@ export const getSampleLeague = (leagueId) => {
     ]
   };
 };
+
+// Sample European fixtures data for testing
+export const europeanFixtures = [
+  // Champions League fixtures
+  {
+    id: 201,
+    gameweek: null, // European competitions don't use gameweeks
+    homeTeam: "Arsenal",
+    awayTeam: "Bayern Munich",
+    date: "2025-05-28T20:00:00",
+    venue: "Emirates Stadium",
+    competition: "Champions League",
+    competitionCode: "CL",
+    stage: "QUARTER_FINAL",
+    predicted: false,
+  },
+  {
+    id: 202,
+    gameweek: null,
+    homeTeam: "Real Madrid",
+    awayTeam: "Man. City",
+    date: "2025-05-29T20:00:00",
+    venue: "Santiago Bernabéu",
+    competition: "Champions League",
+    competitionCode: "CL",
+    stage: "QUARTER_FINAL",
+    predicted: false,
+  },
+  {
+    id: 203,
+    gameweek: null,
+    homeTeam: "Liverpool",
+    awayTeam: "Barcelona",
+    date: "2025-06-01T17:30:00",
+    venue: "Anfield",
+    competition: "Champions League",
+    competitionCode: "CL",
+    stage: "SEMI_FINAL",
+    predicted: true,
+  },
+  // Europa League fixtures
+  {
+    id: 204,
+    gameweek: null,
+    homeTeam: "Chelsea",
+    awayTeam: "AC Milan",
+    date: "2025-05-30T18:45:00",
+    venue: "Stamford Bridge",
+    competition: "Europa League",
+    competitionCode: "EL",
+    stage: "QUARTER_FINAL",
+    predicted: false,
+  },
+  {
+    id: 205,
+    gameweek: null,
+    homeTeam: "AS Roma",
+    awayTeam: "Man. United",
+    date: "2025-06-02T20:00:00",
+    venue: "Stadio Olimpico",
+    competition: "Europa League",
+    competitionCode: "EL",
+    stage: "SEMI_FINAL",
+    predicted: true,
+  },
+  // Europa Conference League
+  {
+    id: 206,
+    gameweek: null,
+    homeTeam: "Tottenham",
+    awayTeam: "Fiorentina",
+    date: "2025-06-03T19:00:00",
+    venue: "Tottenham Hotspur Stadium",
+    competition: "Europa Conference League",
+    competitionCode: "EC",
+    stage: "FINAL",
+    predicted: false,
+  }
+];
+
+// Combine all fixtures (Premier League + European) for comprehensive testing
+export const allFixtures = [...fixtures, ...europeanFixtures];

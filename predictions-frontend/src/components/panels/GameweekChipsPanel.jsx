@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  InfoCircledIcon, 
   CheckIcon, 
-  LightningBoltIcon,
   Cross2Icon,
-  ArrowRightIcon,
   QuestionMarkCircledIcon,
   ChevronDownIcon
 } from "@radix-ui/react-icons";
@@ -14,7 +11,6 @@ const GameweekChipsPanel = ({
   currentGameweek, 
   onApplyChip, 
   activeMatchChips = [], 
-  upcomingFixtures = [],
   toggleChipInfoModal 
 }) => {
   const [activeChips, setActiveChips] = useState([]);
@@ -149,11 +145,6 @@ const GameweekChipsPanel = ({
     if (onApplyChip) {
       onApplyChip(chipId, currentGameweek, true); // true indicates removal
     }
-  };
-  
-  // Get chip details by ID helper
-  const getChipById = (chipId) => {
-    return allChips.find(chip => chip.id === chipId) || null;
   };
   
   // Format fixture name helper
@@ -472,27 +463,6 @@ const GameweekChipsPanel = ({
                       </div>
                     </div>
                     
-                    {/* Upcoming fixtures*/}
-                    {upcomingFixtures.length > 0 && (
-                      <div className="mt-2 border-t border-primary-600/30 mx-2 pt-2 pb-1">
-                        <h4 className="text-white/70 text-[0.8rem] mb-1.5">Upcoming Fixtures</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {upcomingFixtures.slice(0, 4).map((fixture, idx) => (
-                            <div 
-                              key={idx}
-                              className="bg-primary-700/20 border border-primary-600/20 rounded flex items-center"
-                            >
-                              <span className="text-white/80 text-[0.8rem] px-1.5 py-0.5">
-                                {formatFixture(fixture)}
-                              </span>
-                              <button className="bg-indigo-600/80 hover:bg-indigo-600 h-full rounded text-[0.8rem] px-1.5 py-0.5 text-white transition-colors">
-                                Predict
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
               )}

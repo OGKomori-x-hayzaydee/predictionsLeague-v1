@@ -5,7 +5,7 @@ import { format, parseISO, isAfter } from "date-fns";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
 
-// Import from centralized data file
+// Import sample data
 import { matches, gameweeks, teams, teamLogos } from "../data/sampleData";
 
 import {
@@ -24,11 +24,7 @@ import {
 export default function Matches() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [selectedGameweek, setSelectedGameweek] = useState("all");
-  const [filterTeam, setFilterTeam] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Data imports from centralized file
+  const [filterTeam, setFilterTeam] = useState("all");  const [showFilters, setShowFilters] = useState(false);
 
   // Simulate API loading
   useEffect(() => {
@@ -39,17 +35,17 @@ export default function Matches() {
   }, []);
 
   // Filter matches based on selected tab and filters
-  const filteredMatches = matches.filter(match => {
+  const filteredMatches = matches.filter((match) => {
     // Filter by tab (upcoming/completed)
     if (activeTab === "upcoming" && match.status !== "upcoming") return false;
     if (activeTab === "completed" && match.status !== "completed") return false;
-    
+
     // Filter by gameweek
     if (selectedGameweek !== "all" && match.gameweek !== parseInt(selectedGameweek)) return false;
-    
+
     // Filter by team
     if (filterTeam !== "all" && match.homeTeam !== filterTeam && match.awayTeam !== filterTeam) return false;
-    
+
     return true;
   });
 
