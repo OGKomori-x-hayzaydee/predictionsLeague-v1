@@ -1,9 +1,6 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-
-// Import components
+import { useState } from "react";
 import PredictionFilters from "../predictions/PredictionFilters";
-import PotentialPointsSummary from "../predictions/PotentialPointsSummary";
+import PotentialPointsSummary from "../panels/PotentialPointsSummary";
 import PredictionCard from "../predictions/PredictionCard";
 import EmptyState from "../common/EmptyState";
 

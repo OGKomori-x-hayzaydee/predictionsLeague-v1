@@ -102,7 +102,7 @@ const LeagueCard = ({ league, onManageLeague, onViewLeague }) => {
           </div>
           
           <div>
-            <h3 className="text-white font-dmSerif text-xl">{league.name}</h3>
+            <h3 className="text-white font-outfit text-xl">{league.name}</h3>
             <div className="flex items-center text-white/60 text-xs">
               <span>Created {formatSafeDate(league.createdAt, 'MMM d, yyyy')}</span>
               {league.isAdmin && (

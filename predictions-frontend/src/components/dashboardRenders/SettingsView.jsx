@@ -1,4 +1,3 @@
-import React from "react";
 import LogoManager from "../common/LogoManager";
 
 const SettingsView = () => {
@@ -39,11 +38,11 @@ export default SettingsView;
 
 /*
 
-Possible Features for SettingsView:
+Features for SettingsView:
 1. **Profile Management**: Allow users to update their profile information, including username, email, and password.
 2. **Notification Preferences**: Enable users to customize their notification settings, such as email alerts for game updates, fixture changes, etc.
 3. **Privacy Settings**: Provide options for users to manage their privacy settings, including who can see their profile and activity.
-4. **Theme Customization**: Allow users to switch between light and dark themes or customize the app's color scheme.
+4. **Theme Customization**: Allow users to switch between light and dark themes or customize the app's color scheme, font in sentence case or all lowercase.
 5. **Button Titles**: Provide method for users to toggle button titles on or off.
 6. **Default Menu View**: Allow users to set their default view when they log in (e.g., fixtures, predictions, etc.)
 

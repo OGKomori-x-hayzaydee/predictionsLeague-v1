@@ -34,6 +34,11 @@ select {
   animation: marquee 30s linear infinite;
 }
 
+.text-2xs {
+  font-size: 0.65rem;
+  line-height: 1rem;
+}
+
 
 .fixture-swiper-container {
   width: 100%;

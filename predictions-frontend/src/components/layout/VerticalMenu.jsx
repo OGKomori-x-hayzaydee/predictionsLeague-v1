@@ -25,7 +25,7 @@ export default function VerticalMenu({
       label: "Dashboard",
       icon: <HomeIcon />,
     },
-    
+
     {
       id: "fixtures",
       label: "Fixtures",
@@ -34,12 +34,12 @@ export default function VerticalMenu({
     {
       id: "predictions",
       label: "My Predictions",
-      icon: <BarChartIcon />,
+      icon:  <StackIcon />,
     },
     {
       id: "leagues",
       label: "My Leagues",
-      icon: <StackIcon />,
+      icon: <BarChartIcon />,
     },
     {
       id: "profile",

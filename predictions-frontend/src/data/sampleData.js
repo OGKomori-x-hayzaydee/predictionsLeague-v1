@@ -456,14 +456,14 @@ export const getSampleLeague = (leagueId) => {
     lastUpdate: "2025-05-15T14:30:00",
     isAdmin: parseInt(leagueId) % 2 === 0, // Just for testing - every even ID is admin
     leaderboard: [
-      { id: 1, name: "Jane Smith", points: 478, position: 1, trend: "up", avatar: null },
-      { id: 2, name: "John Doe", points: 467, position: 2, trend: "same", avatar: null },
-      { id: 3, name: "Current User", points: 453, position: 3, trend: "down", avatar: null, isCurrentUser: true },
-      { id: 4, name: "Mike Jones", points: 432, position: 4, trend: "up", avatar: null },
-      { id: 5, name: "Sarah Williams", points: 418, position: 5, trend: "down", avatar: null },
-      { id: 6, name: "Robert Chen", points: 405, position: 6, trend: "up", avatar: null },
-      { id: 7, name: "Emma Wilson", points: 398, position: 7, trend: "down", avatar: null },
-      { id: 8, name: "David Clark", points: 382, position: 8, trend: "same", avatar: null },
+      { id: 1, name: "Jane Smith", points: 478, position: 1, trend: "up", avatar: null, predictions: 18, joinedDate: "2024-08-15T10:30:00" },
+      { id: 2, name: "John Doe", points: 467, position: 2, trend: "same", avatar: null, predictions: 17, joinedDate: "2024-08-20T14:15:00" },
+      { id: 3, name: "Current User", points: 453, position: 3, trend: "down", avatar: null, isCurrentUser: true, predictions: 16, joinedDate: "2024-09-01T09:45:00" },
+      { id: 4, name: "Mike Jones", points: 432, position: 4, trend: "up", avatar: null, predictions: 15, joinedDate: "2024-09-05T16:20:00" },
+      { id: 5, name: "Sarah Williams", points: 418, position: 5, trend: "down", avatar: null, predictions: 14, joinedDate: "2024-09-10T11:10:00" },
+      { id: 6, name: "Robert Chen", points: 405, position: 6, trend: "up", avatar: null, predictions: 13, joinedDate: "2024-09-15T13:30:00" },
+      { id: 7, name: "Emma Wilson", points: 398, position: 7, trend: "down", avatar: null, predictions: 12, joinedDate: "2024-09-20T08:45:00" },
+      { id: 8, name: "David Clark", points: 382, position: 8, trend: "same", avatar: null, predictions: 11, joinedDate: "2024-09-25T15:00:00" },
     ]
   };
 };

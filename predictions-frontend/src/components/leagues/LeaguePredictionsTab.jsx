@@ -380,12 +380,11 @@ const LeaguePredictionsTab = ({ leagueId }) => {
     if (!timestamp) return null;
     return formatDate(timestamp, 'MMM d, h:mm a');
   };
-  
-  // Get chip badge styling
+    // Get chip badge styling
   const getChipBadge = (chipName) => {
     const chipStyles = {
       "wildcard": "bg-purple-900/40 text-purple-300 border-purple-700/40",
-      "scorerFocus": "bg-indigo-900/40 text-indigo-300 border-indigo-700/40",
+      "scorerFocus": "bg-cyan-900/40 text-cyan-300 border-cyan-700/40",
       "cleanSheet": "bg-emerald-900/40 text-emerald-300 border-emerald-700/40",
       "defensiveBoost": "bg-blue-900/40 text-blue-300 border-blue-700/40",
       "homeAdvantage": "bg-amber-900/40 text-amber-300 border-amber-700/40",
@@ -443,7 +442,7 @@ const LeaguePredictionsTab = ({ leagueId }) => {
       className="mb-8"
     >
       <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
-        <h2 className="text-teal-100 text-2xl font-dmSerif">League Predictions</h2>
+        <h2 className="text-teal-100 text-2xl font-outfit">League Predictions</h2>
         
         <div className="flex flex-wrap items-center gap-2">
           {/* View mode selector */}

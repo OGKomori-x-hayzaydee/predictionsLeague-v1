@@ -44,7 +44,7 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-teal-100 text-2xl font-dmSerif">Create New League</h2>
+        <h2 className="text-teal-100 text-2xl font-outfit">Create New League</h2>
         <button 
           type="button"
           onClick={onCancel}

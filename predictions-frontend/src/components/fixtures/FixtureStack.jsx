@@ -10,10 +10,11 @@ import "swiper/css/effect-cards";
 import { EffectCards } from "swiper/modules";
 
 // Import club logos
-import { getTeamLogo, fixtures } from "../../data/sampleData";
+import { getTeamLogo } from "../../data/sampleData";
 import EmptyFixtureState from "./EmptyFixtureState";
 
 export default function FixtureStack({
+  fixtures,
   onFixtureSelect,
   searchQuery = "",
   onClearSearch,
@@ -24,7 +25,6 @@ export default function FixtureStack({
   const swiperRef = useRef(null);
   const [swiperInitialized, setSwiperInitialized] = useState(false);
   const [visibleSlideIndex, setVisibleSlideIndex] = useState(0);
-
   // Memo-ize expensive operations
   const filteredFixtures = React.useMemo(() => {
     return fixtures.filter((fixture) => {
@@ -34,8 +34,8 @@ export default function FixtureStack({
       return (
         fixture.homeTeam.toLowerCase().includes(query) ||
         fixture.awayTeam.toLowerCase().includes(query) ||
-        fixture.venue.toLowerCase().includes(query) ||
-        fixture.competition.toLowerCase().includes(query)
+        fixture.venue?.toLowerCase().includes(query) ||
+        fixture.competition?.toLowerCase().includes(query)
       );
     });
   }, [fixtures, searchQuery]);
@@ -238,22 +238,11 @@ export default function FixtureStack({
   return (
     <div className="relative backdrop-blur-md to-primary-700/40 rounded-lg p-4">
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-teal-200 font-outfit font-medium text-xl">
-            Fixture Cards
-          </h3>
-
-          {dates.length > 0 && visibleSlideIndex < dates.length && (
-            <div className="bg-teal-900/30 text-teal-300 text-sm px-3 py-1 rounded-md flex items-center">
-              <CalendarIcon className="mr-1.5 w-4 h-4" />
-              {format(parseISO(dates[visibleSlideIndex]), "EEEE, MMM d")}
-            </div>
-          )}
-        </div>        {dates.length === 0 ? (
+        {dates.length === 0 ? (
           <EmptyFixtureState searchQuery={searchQuery} />
         ) : (
           <div className="relative">
-            {/* Date navigation pills */}
+            {/* Date navigation pills
             <div className="flex justify-center mb-4 space-x-1 overflow-x-auto hide-scrollbar py-2">
               {dates.map((date, index) => (
                 <button
@@ -286,7 +275,7 @@ export default function FixtureStack({
                   )}
                 </button>
               ))}
-            </div>
+            </div> */}
 
             {/* Stack of date cards using Swiper */}
             <div className="fixture-swiper-container">
@@ -449,9 +438,9 @@ export default function FixtureStack({
       {/* Navigation hint and indicators */}
       {dates.length > 0 && (
         <div className="flex flex-col items-center mt-4">
-          <div className="flex justify-center items-center text-white/50 text-xs mb-3">
+          {/* <div className="flex justify-center items-center text-white/50 text-xs mb-3">
             <span className="ml-1">Swipe to navigate</span>
-          </div>
+          </div> */}
 
           {/* Page indicators */}
           <div className="flex space-x-1">

@@ -73,7 +73,7 @@ const DiscoverTab = ({
       
       {/* Featured Leagues */}
       <div className="mb-8">
-        <h2 className="text-teal-100 text-2xl font-dmSerif mb-3 flex items-center">
+        <h2 className="text-teal-100 text-2xl font-outfit mb-3 flex items-center">
           <RocketIcon className="w-5 h-5 mr-2" />
           Featured Leagues
         </h2>

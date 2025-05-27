@@ -38,7 +38,7 @@ const FeaturedLeagueCard = ({ league, onJoinLeague, isJoining }) => {
       
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white font-dmSerif text-xl">{league.name}</h3>
+          <h3 className="text-white font-outfit text-xl">{league.name}</h3>
           <div className={`px-2 py-1 rounded-full text-xs flex items-center ${
             league.type === 'private' 
               ? 'bg-indigo-900/40 text-indigo-300' 

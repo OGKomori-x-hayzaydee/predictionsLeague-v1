@@ -4,10 +4,11 @@ import CarouselNavButton from "../ui/CarouselNavButton";
 import useCarouselScroll from "../../hooks/useCarouselScroll";
 import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
 import { normalizeTeamName } from "../../utils/teamUtils";
-import { fixtures, teamLogos } from "../../data/sampleData";
+import { teamLogos } from "../../data/sampleData";
 import EmptyFixtureState from "./EmptyFixtureState";
 
 export default function FixtureCarousel({
+  fixtures,
   onFixtureSelect,
   activeGameweekChips = [],
   searchQuery = ""

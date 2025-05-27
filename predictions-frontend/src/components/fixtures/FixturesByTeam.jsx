@@ -5,14 +5,13 @@ import {
 } from "../../utils/fixtureUtils";
 import TeamPanel from "./TeamPanel";
 import EmptyFixtureState from "./EmptyFixtureState";
-import { fixtures } from "../../data/sampleData";
 import { normalizeTeamName } from "../../utils/teamUtils";
 
-function FixturesByTeam({ fixtures: propFixtures = [], onFixtureSelect, searchQuery = "" }) {
+function FixturesByTeam({ fixtures = [], onFixtureSelect, searchQuery = "" }) {
   const [expandedTeam, setExpandedTeam] = useState(null);
 
-  // Use fixtures provided as prop or fallback to fixtures from context
-  const fixturesToUse = propFixtures && propFixtures.length > 0 ? propFixtures : fixtures || [];
+  // Use provided fixtures
+  const fixturesToUse = fixtures;
 
   // Define the Big Six teams with their standardized names
   const bigSixTeams = [

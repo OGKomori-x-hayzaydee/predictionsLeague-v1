@@ -13,7 +13,7 @@ const LeaderboardTab = ({ leaderboard }) => {
       className="mb-8"
     >
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-teal-100 text-2xl font-dmSerif">Leaderboard</h2>
+        <h2 className="text-teal-100 text-2xl font-outfit">Leaderboard</h2>
         
         <div className="flex items-center gap-2">
           <button className="bg-slate-700/40 hover:bg-slate-700/60 border border-slate-600/30 rounded-md py-1.5 px-3 text-sm text-white/70 hover:text-white flex items-center transition-colors">

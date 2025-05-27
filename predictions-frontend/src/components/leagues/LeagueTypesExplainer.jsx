@@ -12,7 +12,7 @@ const LeagueTypesExplainer = () => (
         <div className="w-10 h-10 rounded-full bg-slate-600/40 flex items-center justify-center text-slate-300 mr-3">
           <GlobeIcon className="w-5 h-5" />
         </div>
-        <h3 className="text-teal-100 text-xl font-dmSerif">Public Leagues</h3>
+        <h3 className="text-teal-100 text-xl font-outfit">Public Leagues</h3>
       </div>
       <p className="text-white/70 text-sm mb-4">
         Public leagues are open to everyone. Join global competitions with thousands of players, compete for higher ranks, and test your prediction skills against the world.
@@ -43,7 +43,7 @@ const LeagueTypesExplainer = () => (
         <div className="w-10 h-10 rounded-full bg-indigo-800/50 flex items-center justify-center text-indigo-300 mr-3">
           <LockClosedIcon className="w-4 h-4" />
         </div>
-        <h3 className="text-indigo-100 text-xl font-dmSerif">Private Leagues</h3>
+        <h3 className="text-indigo-100 text-xl font-outfit">Private Leagues</h3>
       </div>
       <p className="text-white/70 text-sm mb-4">
         Create your own league and invite friends, family, or colleagues. As league admin, you control the rules, scoring systems, and which matches to include.

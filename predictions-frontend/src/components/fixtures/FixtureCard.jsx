@@ -19,7 +19,7 @@ const FixtureCard = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick(fixture)}
-      className={`bg-primary-800/40 border border-primary-700/40 rounded-lg p-3 hover:border-primary-600/40 transition-all ${
+      className={`border rounded-lg p-3 hover:border-primary-600/40 transition-all ${
         selected ? "ring-2 ring-teal-400" : ""
       }`}
     >

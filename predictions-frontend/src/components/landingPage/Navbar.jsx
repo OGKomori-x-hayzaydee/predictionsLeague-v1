@@ -153,7 +153,6 @@ const Navbar = memo(() => {
             variants={itemVariants}
           >
             <NavItem to="/" location={location}>home</NavItem>
-            <NavItem to="/matches" location={location}>matches</NavItem>
             <NavItem to="/howToPlay" location={location}>how to play</NavItem>
 
             <motion.div variants={itemVariants}>
