@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import PredictionFilters from "../predictions/PredictionFilters";
 import PotentialPointsSummary from "../panels/PotentialPointsSummary";
 import PredictionCard from "../predictions/PredictionCard";
 import EmptyState from "../common/EmptyState";
+import { ThemeContext } from "../../context/ThemeContext";
+import { text } from "../../utils/themeUtils";
 
 // Import data and utilities
 import { predictions, teamLogos } from "../../data/sampleData";
@@ -14,6 +16,9 @@ const PredictionsView = ({ handleEditPrediction }) => {
   const [sortBy, setSortBy] = useState("date");
   const [filterTeam, setFilterTeam] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Get theme context
+  const { theme } = useContext(ThemeContext);
 
   // Filter predictions based on active filter
   const filteredPredictions = predictions.filter((prediction) => {
@@ -74,10 +79,10 @@ const PredictionsView = ({ handleEditPrediction }) => {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-teal-100 text-3xl font-bold font-dmSerif">
+        <h1 className={`${theme === 'dark' ? 'text-teal-100' : 'text-teal-700'} text-3xl font-bold font-dmSerif`}>
           My Predictions
         </h1>
-        <p className="text-white/70 font-outfit">
+        <p className={`${text.secondary[theme]} font-outfit`}>
           View and manage your predictions for past and upcoming matches
         </p>
       </div>

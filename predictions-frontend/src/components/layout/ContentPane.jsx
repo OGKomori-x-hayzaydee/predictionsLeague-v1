@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PredictionsModal from "../predictions/PredictionsModal";
 import ChipInfoModal from "../predictions/ChipInfoModal";
+import { ThemeContext } from "../../context/ThemeContext";
+import { backgrounds } from "../../utils/themeUtils";
 
 // Import from centralized data file
 import { upcomingMatches, recentPredictions, leagues } from "../../data/sampleData";
@@ -22,6 +24,9 @@ export default function ContentPane({
   activeItem,
   navigateToSection,
 }) {
+  // Access theme context
+  const { theme } = useContext(ThemeContext);
+  
   // Animation variants
   const contentVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -244,17 +249,15 @@ export default function ContentPane({
         );
     }
   };
-
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className={`h-full overflow-y-auto p-6 ${backgrounds.main[theme]}`}>
       {/* Render content based on activeItem */}
       {renderContent()}
 
       {/* Predictions Modal */}
-      <AnimatePresence>
-        {modalData.isOpen && (
+      <AnimatePresence>        {modalData.isOpen && (
           <motion.div
-            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

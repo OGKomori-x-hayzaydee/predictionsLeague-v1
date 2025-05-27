@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import ViewToggleButton from "./ViewToggleButton";
 import {
   LayoutIcon,
@@ -9,11 +9,20 @@ import {
   TableIcon,
   ListBulletIcon,
 } from "@radix-ui/react-icons";
+import { ThemeContext } from "../../context/ThemeContext";
 
 const ViewToggleBar = ({ viewMode, setViewMode }) => {
+  const { theme } = useContext(ThemeContext);
+
   return (
     <div className="flex flex-col space-y-2">
-      <div className="bg-primary-800/50 rounded-lg border border-primary-700/30 p-1 flex">
+      <div
+        className={`${
+          theme === "dark"
+            ? "bg-primary-800/50 border-primary-700/30"
+            : "bg-slate-100 border-slate-200"
+        } rounded-lg border p-1 flex`}
+      >
         <ViewToggleButton
           icon={<PersonIcon />}
           active={viewMode === "teams"}

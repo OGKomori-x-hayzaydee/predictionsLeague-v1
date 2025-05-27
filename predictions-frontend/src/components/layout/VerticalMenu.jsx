@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import {
   HomeIcon,
@@ -12,12 +12,15 @@ import {
 } from "@radix-ui/react-icons";
 import { NavLink } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function VerticalMenu({
   activeItem,
   setActiveItem,
   isCollapsed = false,
 }) {
+  // Get theme context
+  const { theme } = useContext(ThemeContext);
   // Menu items configuration
   const menuItems = [
     {
@@ -68,10 +71,13 @@ export default function VerticalMenu({
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0 },
   };
-
   return (
     <motion.div
-      className="bg-primary-500/90 backdrop-blur-md h-full border-r border-primary-400/20 py-6"
+      className={`${
+        theme === 'dark' 
+          ? 'bg-primary-500/90 border-primary-400/20' 
+          : 'bg-white border-slate-200 shadow-sm'
+      } backdrop-blur-md h-full border-r py-6`}
       initial="hidden"
       animate="visible"
       variants={menuVariants}
@@ -88,11 +94,9 @@ export default function VerticalMenu({
           src={logo}
           alt="Predictions League Logo"
           className={`h-8 ${isCollapsed ? "mx-auto" : "ml-2 mr-0.5"}`}
-        />
-
-        {/* Text only shown when not collapsed */}
+        />        {/* Text only shown when not collapsed */}
         {!isCollapsed && (
-          <span className="text-teal-100 text-lg font-bold font-dmSerif">
+          <span className={`${theme === 'dark' ? 'text-teal-100' : 'text-teal-700'} text-lg font-bold font-dmSerif`}>
             predictionsLeague
           </span>
         )}
@@ -103,13 +107,16 @@ export default function VerticalMenu({
           {menuItems.map((item) => (
             <motion.li key={item.id} variants={itemVariants}>
               <button
-                onClick={() => setActiveItem(item.id)}
-                className={`flex ${
+                onClick={() => setActiveItem(item.id)}                className={`flex ${
                   isCollapsed ? "justify-center" : "items-center"
                 } w-full px-4 py-3 text-left transition-colors ${
                   activeItem === item.id
-                    ? "bg-primary-600/60 text-teal-300 border-l-2 border-teal-400"
-                    : "text-white/70 hover:bg-primary-600/40 hover:text-teal-200"
+                    ? theme === 'dark'
+                      ? "bg-primary-600/60 text-teal-300 border-l-2 border-teal-400"
+                      : "bg-teal-50 text-teal-700 border-l-2 border-teal-500"
+                    : theme === 'dark'
+                      ? "text-white/70 hover:bg-primary-600/40 hover:text-teal-200"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-teal-700"
                 }`}
                 title={isCollapsed ? item.label : ""}
               >
@@ -123,10 +130,13 @@ export default function VerticalMenu({
 
           {/* Logout button*/}
           <motion.li variants={itemVariants}>
-            <button
-              className={`flex ${
+            <button              className={`flex ${
                 isCollapsed ? "justify-center" : "items-center"
-              } w-full px-4 py-3 text-left text-white/50 hover:text-red-300 transition-colors mt-8`}
+              } w-full px-4 py-3 text-left ${
+                theme === 'dark' 
+                ? 'text-white/50 hover:text-red-300' 
+                : 'text-slate-400 hover:text-red-500'
+              } transition-colors mt-8`}
               onClick={() => alert("Logging out...")}
               title={isCollapsed ? "Logout" : ""}
             >

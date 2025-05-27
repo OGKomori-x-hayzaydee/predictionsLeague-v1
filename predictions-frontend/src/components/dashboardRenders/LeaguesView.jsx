@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusIcon,
@@ -19,6 +19,8 @@ import Modal from "../ui/Modal";
 import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
 import SearchInput from "../common/SearchInput";
+import { ThemeContext } from "../../context/ThemeContext";
+import { text, backgrounds, buttons } from "../../utils/themeUtils";
 
 const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   const [activeTab, setActiveTab] = useState("my-leagues");
@@ -27,6 +29,9 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   const [joiningLeague, setJoiningLeague] = useState(false);
   const [leagueCode, setLeagueCode] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Get theme context
+  const { theme } = useContext(ThemeContext);
 
   // Use our custom hook to get league data and functions
   const {
@@ -122,14 +127,14 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center">
-            <h1 className="text-teal-100 text-3xl font-bold font-dmSerif">
+            <h1 className={`${theme === 'dark' ? 'text-teal-100' : 'text-teal-700'} text-3xl font-bold font-dmSerif`}>
               My Leagues
             </h1>
-            <div className="ml-3 mt-1 bg-teal-900/30 text-teal-300 text-xs px-2.5 py-1 rounded-full">
+            <div className={`ml-3 mt-1 ${theme === 'dark' ? 'bg-teal-900/30 text-teal-300' : 'bg-teal-100 text-teal-700'} text-xs px-2.5 py-1 rounded-full`}>
               {myLeagues.length} {myLeagues.length === 1 ? "League" : "Leagues"}
             </div>
           </div>
-          <p className="text-white/70 font-outfit mt-1">
+          <p className={`${text.secondary[theme]} font-outfit mt-1`}>
             Manage your leagues, check rankings, and join competitions
           </p>
         </div>
@@ -139,7 +144,11 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowJoinModal(true)}
-            className="px-3 py-1.5 bg-slate-700/60 hover:bg-slate-700/80 border border-slate-500/30 rounded-md transition-colors flex items-center text-white/90 text-sm"
+            className={`px-3 py-1.5 ${
+              theme === 'dark'
+                ? 'bg-slate-700/60 hover:bg-slate-700/80 border-slate-500/30'
+                : 'bg-slate-100 hover:bg-slate-200 border-slate-200'
+            } border rounded-md transition-colors flex items-center ${text.primary[theme]} text-sm`}
           >
             <EnterIcon className="mr-1.5 w-3.5 h-3.5" />
             Join League
@@ -149,7 +158,7 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowCreateModal(true)}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors flex items-center text-white text-sm font-medium"
+            className={`${buttons.primary[theme]} px-3 py-1.5 rounded-md transition-colors flex items-center text-white text-sm font-medium`}
           >
             <PlusCircledIcon className="mr-1.5 w-3.5 h-3.5" />
             Create League
@@ -174,13 +183,17 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
 
         <div className="flex items-center gap-3">
           {/* Tab Navigation */}
-          <div className="flex bg-slate-800/50 rounded-xl p-1 border border-slate-700/30">
+          <div className={`flex ${
+            theme === 'dark'
+              ? 'bg-slate-800/50 border-slate-700/30'
+              : 'bg-slate-100 border-slate-200'
+          } rounded-xl p-1 border`}>
             <button
               onClick={() => setActiveTab("my-leagues")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === "my-leagues"
-                  ? "bg-teal-600 text-white shadow-lg shadow-teal-600/20"
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                  ? `bg-teal-600 text-white shadow-lg ${theme === 'dark' ? 'shadow-teal-600/20' : 'shadow-teal-600/10'}`
+                  : `${theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-slate-700/50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`
               }`}
             >
               My Leagues
@@ -189,8 +202,8 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
               onClick={() => setActiveTab("discover")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === "discover"
-                  ? "bg-teal-600 text-white shadow-lg shadow-teal-600/20"
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                  ? `bg-teal-600 text-white shadow-lg ${theme === 'dark' ? 'shadow-teal-600/20' : 'shadow-teal-600/10'}`
+                  : `${theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-slate-700/50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`
               }`}
             >
               Discover
