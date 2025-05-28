@@ -1,31 +1,44 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import StatusBar from "../components/layout/StatusBar";
 import VerticalMenu from "../components/layout/VerticalMenu";
 import ContentPane from "../components/layout/ContentPane";
 import { Box } from "@radix-ui/themes";
+import { ThemeContext } from "../context/ThemeContext";
 
 // Import from centralized data file
-import { upcomingMatches, recentPredictions, leagues } from "../data/sampleData";
+import {
+  upcomingMatches,
+  recentPredictions,
+  leagues,
+} from "../data/sampleData";
 
 import {
   HamburgerMenuIcon,
   MagnifyingGlassIcon,
   ChevronRightIcon,
-  Cross2Icon
+  Cross2Icon,
 } from "@radix-ui/react-icons";
 
 export default function Home() {
   const { view } = useParams();
   const navigate = useNavigate();
-  
+
+  const { theme } = useContext(ThemeContext);
   // Valid views
-  const validViews = ["dashboard", "profile", "predictions", "fixtures", "leagues", "settings"];
-  
+  const validViews = [
+    "dashboard",
+    "profile",
+    "predictions",
+    "fixtures",
+    "leagues",
+    "settings",
+  ];
+
   // Ensure the view is valid, default to "dashboard"
   const activeItem = validViews.includes(view) ? view : "dashboard";
-  
+
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,13 +67,20 @@ export default function Home() {
   // Get breadcrumb title
   const getBreadcrumbTitle = () => {
     switch (activeItem) {
-      case "dashboard": return "Dashboard";
-      case "profile": return "My Profile";
-      case "predictions": return "My Predictions";
-      case "fixtures": return "Fixtures";
-      case "leagues": return "My Leagues";
-      case "settings": return "Settings";
-      default: return "Dashboard";
+      case "dashboard":
+        return "Dashboard";
+      case "profile":
+        return "My Profile";
+      case "predictions":
+        return "My Predictions";
+      case "fixtures":
+        return "Fixtures";
+      case "leagues":
+        return "My Leagues";
+      case "settings":
+        return "Settings";
+      default:
+        return "Dashboard";
     }
   };
 
@@ -99,10 +119,14 @@ export default function Home() {
         {/* Left Menu - Full Height */}
         <AnimatePresence>
           <motion.div
-            className={`h-full hidden md:block ${isMenuCollapsed ? "w-16" : "w-64"}`}
+            className={`h-full hidden md:block ${
+              isMenuCollapsed ? "w-16" : "w-64"
+            }`}
             animate={{ width: isMenuCollapsed ? "4rem" : "16rem" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-          >            <VerticalMenu
+          >
+            {" "}
+            <VerticalMenu
               activeItem={activeItem}
               setActiveItem={navigateToSection}
               isCollapsed={isMenuCollapsed}
@@ -111,7 +135,9 @@ export default function Home() {
         </AnimatePresence>
 
         {/* Content Area*/}
-        <div className="flex-1 flex flex-col h-full overflow-hidden">          {/* Mobile Menu (only shown on small screens) */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {" "}
+          {/* Mobile Menu (only shown on small screens) */}
           <div className="md:hidden w-full bg-primary-500/90 backdrop-blur-md border-b border-primary-400/20 px-4 py-3">
             <select
               value={activeItem}
@@ -126,17 +152,21 @@ export default function Home() {
               <option value="settings">Settings</option>
             </select>
           </div>
-
           {/* Status Bar moved inside content area */}
           <StatusBar />
-
           {/* Breadcrumb & Search Bar */}
-          <div className="bg-primary-600/40 px-4 py-2 border-b border-primary-400/20 flex items-center justify-between font-outfit">
+          <div
+            className={`${
+              theme === "dark"
+                ? "bg-primary-500/90 border-b-slate-800"
+                : "bg-slate-50 border-slate-200 text-light-text border-b-slate-200"
+            } px-4 py-2 border-b flex items-center justify-between font-outfit`}
+          >
             <div className="flex items-center">
               {/* Menu toggle button */}
               <button
                 onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
-                className="mr-3 text-white/60 hover:text-white p-1 hidden md:block"
+                className="mr-3  p-1 hidden md:block"
                 aria-label={isMenuCollapsed ? "Expand menu" : "Collapse menu"}
               >
                 <HamburgerMenuIcon />
@@ -144,9 +174,29 @@ export default function Home() {
 
               {/* Breadcrumbs */}
               <div className="flex items-center text-sm">
-                <span className="text-white/60">Home</span>
-                <ChevronRightIcon className="mx-1 text-white/40" />
-                <span className="text-teal-300 font-medium">{getBreadcrumbTitle()}</span>
+                <span
+                  className={`${
+                    theme === "dark"
+                      ? "bg-primary-500/90"
+                      : "bg-slate-50 border-slate-200 text-light-text"
+                  }`}
+                >
+                  Home
+                </span>
+                <ChevronRightIcon className={`${
+                    theme === "dark"
+                      ? "text-teal-300"
+                      : " text-teal-700"
+                  } mx-1`}/>
+                <span
+                  className={`${
+                    theme === "dark"
+                      ? "text-teal-300"
+                      : " text-teal-700"
+                  } font-medium`}
+                >
+                  {getBreadcrumbTitle()}
+                </span>
               </div>
             </div>
 
@@ -167,7 +217,7 @@ export default function Home() {
                       setIsSearchOpen(false);
                       setSearchQuery("");
                     }}
-                    className="text-white/60 hover:text-white p-1"
+                    className="  p-1"
                   >
                     <Cross2Icon />
                   </button>
@@ -175,7 +225,7 @@ export default function Home() {
               ) : (
                 <button
                   onClick={() => setIsSearchOpen(true)}
-                  className="text-white/60 hover:text-white p-1"
+                  className="  p-1"
                   aria-label="Search"
                 >
                   <MagnifyingGlassIcon />
@@ -183,7 +233,6 @@ export default function Home() {
               )}
             </div>
           </div>
-
           {/* Content Area with Loading State */}
           <div className="flex-1 overflow-hidden relative">
             {isLoading ? (
@@ -195,16 +244,15 @@ export default function Home() {
                 </div>
               </div>
             ) : null}
-            
-            <ContentPane 
-              activeItem={activeItem} 
+
+            <ContentPane
+              activeItem={activeItem}
               navigateToSection={navigateToSection}
               upcomingMatches={upcomingMatches}
               recentPredictions={recentPredictions}
               leagues={leagues}
             />
           </div>
-
         </div>
       </div>
     </Box>

@@ -85,5 +85,11 @@ Features for SettingsView:
 4. **Theme Customization**: Allow users to switch between light and dark themes or customize the app's color scheme, font in sentence case or all lowercase.
 5. **Button Titles**: Provide method for users to toggle button titles on or off.
 6. **Default Menu View**: Allow users to set their default view when they log in (e.g., fixtures, predictions, etc.)
+7. **Account Deletion**: Provide a secure method for users to delete their account if they choose to do so.
+8. **Language Preferences**: Allow users to select their preferred language for the application.
+9. **Data Export**: Enable users to export their data, such as predictions and fixtures, in a downloadable format (e.g., CSV).
+10. **Help and Support**: Provide a section for users to access help documentation or contact support for assistance.
+11. **Accessibility Options**: Include features to enhance accessibility, such as text size adjustments or high-contrast modes.
+
 
 */

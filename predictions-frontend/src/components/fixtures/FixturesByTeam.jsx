@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   filterFixturesByQuery,
   groupFixturesByTeam,
@@ -6,8 +6,10 @@ import {
 import TeamPanel from "./TeamPanel";
 import EmptyFixtureState from "./EmptyFixtureState";
 import { normalizeTeamName } from "../../utils/teamUtils";
+import { ThemeContext } from "../../context/ThemeContext";
 
 function FixturesByTeam({ fixtures = [], onFixtureSelect, searchQuery = "" }) {
+  const { theme } = useContext(ThemeContext);
   const [expandedTeam, setExpandedTeam] = useState(null);
 
   // Use provided fixtures

@@ -48,7 +48,10 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
     if (activeFilter === "predicted" && !fixture.predicted) return false;
 
     // Filter by gameweek
-    if (gameweekFilter !== "all" && fixture.gameweek !== parseInt(gameweekFilter))
+    if (
+      gameweekFilter !== "all" &&
+      fixture.gameweek !== parseInt(gameweekFilter)
+    )
       return false;
 
     // Filter by team
@@ -60,7 +63,10 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
       return false;
 
     // Filter by competition
-    if (competitionFilter !== "all" && fixture.competition !== competitionFilter)
+    if (
+      competitionFilter !== "all" &&
+      fixture.competition !== competitionFilter
+    )
       return false;
 
     // Filter by search query
@@ -86,7 +92,11 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className={`${theme === 'dark' ? 'text-teal-100' : 'text-teal-700'} text-3xl font-bold font-dmSerif`}>
+          <h1
+            className={`${
+              theme === "dark" ? "text-teal-100" : "text-teal-700"
+            } text-3xl font-bold font-dmSerif`}
+          >
             Fixtures
           </h1>
           <p className={`${text.secondary[theme]} font-outfit`}>
@@ -112,7 +122,13 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
         />
       </motion.div>
       {/* Content container with active chips banner */}
-      <div className={`${theme === 'dark' ? 'backdrop-blur-xl border-slate-700/50 bg-slate-900/60' : 'border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm'} rounded-xl border mb-5 overflow-hidden font-outfit p-5`}>
+      <div
+        className={`${
+          theme === "dark"
+            ? "backdrop-blur-xl border-slate-700/50 bg-slate-900/60"
+            : "border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm"
+        } rounded-xl border mb-5 overflow-hidden font-outfit p-5`}
+      >
         {/* Active gameweek chips banner */}
         <AnimatePresence>
           {activeGameweekChips.length > 0 && (

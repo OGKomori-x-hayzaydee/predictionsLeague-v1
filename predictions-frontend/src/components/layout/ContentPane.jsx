@@ -6,7 +6,11 @@ import { ThemeContext } from "../../context/ThemeContext";
 import { backgrounds } from "../../utils/themeUtils";
 
 // Import from centralized data file
-import { upcomingMatches, recentPredictions, leagues } from "../../data/sampleData";
+import {
+  upcomingMatches,
+  recentPredictions,
+  leagues,
+} from "../../data/sampleData";
 
 // Import all view components
 import {
@@ -20,13 +24,10 @@ import {
   LeagueManagementView, // New component
 } from "../dashboardRenders";
 
-export default function ContentPane({
-  activeItem,
-  navigateToSection,
-}) {
+export default function ContentPane({ activeItem, navigateToSection }) {
   // Access theme context
   const { theme } = useContext(ThemeContext);
-  
+
   // Animation variants
   const contentVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -177,15 +178,17 @@ export default function ContentPane({
             recentPredictions={recentPredictions}
             leagues={leagues}
             // Replace the goToPredictions prop with this inline function
-            goToPredictions={(match) => handleFixtureSelect({
-              id: match.id,
-              homeTeam: match.homeTeam,
-              awayTeam: match.awayTeam,
-              date: match.date,
-              venue: match.venue,
-              gameweek: match.gameweek,
-              competition: match.competition
-            })}
+            goToPredictions={(match) =>
+              handleFixtureSelect({
+                id: match.id,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                date: match.date,
+                venue: match.venue,
+                gameweek: match.gameweek,
+                competition: match.competition,
+              })
+            }
             navigateToSection={navigateToSection}
             toggleChipInfoModal={toggleChipInfoModal}
           />
@@ -234,15 +237,17 @@ export default function ContentPane({
             recentPredictions={recentPredictions}
             leagues={leagues}
             // Replace the goToPredictions prop with this inline function
-            goToPredictions={(match) => handleFixtureSelect({
-              id: match.id,
-              homeTeam: match.homeTeam,
-              awayTeam: match.awayTeam,
-              date: match.date,
-              venue: match.venue,
-              gameweek: match.gameweek,
-              competition: match.competition
-            })}
+            goToPredictions={(match) =>
+              handleFixtureSelect({
+                id: match.id,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                date: match.date,
+                venue: match.venue,
+                gameweek: match.gameweek,
+                competition: match.competition,
+              })
+            }
             navigateToSection={navigateToSection}
             toggleChipInfoModal={toggleChipInfoModal}
           />
@@ -255,7 +260,9 @@ export default function ContentPane({
       {renderContent()}
 
       {/* Predictions Modal */}
-      <AnimatePresence>        {modalData.isOpen && (
+      <AnimatePresence>
+        {" "}
+        {modalData.isOpen && (
           <motion.div
             className={`fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm`}
             initial={{ opacity: 0 }}
@@ -264,10 +271,10 @@ export default function ContentPane({
           >
             <PredictionsModal
               fixture={modalData.fixture}
-              onClose={() => setModalData({...modalData, isOpen: false})}
+              onClose={() => setModalData({ ...modalData, isOpen: false })}
               onSave={(prediction) => {
                 console.log("Saving prediction:", prediction);
-                setModalData({...modalData, isOpen: false});
+                setModalData({ ...modalData, isOpen: false });
                 // Add any additional logic needed
               }}
               initialValues={modalData.initialValues}

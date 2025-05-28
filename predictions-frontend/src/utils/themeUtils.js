@@ -20,7 +20,7 @@ export const backgrounds = {
   // Main content areas
   main: {
     dark: 'text-white',
-    light: 'bg-light-bg text-light-text'
+    light: 'bg-slate-50 text-light-text'
   },
   // Card backgrounds
   card: {

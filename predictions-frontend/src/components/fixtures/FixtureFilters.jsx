@@ -1,6 +1,9 @@
+import { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { teams } from "../../data/sampleData";
+import { ThemeContext } from "../../context/ThemeContext";
+import { getThemeStyles, text } from "../../utils/themeUtils";
 
 const FixtureFilters = ({
   activeFilter,
@@ -18,17 +21,37 @@ const FixtureFilters = ({
   showFilters,
   setShowFilters,
 }) => {
+  // Get theme context
+  const { theme } = useContext(ThemeContext);
   return (
-    <div className=" backdrop-blur-md rounded-lg border border-primary-400/20 p-5 pb-2 mb-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+    <div
+      className={`backdrop-blur-md rounded-lg border p-4 mb-6 ${
+        getThemeStyles(theme, {
+          dark: "border-slate-700/50 bg-slate-900/60",
+          light: "border-slate-200 bg-white/80"
+        })
+      }`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Tabs */}
-        <div className="flex bg-primary-700/40 rounded-lg p-1">
+        <div className={`flex rounded-lg p-1 ${
+          getThemeStyles(theme, {
+            dark: "bg-slate-800/60",
+            light: "bg-slate-100"
+          })
+        }`}>
           <button
             onClick={() => setActiveFilter("all")}
             className={`px-4 py-2 text-sm rounded-md transition ${
               activeFilter === "all"
-                ? "bg-indigo-600 text-white"
-                : "text-white/70 hover:text-white"
+                ? getThemeStyles(theme, {
+                    dark: "bg-indigo-600 text-white",
+                    light: "bg-indigo-500 text-white"
+                  })
+                : getThemeStyles(theme, {
+                    dark: "text-slate-300 hover:text-white",
+                    light: "text-slate-600 hover:text-slate-800"
+                  })
             }`}
           >
             All
@@ -37,8 +60,14 @@ const FixtureFilters = ({
             onClick={() => setActiveFilter("upcoming")}
             className={`px-4 py-2 text-sm rounded-md transition ${
               activeFilter === "upcoming"
-                ? "bg-indigo-600 text-white"
-                : "text-white/70 hover:text-white"
+                ? getThemeStyles(theme, {
+                    dark: "bg-indigo-600 text-white",
+                    light: "bg-indigo-500 text-white"
+                  })
+                : getThemeStyles(theme, {
+                    dark: "text-slate-300 hover:text-white",
+                    light: "text-slate-600 hover:text-slate-800"
+                  })
             }`}
           >
             Upcoming
@@ -47,8 +76,14 @@ const FixtureFilters = ({
             onClick={() => setActiveFilter("predicted")}
             className={`px-4 py-2 text-sm rounded-md transition ${
               activeFilter === "predicted"
-                ? "bg-indigo-600 text-white"
-                : "text-white/70 hover:text-white"
+                ? getThemeStyles(theme, {
+                    dark: "bg-indigo-600 text-white",
+                    light: "bg-indigo-500 text-white"
+                  })
+                : getThemeStyles(theme, {
+                    dark: "text-slate-300 hover:text-white",
+                    light: "text-slate-600 hover:text-slate-800"
+                  })
             }`}
           >
             Predicted
@@ -59,7 +94,12 @@ const FixtureFilters = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-1 text-white/70 hover:text-white font-outfit transition-colors mr-2 text-sm"
+            className={`flex items-center gap-1 hover:text-white font-outfit transition-colors mr-2 text-sm ${
+              getThemeStyles(theme, {
+                dark: "text-slate-300 hover:text-white",
+                light: "text-slate-600 hover:text-slate-800"
+              })
+            }`}
           >
             {showFilters ? "Hide filters" : "Show filters"}
           </button>
@@ -69,14 +109,22 @@ const FixtureFilters = ({
               placeholder="Search fixtures..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-primary-700/40 border border-primary-400/20 rounded-md pl-10 pr-4 py-2 text-white text-sm w-full sm:w-auto min-w-[200px]"
+              className={`border rounded-md pl-10 pr-4 py-2 text-sm w-full sm:w-auto min-w-[200px] ${
+                getThemeStyles(theme, {
+                  dark: "bg-slate-800/60 border-slate-600/50 text-white placeholder-slate-400",
+                  light: "bg-white border-slate-300 text-slate-800 placeholder-slate-500"
+                })
+              }`}
             />
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
+            <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${
+              getThemeStyles(theme, {
+                dark: "text-slate-400",
+                light: "text-slate-500"
+              })
+            }`} />
           </div>
         </div>
-      </div>
-
-      {/* Advanced filters */}
+      </div>      {/* Advanced filters */}
       <AnimatePresence>
         {showFilters && (
           <motion.div
@@ -84,24 +132,40 @@ const FixtureFilters = ({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="pt-4 border-t border-primary-400/20"
+            className={`pt-4 border-t ${
+              getThemeStyles(theme, {
+                dark: "border-slate-700/50",
+                light: "border-slate-200"
+              })
+            }`}
           >
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               {/* Gameweek filter */}
               <div>
-                <label className="block text-white/70 text-sm mb-1">
+                <label className={`block text-sm mb-1 ${getThemeStyles(theme, text.secondary)}`}>
                   Gameweek
                 </label>
                 <select
                   value={gameweekFilter}
                   onChange={(e) => setGameweekFilter(e.target.value)}
-                  className="bg-primary-700/40 border border-primary-400/20 rounded-md px-3 py-2 text-white text-sm w-full"
+                  className={`border rounded-md px-3 py-2 text-sm w-full ${
+                    getThemeStyles(theme, {
+                      dark: "bg-slate-800/60 border-slate-600/50 text-white",
+                      light: "bg-white border-slate-300 text-slate-800"
+                    })
+                  }`}
                 >
-                  <option value="all" className="bg-indigo-800">
+                  <option value="all" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     All Gameweeks
                   </option>
                   {Array.from({ length: 38 }, (_, i) => i + 1).map((gw) => (
-                    <option key={gw} value={gw} className="bg-indigo-950">
+                    <option key={gw} value={gw} className={getThemeStyles(theme, {
+                      dark: "bg-slate-800",
+                      light: "bg-white"
+                    })}>
                       Gameweek {gw}
                     </option>
                   ))}
@@ -110,19 +174,28 @@ const FixtureFilters = ({
 
               {/* Team filter */}
               <div>
-                <label className="block text-white/70 text-sm mb-1">
-                  Team
-                </label>
+                <label className={`block text-sm mb-1 ${getThemeStyles(theme, text.secondary)}`}>Team</label>
                 <select
                   value={filterTeam}
                   onChange={(e) => setFilterTeam(e.target.value)}
-                  className="bg-primary-700/40 border border-primary-400/20 rounded-md px-3 py-2 text-white text-sm w-full"
+                  className={`border rounded-md px-3 py-2 text-sm w-full ${
+                    getThemeStyles(theme, {
+                      dark: "bg-slate-800/60 border-slate-600/50 text-white",
+                      light: "bg-white border-slate-300 text-slate-800"
+                    })
+                  }`}
                 >
-                  <option value="all" className="bg-indigo-800">
+                  <option value="all" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     All Teams
                   </option>
-                  {teams.map(team => (
-                    <option key={team} value={team} className="bg-indigo-950">
+                  {teams.map((team) => (
+                    <option key={team} value={team} className={getThemeStyles(theme, {
+                      dark: "bg-slate-800",
+                      light: "bg-white"
+                    })}>
                       {team}
                     </option>
                   ))}
@@ -131,27 +204,50 @@ const FixtureFilters = ({
 
               {/* Competition filter */}
               <div>
-                <label className="block text-white/70 text-sm mb-1">
+                <label className={`block text-sm mb-1 ${getThemeStyles(theme, text.secondary)}`}>
                   Competition
                 </label>
                 <select
                   value={competitionFilter}
                   onChange={(e) => setCompetitionFilter(e.target.value)}
-                  className="bg-primary-700/40 border border-primary-400/20 rounded-md px-3 py-2 text-white text-sm w-full"
+                  className={`border rounded-md px-3 py-2 text-sm w-full ${
+                    getThemeStyles(theme, {
+                      dark: "bg-slate-800/60 border-slate-600/50 text-white",
+                      light: "bg-white border-slate-300 text-slate-800"
+                    })
+                  }`}
                 >
-                  <option value="all" className="bg-indigo-800">
+                  <option value="all" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     All Competitions
                   </option>
-                  <option value="Premier League" className="bg-indigo-950">
+                  <option value="Premier League" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Premier League
                   </option>
-                  <option value="Champions League" className="bg-indigo-950">
+                  <option value="Champions League" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Champions League
                   </option>
-                  <option value="Europa League" className="bg-indigo-950">
+                  <option value="Europa League" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Europa League
                   </option>
-                  <option value="Europa Conference League" className="bg-indigo-950">
+                  <option
+                    value="Europa Conference League"
+                    className={getThemeStyles(theme, {
+                      dark: "bg-slate-800",
+                      light: "bg-white"
+                    })}
+                  >
                     Conference League
                   </option>
                 </select>
@@ -159,24 +255,41 @@ const FixtureFilters = ({
 
               {/* Sort by */}
               <div>
-                <label className="block text-white/70 text-sm mb-1">
+                <label className={`block text-sm mb-1 ${getThemeStyles(theme, text.secondary)}`}>
                   Sort by
                 </label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-primary-700/40 border border-primary-400/20 rounded-md px-3 py-2 text-white text-sm w-full"
+                  className={`border rounded-md px-3 py-2 text-sm w-full ${
+                    getThemeStyles(theme, {
+                      dark: "bg-slate-800/60 border-slate-600/50 text-white",
+                      light: "bg-white border-slate-300 text-slate-800"
+                    })
+                  }`}
                 >
-                  <option value="date" className="bg-indigo-800">
+                  <option value="date" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Date (newest first)
                   </option>
-                  <option value="gameweek" className="bg-indigo-950">
+                  <option value="gameweek" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Gameweek
                   </option>
-                  <option value="team" className="bg-indigo-950">
+                  <option value="team" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Home team
                   </option>
-                  <option value="competition" className="bg-indigo-950">
+                  <option value="competition" className={getThemeStyles(theme, {
+                    dark: "bg-slate-800",
+                    light: "bg-white"
+                  })}>
                     Competition
                   </option>
                 </select>
@@ -194,7 +307,12 @@ const FixtureFilters = ({
                   setSearchQuery("");
                   setActiveFilter("all");
                 }}
-                className="bg-primary-700/50 hover:bg-primary-700/70 text-white text-sm py-1.5 px-4 rounded-md transition-colors flex items-center"
+                className={`text-sm py-1.5 px-4 rounded-md transition-colors flex items-center ${
+                  getThemeStyles(theme, {
+                    dark: "bg-slate-700/50 hover:bg-slate-700/70 text-slate-300 hover:text-white",
+                    light: "bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800"
+                  })
+                }`}
               >
                 Reset filters
               </button>
