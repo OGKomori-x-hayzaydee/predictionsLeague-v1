@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PredictionsModal from "../predictions/PredictionsModal";
 import ChipInfoModal from "../predictions/ChipInfoModal";
@@ -24,7 +24,7 @@ import {
   LeagueManagementView, // New component
 } from "../dashboardRenders";
 
-export default function ContentPane({ activeItem, navigateToSection }) {
+export default function ContentPane({ activeItem, navigateToSection, navigationParams = {} }) {
   // Access theme context
   const { theme } = useContext(ThemeContext);
 
@@ -140,12 +140,18 @@ export default function ContentPane({ activeItem, navigateToSection }) {
     setSelectedLeagueId(leagueId);
     setIsManagingLeague(true);
   };
-
   // Handler to go back to leagues list
   const handleBackToLeagues = () => {
     setSelectedLeagueId(null);
     setIsManagingLeague(false);
   };
+
+  // Handle navigation parameters (e.g., automatic league navigation from dashboard)
+  useEffect(() => {
+    if (activeItem === "leagues" && navigationParams.leagueId) {
+      handleViewLeague(navigationParams.leagueId);
+    }
+  }, [activeItem, navigationParams]);
 
   // Render content based on active item
   const renderContent = () => {

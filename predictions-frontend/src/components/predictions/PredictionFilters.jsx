@@ -24,7 +24,7 @@ const PredictionFilters = ({
   return (
     <div className={`backdrop-blur-md rounded-lg border p-4 mb-6 ${
       getThemeStyles(theme, {
-        dark: "border-slate-700/50 bg-slate-900/60",
+        dark: "border-slate-700/50 bg-slate-800/50",
         light: "border-slate-200 bg-white/80"
       })
     }`}>
@@ -32,7 +32,7 @@ const PredictionFilters = ({
         {/* Tabs */}
         <div className={`flex rounded-lg p-1 ${
           getThemeStyles(theme, {
-            dark: "bg-slate-800/60",
+            dark: "bg-slate-700/60",
             light: "bg-slate-100"
           })
         }`}>

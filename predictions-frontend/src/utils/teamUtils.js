@@ -3,7 +3,7 @@ import chelseaLogo from "../assets/clubs/chelsea.png";
 import liverpoolLogo from "../assets/clubs/liverpool.png";
 import manCityLogo from "../assets/clubs/mancity.png";
 import manUtdLogo from "../assets/clubs/manutd.png";
-import tottenhamLogo from "../assets/clubs/tottenham.png";
+import tottenhamLogo from "../assets/clubs/spurs.png";
 
 // Map team names to their logo files
 export const teamLogos = {
@@ -29,8 +29,8 @@ export const teamLogos = {
   "Manchester United": manUtdLogo,
   "Manchester United FC": manUtdLogo,
   
-  // Tottenham variations
-  "Tottenham": tottenhamLogo,
+  // Spurs variations
+  "Spurs": tottenhamLogo,
   "Tottenham Hotspur": tottenhamLogo,
   "Tottenham Hotspur FC": tottenhamLogo,
 };
@@ -59,10 +59,10 @@ export const teamNameMappings = {
   "Manchester United": "Man. United",
   "Man. United": "Man. United",
   
-  // Tottenham variations
-  "Tottenham Hotspur FC": "Tottenham",
-  "Tottenham Hotspur": "Tottenham",
-  "Tottenham": "Tottenham",
+  // spurs variations
+  "Tottenham Hotspur FC": "Spurs",
+  "Tottenham Hotspur": "Spurs",
+  "Tottenham": "Spurs",
 };
 
 /**

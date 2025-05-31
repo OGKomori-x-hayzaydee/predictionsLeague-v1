@@ -25,7 +25,7 @@ const FixtureCard = ({
       onClick={() => onClick(fixture)}
       className={`border rounded-lg p-3 ${
         theme === "dark"
-          ? "hover:border-primary-600/40 bg-primary-700/20"
+          ? "bg-slate-800/50 border-slate-600/50 shadow-sm"
           : "border-slate-300 bg-white shadow-sm"
       } transition-all ${
         selected
@@ -42,10 +42,13 @@ const FixtureCard = ({
         } mb-2`}
       >
         <span>{fixture.competition}</span>
-        <span className="flex items-center">
-          <ClockIcon className="mr-1 w-3 h-3" />
-          {format(parseISO(fixture.date), "h:mm a")}
-        </span>
+        <div className="text-right">
+          <div className="flex items-center justify-end">
+            <ClockIcon className="mr-1 w-3 h-3" />
+            {format(parseISO(fixture.date), "MMM d, yyyy")} |{" "}
+            {format(parseISO(fixture.date), "h:mm a")}
+          </div>
+        </div>
       </div>
       <div className="flex items-center">
         <img

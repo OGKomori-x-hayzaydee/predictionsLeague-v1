@@ -7,6 +7,7 @@ import TeamPanel from "./TeamPanel";
 import EmptyFixtureState from "./EmptyFixtureState";
 import { normalizeTeamName } from "../../utils/teamUtils";
 import { ThemeContext } from "../../context/ThemeContext";
+import { getThemeStyles, text } from "../../utils/themeUtils";
 
 function FixturesByTeam({ fixtures = [], onFixtureSelect, searchQuery = "" }) {
   const { theme } = useContext(ThemeContext);
@@ -22,7 +23,7 @@ function FixturesByTeam({ fixtures = [], onFixtureSelect, searchQuery = "" }) {
     "Liverpool",
     "Man. City",
     "Man. United",
-    "Tottenham",
+    "Spurs",
   ];
 
   // Log original fixtures for debugging

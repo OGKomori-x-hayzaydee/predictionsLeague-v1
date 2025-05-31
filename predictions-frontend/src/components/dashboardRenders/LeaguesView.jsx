@@ -29,7 +29,7 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   const [joiningLeague, setJoiningLeague] = useState(false);
   const [leagueCode, setLeagueCode] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Get theme context
   const { theme } = useContext(ThemeContext);
 
@@ -127,10 +127,20 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center">
-            <h1 className={`${theme === 'dark' ? 'text-teal-100' : 'text-teal-700'} text-3xl font-bold font-dmSerif`}>
+            <h1
+              className={`${
+                theme === "dark" ? "text-teal-100" : "text-teal-700"
+              } text-3xl font-bold font-dmSerif`}
+            >
               My Leagues
             </h1>
-            <div className={`ml-3 mt-1 ${theme === 'dark' ? 'bg-teal-900/30 text-teal-300' : 'bg-teal-100 text-teal-700'} text-xs px-2.5 py-1 rounded-full`}>
+            <div
+              className={`ml-3 mt-1 ${
+                theme === "dark"
+                  ? "bg-teal-900/30 text-teal-300"
+                  : "bg-teal-100 text-teal-700"
+              } text-xs px-2.5 py-1 rounded-full`}
+            >
               {myLeagues.length} {myLeagues.length === 1 ? "League" : "Leagues"}
             </div>
           </div>
@@ -145,10 +155,12 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowJoinModal(true)}
             className={`px-3 py-1.5 ${
-              theme === 'dark'
-                ? 'bg-slate-700/60 hover:bg-slate-700/80 border-slate-500/30'
-                : 'bg-slate-100 hover:bg-slate-200 border-slate-200'
-            } border rounded-md transition-colors flex items-center ${text.primary[theme]} text-sm`}
+              theme === "dark"
+                ? "bg-slate-700/60 hover:bg-slate-700/80 border-slate-500/30"
+                : "bg-slate-100 hover:bg-slate-200 border-slate-200"
+            } border rounded-md transition-colors flex items-center ${
+              text.primary[theme]
+            } text-sm font-outfit`}
           >
             <EnterIcon className="mr-1.5 w-3.5 h-3.5" />
             Join League
@@ -158,7 +170,7 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowCreateModal(true)}
-            className={`${buttons.primary[theme]} px-3 py-1.5 rounded-md transition-colors flex items-center text-white text-sm font-medium`}
+            className={`${buttons.primary[theme]} px-3 py-1.5 rounded-md transition-colors flex items-center text-white text-sm font-medium font-outfit`}
           >
             <PlusCircledIcon className="mr-1.5 w-3.5 h-3.5" />
             Create League
@@ -183,27 +195,45 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
 
         <div className="flex items-center gap-3">
           {/* Tab Navigation */}
-          <div className={`flex ${
-            theme === 'dark'
-              ? 'bg-slate-800/50 border-slate-700/30'
-              : 'bg-slate-100 border-slate-200'
-          } rounded-xl p-1 border`}>
+          <div
+            className={`flex ${
+              theme === "dark"
+                ? "bg-slate-800/50 border-slate-700/30"
+                : "bg-slate-100 border-slate-200"
+            } rounded-xl p-1 border`}
+          >
             <button
               onClick={() => setActiveTab("my-leagues")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-all duration-200 ${
                 activeTab === "my-leagues"
-                  ? `bg-teal-600 text-white shadow-lg ${theme === 'dark' ? 'shadow-teal-600/20' : 'shadow-teal-600/10'}`
-                  : `${theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-slate-700/50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`
+                  ? `bg-teal-600 text-white shadow-lg ${
+                      theme === "dark"
+                        ? "shadow-teal-600/20"
+                        : "shadow-teal-600/10"
+                    }`
+                  : `${
+                      theme === "dark"
+                        ? "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                    }`
               }`}
             >
               My Leagues
             </button>
             <button
               onClick={() => setActiveTab("discover")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-all duration-200 ${
                 activeTab === "discover"
-                  ? `bg-teal-600 text-white shadow-lg ${theme === 'dark' ? 'shadow-teal-600/20' : 'shadow-teal-600/10'}`
-                  : `${theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-slate-700/50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`
+                  ? `bg-teal-600 text-white shadow-lg ${
+                      theme === "dark"
+                        ? "shadow-teal-600/20"
+                        : "shadow-teal-600/10"
+                    }`
+                  : `${
+                      theme === "dark"
+                        ? "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                    }`
               }`}
             >
               Discover
@@ -273,6 +303,8 @@ const MyLeaguesContent = ({
   onCreateLeague,
   onJoinLeague,
 }) => {
+  const { theme } = useContext(ThemeContext);
+
   if (isLoading) {
     return <LoadingState message="Loading your leagues..." />;
   }
@@ -285,23 +317,35 @@ const MyLeaguesContent = ({
         className="text-center py-12"
       >
         <div className="max-w-md mx-auto">
-          <h3 className="text-xl font-semibold text-white mb-2">
+          <h3
+            className={`text-xl font-semibold ${text.primary[theme]} mb-2 font-outfit`}
+          >
             No Leagues Yet
           </h3>
-          <p className="text-slate-400 mb-6">
+          <p className={`${text.secondary[theme]} mb-6 font-outfit`}>
             Create your first league or join an existing one to start competing!
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={onCreateLeague}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600 rounded-xl text-white font-medium transition-all duration-200"
+              className={`flex items-center justify-center gap-2 px-6 py-3 ${
+                buttons.primary[theme]
+              } rounded-xl text-white font-medium font-outfit transition-all duration-200 shadow-lg ${
+                theme === "dark" ? "shadow-teal-600/20" : "shadow-teal-600/10"
+              }`}
             >
               <PlusIcon className="w-4 h-4" />
               Create League
             </button>
             <button
               onClick={onJoinLeague}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-700/60 hover:bg-slate-700/80 border border-slate-600/40 rounded-xl text-white font-medium transition-all duration-200"
+              className={`flex items-center justify-center gap-2 px-6 py-3 ${
+                theme === "dark"
+                  ? "bg-slate-700/60 hover:bg-slate-700/80 border-slate-600/40"
+                  : "bg-slate-100 hover:bg-slate-200 border-slate-200"
+              } border rounded-xl ${
+                text.primary[theme]
+              } font-medium font-outfit transition-all duration-200`}
             >
               <EnterIcon className="w-4 h-4" />
               Join League
@@ -360,30 +404,60 @@ const DiscoverContent = ({ leagues, isLoading, onJoinLeague, isJoining }) => {
 
 // League Card Component
 const LeagueCard = ({ league, index, onView, onManage }) => {
+  const { theme } = useContext(ThemeContext);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="group relative bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 transition-all duration-300 overflow-hidden font-outfit"
+      className={`group relative ${
+        theme === "dark"
+          ? "bg-slate-800/30 border-slate-700/50 hover:border-slate-600/50"
+          : "bg-white border-slate-200 shadow-sm hover:border-slate-300"
+      } backdrop-blur-sm border rounded-2xl p-6 transition-all duration-300 overflow-hidden font-outfit`}
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div
+        className={`absolute inset-0 ${
+          theme === "dark"
+            ? "bg-gradient-to-br from-teal-500/5 to-indigo-500/5"
+            : "bg-gradient-to-br from-teal-500/3 to-indigo-500/3"
+        } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+      />
 
       {/* Admin badge */}
       {league.isAdmin && (
-        <div className="absolute top-4 right-4 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-          <span className="text-xs font-medium text-amber-400">Admin</span>
+        <div
+          className={`absolute top-4 right-4 px-2 py-1 ${
+            theme === "dark"
+              ? "bg-amber-500/10 border-amber-500/20"
+              : "bg-amber-50 border-amber-200"
+          } border rounded-lg`}
+        >
+          <span
+            className={`text-xs font-medium ${
+              theme === "dark" ? "text-amber-400" : "text-amber-600"
+            }`}
+          >
+            Admin
+          </span>
         </div>
       )}
 
       <div className="relative">
         {/* League Header */}
         <div className="mb-4">
-          <h3 className="text-lg font-medium text-teal-200 mb-2 line-clamp-1">
+          <h3
+            className={`text-lg font-medium ${
+              theme === "dark" ? "text-teal-200" : "text-teal-700"
+            } mb-2 line-clamp-1 font-outfit`}
+          >
             {league.name}
           </h3>
-          <p className="text-sm text-slate-400 line-clamp-2">
+          <p
+            className={`text-sm ${text.secondary[theme]} line-clamp-2 font-outfit`}
+          >
             {league.description}
           </p>
         </div>
@@ -392,21 +466,29 @@ const LeagueCard = ({ league, index, onView, onManage }) => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <PersonIcon className="w-4 h-4 text-slate-400" />
-              <span className="text-lg font-bold text-white">
+              <PersonIcon className={`w-4 h-4 ${text.muted[theme]}`} />
+              <span
+                className={`text-lg font-bold ${text.primary[theme]} font-outfit`}
+              >
                 {league.members}
               </span>
             </div>
-            <span className="text-xs text-slate-400">Members</span>
+            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
+              Members
+            </span>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <CalendarIcon className="w-4 h-4 text-slate-400" />
-              <span className="text-lg font-bold text-white">
+              <CalendarIcon className={`w-4 h-4 ${text.muted[theme]}`} />
+              <span
+                className={`text-lg font-bold ${text.primary[theme]} font-outfit`}
+              >
                 #{league.position || "N/A"}
               </span>
             </div>
-            <span className="text-xs text-slate-400">Position</span>
+            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
+              Position
+            </span>
           </div>
         </div>
 
@@ -414,7 +496,13 @@ const LeagueCard = ({ league, index, onView, onManage }) => {
         <div className="flex gap-2">
           <button
             onClick={onView}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700/80 border border-slate-600/40 rounded-xl text-white text-sm font-medium transition-all duration-200"
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 ${
+              theme === "dark"
+                ? "bg-slate-700/60 hover:bg-slate-700/80 border-slate-600/40"
+                : "bg-slate-100 hover:bg-slate-200 border-slate-200"
+            } border rounded-xl ${
+              text.primary[theme]
+            } text-sm font-medium font-outfit transition-all duration-200`}
           >
             <EyeOpenIcon className="w-4 h-4" />
             View
@@ -422,7 +510,11 @@ const LeagueCard = ({ league, index, onView, onManage }) => {
           {league.isAdmin && (
             <button
               onClick={onManage}
-              className="flex items-center justify-center px-4 py-2.5 bg-teal-600/20 hover:bg-teal-600/30 border border-teal-500/30 rounded-xl text-teal-400 text-sm font-medium transition-all duration-200"
+              className={`flex items-center justify-center px-4 py-2.5 ${
+                theme === "dark"
+                  ? "bg-teal-600/20 hover:bg-teal-600/30 border-teal-500/30 text-teal-400"
+                  : "bg-teal-100 hover:bg-teal-200 border-teal-200 text-teal-600"
+              } border rounded-xl text-sm font-medium font-outfit transition-all duration-200`}
             >
               <GearIcon className="w-4 h-4" />
             </button>
@@ -435,23 +527,39 @@ const LeagueCard = ({ league, index, onView, onManage }) => {
 
 // Featured League Card Component
 const FeaturedLeagueCard = ({ league, index, onJoin, isJoining }) => {
+  const { theme } = useContext(ThemeContext);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="group relative bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-slate-600/60 transition-all duration-300 overflow-hidden"
+      className={`group relative ${
+        theme === "dark"
+          ? "bg-slate-800/30 border-slate-700/50 hover:border-slate-600/60"
+          : "bg-white border-slate-200 shadow-sm hover:border-slate-300"
+      } backdrop-blur-sm border rounded-2xl p-6 transition-all duration-300 overflow-hidden font-outfit`}
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div
+        className={`absolute inset-0 ${
+          theme === "dark"
+            ? "bg-gradient-to-br from-indigo-500/5 to-purple-500/5"
+            : "bg-gradient-to-br from-indigo-500/3 to-purple-500/3"
+        } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+      />
 
       <div className="relative">
         {/* League Header */}
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1">
+          <h3
+            className={`text-lg font-semibold ${text.primary[theme]} mb-2 line-clamp-1 font-outfit`}
+          >
             {league.name}
           </h3>
-          <p className="text-sm text-slate-400 line-clamp-2">
+          <p
+            className={`text-sm ${text.secondary[theme]} line-clamp-2 font-outfit`}
+          >
             {league.description}
           </p>
         </div>
@@ -460,29 +568,41 @@ const FeaturedLeagueCard = ({ league, index, onJoin, isJoining }) => {
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <PersonIcon className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-bold text-white">
+              <PersonIcon className={`w-4 h-4 ${text.muted[theme]}`} />
+              <span
+                className={`text-sm font-bold ${text.primary[theme]} font-outfit`}
+              >
                 {league.members}
               </span>
             </div>
-            <span className="text-xs text-slate-400">Members</span>
+            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
+              Members
+            </span>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <StarIcon className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-bold text-white">
+              <StarIcon className={`w-4 h-4 ${text.muted[theme]}`} />
+              <span
+                className={`text-sm font-bold ${text.primary[theme]} font-outfit`}
+              >
                 {league.rating || "4.8"}
               </span>
             </div>
-            <span className="text-xs text-slate-400">Rating</span>
+            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
+              Rating
+            </span>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <span className="text-sm font-bold text-white">
+              <span
+                className={`text-sm font-bold ${text.primary[theme]} font-outfit`}
+              >
                 {league.prize || "Free"}
               </span>
             </div>
-            <span className="text-xs text-slate-400">Prize</span>
+            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
+              Prize
+            </span>
           </div>
         </div>
 
@@ -490,7 +610,11 @@ const FeaturedLeagueCard = ({ league, index, onJoin, isJoining }) => {
         <button
           onClick={onJoin}
           disabled={isJoining}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white text-sm font-medium transition-all duration-200"
+          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 ${
+            buttons.primary[theme]
+          } disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white text-sm font-medium font-outfit transition-all duration-200 shadow-lg ${
+            theme === "dark" ? "shadow-indigo-600/20" : "shadow-indigo-600/10"
+          }`}
         >
           {isJoining ? (
             <>

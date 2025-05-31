@@ -9,8 +9,6 @@ import {
   ChatBubbleIcon,
   GearIcon,
   ExitIcon,
-  SunIcon,
-  MoonIcon,
 } from "@radix-ui/react-icons";
 import { NavLink } from "react-router-dom";
 import logo from "../../assets/logo.png";
@@ -22,7 +20,7 @@ export default function VerticalMenu({
   isCollapsed = false,
 }) {
   // Get theme context
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   // Menu items configuration
   const menuItems = [
     {
@@ -128,29 +126,6 @@ export default function VerticalMenu({
                 )}
               </button>
             </motion.li>          ))}
-
-          {/* Theme Toggle - Only shown when collapsed */}
-          {isCollapsed && (
-            <motion.li variants={itemVariants}>
-              <button
-                onClick={toggleTheme}
-                className={`flex justify-center w-full px-4 py-3 transition-colors ${
-                  theme === 'dark'
-                    ? "text-white/70 hover:bg-primary-600/40 hover:text-teal-300"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-teal-700"
-                }`}
-                title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-              >
-                <motion.span
-                  initial={{ rotate: 0 }}
-                  animate={{ rotate: theme === 'dark' ? 0 : 360 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-                </motion.span>
-              </button>
-            </motion.li>
-          )}
 
           {/* Logout button*/}
           <motion.li variants={itemVariants}>

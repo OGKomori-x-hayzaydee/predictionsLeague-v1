@@ -6,24 +6,25 @@ import PredictionBreakdownModal from "../predictions/PredictionBreakdownModal";
 import PredictionViewToggleBar from "../predictions/PredictionViewToggleBar";
 import EmptyState from "../common/EmptyState";
 import { ThemeContext } from "../../context/ThemeContext";
+import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { text } from "../../utils/themeUtils";
 
 // Import data and utilities
 import { predictions, teamLogos } from "../../data/sampleData";
 
-const PredictionsView = ({ handleEditPrediction }) => {
+const PredictionsView = ({ handleEditPrediction }) => {  // Get theme context and user preferences
+  const { theme } = useContext(ThemeContext);
+  const { preferences } = useUserPreferences();
+  
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [gameweekFilter, setGameweekFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [filterTeam, setFilterTeam] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState("teams");
+  const [viewMode, setViewMode] = useState(preferences.defaultPredictionsView);
   const [selectedPrediction, setSelectedPrediction] = useState(null);
   const [showBreakdownModal, setShowBreakdownModal] = useState(false);
-
-  // Get theme context
-  const { theme } = useContext(ThemeContext);
   // Filter predictions based on active filter
   const filteredPredictions = predictions.filter((prediction) => {
     // Filter by status
@@ -58,11 +59,12 @@ const PredictionsView = ({ handleEditPrediction }) => {
 
     return true;
   });
-
-  // Separate filter for pending predictions only (for PotentialPointsSummary)
-  const pendingPredictions = predictions.filter((prediction) => {
-    return prediction.status === "pending";
-  });
+  // For PotentialPointsSummary: show pending predictions from the filtered set
+  // This ensures consistency - if user filters by pending, both components show the same data
+  // If user filters by something else, PotentialPointsSummary still only shows pending predictions
+  const pendingPredictions = activeFilter === "pending" 
+    ? filteredPredictions  // When filtering by pending, use the already filtered data
+    : predictions.filter((prediction) => prediction.status === "pending"); // Otherwise, show all pending predictions
 
   // Sort predictions
   const sortedPredictions = [...filteredPredictions].sort((a, b) => {

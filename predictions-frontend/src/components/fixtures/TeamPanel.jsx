@@ -7,6 +7,7 @@ import { normalizeTeamName, getTeamLogo } from "../../utils/teamUtils";
 import { getLogoUrl } from "../../utils/logoCache";
 import { teamLogos } from "../../data/sampleData";
 import { ThemeContext } from "../../context/ThemeContext";
+import { getThemeStyles, text } from "../../utils/themeUtils";
 
 const TeamPanel = ({
   team,
@@ -47,20 +48,22 @@ const TeamPanel = ({
     }
 
     return logo;
-  };
-  return (
+  };  return (
     <div
-      className={`rounded-lg border overflow-hidden ${
-        theme === "dark"
-          ? "bg-primary-800/30 border-primary-700/30"
-          : "bg-white border-gray-200 shadow-sm"
-      }`}
+      className={`rounded-lg border overflow-hidden ${getThemeStyles(theme, {
+        dark: "bg-slate-800/50 border-slate-600/50",
+        light: "bg-white border-gray-200 shadow-sm",
+      })}`}
     >
       {/* Team header - clickable */}
       <div
-        className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
-          theme === "dark" ? "hover:bg-primary-700/30" : "hover:bg-gray-50"
-        }`}
+        className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${getThemeStyles(
+          theme,
+          {
+            dark: "bg-slate-900/60 hover:bg-slate-700/30",
+            light: "hover:bg-gray-50",
+          }
+        )}`}
         onClick={() => onToggle(team)}
       >
         <div className="flex items-center">
@@ -71,16 +74,12 @@ const TeamPanel = ({
           />
           <div>
             <h3
-              className={`font-medium ${
-                theme === "dark" ? "text-white" : "text-gray-900"
-              }`}
+              className={`font-medium ${getThemeStyles(theme, text.primary)}`}
             >
               {team}
             </h3>
             <div
-              className={`text-xs ${
-                theme === "dark" ? "text-white/60" : "text-gray-500"
-              }`}
+              className={`text-xs ${getThemeStyles(theme, text.muted)}`}
             >
               {fixtures.length} upcoming fixture
               {fixtures.length !== 1 ? "s" : ""}
@@ -90,29 +89,34 @@ const TeamPanel = ({
 
         <div className="flex items-center space-x-3">
           <div
-            className={`w-20 rounded-full h-1.5 overflow-hidden ${
-              theme === "dark" ? "bg-primary-700/30" : "bg-gray-200"
-            }`}
+            className={`w-20 rounded-full h-1.5 overflow-hidden ${getThemeStyles(
+              theme,
+              {
+                dark: "bg-slate-800/60",
+                light: "bg-gray-200",
+              }
+            )}`}
           >
             <div
-              className="bg-teal-500 h-full"
+              className="bg-teal-500 h-full transition-all duration-300"
               style={{ width: `${stats.percentage}%` }}
             ></div>
           </div>
           <div
-            className={`text-xs ${
-              theme === "dark" ? "text-white/70" : "text-gray-600"
-            }`}
+            className={`text-xs ${getThemeStyles(theme, {
+              dark: "text-white/70",
+              light: "text-gray-600",
+            })}`}
           >
             {stats.predicted}/{stats.total} predicted
           </div>
           {isExpanded ? (
             <MinusIcon
-              className={theme === "dark" ? "text-white/60" : "text-gray-400"}
+              className={`w-4 h-4 ${getThemeStyles(theme, text.muted)}`}
             />
           ) : (
             <PlusIcon
-              className={theme === "dark" ? "text-white/60" : "text-gray-400"}
+              className={`w-4 h-4 ${getThemeStyles(theme, text.muted)}`}
             />
           )}
         </div>
@@ -126,9 +130,10 @@ const TeamPanel = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`border-t overflow-hidden ${
-              theme === "dark" ? "border-primary-700/30" : "border-gray-200"
-            }`}
+            className={`border-t overflow-hidden ${getThemeStyles(theme, {
+              dark: "border-slate-600/50 bg-slate-900/60",
+              light: "border-gray-200",
+            })}`}
           >
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -6,15 +6,20 @@ import ActiveChipsBanner from "../ui/ActiveChipsBanner";
 import ContentView from "../fixtures/ContentView";
 import FixtureFilters from "../fixtures/FixtureFilters";
 import { ThemeContext } from "../../context/ThemeContext";
+import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { backgrounds, text } from "../../utils/themeUtils";
 import { fixtures, gameweeks, upcomingMatches } from "../../data/sampleData";
 
 const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
+  // Get theme context and user preferences
+  const { theme } = useContext(ThemeContext);
+  const { preferences } = useUserPreferences();
+
   const [currentGameweek, setCurrentGameweek] = useState(
     gameweeks?.[0]?.id || 36
   );
   const [activeGameweekChips, setActiveGameweekChips] = useState([]);
-  const [viewMode, setViewMode] = useState("teams");
+  const [viewMode, setViewMode] = useState(preferences.defaultFixturesView);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [gameweekFilter, setGameweekFilter] = useState("all");
@@ -22,9 +27,6 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
   const [competitionFilter, setCompetitionFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [showFilters, setShowFilters] = useState(false);
-
-  // Get theme context
-  const { theme } = useContext(ThemeContext);
 
   // Handle applying gameweek chips
   const handleApplyGameweekChip = (chipId, gameweek, isRemoval = false) => {
@@ -40,11 +42,10 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
       } gameweek chip ${chipId} for gameweek ${gameweek}`
     );
   };
-
   // Filter fixtures based on selected filters
   const filteredFixtures = fixtures.filter((fixture) => {
     // Filter by status
-    if (activeFilter === "upcoming" && fixture.predicted) return false;
+    if (activeFilter === "unpredicted" && fixture.predicted) return false;
     if (activeFilter === "predicted" && !fixture.predicted) return false;
 
     // Filter by gameweek

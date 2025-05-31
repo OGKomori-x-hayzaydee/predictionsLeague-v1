@@ -32,8 +32,7 @@ const FixtureFilters = ({
         })
       }`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-4">        {/* Tabs */}
         <div className={`flex rounded-lg p-1 ${
           getThemeStyles(theme, {
             dark: "bg-slate-800/60",
@@ -54,23 +53,7 @@ const FixtureFilters = ({
                   })
             }`}
           >
-            All
-          </button>
-          <button
-            onClick={() => setActiveFilter("upcoming")}
-            className={`px-4 py-2 text-sm rounded-md transition ${
-              activeFilter === "upcoming"
-                ? getThemeStyles(theme, {
-                    dark: "bg-indigo-600 text-white",
-                    light: "bg-indigo-500 text-white"
-                  })
-                : getThemeStyles(theme, {
-                    dark: "text-slate-300 hover:text-white",
-                    light: "text-slate-600 hover:text-slate-800"
-                  })
-            }`}
-          >
-            Upcoming
+            All Fixtures
           </button>
           <button
             onClick={() => setActiveFilter("predicted")}
@@ -87,6 +70,22 @@ const FixtureFilters = ({
             }`}
           >
             Predicted
+          </button>
+          <button
+            onClick={() => setActiveFilter("unpredicted")}
+            className={`px-4 py-2 text-sm rounded-md transition ${
+              activeFilter === "unpredicted"
+                ? getThemeStyles(theme, {
+                    dark: "bg-indigo-600 text-white",
+                    light: "bg-indigo-500 text-white"
+                  })
+                : getThemeStyles(theme, {
+                    dark: "text-slate-300 hover:text-white",
+                    light: "text-slate-600 hover:text-slate-800"
+                  })
+            }`}
+          >
+            Unpredicted
           </button>
         </div>
 

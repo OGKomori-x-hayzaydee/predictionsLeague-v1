@@ -1,7 +1,7 @@
 import { useState, useRef, useContext } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import DateGroup from "./DateGroup";
+import UniversalDateGroup from "../common/UniversalDateGroup";
 import useCarouselScroll from "../../hooks/useCarouselScroll";
 import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
 import { normalizeTeamName } from "../../utils/teamUtils";
@@ -157,12 +157,12 @@ export default function FixtureCarousel({
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className="flex-shrink-0"
                   style={{ width: `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 16 / itemsPerView}px)` }}
-                >
-                  <DateGroup
+                >                  <UniversalDateGroup
                     date={date}
-                    fixtures={dayFixtures}
-                    selectedFixture={selectedFixture}
-                    onFixtureClick={handleFixtureClick}
+                    items={dayFixtures}
+                    type="fixtures"
+                    selectedItem={selectedFixture}
+                    onItemClick={handleFixtureClick}
                     teamLogos={teamLogos}
                   />
                 </motion.div>

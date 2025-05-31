@@ -72,20 +72,17 @@ const PredictionCalendar = ({
     return predictionsByDate[dateKey] || [];
   };
 
-  const selectedDatePredictions = selectedDate ? getDatePredictions(selectedDate) : [];
-
-  return (
-    <div className="space-y-6">
+  const selectedDatePredictions = selectedDate ? getDatePredictions(selectedDate) : [];  return (
+    <div className="space-y-5">
       {/* Calendar header */}
       <div className="flex items-center justify-between">
         <h3 className={`text-xl font-semibold ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
           {format(currentMonth, 'MMMM yyyy')}
         </h3>
-        
-        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
           <button
             onClick={handlePreviousMonth}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-md transition-colors ${
               theme === "dark"
                 ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700/70"
                 : "bg-slate-200 text-slate-600 hover:bg-slate-300"
@@ -96,7 +93,7 @@ const PredictionCalendar = ({
           
           <button
             onClick={handleNextMonth}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-md transition-colors ${
               theme === "dark"
                 ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700/70"
                 : "bg-slate-200 text-slate-600 hover:bg-slate-300"
@@ -105,9 +102,7 @@ const PredictionCalendar = ({
             <ChevronRightIcon className="w-4 h-4" />
           </button>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      </div>      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
         {/* Calendar grid */}
         <div className="lg:col-span-2">
           {/* Weekday headers */}
@@ -115,16 +110,14 @@ const PredictionCalendar = ({
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
               <div
                 key={day}
-                className={`text-center text-sm font-medium py-2 ${
+                className={`text-center text-sm font-medium py-1.5 ${
                   theme === "dark" ? "text-slate-400" : "text-slate-500"
                 }`}
               >
                 {day}
               </div>
             ))}
-          </div>
-
-          {/* Calendar days */}
+          </div>          {/* Calendar days */}
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, index) => {
               const dayPredictions = getDatePredictions(day);
@@ -140,7 +133,7 @@ const PredictionCalendar = ({
                   transition={{ duration: 0.2, delay: index * 0.01 }}
                   onClick={() => handleDateClick(day)}
                   disabled={!hasPredictions}
-                  className={`relative aspect-square p-2 rounded-lg transition-all ${
+                  className={`relative w-10 h-10 p-1.5 rounded-lg transition-all ${
                     !isCurrentMonth
                       ? theme === "dark" ? "text-slate-600" : "text-slate-300"
                       : hasPredictions
@@ -171,7 +164,7 @@ const PredictionCalendar = ({
                   
                   {/* Multiple predictions indicator */}
                   {dayPredictions.length > 1 && (
-                    <div className={`absolute top-1 right-1 text-xs font-bold ${
+                    <div className={`absolute top-0 right-0 text-sm font-bold ${
                       isSelected 
                         ? "text-white" 
                         : theme === "dark" ? "text-teal-400" : "text-teal-600"
@@ -183,13 +176,11 @@ const PredictionCalendar = ({
               );
             })}
           </div>
-        </div>
-
-        {/* Selected date predictions */}
-        <div className="lg:col-span-1">
+        </div>{/* Selected date predictions */}
+        <div className="lg:col-span-2">
           {selectedDate ? (
             <div>
-              <h4 className={`font-semibold mb-4 ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+              <h4 className={`font-semibold mb-4 text-base ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
                 {format(selectedDate, 'EEEE, MMMM do')}
               </h4>
               
@@ -210,9 +201,7 @@ const PredictionCalendar = ({
                   </motion.div>
                 ))}
               </div>
-            </div>
-          ) : (
-            <div className={`text-center py-8 ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}>
+            </div>          ) : (            <div className={`text-center py-8 ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}>
               <p className="text-sm">Click on a date with predictions to view them</p>
             </div>
           )}

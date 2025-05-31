@@ -23,28 +23,27 @@ const PredictionTable = ({
   if (predictions.length === 0) {
     return <EmptyState />;
   }
-
   const getStatusConfig = (prediction) => {
     const isPending = prediction.status === "pending";
     if (isPending) {
       return {
-        bgColor: "bg-amber-500/10",
-        textColor: "text-amber-300",
+        bgColor: theme === "dark" ? "bg-amber-800/30" : "bg-amber-50",
+        textColor: theme === "dark" ? "text-amber-300" : "text-amber-700",
         icon: ClockIcon,
         label: "Pending",
       };
     }
     if (prediction.correct) {
       return {
-        bgColor: "bg-emerald-500/10",
-        textColor: "text-emerald-300",
+        bgColor: theme === "dark" ? "bg-emerald-800/30" : "bg-emerald-50",
+        textColor: theme === "dark" ? "text-emerald-300" : "text-emerald-700",
         icon: CheckIcon,
         label: "Correct",
       };
     }
     return {
-      bgColor: "bg-red-500/10",
-      textColor: "text-red-300",
+      bgColor: theme === "dark" ? "bg-red-800/30" : "bg-red-50",
+      textColor: theme === "dark" ? "text-red-300" : "text-red-700",
       icon: Cross2Icon,
       label: "Incorrect",
     };
@@ -54,12 +53,20 @@ const PredictionTable = ({
     e.stopPropagation();
     onEditClick(prediction);
   };
-
   return (
-    <div className="overflow-x-auto">
-      <table className={`w-full ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
-        <thead>
-          <tr className={`${theme === "dark" ? "border-slate-700" : "border-slate-200"} border-b`}>
+    <div className={`rounded-lg border overflow-hidden ${
+      theme === "dark" 
+        ? "bg-slate-800/50 border-slate-700/50" 
+        : "bg-white border-slate-200"
+    }`}>
+      <div className="overflow-x-auto">
+        <table className={`w-full ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+          <thead>
+            <tr className={`border-b ${
+              theme === "dark" 
+                ? "border-slate-700/50 bg-slate-900/30" 
+                : "border-slate-200 bg-slate-50"
+            }`}>
             <th className={`text-left py-3 px-4 font-medium text-sm ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
               Date
             </th>
@@ -70,10 +77,13 @@ const PredictionTable = ({
               Prediction
             </th>
             <th className={`text-center py-3 px-4 font-medium text-sm ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
+              Actual Result
+            </th>
+            <th className={`text-center py-3 px-4 font-medium text-sm ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
               Status
             </th>
             <th className={`text-center py-3 px-4 font-medium text-sm ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
-              Points
+              Points/Chips
             </th>
             <th className={`text-center py-3 px-4 font-medium text-sm ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
               Actions
@@ -131,21 +141,49 @@ const PredictionTable = ({
                     </div>
                   </div>
                 </td>
-                
-                <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <div className={`px-2 py-1 rounded-md ${theme === "dark" ? "bg-indigo-600/20 border border-indigo-500/20" : "bg-indigo-50 border border-indigo-200"}`}>
-                      <span className="text-sm font-bold">
-                        {prediction.homeScore}
-                      </span>
+                    <div className={`px-2 py-1 rounded-lg text-sm font-bold ${
+                      theme === "dark" 
+                        ? "bg-indigo-800/30 text-indigo-300 border border-indigo-700/50" 
+                        : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                    }`}>
+                      {prediction.homeScore}
                     </div>
                     <span className={`text-xs ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>-</span>
-                    <div className={`px-2 py-1 rounded-md ${theme === "dark" ? "bg-indigo-600/20 border border-indigo-500/20" : "bg-indigo-50 border border-indigo-200"}`}>
-                      <span className="text-sm font-bold">
-                        {prediction.awayScore}
-                      </span>
+                    <div className={`px-2 py-1 rounded-lg text-sm font-bold ${
+                      theme === "dark" 
+                        ? "bg-indigo-800/30 text-indigo-300 border border-indigo-700/50" 
+                        : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                    }`}>
+                      {prediction.awayScore}
                     </div>
                   </div>
+                </td>
+                  <td className="py-3 px-4 text-center">
+                  {!isPending && prediction.actualHomeScore !== null && prediction.actualAwayScore !== null ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className={`px-2 py-1 rounded-lg text-sm font-bold ${
+                        theme === "dark" 
+                          ? "bg-slate-700/50 border border-slate-600/50 text-slate-300" 
+                          : "bg-slate-100 border border-slate-300 text-slate-700"
+                      }`}>
+                        {prediction.actualHomeScore}
+                      </div>
+                      <span className={`text-xs ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>-</span>
+                      <div className={`px-2 py-1 rounded-lg text-sm font-bold ${
+                        theme === "dark" 
+                          ? "bg-slate-700/50 border border-slate-600/50 text-slate-300" 
+                          : "bg-slate-100 border border-slate-300 text-slate-700"
+                      }`}>
+                        {prediction.actualAwayScore}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className={`text-xs ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>
+                      {isPending ? "—" : "N/A"}
+                    </span>
+                  )}
                 </td>
                 
                 <td className="py-3 px-4 text-center">
@@ -158,29 +196,30 @@ const PredictionTable = ({
                 </td>
                 
                 <td className="py-3 px-4 text-center">
-                  {!isPending ? (
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg ${
-                      prediction.points > 0
-                        ? theme === "dark" 
-                          ? "bg-teal-800/30 text-teal-300" 
-                          : "bg-teal-50 text-teal-700"
-                        : theme === "dark"
-                          ? "bg-red-900/30 text-red-300"
-                          : "bg-red-50 text-red-700"
-                    }`}>
-                      <span className="text-xs font-semibold">
-                        {prediction.points} pts
-                      </span>
-                    </div>
-                  ) : (
-                    prediction.chips && prediction.chips.length > 0 && (
+                  <div className="flex flex-col items-center gap-1">
+                    {!isPending && (
+                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg ${
+                        prediction.points > 0
+                          ? theme === "dark" 
+                            ? "bg-teal-800/30 text-teal-300" 
+                            : "bg-teal-50 text-teal-700"
+                          : theme === "dark"
+                            ? "bg-red-900/30 text-red-300"
+                            : "bg-red-50 text-red-700"
+                      }`}>
+                        <span className="text-xs font-semibold">
+                          {prediction.points} pts
+                        </span>
+                      </div>
+                    )}
+                    {prediction.chips && prediction.chips.length > 0 && (
                       <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg ${theme === "dark" ? "bg-purple-800/30 text-purple-300" : "bg-purple-50 text-purple-700"}`}>
                         <span className="text-xs font-medium">
                           {prediction.chips.length} chip{prediction.chips.length > 1 ? 's' : ''}
                         </span>
                       </div>
-                    )
-                  )}
+                    )}
+                  </div>
                 </td>
                 
                 <td className="py-3 px-4 text-center">
@@ -211,9 +250,9 @@ const PredictionTable = ({
                 </td>
               </motion.tr>
             );
-          })}
-        </tbody>
+          })}        </tbody>
       </table>
+      </div>
     </div>
   );
 };

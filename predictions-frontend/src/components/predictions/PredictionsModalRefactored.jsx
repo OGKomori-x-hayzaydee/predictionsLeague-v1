@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format, parseISO, addMinutes } from "date-fns";
 import { ThemeContext } from "../../context/ThemeContext";
 import { backgrounds, text, getThemeStyles } from "../../utils/themeUtils";
-import { InfoCircledIcon, ClockIcon, ExclamationTriangleIcon, CheckIcon } from "@radix-ui/react-icons";
+import { InfoCircledIcon, ClockIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 // Import modular components
 import ModalHeader from "./modal/ModalHeader";
@@ -212,7 +212,9 @@ export default function PredictionsModal({
                   onHomeScoreChange={setHomeScore}
                   onAwayScoreChange={setAwayScore}
                 />
-              )}              {/* Step 2: Goalscorers & Chips */}
+              )}
+
+              {/* Step 2: Goalscorers & Chips */}
               {currentStep === 2 && (
                 <GoalscorersStep
                   fixture={fixture}
@@ -221,23 +223,9 @@ export default function PredictionsModal({
                   homeScorers={homeScorers}
                   awayScorers={awayScorers}
                   selectedChips={selectedChips}
-                  onHomeScorerChange={(index, value) => {
-                    const newScorers = [...homeScorers];
-                    newScorers[index] = value;
-                    setHomeScorers(newScorers);
-                  }}
-                  onAwayScorerChange={(index, value) => {
-                    const newScorers = [...awayScorers];
-                    newScorers[index] = value;
-                    setAwayScorers(newScorers);
-                  }}
-                  onToggleChip={(chipId) => {
-                    setSelectedChips(prev => 
-                      prev.includes(chipId) 
-                        ? prev.filter(id => id !== chipId)
-                        : [...prev, chipId]
-                    );
-                  }}
+                  onHomeScorersChange={setHomeScorers}
+                  onAwayScorersChange={setAwayScorers}
+                  onChipsChange={setSelectedChips}
                   toggleChipInfoModal={toggleChipInfoModal}
                   errors={errors}
                 />

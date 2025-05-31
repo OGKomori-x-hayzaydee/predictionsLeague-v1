@@ -54,14 +54,14 @@ const PredictionTeamPanel = ({
     <div
       className={`rounded-lg border overflow-hidden ${
         theme === "dark"
-          ? "bg-primary-800/30 border-primary-700/30"
+          ? "bg-slate-800/50 border-slate-600/50"
           : "bg-white border-gray-200 shadow-sm"
       }`}
     >
       {/* Team header - clickable */}
       <div
         className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
-          theme === "dark" ? "hover:bg-primary-700/30" : "hover:bg-gray-50"
+          theme === "dark" ? "bg-slate-900/60" : "hover:bg-gray-50"
         }`}
         onClick={() => onToggle(team)}
       >
@@ -94,7 +94,7 @@ const PredictionTeamPanel = ({
           {/* Accuracy Progress Bar */}
           <div
             className={`w-20 rounded-full h-1.5 overflow-hidden ${
-              theme === "dark" ? "bg-primary-700/30" : "bg-gray-200"
+              theme === "dark" ? "bg-slate-800/60" : "bg-gray-200"
             }`}
           >
             <div
@@ -143,13 +143,13 @@ const PredictionTeamPanel = ({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={`border-t overflow-hidden ${
-              theme === "dark" ? "border-primary-700/30" : "border-gray-200"
+              theme === "dark" ? "border-slate-600/50 bg-slate-900/60" : "border-gray-200"
             }`}
           >
             <div className="p-4">
               {/* Team Stats Overview */}
               <div className={`mb-4 p-3 rounded-lg ${
-                theme === "dark" ? "bg-primary-900/30" : "bg-gray-50"
+                theme === "dark" ? "bg-slate-800/60" : "bg-gray-50"
               }`}>
                 <div className="flex items-center justify-between mb-2">
                   <h4 className={`text-sm font-medium ${

@@ -1,168 +1,224 @@
-import React, { useState } from "react";
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
+import React, { useState, useContext } from "react";
+import { motion } from "framer-motion";
+import { 
+  format, 
+  parseISO, 
+  startOfMonth, 
+  endOfMonth, 
+  startOfWeek, 
+  endOfWeek, 
+  eachDayOfInterval, 
+  isSameMonth, 
+  isSameDay,
+  addMonths,
+  subMonths
+} from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
 import EmptyFixtureState from "./EmptyFixtureState";
+import { ThemeContext } from "../../context/ThemeContext";
 
 function FixtureCalendar({ fixtures, onFixtureSelect, searchQuery = "" }) {
+  const { theme } = useContext(ThemeContext);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
 
   // Filter fixtures based on search query - using the common utility function
   const filteredFixtures = filterFixturesByQuery(fixtures, searchQuery);
 
-  // Functions for navigating months
-  const prevMonth = () => {
-    setCurrentMonth(prev => {
-      const newMonth = new Date(prev);
-      newMonth.setMonth(newMonth.getMonth() - 1);
-      return newMonth;
-    });
-  };
+  if (filteredFixtures.length === 0) {
+    return <EmptyFixtureState searchQuery={searchQuery} />;
+  }
 
-  const nextMonth = () => {
-    setCurrentMonth(prev => {
-      const newMonth = new Date(prev);
-      newMonth.setMonth(newMonth.getMonth() + 1);
-      return newMonth;
-    });
-  };
+  // Group fixtures by date - using the common utility function
+  const fixturesByDate = groupFixturesByDate(filteredFixtures);
 
   // Get calendar days
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
-  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  
-  // Get day of week for the first day to determine offset
-  const startOffset = monthStart.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  
-  // Group fixtures by date - using the common utility function
-  const fixturesByDate = groupFixturesByDate(filteredFixtures);
-  
-  // Handle date selection
+  const calendarStart = startOfWeek(monthStart);
+  const calendarEnd = endOfWeek(monthEnd);
+  const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+  const handlePreviousMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+    setSelectedDate(null);
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+    setSelectedDate(null);
+  };
+
   const handleDateClick = (date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    setSelectedDate(isSameDay(selectedDate, date) ? null : date);
-    
-    // If there's only one fixture on this day, select it directly
-    if (fixturesByDate[dateStr] && fixturesByDate[dateStr].length === 1) {
-      onFixtureSelect(fixturesByDate[dateStr][0]);
+    const dateKey = format(date, 'yyyy-MM-dd');
+    if (fixturesByDate[dateKey]) {
+      setSelectedDate(date);
     }
   };
-  // Check if we have any fixtures to display
-  const hasFixtures = filteredFixtures.length > 0;
 
+  const getDateFixtures = (date) => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    return fixturesByDate[dateKey] || [];
+  };
+
+  const selectedDateFixtures = selectedDate ? getDateFixtures(selectedDate) : [];
   return (
-    <div className="bg-primary-800/30 rounded-lg border border-primary-700/30 p-4">
-      {hasFixtures ? (
-        <>
-          {/* Calendar header */}
-          <div className="flex items-center justify-between mb-4">
-            <button 
-              onClick={prevMonth}
-              className="p-1 rounded hover:bg-primary-700/40"
-            >
-              <ChevronLeftIcon className="w-5 h-5 text-teal-300" />
-            </button>
-            <h2 className="text-teal-100 text-lg font-medium">
-              {format(currentMonth, 'MMMM yyyy')}
-            </h2>
-            <button 
-              onClick={nextMonth}
-              className="p-1 rounded hover:bg-primary-700/40"
-            >
-              <ChevronRightIcon className="w-5 h-5 text-teal-300" />
-            </button>
-          </div>
+    <div className="space-y-5">
+      {/* Calendar header */}
+      <div className="flex items-center justify-between">
+        <h3 className={`text-xl font-semibold ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+          {format(currentMonth, 'MMMM yyyy')}
+        </h3>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handlePreviousMonth}
+            className={`p-2 rounded-md transition-colors ${
+              theme === "dark"
+                ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700/70"
+                : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+            }`}
+          >
+            <ChevronLeftIcon className="w-4 h-4" />
+          </button>
           
-          {/* Day headers */}
-          <div className="grid grid-cols-7 mb-2 text-center">
-            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-              <div key={day} className="text-white/60 text-sm py-1">
+          <button
+            onClick={handleNextMonth}
+            className={`p-2 rounded-md transition-colors ${
+              theme === "dark"
+                ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700/70"
+                : "bg-slate-200 text-slate-600 hover:bg-slate-300"
+            }`}
+          >
+            <ChevronRightIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+        {/* Calendar grid */}
+        <div className="lg:col-span-2">
+          {/* Weekday headers */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div
+                key={day}
+                className={`text-center text-sm font-medium py-1.5 ${
+                  theme === "dark" ? "text-slate-400" : "text-slate-500"
+                }`}
+              >
                 {day}
               </div>
             ))}
           </div>
-          
-          {/* Calendar grid */}
+
+          {/* Calendar days */}
           <div className="grid grid-cols-7 gap-1">
-            {/* Empty cells for offset */}
-            {Array.from({ length: startOffset }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-16 border border-transparent"></div>
-            ))}
-            
-            {/* Calendar days */}
-            {calendarDays.map(day => {
-              const dateStr = format(day, 'yyyy-MM-dd');
-              const dayFixtures = fixturesByDate[dateStr] || [];
-              const hasFixtures = dayFixtures.length > 0;
+            {calendarDays.map((day, index) => {
+              const dayFixtures = getDateFixtures(day);
+              const isCurrentMonth = isSameMonth(day, currentMonth);
               const isSelected = selectedDate && isSameDay(day, selectedDate);
-              
+              const hasFixtures = dayFixtures.length > 0;
+
               return (
-                <div 
-                  key={dateStr}
+                <motion.button
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2, delay: index * 0.01 }}
                   onClick={() => handleDateClick(day)}
-                  className={`h-16 border rounded-md p-1 overflow-hidden transition-all ${
-                    hasFixtures 
-                      ? isSelected
-                        ? "border-teal-500 bg-teal-900/20 cursor-pointer"
-                        : "border-primary-600/30 bg-primary-700/20 hover:border-primary-500/40 cursor-pointer" 
-                      : "border-transparent hover:border-primary-800/50"
-                  }`}
+                  disabled={!hasFixtures}
+                  className={`relative w-10 h-10 p-1.5 rounded-lg transition-all ${
+                    !isCurrentMonth
+                      ? theme === "dark" ? "text-slate-600" : "text-slate-300"
+                      : hasFixtures
+                        ? isSelected
+                          ? theme === "dark" 
+                            ? "bg-teal-600 text-white" 
+                            : "bg-teal-500 text-white"
+                          : theme === "dark"
+                            ? "bg-slate-700/50 text-white hover:bg-slate-700/70"
+                            : "bg-slate-100 text-slate-800 hover:bg-slate-200"
+                        : theme === "dark" 
+                          ? "text-slate-400" 
+                          : "text-slate-500"
+                  } ${hasFixtures ? 'cursor-pointer' : 'cursor-default'}`}
                 >
-                  <div className="text-right mb-1">
-                    <span className={`inline-block rounded-full w-5 h-5 text-xs leading-5 text-center ${
-                      hasFixtures ? "bg-teal-900/40 text-teal-300" : "text-white/60"
-                    }`}>
-                      {format(day, 'd')}
-                    </span>
-                  </div>
+                  <span className="text-sm font-medium">
+                    {format(day, 'd')}
+                  </span>
                   
-                  {/* Show fixtures indicator */}
+                  {/* Fixture indicator */}
                   {hasFixtures && (
-                    <div className="text-xs text-white/70">
-                      {dayFixtures.length} {dayFixtures.length === 1 ? 'match' : 'matches'}
+                    <div className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full ${
+                      isSelected 
+                        ? "bg-white" 
+                        : theme === "dark" ? "bg-teal-400" : "bg-teal-500"
+                    }`} />
+                  )}
+                  
+                  {/* Multiple fixtures indicator */}
+                  {dayFixtures.length > 1 && (
+                    <div className={`absolute top-0 right-0 text-sm font-bold ${
+                      isSelected 
+                        ? "text-white" 
+                        : theme === "dark" ? "text-teal-400" : "text-teal-600"
+                    }`}>
+                      {dayFixtures.length}
                     </div>
                   )}
-                </div>
+                </motion.button>
               );
             })}
           </div>
-          
-          {/* Selected date fixtures */}
-          {selectedDate && (
-            <div className="mt-4 border-t border-primary-700/30 pt-4">
-              <h3 className="text-teal-200 text-md font-medium mb-2">
-                {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-              </h3>
+        </div>
+
+        {/* Selected date fixtures */}
+        <div className="lg:col-span-2">
+          {selectedDate ? (
+            <div>
+              <h4 className={`font-semibold mb-4 text-base ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+                {format(selectedDate, 'EEEE, MMMM do')}
+              </h4>
               
-              {fixturesByDate[format(selectedDate, 'yyyy-MM-dd')] ? (
-                <div className="space-y-2">
-                  {fixturesByDate[format(selectedDate, 'yyyy-MM-dd')].map(fixture => (
-                    <div 
-                      key={fixture.id}
-                      onClick={() => onFixtureSelect(fixture)}
-                      className="p-2 bg-primary-700/30 border border-primary-600/30 rounded-md hover:bg-primary-600/30 cursor-pointer flex justify-between items-center"
-                    >
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {selectedDateFixtures.map((fixture, index) => (
+                  <motion.div
+                    key={fixture.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    onClick={() => onFixtureSelect(fixture)}
+                    className={`p-3 rounded-lg border transition-all cursor-pointer ${
+                      theme === "dark"
+                        ? "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-700/70"
+                        : "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
                       <div>
-                        <span className="text-white font-medium">{fixture.homeTeam} vs {fixture.awayTeam}</span>
-                        <div className="text-white/60 text-xs">{fixture.venue}</div>
+                        <div className={`font-medium ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+                          {fixture.homeTeam} vs {fixture.awayTeam}
+                        </div>
+                        <div className={`text-sm ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}>
+                          {fixture.venue}
+                        </div>
                       </div>
-                      <div className="text-white/70 text-sm">
+                      <div className={`text-sm ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
                         {format(parseISO(fixture.date), 'h:mm a')}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-white/50">No fixtures on this date</div>
-              )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className={`text-center py-8 ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}>
+              <p className="text-sm">Click on a date with fixtures to view them</p>
             </div>
           )}
-        </>
-      ) : (
-        <EmptyFixtureState searchQuery={searchQuery} />
-      )}
+        </div>
+      </div>
     </div>
   );
 }

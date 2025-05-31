@@ -113,6 +113,53 @@ select {
   border-radius: 20px;
 }
 
+/* PredictionStack styles to match FixtureStack dimensions */
+.prediction-stack-swiper {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.prediction-stack-slide {
+  background-color: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.prediction-stack-slide::-webkit-scrollbar {
+  width: 4px;
+}
+
+.prediction-stack-slide::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prediction-stack-slide::-webkit-scrollbar-thumb {
+  background-color: rgba(139, 92, 246, 0.3);
+  border-radius: 2px;
+}
+
+.predictions-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.predictions-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.predictions-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.predictions-container::-webkit-scrollbar-thumb {
+  background-color: rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+}
+
 /* Add some animation for the bounce indicator */
 @keyframes bounce {
   0%,

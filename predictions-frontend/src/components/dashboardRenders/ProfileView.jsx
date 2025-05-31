@@ -37,8 +37,7 @@ const ProfileView = () => {
                 <LightningBoltIcon className="mr-1" /> 3-Week Streak
               </span>
             </div>
-          </div>
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-4 rounded-md transition-colors">
+          </div>          <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 px-4 rounded-md transition-colors font-outfit">
             Edit Profile
           </button>
         </div>
@@ -49,18 +48,17 @@ const ProfileView = () => {
           <h3 className={`${theme === 'dark' ? 'text-teal-200' : 'text-teal-600'} font-outfit font-medium text-lg mb-4`}>
             Account Information
           </h3>
-          <div className="space-y-3">
-            <div className="flex flex-col">
-              <span className={`${text.muted[theme]} text-sm mb-1`}>Username</span>
-              <span className={`${text.primary[theme]}`}>alexplayer23</span>
+          <div className="space-y-3">            <div className="flex flex-col">
+              <span className={`${text.muted[theme]} text-sm mb-1 font-outfit`}>Username</span>
+              <span className={`${text.primary[theme]} font-outfit`}>alexplayer23</span>
             </div>
             <div className="flex flex-col">
-              <span className={`${text.muted[theme]} text-sm mb-1`}>Email</span>
-              <span className={`${text.primary[theme]}`}>alex@example.com</span>
+              <span className={`${text.muted[theme]} text-sm mb-1 font-outfit`}>Email</span>
+              <span className={`${text.primary[theme]} font-outfit`}>alex@example.com</span>
             </div>
             <div className="flex flex-col">
-              <span className={`${text.muted[theme]} text-sm mb-1`}>Favorite Team</span>
-              <span className={`${text.primary[theme]}`}>Arsenal</span>
+              <span className={`${text.muted[theme]} text-sm mb-1 font-outfit`}>Favorite Team</span>
+              <span className={`${text.primary[theme]} font-outfit`}>Arsenal</span>
             </div>
           </div>
         </div>
@@ -69,22 +67,21 @@ const ProfileView = () => {
           <h3 className={`${theme === 'dark' ? 'text-teal-200' : 'text-teal-600'} font-outfit font-medium text-lg mb-4`}>
             Your Stats
           </h3>
-          <div className="space-y-3">
-            <div className="flex flex-col">
-              <span className={`${text.muted[theme]} text-sm mb-1`}>
+          <div className="space-y-3">            <div className="flex flex-col">
+              <span className={`${text.muted[theme]} text-sm mb-1 font-outfit`}>
                 Total Predictions
               </span>
-              <span className={`${text.primary[theme]}`}>237</span>
+              <span className={`${text.primary[theme]} font-outfit`}>237</span>
             </div>
             <div className="flex flex-col">
-              <span className={`${text.muted[theme]} text-sm mb-1`}>
+              <span className={`${text.muted[theme]} text-sm mb-1 font-outfit`}>
                 Correct Score Predictions
               </span>
-              <span className={`${text.primary[theme]}`}>41 (17.3%)</span>
+              <span className={`${text.primary[theme]} font-outfit`}>41 (17.3%)</span>
             </div>
             <div className="flex flex-col">
-              <span className={`${text.muted[theme]} text-sm mb-1`}>Best Gameweek</span>
-              <span className={`${text.primary[theme]}`}>GW21 (86 points)</span>
+              <span className={`${text.muted[theme]} text-sm mb-1 font-outfit`}>Best Gameweek</span>
+              <span className={`${text.primary[theme]} font-outfit`}>GW21 (86 points)</span>
             </div>
           </div>
         </div>

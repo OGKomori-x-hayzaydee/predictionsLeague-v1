@@ -22,15 +22,7 @@ function PredictionsByTeam({ predictions = [], onPredictionSelect, onPredictionE
     "Liverpool",
     "Man. City",
     "Man. United",
-    "Tottenham",
-  ];
-
-  // Log original predictions for debugging
-  console.log("Original predictions:", predictionsToUse);
-  console.log(
-    "Teams in original predictions:",
-    [...new Set([...predictionsToUse.map((p) => p.homeTeam), ...predictionsToUse.map((p) => p.awayTeam)])]
-  );
+    "Spurs",  ];
 
   // Filter predictions based on search query - using common utility function
   const filteredPredictions = filterPredictionsByQuery(predictionsToUse, searchQuery);
@@ -39,20 +31,10 @@ function PredictionsByTeam({ predictions = [], onPredictionSelect, onPredictionE
   const normalizedPredictions = filteredPredictions.map((prediction) => ({
     ...prediction,
     homeTeam: normalizeTeamName(prediction.homeTeam),
-    awayTeam: normalizeTeamName(prediction.awayTeam),
-  }));
-
-  // Log normalized team names for debugging
-  console.log(
-    "Normalized teams in predictions:",
-    [...new Set([...normalizedPredictions.map((p) => p.homeTeam), ...normalizedPredictions.map((p) => p.awayTeam)])]
-  );
+    awayTeam: normalizeTeamName(prediction.awayTeam),  }));
 
   // Group predictions by team - but only for Big Six teams
   const predictionsByTeam = groupPredictionsByTeam(normalizedPredictions, bigSixTeams);
-
-  // Log the grouped predictions to see what we're working with
-  console.log("Predictions by team (after grouping):", predictionsByTeam);
 
   // Toggle team expansion
   const toggleTeam = (team) => {

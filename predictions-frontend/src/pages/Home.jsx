@@ -38,14 +38,19 @@ export default function Home() {
 
   // Ensure the view is valid, default to "dashboard"
   const activeItem = validViews.includes(view) ? view : "dashboard";
-
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [navigationParams, setNavigationParams] = useState({});
+  
   // navigateToSection function to change the active item
-  const navigateToSection = (section) => {
+  const navigateToSection = (section, params = {}) => {
+    // Navigate to the section
     navigate(`/home/${section}`);
+    
+    // Store additional parameters for the ContentPane to handle
+    setNavigationParams(params);
   };
   // Redirect to dashboard if invalid view
   useEffect(() => {
@@ -153,7 +158,9 @@ export default function Home() {
             </select>
           </div>
           {/* Status Bar moved inside content area */}
-          <StatusBar />
+          <StatusBar
+           onMakePredictions={() => navigateToSection("predictions")} 
+          />
           {/* Breadcrumb & Search Bar */}
           <div
             className={`${
@@ -243,11 +250,10 @@ export default function Home() {
                   <div className="w-3 h-3 bg-teal-400 rounded-full animate-bounce"></div>
                 </div>
               </div>
-            ) : null}
-
-            <ContentPane
+            ) : null}            <ContentPane
               activeItem={activeItem}
               navigateToSection={navigateToSection}
+              navigationParams={navigationParams}
               upcomingMatches={upcomingMatches}
               recentPredictions={recentPredictions}
               leagues={leagues}

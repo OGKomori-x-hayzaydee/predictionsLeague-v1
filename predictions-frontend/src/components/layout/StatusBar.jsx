@@ -5,13 +5,15 @@ import {
   CaretDownIcon,
   LockClosedIcon,
   ClockIcon,
+  SunIcon,
+  MoonIcon,
 } from "@radix-ui/react-icons";
 import { useContext } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 
-export default function StatusBar({ user }) {
+export default function StatusBar({ user, onMakePredictions }) {
   // Get theme context
-  const { theme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   // Sample user data - in a real app, this would come from props or context
   const userData = user || {
@@ -151,13 +153,14 @@ export default function StatusBar({ user }) {
               </span>
             </div>
           </div>{" "}
-          {/* Action Button */}
-          <div>
+          {/* Action Button & Theme Toggle */}
+          <div className="flex items-center space-x-3">
+            {/* Action Button */}
             {userData.pendingPredictions > 0 ? (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => alert("Navigate to predictions page")}
+                onClick={onMakePredictions}
                 className={`${
                   theme === "dark"
                     ? "bg-indigo-600 hover:bg-indigo-700"
@@ -180,6 +183,27 @@ export default function StatusBar({ user }) {
                 <LockClosedIcon className="mr-1" /> All Predictions Made
               </button>
             )}
+
+            {/* Theme Toggle */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleTheme}
+              className={`p-2 rounded-md transition-colors ${
+                theme === "dark"
+                  ? "text-white/70 hover:bg-primary-600/40 hover:text-teal-300"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-teal-700"
+              }`}
+              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+            >
+              <motion.span
+                initial={{ rotate: 0 }}
+                animate={{ rotate: theme === "dark" ? 0 : 360 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+              </motion.span>
+            </motion.button>
           </div>
         </div>
       </Box>

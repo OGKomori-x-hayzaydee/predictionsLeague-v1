@@ -219,17 +219,31 @@ const GameweekChipsPanel = ({
                 Enhance your predictions with strategic chip usage
               </p>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
+          </div>          <div className="flex items-center gap-3">
             {activeChipsCount > 0 && (
-              <div className="bg-teal-900/40 border border-teal-700/30 text-teal-300 rounded-full px-3 py-1 flex items-center font-outfit">
+              <div className={`rounded-full px-3 py-1 flex items-center font-outfit border ${getThemeStyles(
+                theme,
+                {
+                  dark: "bg-teal-900/40 border-teal-700/30 text-teal-300",
+                  light: "bg-teal-100 border-teal-200 text-teal-700",
+                }
+              )}`}>
                 <span className="text-xs">
                   <span className="font-medium">{activeChipsCount}</span> active
                 </span>
               </div>
             )}
-            <div className="bg-blue-900/40 border border-blue-700/30 text-blue-300 rounded-full px-3 py-1 flex items-center font-outfit">
-              <span className="text-blue-200/70 text-sm mr-1">GW:</span>
+            <div className={`rounded-full px-3 py-1 flex items-center font-outfit border ${getThemeStyles(
+              theme,
+              {
+                dark: "bg-blue-900/40 border-blue-700/30 text-blue-300",
+                light: "bg-blue-100 border-blue-200 text-blue-700",
+              }
+            )}`}>
+              <span className={`text-sm mr-1 ${getThemeStyles(theme, {
+                dark: "text-blue-200/70",
+                light: "text-blue-600/70",
+              })}`}>GW:</span>
               <span className="font-medium text-sm">{currentGameweek}</span>
             </div>{" "}
             <motion.button
@@ -274,12 +288,14 @@ const GameweekChipsPanel = ({
                 })}`}
               >
                 <div className="flex">
-                  {" "}
-                  <button
+                  {" "}                  <button
                     onClick={() => setSelectedTab("gameweek")}
                     className={`py-2 px-4 text-sm relative transition-colors ${
                       selectedTab === "gameweek"
-                        ? "text-teal-300"
+                        ? getThemeStyles(theme, {
+                            dark: "text-teal-300",
+                            light: "text-teal-600",
+                          })
                         : getThemeStyles(theme, {
                             dark: "text-slate-400 hover:text-slate-300",
                             light: "text-slate-500 hover:text-slate-700",
@@ -296,12 +312,14 @@ const GameweekChipsPanel = ({
                         layoutId="tabIndicator"
                       />
                     )}
-                  </button>{" "}
-                  <button
+                  </button>{" "}                  <button
                     onClick={() => setSelectedTab("match")}
                     className={`py-2 px-4 text-sm relative transition-colors ${
                       selectedTab === "match"
-                        ? "text-teal-300"
+                        ? getThemeStyles(theme, {
+                            dark: "text-teal-300",
+                            light: "text-teal-600",
+                          })
                         : getThemeStyles(theme, {
                             dark: "text-slate-400 hover:text-slate-300",
                             light: "text-slate-500 hover:text-slate-700",
@@ -398,9 +416,14 @@ const GameweekChipsPanel = ({
                                         )}`}
                                       >
                                         {chip.name}
-                                      </div>{" "}
-                                      {isActive && (
-                                        <div className="flex items-center bg-teal-700/30 text-teal-300 text-2xs px-1.5 py-0.5 rounded">
+                                      </div>{" "}                                      {isActive && (
+                                        <div className={`flex items-center text-2xs px-1.5 py-0.5 rounded ${getThemeStyles(
+                                          theme,
+                                          {
+                                            dark: "bg-teal-700/30 text-teal-300",
+                                            light: "bg-teal-100 text-teal-700",
+                                          }
+                                        )}`}>
                                           <CheckIcon className="w-2.5 h-2.5 mr-0.5" />
                                           <span>Active</span>
                                         </div>
@@ -830,10 +853,12 @@ const GameweekChipsPanel = ({
                   className={`text-sm leading-relaxed mb-1.5 ${getThemeStyles(
                     theme,
                     text.secondary
-                  )}`}
-                >
+                  )}`}                >
                   This chip affects{" "}
-                  <span className="text-teal-300 font-medium">
+                  <span className={`font-medium ${getThemeStyles(theme, {
+                    dark: "text-teal-300",
+                    light: "text-teal-600",
+                  })}`}>
                     all predictions
                   </span>{" "}
                   for this gameweek.

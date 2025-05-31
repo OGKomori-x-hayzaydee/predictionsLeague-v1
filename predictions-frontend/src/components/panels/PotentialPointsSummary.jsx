@@ -17,14 +17,10 @@ const PotentialPointsSummary = ({ predictions, teamLogos }) => {
   const [showDetailedPointsBreakdown, setShowDetailedPointsBreakdown] =
     useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
-
   // Get theme context
   const { theme } = useContext(ThemeContext);
-
-  // Filter for only pending predictions to ensure we're calculating potential points correctly
-  const pendingPredictions = predictions.filter(
-    (prediction) => prediction.status === "pending"
-  );
+  // Use the already filtered pending predictions passed from parent component
+  const pendingPredictions = predictions;
 
   return (
     <motion.div
