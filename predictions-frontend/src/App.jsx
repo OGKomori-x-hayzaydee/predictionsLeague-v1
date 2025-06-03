@@ -1,27 +1,30 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Theme } from "@radix-ui/themes";
 import { ThemeProvider } from "./context/ThemeContext";
-import Home from "./pages/Home";
+import { UserPreferencesProvider } from "./context/UserPreferencesContext";
+import DefaultRedirect from "./components/common/DefaultRedirect";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import HowToPlay from "./pages/HowToPlay";
-import Dashboard from "./pages/Dashboard";
-import Matches from "./pages/Matches";
+import Home from "./pages/Home";
 
 
 function App() {
   return (
     <ThemeProvider>
+      <UserPreferencesProvider>
         <Theme>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/howToPlay" element={<HowToPlay />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/matches" element={<Matches />} />
+              <Route path="/home" element={<DefaultRedirect />} />
+              <Route path="/home/:view" element={<Home />} />
             </Routes>
         </Theme>
+      </UserPreferencesProvider>
     </ThemeProvider>
   );
 }

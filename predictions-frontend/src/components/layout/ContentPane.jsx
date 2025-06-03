@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PredictionsModal from "../predictions/PredictionsModal";
 import ChipInfoModal from "../predictions/ChipInfoModal";
+import { ThemeContext } from "../../context/ThemeContext";
+import { backgrounds } from "../../utils/themeUtils";
 
 // Import from centralized data file
-import { upcomingMatches, recentPredictions, leagues } from "../../data/sampleData";
+import {
+  upcomingMatches,
+  recentPredictions,
+  leagues,
+} from "../../data/sampleData";
 
 // Import all view components
 import {
@@ -18,10 +24,10 @@ import {
   LeagueManagementView, // New component
 } from "../dashboardRenders";
 
-export default function ContentPane({
-  activeItem,
-  navigateToSection,
-}) {
+export default function ContentPane({ activeItem, navigateToSection, navigationParams = {} }) {
+  // Access theme context
+  const { theme } = useContext(ThemeContext);
+
   // Animation variants
   const contentVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -134,12 +140,18 @@ export default function ContentPane({
     setSelectedLeagueId(leagueId);
     setIsManagingLeague(true);
   };
-
   // Handler to go back to leagues list
   const handleBackToLeagues = () => {
     setSelectedLeagueId(null);
     setIsManagingLeague(false);
   };
+
+  // Handle navigation parameters (e.g., automatic league navigation from dashboard)
+  useEffect(() => {
+    if (activeItem === "leagues" && navigationParams.leagueId) {
+      handleViewLeague(navigationParams.leagueId);
+    }
+  }, [activeItem, navigationParams]);
 
   // Render content based on active item
   const renderContent = () => {
@@ -172,15 +184,17 @@ export default function ContentPane({
             recentPredictions={recentPredictions}
             leagues={leagues}
             // Replace the goToPredictions prop with this inline function
-            goToPredictions={(match) => handleFixtureSelect({
-              id: match.id,
-              homeTeam: match.homeTeam,
-              awayTeam: match.awayTeam,
-              date: match.date,
-              venue: match.venue,
-              gameweek: match.gameweek,
-              competition: match.competition
-            })}
+            goToPredictions={(match) =>
+              handleFixtureSelect({
+                id: match.id,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                date: match.date,
+                venue: match.venue,
+                gameweek: match.gameweek,
+                competition: match.competition,
+              })
+            }
             navigateToSection={navigateToSection}
             toggleChipInfoModal={toggleChipInfoModal}
           />
@@ -229,42 +243,44 @@ export default function ContentPane({
             recentPredictions={recentPredictions}
             leagues={leagues}
             // Replace the goToPredictions prop with this inline function
-            goToPredictions={(match) => handleFixtureSelect({
-              id: match.id,
-              homeTeam: match.homeTeam,
-              awayTeam: match.awayTeam,
-              date: match.date,
-              venue: match.venue,
-              gameweek: match.gameweek,
-              competition: match.competition
-            })}
+            goToPredictions={(match) =>
+              handleFixtureSelect({
+                id: match.id,
+                homeTeam: match.homeTeam,
+                awayTeam: match.awayTeam,
+                date: match.date,
+                venue: match.venue,
+                gameweek: match.gameweek,
+                competition: match.competition,
+              })
+            }
             navigateToSection={navigateToSection}
             toggleChipInfoModal={toggleChipInfoModal}
           />
         );
     }
   };
-
   return (
-    <div className="h-full overflow-y-auto p-6">
+    <div className={`h-full overflow-y-auto p-6 ${backgrounds.main[theme]}`}>
       {/* Render content based on activeItem */}
       {renderContent()}
 
       {/* Predictions Modal */}
       <AnimatePresence>
+        {" "}
         {modalData.isOpen && (
           <motion.div
-            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <PredictionsModal
               fixture={modalData.fixture}
-              onClose={() => setModalData({...modalData, isOpen: false})}
+              onClose={() => setModalData({ ...modalData, isOpen: false })}
               onSave={(prediction) => {
                 console.log("Saving prediction:", prediction);
-                setModalData({...modalData, isOpen: false});
+                setModalData({ ...modalData, isOpen: false });
                 // Add any additional logic needed
               }}
               initialValues={modalData.initialValues}

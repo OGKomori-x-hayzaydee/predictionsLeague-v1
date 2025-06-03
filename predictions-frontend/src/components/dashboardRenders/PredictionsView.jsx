@@ -1,23 +1,30 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-
-// Import components
+import { useState, useContext } from "react";
 import PredictionFilters from "../predictions/PredictionFilters";
-import PotentialPointsSummary from "../predictions/PotentialPointsSummary";
-import PredictionCard from "../predictions/PredictionCard";
+import PotentialPointsSummary from "../panels/PotentialPointsSummary";
+import PredictionContentView from "../predictions/PredictionContentView";
+import PredictionBreakdownModal from "../predictions/PredictionBreakdownModal";
+import PredictionViewToggleBar from "../predictions/PredictionViewToggleBar";
 import EmptyState from "../common/EmptyState";
+import { ThemeContext } from "../../context/ThemeContext";
+import { useUserPreferences } from "../../context/UserPreferencesContext";
+import { text } from "../../utils/themeUtils";
 
 // Import data and utilities
 import { predictions, teamLogos } from "../../data/sampleData";
 
-const PredictionsView = ({ handleEditPrediction }) => {
+const PredictionsView = ({ handleEditPrediction }) => {  // Get theme context and user preferences
+  const { theme } = useContext(ThemeContext);
+  const { preferences } = useUserPreferences();
+  
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [gameweekFilter, setGameweekFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [filterTeam, setFilterTeam] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-
+  const [viewMode, setViewMode] = useState(preferences.defaultPredictionsView);
+  const [selectedPrediction, setSelectedPrediction] = useState(null);
+  const [showBreakdownModal, setShowBreakdownModal] = useState(false);
   // Filter predictions based on active filter
   const filteredPredictions = predictions.filter((prediction) => {
     // Filter by status
@@ -52,6 +59,12 @@ const PredictionsView = ({ handleEditPrediction }) => {
 
     return true;
   });
+  // For PotentialPointsSummary: show pending predictions from the filtered set
+  // This ensures consistency - if user filters by pending, both components show the same data
+  // If user filters by something else, PotentialPointsSummary still only shows pending predictions
+  const pendingPredictions = activeFilter === "pending" 
+    ? filteredPredictions  // When filtering by pending, use the already filtered data
+    : predictions.filter((prediction) => prediction.status === "pending"); // Otherwise, show all pending predictions
 
   // Sort predictions
   const sortedPredictions = [...filteredPredictions].sort((a, b) => {
@@ -68,63 +81,97 @@ const PredictionsView = ({ handleEditPrediction }) => {
     }
     return 0;
   });
-
   // The edit button handler passes the prediction to the parent
   const onEditClick = (prediction) => {
     handleEditPrediction(prediction);
   };
 
-  return (
-    <>
-      <div className="mb-6">
-        <h1 className="text-teal-100 text-3xl font-bold font-dmSerif">
-          My Predictions
-        </h1>
-        <p className="text-white/70 font-outfit">
-          View and manage your predictions for past and upcoming matches
-        </p>
-      </div>
+  // Handle prediction card click to open breakdown modal
+  const handlePredictionSelect = (prediction) => {
+    setSelectedPrediction(prediction);
+    setShowBreakdownModal(true);
+  };
 
-      {/* Filters and search */}
-      <PredictionFilters
-        activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        gameweekFilter={gameweekFilter}
-        setGameweekFilter={setGameweekFilter}
-        filterTeam={filterTeam}
-        setFilterTeam={setFilterTeam}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
+  // Handle modal close
+  const handleCloseModal = () => {
+    setShowBreakdownModal(false);
+    setSelectedPrediction(null);
+  };
+
+  // Handle edit from modal
+  const handleEditFromModal = (prediction) => {
+    handleCloseModal();
+    handleEditPrediction(prediction);
+  };
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className={`${theme === 'dark' ? 'text-teal-100' : 'text-teal-700'} text-3xl font-bold font-dmSerif`}>
+            My Predictions
+          </h1>
+          <p className={`${text.secondary[theme]} font-outfit`}>
+            View and manage your predictions for past and upcoming matches
+          </p>
+        </div>
+
+        {/* View toggle controls */}
+        <PredictionViewToggleBar viewMode={viewMode} setViewMode={setViewMode} />
+      </div>      {/* Potential Points Summary - Always visible but only shows pending predictions */}
+      <PotentialPointsSummary
+        predictions={pendingPredictions}
+        teamLogos={teamLogos}
       />
 
-      {/* Potential Points Summary - Only shown when viewing pending predictions */}
-      {activeFilter === "pending" && filteredPredictions.length > 0 && (
-        <PotentialPointsSummary
-          predictions={filteredPredictions}
-          teamLogos={teamLogos}
+      {/* Content container with filters and predictions */}
+      <div
+        className={`${
+          theme === "dark"
+            ? "backdrop-blur-xl border-slate-700/50 bg-slate-900/60"
+            : "border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm"
+        } rounded-xl border mb-5 overflow-hidden font-outfit p-5`}
+      >
+        {/* Prediction filters component */}
+        <PredictionFilters
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          gameweekFilter={gameweekFilter}
+          setGameweekFilter={setGameweekFilter}
+          filterTeam={filterTeam}
+          setFilterTeam={setFilterTeam}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
         />
-      )}
 
-      {/* Prediction list */}
-      <div className="space-y-4 font-outfit">
+        {/* Prediction Content */}
         {sortedPredictions.length === 0 ? (
           <EmptyState />
         ) : (
-          sortedPredictions.map((prediction) => (
-            <PredictionCard
-              key={prediction.id}
-              prediction={prediction}
-              teamLogos={teamLogos}
-              onEditClick={onEditClick}
-            />
-          ))
+          <PredictionContentView
+            viewMode={viewMode}
+            predictions={sortedPredictions}
+            onPredictionSelect={handlePredictionSelect}
+            onEditClick={onEditClick}
+            teamLogos={teamLogos}
+            searchQuery={searchQuery}
+          />
         )}
       </div>
-    </>
+
+      {/* Prediction Breakdown Modal */}
+      {showBreakdownModal && selectedPrediction && (
+        <PredictionBreakdownModal
+          prediction={selectedPrediction}
+          teamLogos={teamLogos}
+          onClose={handleCloseModal}
+          onEdit={handleEditFromModal}
+        />
+      )}
+    </div>
   );
 };
 

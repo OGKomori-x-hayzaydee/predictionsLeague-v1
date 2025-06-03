@@ -1,9 +1,30 @@
 @import "tailwindcss";
 
 @theme {
+  /* Dark mode colors */
   --color-primary-500: #021526;
   --color-primary-600: #17153b;
-  /* --text-xl: 4.5rem; */
+  --color-primary-700: #0a0f1a;
+  --color-primary-800: #050914;
+  
+  /* Light mode colors */
+  --color-light-bg: #ffffff;
+  --color-light-card: #f8fafc;
+  --color-light-border: #e2e8f0;
+  --color-light-text: #1e293b;
+  --color-light-text-secondary: #64748b;
+  
+  /* Accent colors - consistent across themes but with different shades */
+  --color-teal-light: #14b8a6; /* teal-500 for light mode */
+  --color-teal-dark: #5eead4;  /* teal-300 for dark mode */
+  --color-indigo-light: #4f46e5; /* indigo-600 for light mode */
+  --color-indigo-dark: #818cf8;  /* indigo-400 for dark mode */
+  --color-emerald-light: #10b981; /* emerald-500 for light mode */
+  --color-emerald-dark: #6ee7b7;  /* emerald-300 for dark mode */
+  --color-amber-light: #d97706;   /* amber-600 for light mode */
+  --color-amber-dark: #fcd34d;    /* amber-300 for dark mode */
+  
+  /* Typography */
   --font-dmSerif: "DM Serif Text", serif;
   --font-outfit: "Outfit", sans-serif;
 }
@@ -34,6 +55,10 @@ select {
   animation: marquee 30s linear infinite;
 }
 
+.text-2xs {
+  font-size: 0.65rem;
+  line-height: 1rem;
+}
 
 .fixture-swiper-container {
   width: 100%;
@@ -88,9 +113,57 @@ select {
   border-radius: 20px;
 }
 
+/* PredictionStack styles to match FixtureStack dimensions */
+.prediction-stack-swiper {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.prediction-stack-slide {
+  background-color: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.prediction-stack-slide::-webkit-scrollbar {
+  width: 4px;
+}
+
+.prediction-stack-slide::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prediction-stack-slide::-webkit-scrollbar-thumb {
+  background-color: rgba(139, 92, 246, 0.3);
+  border-radius: 2px;
+}
+
+.predictions-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.predictions-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.predictions-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.predictions-container::-webkit-scrollbar-thumb {
+  background-color: rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+}
+
 /* Add some animation for the bounce indicator */
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {

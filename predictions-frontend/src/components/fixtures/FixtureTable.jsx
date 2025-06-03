@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { format, parseISO } from "date-fns";
 import { CaretSortIcon, CheckCircledIcon, LightningBoltIcon } from "@radix-ui/react-icons";
+import { ThemeContext } from "../../context/ThemeContext";
 import EmptyFixtureState from "./EmptyFixtureState";
 
 function FixtureTable({ fixtures, onFixtureSelect, searchQuery = "" }) {
+  const { theme } = useContext(ThemeContext);
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState('asc');
   
@@ -64,108 +66,181 @@ function FixtureTable({ fixtures, onFixtureSelect, searchQuery = "" }) {
       setSortDirection('asc');
     }
   };
-
   return (
-    <div className="bg-primary-800/30 rounded-lg border border-primary-700/30 overflow-hidden">
+    <div className={`rounded-lg border overflow-hidden ${
+      theme === "dark" 
+        ? "bg-slate-800/50 border-slate-700/50" 
+        : "bg-white border-slate-200"
+    }`}>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className={`w-full ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
           <thead>
-            <tr className="border-b border-primary-700/30 bg-primary-900/30">
+            <tr className={`border-b ${
+              theme === "dark" 
+                ? "border-slate-700/50 bg-slate-900/30" 
+                : "border-slate-200 bg-slate-50"
+            }`}>
               <th 
-                className="text-left py-3 px-4 font-medium text-white/70 text-sm cursor-pointer hover:text-teal-300"
+                className={`text-left py-3 px-4 font-medium text-sm cursor-pointer transition-colors ${
+                  theme === "dark"
+                    ? "text-slate-300 hover:text-teal-300"
+                    : "text-slate-600 hover:text-teal-600"
+                }`}
                 onClick={() => handleSort('date')}
               >
                 <div className="flex items-center">
                   Date
-                  <CaretSortIcon className={`ml-1 ${sortField === 'date' ? 'text-teal-300' : 'text-white/40'}`} />
+                  <CaretSortIcon className={`ml-1 ${
+                    sortField === 'date' 
+                      ? 'text-teal-300' 
+                      : theme === "dark" ? 'text-slate-500' : 'text-slate-400'
+                  }`} />
                 </div>
               </th>
               <th 
-                className="text-left py-3 px-4 font-medium text-white/70 text-sm cursor-pointer hover:text-teal-300"
+                className={`text-left py-3 px-4 font-medium text-sm cursor-pointer transition-colors ${
+                  theme === "dark"
+                    ? "text-slate-300 hover:text-teal-300"
+                    : "text-slate-600 hover:text-teal-600"
+                }`}
                 onClick={() => handleSort('gameweek')}
               >
                 <div className="flex items-center">
                   GW
-                  <CaretSortIcon className={`ml-1 ${sortField === 'gameweek' ? 'text-teal-300' : 'text-white/40'}`} />
+                  <CaretSortIcon className={`ml-1 ${
+                    sortField === 'gameweek' 
+                      ? 'text-teal-300' 
+                      : theme === "dark" ? 'text-slate-500' : 'text-slate-400'
+                  }`} />
                 </div>
               </th>
               <th 
-                className="text-left py-3 px-4 font-medium text-white/70 text-sm cursor-pointer hover:text-teal-300"
+                className={`text-left py-3 px-4 font-medium text-sm cursor-pointer transition-colors ${
+                  theme === "dark"
+                    ? "text-slate-300 hover:text-teal-300"
+                    : "text-slate-600 hover:text-teal-600"
+                }`}
                 onClick={() => handleSort('match')}
               >
                 <div className="flex items-center">
                   Match
-                  <CaretSortIcon className={`ml-1 ${sortField === 'match' ? 'text-teal-300' : 'text-white/40'}`} />
+                  <CaretSortIcon className={`ml-1 ${
+                    sortField === 'match' 
+                      ? 'text-teal-300' 
+                      : theme === "dark" ? 'text-slate-500' : 'text-slate-400'
+                  }`} />
                 </div>
               </th>
               <th 
-                className="text-left py-3 px-4 font-medium text-white/70 text-sm cursor-pointer hover:text-teal-300"
+                className={`text-left py-3 px-4 font-medium text-sm cursor-pointer transition-colors ${
+                  theme === "dark"
+                    ? "text-slate-300 hover:text-teal-300"
+                    : "text-slate-600 hover:text-teal-600"
+                }`}
                 onClick={() => handleSort('competition')}
               >
                 <div className="flex items-center">
                   Competition
-                  <CaretSortIcon className={`ml-1 ${sortField === 'competition' ? 'text-teal-300' : 'text-white/40'}`} />
+                  <CaretSortIcon className={`ml-1 ${
+                    sortField === 'competition' 
+                      ? 'text-teal-300' 
+                      : theme === "dark" ? 'text-slate-500' : 'text-slate-400'
+                  }`} />
                 </div>
               </th>
               <th 
-                className="text-left py-3 px-4 font-medium text-white/70 text-sm cursor-pointer hover:text-teal-300"
+                className={`text-left py-3 px-4 font-medium text-sm cursor-pointer transition-colors ${
+                  theme === "dark"
+                    ? "text-slate-300 hover:text-teal-300"
+                    : "text-slate-600 hover:text-teal-600"
+                }`}
                 onClick={() => handleSort('predicted')}
               >
                 <div className="flex items-center">
                   Status
-                  <CaretSortIcon className={`ml-1 ${sortField === 'predicted' ? 'text-teal-300' : 'text-white/40'}`} />
+                  <CaretSortIcon className={`ml-1 ${
+                    sortField === 'predicted' 
+                      ? 'text-teal-300' 
+                      : theme === "dark" ? 'text-slate-500' : 'text-slate-400'
+                  }`} />
                 </div>
               </th>
             </tr>
-          </thead>
-          <tbody>
+          </thead>          <tbody>
             {sortedFixtures.map(fixture => (
               <tr 
                 key={fixture.id}
-                className="border-b border-primary-700/20 hover:bg-primary-700/30 cursor-pointer transition-colors"
+                className={`cursor-pointer transition-colors border-b ${
+                  theme === "dark"
+                    ? "hover:bg-slate-800/50 border-slate-700/50"
+                    : "hover:bg-slate-50 border-slate-200"
+                }`}
                 onClick={() => onFixtureSelect(fixture)}
               >
-                <td className="py-2 px-4">
-                  <div className="text-white/90">{format(parseISO(fixture.date), "MMM d, yyyy")}</div>
-                  <div className="text-white/60 text-xs">{format(parseISO(fixture.date), "h:mm a")}</div>
+                <td className="py-3 px-4">
+                  <div className={`text-sm font-medium ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+                    {format(parseISO(fixture.date), "MMM d, yyyy")}
+                  </div>
+                  <div className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}>
+                    {format(parseISO(fixture.date), "h:mm a")}
+                  </div>
                 </td>
-                <td className="py-2 px-4">
-                  <div className="bg-primary-700/30 text-white/80 text-xs px-2 py-0.5 rounded inline-block">
+                <td className="py-3 px-4">
+                  <div className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${
+                    theme === "dark" 
+                      ? "bg-slate-700/50 border border-slate-600/50 text-slate-300" 
+                      : "bg-slate-100 border border-slate-300 text-slate-700"
+                  }`}>
                     {fixture.gameweek}
                   </div>
                 </td>
-                <td className="py-2 px-4">
-                  <div className="text-white font-medium">{fixture.homeTeam} vs {fixture.awayTeam}</div>
-                  <div className="text-white/60 text-xs">{fixture.venue}</div>
+                <td className="py-3 px-4">
+                  <div className={`font-medium ${theme === "dark" ? "text-white" : "text-slate-800"}`}>
+                    {fixture.homeTeam} vs {fixture.awayTeam}
+                  </div>
+                  <div className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}>
+                    {fixture.venue}
+                  </div>
                 </td>
-                <td className="py-2 px-4">
-                  <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${
+                <td className="py-3 px-4">
+                  <div className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${
                     fixture.competition === "Premier League" 
-                      ? "bg-purple-900/30 text-purple-300" 
-                      : "bg-amber-900/30 text-amber-300"
+                      ? theme === "dark"
+                        ? "bg-purple-800/30 text-purple-300" 
+                        : "bg-purple-50 text-purple-700"
+                      : theme === "dark"
+                        ? "bg-amber-800/30 text-amber-300"
+                        : "bg-amber-50 text-amber-700"
                   }`}>
                     {fixture.competition}
                   </div>
                 </td>
-                <td className="py-2 px-4">
+                <td className="py-3 px-4">
                   {fixture.predicted ? (
-                    <div className="flex items-center text-indigo-300">
-                      <CheckCircledIcon className="mr-1 w-3.5 h-3.5" />
-                      <span>Predicted</span>
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg ${
+                      theme === "dark" 
+                        ? "bg-indigo-800/30 text-indigo-300" 
+                        : "bg-indigo-50 text-indigo-700"
+                    }`}>
+                      <CheckCircledIcon className="w-3.5 h-3.5" />
+                      <span className="text-xs font-medium">Predicted</span>
                     </div>
                   ) : (
-                    <div className="flex items-center text-teal-300">
-                      <LightningBoltIcon className="mr-1 w-3.5 h-3.5" />
-                      <span>To Predict</span>
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg ${
+                      theme === "dark" 
+                        ? "bg-teal-800/30 text-teal-300" 
+                        : "bg-teal-50 text-teal-700"
+                    }`}>
+                      <LightningBoltIcon className="w-3.5 h-3.5" />
+                      <span className="text-xs font-medium">To Predict</span>
                     </div>
                   )}
                 </td>
               </tr>
             ))}
-          </tbody>
-        </table>
+          </tbody>        </table>
       </div>
-        {sortedFixtures.length === 0 && (
+      {sortedFixtures.length === 0 && (
         <EmptyFixtureState searchQuery={searchQuery} />
       )}
     </div>

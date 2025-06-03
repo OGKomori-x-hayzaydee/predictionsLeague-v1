@@ -25,6 +25,7 @@ const ContentView = ({
           transition={{ duration: 0.2 }}
         >
           <FixtureCarousel
+            fixtures={fixtures}
             onFixtureSelect={onFixtureSelect}
             activeGameweekChips={activeGameweekChips}
             searchQuery={searchQuery}
@@ -57,8 +58,8 @@ const ContentView = ({
           transition={{ duration: 0.2 }}
         >
           <FixtureStack
+            fixtures={fixtures}
             onFixtureSelect={onFixtureSelect}
-            activeGameweekChips={activeGameweekChips}
             searchQuery={searchQuery}
           />
         </motion.div>
@@ -121,6 +122,7 @@ const ContentView = ({
           transition={{ duration: 0.2 }}
         >
           <FixtureList
+            fixtures={fixtures}
             onFixtureSelect={onFixtureSelect}
             activeGameweekChips={activeGameweekChips}
             searchQuery={searchQuery}

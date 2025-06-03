@@ -1,18 +1,27 @@
 import React, { useContext } from "react";
 import { motion } from "framer-motion";
-import { ThemeContext } from "../context/ThemeContext";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useContext(ThemeContext);
   
+  const springTransition = {
+    type: "spring",
+    stiffness: 700,
+    damping: 30
+  };
+  
   return (
     <motion.button
       onClick={toggleTheme}
-      className={`relative inline-flex items-center justify-center w-10 h-10 rounded-full overflow-hidden ${
-        theme === "dark" ? "bg-primary-700" : "bg-indigo-100"
+      className={`relative inline-flex items-center justify-center w-12 h-12 rounded-full overflow-hidden ${
+        theme === "dark" 
+          ? "bg-primary-700 hover:bg-primary-600" 
+          : "bg-white hover:bg-slate-100 shadow-sm border border-slate-200"
       }`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.92 }}
+      transition={springTransition}
       aria-label="Toggle theme"
     >
       {theme === "dark" ? (
@@ -25,7 +34,7 @@ export default function ThemeToggle() {
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5" 
+            className="h-6 w-6" 
             viewBox="0 0 20 20" 
             fill="currentColor"
           >
@@ -52,8 +61,32 @@ export default function ThemeToggle() {
           >
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
           </svg>
+          <motion.span 
+            className="absolute inset-0 rounded-full"
+            animate={{
+              background: [
+                "radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.1) 0%, rgba(0, 0, 0, 0) 70%)",
+                "radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.15) 0%, rgba(0, 0, 0, 0) 70%)",
+                "radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.1) 0%, rgba(0, 0, 0, 0) 70%)"
+              ]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 3,
+              ease: "easeInOut"
+            }}
+          />
         </motion.div>
       )}
+      <motion.span
+        className={`absolute inset-0 ${theme === "dark" ? "bg-slate-900" : "bg-white"}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: theme === "dark" ? 0 : 0 }}
+        exit={{ opacity: 0 }}
+        style={{
+          zIndex: -1
+        }}
+      />
     </motion.button>
   );
 }

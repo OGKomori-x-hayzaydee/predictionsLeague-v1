@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { format, parseISO } from "date-fns";
 import { ClockIcon, CalendarIcon } from "@radix-ui/react-icons";
 // Import Swiper React components
@@ -9,11 +9,12 @@ import "swiper/css/effect-cards";
 // Import required modules
 import { EffectCards } from "swiper/modules";
 
-// Import club logos
-import { getTeamLogo, fixtures } from "../../data/sampleData";
 import EmptyFixtureState from "./EmptyFixtureState";
+import FixtureCard from "./FixtureCard";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function FixtureStack({
+  fixtures,
   onFixtureSelect,
   searchQuery = "",
   onClearSearch,
@@ -25,6 +26,8 @@ export default function FixtureStack({
   const [swiperInitialized, setSwiperInitialized] = useState(false);
   const [visibleSlideIndex, setVisibleSlideIndex] = useState(0);
 
+  // Get theme context
+  const { theme } = useContext(ThemeContext);
   // Memo-ize expensive operations
   const filteredFixtures = React.useMemo(() => {
     return fixtures.filter((fixture) => {
@@ -34,8 +37,8 @@ export default function FixtureStack({
       return (
         fixture.homeTeam.toLowerCase().includes(query) ||
         fixture.awayTeam.toLowerCase().includes(query) ||
-        fixture.venue.toLowerCase().includes(query) ||
-        fixture.competition.toLowerCase().includes(query)
+        fixture.venue?.toLowerCase().includes(query) ||
+        fixture.competition?.toLowerCase().includes(query)
       );
     });
   }, [fixtures, searchQuery]);
@@ -234,26 +237,20 @@ export default function FixtureStack({
   useEffect(() => {
     overflowCheckedRef.current = {};
   }, [dates]);
-
   return (
-    <div className="relative backdrop-blur-md to-primary-700/40 rounded-lg p-4">
+    <div
+      className={`relative backdrop-blur-md rounded-lg p-4 ${
+        theme === "dark"
+          ? "bg-slate-900/60 border border-slate-700/50"
+          : "bg-white/80 border border-slate-200 shadow-sm"
+      }`}
+    >
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-teal-200 font-outfit font-medium text-xl">
-            Fixture Cards
-          </h3>
-
-          {dates.length > 0 && visibleSlideIndex < dates.length && (
-            <div className="bg-teal-900/30 text-teal-300 text-sm px-3 py-1 rounded-md flex items-center">
-              <CalendarIcon className="mr-1.5 w-4 h-4" />
-              {format(parseISO(dates[visibleSlideIndex]), "EEEE, MMM d")}
-            </div>
-          )}
-        </div>        {dates.length === 0 ? (
+        {dates.length === 0 ? (
           <EmptyFixtureState searchQuery={searchQuery} />
         ) : (
           <div className="relative">
-            {/* Date navigation pills */}
+            {/* Date navigation pills
             <div className="flex justify-center mb-4 space-x-1 overflow-x-auto hide-scrollbar py-2">
               {dates.map((date, index) => (
                 <button
@@ -286,7 +283,7 @@ export default function FixtureStack({
                   )}
                 </button>
               ))}
-            </div>
+            </div> */}
 
             {/* Stack of date cards using Swiper */}
             <div className="fixture-swiper-container">
@@ -315,103 +312,71 @@ export default function FixtureStack({
                 watchOverflow={true}
                 touchStartPreventDefault={false}
               >
+                {" "}
                 {dates.map((date) => (
                   <SwiperSlide key={date} className="fixture-stack-slide">
-                    <div className="backdrop-blur-md bg-slate-900 rounded-lg border border-primary-400/20 p-4 h-full flex flex-col">
+                    <div
+                      className={`backdrop-blur-md rounded-xl border p-4 h-full flex flex-col ${
+                        theme === "dark"
+                          ? "bg-slate-900 border-slate-600/50"
+                          : "bg-white border-slate-300 shadow-sm"
+                      }`}
+                    >
+                      {" "}
                       {/* Date header - now fixed position within the card */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center">
-                          <div className="bg-teal-900/40 text-teal-300 text-sm px-3 py-1 rounded-md flex items-center">
+                          <div
+                            className={`text-sm px-3 py-1 rounded-md flex items-center ${
+                              theme === "dark"
+                                ? "bg-teal-900/40 text-teal-300"
+                                : "bg-teal-100 text-teal-700 border border-teal-200"
+                            }`}
+                          >
                             <CalendarIcon className="mr-1.5 w-4 h-4" />
                             {format(parseISO(date), "EEEE, d")}
                           </div>
                         </div>
                         <div className="flex items-center space-x-1">
                           {fixturesByDate[date]?.length > 0 && (
-                            <div className="text-white/50 text-xs bg-primary-700/40 px-2 py-0.5 rounded-full">
+                            <div
+                              className={`text-xs px-2 py-0.5 rounded-full ${
+                                theme === "dark"
+                                  ? "text-white/50 bg-primary-700/40"
+                                  : "text-slate-600 bg-slate-100"
+                              }`}
+                            >
                               GW {fixturesByDate[date][0].gameweek}
                             </div>
                           )}
                           {fixturesByDate[date]?.length > 2 && (
-                            <div className="text-white/70 text-xs bg-indigo-700/40 px-2 py-0.5 rounded-full">
+                            <div
+                              className={`text-xs px-2 py-0.5 rounded-full ${
+                                theme === "dark"
+                                  ? "text-white/70 bg-indigo-700/40"
+                                  : "text-indigo-700 bg-indigo-100"
+                              }`}
+                            >
                               {fixturesByDate[date].length} fixtures
                             </div>
                           )}
                         </div>
                       </div>
-
                       {/* Fixtures container - now scrollable */}
                       <div
                         className="space-y-3 mt-2 overflow-y-auto flex-grow pr-1 fixtures-container"
                         style={{ maxHeight: "300px" }} // Fixed height for scrolling
                         ref={(ref) => ref && checkOverflow(date, ref)}
                       >
-                        {fixturesByDate[date].map((fixture) => (
-                          <div
+                        {" "}                        {fixturesByDate[date].map((fixture) => (
+                          <FixtureCard
                             key={fixture.id}
-                            onClick={() => handleFixtureClick(fixture)}
-                            className={`bg-primary-700/40 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
-                              selectedFixture &&
-                              selectedFixture.id === fixture.id
-                                ? "ring-2 ring-teal-400 bg-primary-600/50"
-                                : "hover:bg-primary-600/30 hover:border-primary-500/30"
-                            }`}
-                          >
-                            {/* Fixture content  */}
-                            <div className="flex justify-between items-center text-xs text-white/60 mb-2">
-                              <span>{fixture.competition}</span>
-                              <span className="flex items-center">
-                                <ClockIcon className="mr-1 w-3 h-3" />
-                                {format(parseISO(fixture.date), "h:mm a")}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <img
-                                  src={getTeamLogo(fixture.homeTeam)}
-                                  alt={fixture.homeTeam}
-                                  className="w-10 h-10 object-contain"
-                                />
-                                <span className="text-white ml-2 font-outfit">
-                                  {fixture.homeTeam}
-                                </span>
-                              </div>
-                              <span className="text-xs text-white/70 mx-2">
-                                vs
-                              </span>
-                              <div className="flex items-center justify-end">
-                                <span className="text-white mr-2 font-outfit text-right">
-                                  {fixture.awayTeam}
-                                </span>
-                                <img
-                                  src={getTeamLogo(fixture.awayTeam)}
-                                  alt={fixture.awayTeam}
-                                  className="w-10 h-10 object-contain"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="mt-2 flex justify-between items-center">
-                              <div className="text-xs text-white/60">
-                                {fixture.venue}
-                              </div>
-                              <div
-                                className={`text-xs py-1 px-2 rounded ${
-                                  fixture.predicted
-                                    ? "bg-indigo-900/30 text-indigo-300"
-                                    : "bg-teal-900/30 text-teal-300"
-                                }`}
-                              >
-                                {fixture.predicted
-                                  ? "Prediction Made"
-                                  : "Prediction Required"}
-                              </div>
-                            </div>
-                          </div>
+                            fixture={fixture}
+                            selected={selectedFixture && selectedFixture.id === fixture.id}
+                            onClick={handleFixtureClick}
+                          />
                         ))}
                       </div>
-
                       {/* Scroll indicator - shows only when content overflows
                       {cardsWithOverflow[date] && (
                         <div className="text-center mt-3 mb-1 flex items-center justify-center">
@@ -432,9 +397,12 @@ export default function FixtureStack({
                             </svg>
                           </div>
                         </div>
-                      )} */}
-
-                      <div className="text-center mt-2 text-white/50 text-xs">
+                      )} */}{" "}
+                      <div
+                        className={`text-center mt-2 text-xs ${
+                          theme === "dark" ? "text-white/50" : "text-slate-400"
+                        }`}
+                      >
                         Swipe for more dates
                       </div>
                     </div>
@@ -449,10 +417,9 @@ export default function FixtureStack({
       {/* Navigation hint and indicators */}
       {dates.length > 0 && (
         <div className="flex flex-col items-center mt-4">
-          <div className="flex justify-center items-center text-white/50 text-xs mb-3">
+          {/* <div className="flex justify-center items-center text-white/50 text-xs mb-3">
             <span className="ml-1">Swipe to navigate</span>
-          </div>
-
+          </div> */}{" "}
           {/* Page indicators */}
           <div className="flex space-x-1">
             {dates.map((_, index) => (
@@ -460,8 +427,12 @@ export default function FixtureStack({
                 key={index}
                 className={`w-1.5 h-1.5 rounded-full transition-all ${
                   index === visibleSlideIndex
-                    ? "bg-teal-400 scale-125"
-                    : "bg-white/30"
+                    ? theme === "dark"
+                      ? "bg-teal-400 scale-125"
+                      : "bg-teal-500 scale-125"
+                    : theme === "dark"
+                    ? "bg-white/30"
+                    : "bg-slate-300"
                 }`}
               />
             ))}

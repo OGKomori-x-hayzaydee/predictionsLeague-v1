@@ -3,7 +3,7 @@ import chelseaLogo from "../assets/clubs/chelsea.png";
 import liverpoolLogo from "../assets/clubs/liverpool.png";
 import manCityLogo from "../assets/clubs/mancity.png";
 import manUtdLogo from "../assets/clubs/manutd.png";
-import tottenhamLogo from "../assets/clubs/tottenham.png";
+import tottenhamLogo from "../assets/clubs/spurs.png";
 
 // Team logos mapping
 export const teamLogos = {
@@ -12,7 +12,7 @@ export const teamLogos = {
   Liverpool: liverpoolLogo,
   "Man. City": manCityLogo,
   "Man. United": manUtdLogo,
-  Tottenham: tottenhamLogo,
+  Spurs: tottenhamLogo,
   "Manchester City": manCityLogo,
   "Manchester United": manUtdLogo,
 };
@@ -28,88 +28,68 @@ export const teams = [
   "Liverpool", 
   "Manchester City", 
   "Manchester United", 
-  "Tottenham"
+  "Spurs"
 ];
 
-// Sample fixtures data
+// Sample fixtures data - Only future fixtures (after today: May 28, 2025)
 export const fixtures = [
   {
     id: 1,
-    gameweek: 36,
+    gameweek: 38,
     homeTeam: "Arsenal",
-    awayTeam: "Tottenham",
-    date: "2025-05-12T15:00:00",
+    awayTeam: "Man. City",
+    date: "2025-05-30T16:00:00",
     venue: "Emirates Stadium",
     competition: "Premier League",
     predicted: false,
   },
   {
     id: 2,
-    gameweek: 36,
-    homeTeam: "Man. City",
-    awayTeam: "Man. United",
-    date: "2025-05-12T17:30:00",
-    venue: "Etihad Stadium",
+    gameweek: 38,
+    homeTeam: "Spurs",
+    awayTeam: "Chelsea",
+    date: "2025-05-30T16:00:00",
+    venue: "Tottenham Hotspur Stadium",
     competition: "Premier League",
-    predicted: false,
+    predicted: true,
   },
   {
     id: 3,
-    gameweek: 36,
-    homeTeam: "Chelsea",
-    awayTeam: "Liverpool",
-    date: "2025-05-13T20:00:00",
-    venue: "Stamford Bridge",
-    competition: "Premier League",
-    predicted: false,
-  },
-  {
-    id: 4,
-    gameweek: 37,
+    gameweek: 38,
     homeTeam: "Liverpool",
-    awayTeam: "Chelsea",
-    date: "2025-05-19T15:00:00",
+    awayTeam: "Man. United",
+    date: "2025-05-30T16:00:00",
     venue: "Anfield",
     competition: "Premier League",
     predicted: false,
   },
   {
-    id: 5,
-    gameweek: 37,
-    homeTeam: "Man. United",
-    awayTeam: "Tottenham",
-    date: "2025-05-20T20:00:00",
-    venue: "Old Trafford",
+    id: 4,
+    gameweek: 39,
+    homeTeam: "Chelsea",
+    awayTeam: "Arsenal",
+    date: "2025-06-05T20:00:00",
+    venue: "Stamford Bridge",
     competition: "Premier League",
     predicted: false,
+  },
+  {
+    id: 5,
+    gameweek: 39,
+    homeTeam: "Man. United",
+    awayTeam: "Liverpool",
+    date: "2025-06-07T15:00:00",
+    venue: "Old Trafford",
+    competition: "Premier League",
+    predicted: true,
   },
   {
     id: 6,
-    gameweek: 38,
-    homeTeam: "Arsenal",
-    awayTeam: "Man. City",
-    date: "2025-05-26T16:00:00",
-    venue: "Emirates Stadium",
-    competition: "Premier League",
-    predicted: false,
-  },
-  {
-    id: 7,
-    gameweek: 38,
-    homeTeam: "Tottenham",
-    awayTeam: "Chelsea",
-    date: "2025-05-26T16:00:00",
-    venue: "Tottenham Hotspur Stadium",
-    competition: "Premier League",
-    predicted: false,
-  },
-  {
-    id: 8,
-    gameweek: 38,
-    homeTeam: "Arsenal",
-    awayTeam: "Chelsea",
-    date: "2025-05-26T16:00:00",
-    venue: "Emirates Stadium",
+    gameweek: 39,
+    homeTeam: "Man. City",
+    awayTeam: "Spurs",
+    date: "2025-06-08T17:30:00",
+    venue: "Etihad Stadium",
     competition: "Premier League",
     predicted: false,
   }
@@ -121,7 +101,7 @@ export const matches = [
     id: 1,
     gameweek: 36,
     homeTeam: "Arsenal",
-    awayTeam: "Tottenham",
+    awayTeam: "Spurs",
     date: "2025-05-12T15:00:00",
     venue: "Emirates Stadium",
     predicted: true,
@@ -143,7 +123,7 @@ export const matches = [
     id: 3,
     gameweek: 35,
     homeTeam: "Liverpool",
-    awayTeam: "Tottenham",
+    awayTeam: "Spurs",
     date: "2025-05-04T16:30:00",
     venue: "Anfield",
     predicted: true,
@@ -194,7 +174,7 @@ export const predictions = [
     id: 1,
     matchId: 101,
     homeTeam: "Arsenal",
-    awayTeam: "Tottenham",
+    awayTeam: "Spurs",
     homeScore: 2,
     awayScore: 1,
     actualHomeScore: 2,
@@ -249,25 +229,24 @@ export const predictions = [
     actualAwayScorers: ["Haaland", "Foden"],
     status: "completed",
     chips: ["doublePoints"]
-  },
-  {
+  },  {
     id: 4,
     matchId: 104,
     homeTeam: "Man. City",
-    awayTeam: "Tottenham",
+    awayTeam: "Spurs",
     homeScore: 3,
     awayScore: 1,
-    actualHomeScore: null,
-    actualAwayScore: null,
-    correct: null,
-    points: null,
+    actualHomeScore: 3,
+    actualAwayScore: 1,
+    correct: true,
+    points: 12,
     date: "2025-05-12T20:00:00",
     gameweek: 37,
     homeScorers: ["Haaland", "Haaland", "Foden"],
     awayScorers: ["Son"],
-    actualHomeScorers: null,
-    actualAwayScorers: null,
-    status: "pending",
+    actualHomeScorers: ["Haaland", "Haaland", "Foden"],
+    actualAwayScorers: ["Son"],
+    status: "completed",
     chips: []
   },
   {
@@ -285,10 +264,49 @@ export const predictions = [
     gameweek: 38,
     homeScorers: ["Saka", "Havertz", "Martinelli", "Ødegaard"],
     awayScorers: ["Palmer", "Jackson"],
+    actualHomeScorers: null,    actualAwayScorers: null,
+    status: "pending",
+    chips: ["scorerFocus", "wildcard"]
+  },
+  {
+    id: 6,
+    matchId: 106,
+    homeTeam: "Chelsea",
+    awayTeam: "Liverpool",
+    homeScore: 1,
+    awayScore: 3,
+    actualHomeScore: null,
+    actualAwayScore: null,
+    correct: null,
+    points: null,
+    date: "2025-06-05T20:00:00",
+    gameweek: 38,
+    homeScorers: ["Palmer"],
+    awayScorers: ["Salah", "Díaz", "Núñez"],
     actualHomeScorers: null,
     actualAwayScorers: null,
     status: "pending",
-    chips: ["scorerFocus", "wildcard"]
+    chips: ["doubleDown"]
+  },
+  {
+    id: 7,
+    matchId: 107,
+    homeTeam: "Spurs",
+    awayTeam: "Man. United",
+    homeScore: 2,
+    awayScore: 1,
+    actualHomeScore: null,
+    actualAwayScore: null,
+    correct: null,
+    points: null,
+    date: "2025-06-08T15:00:00",
+    gameweek: 38,
+    homeScorers: ["Son", "Kane"],
+    awayScorers: ["Rashford"],
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    status: "pending",
+    chips: ["defensePlusPlus"]
   }
 ];
 
@@ -297,22 +315,22 @@ export const upcomingMatches = [
   {
     id: 1,
     home: "Arsenal",
-    away: "Tottenham",
-    date: "2025-05-23T15:00:00",
+    away: "Man. City",
+    date: "2025-05-30T16:00:00",
     predicted: false,
   },
   {
     id: 2,
-    home: "Man. City",
-    away: "Liverpool",
-    date: "2025-05-24T17:30:00",
+    home: "Spurs",
+    away: "Chelsea", 
+    date: "2025-05-30T16:00:00",
     predicted: true,
   },
   {
     id: 3,
-    home: "Chelsea",
-    away: "Man United",
-    date: "2025-05-12T20:00:00",
+    home: "Liverpool",
+    away: "Man. United",
+    date: "2025-05-30T16:00:00",
     predicted: false,
   }
 ];
@@ -321,7 +339,7 @@ export const upcomingMatches = [
 export const recentPredictions = [
   { id: 1, match: "Man United 3-1 Liverpool", points: 12, correct: true },
   { id: 2, match: "Arsenal 2-1 Chelsea", points: 8, correct: true },
-  { id: 3, match: "Man City 1-1 Tottenham", points: 0, correct: false },
+  { id: 3, match: "Man City 1-1 Spurs", points: 0, correct: false },
 ];
 
 // Sample leagues
@@ -376,7 +394,7 @@ export const features = [
   {
     title: "'Big Six' focus",
     description:
-      "concentrate on the most exciting matches featuring Manchester United, Manchester City, Liverpool, Chelsea, Arsenal, and Tottenham.",
+      "concentrate on the most exciting matches featuring Manchester United, Manchester City, Liverpool, Chelsea, Arsenal, and Spurs.",
   },
   {
     title: "multi-dimensional scoring",
@@ -436,10 +454,10 @@ export const footerSections = [
 ];
 
 export const upcomingFixtures = [
-  { id: 1, home: "Man United", away: "Newcastle", date: "2025-05-15T15:00:00", predicted: false, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-05-15T13:00:00" },
-  { id: 2, home: "Arsenal", away: "Everton", date: "2025-05-15T17:30:00", predicted: true, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-05-15T15:30:00" },
-  { id: 3, home: "Liverpool", away: "West Ham", date: "2025-05-16T20:00:00", predicted: false, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-05-16T18:00:00" },
-  { id: 4, home: "Brighton", away: "Fulham", date: "2025-05-17T15:00:00", predicted: false, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-05-17T13:00:00" }
+  { id: 1, home: "Man United", away: "Newcastle", date: "2025-05-30T15:00:00", predicted: false, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-05-30T13:00:00" },
+  { id: 2, home: "Arsenal", away: "Everton", date: "2025-05-30T17:30:00", predicted: true, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-05-30T15:30:00" },
+  { id: 3, home: "Liverpool", away: "West Ham", date: "2025-06-01T20:00:00", predicted: false, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-06-01T18:00:00" },
+  { id: 4, home: "Brighton", away: "Fulham", date: "2025-06-03T15:00:00", predicted: false, competition: "Premier League", homeImg: "", awayImg: "", deadline: "2025-06-03T13:00:00" }
 ];
 
 // Sample league data for development purposes
@@ -456,14 +474,14 @@ export const getSampleLeague = (leagueId) => {
     lastUpdate: "2025-05-15T14:30:00",
     isAdmin: parseInt(leagueId) % 2 === 0, // Just for testing - every even ID is admin
     leaderboard: [
-      { id: 1, name: "Jane Smith", points: 478, position: 1, trend: "up", avatar: null },
-      { id: 2, name: "John Doe", points: 467, position: 2, trend: "same", avatar: null },
-      { id: 3, name: "Current User", points: 453, position: 3, trend: "down", avatar: null, isCurrentUser: true },
-      { id: 4, name: "Mike Jones", points: 432, position: 4, trend: "up", avatar: null },
-      { id: 5, name: "Sarah Williams", points: 418, position: 5, trend: "down", avatar: null },
-      { id: 6, name: "Robert Chen", points: 405, position: 6, trend: "up", avatar: null },
-      { id: 7, name: "Emma Wilson", points: 398, position: 7, trend: "down", avatar: null },
-      { id: 8, name: "David Clark", points: 382, position: 8, trend: "same", avatar: null },
+      { id: 1, name: "Jane Smith", points: 478, position: 1, trend: "up", avatar: null, predictions: 18, joinedDate: "2024-08-15T10:30:00" },
+      { id: 2, name: "John Doe", points: 467, position: 2, trend: "same", avatar: null, predictions: 17, joinedDate: "2024-08-20T14:15:00" },
+      { id: 3, name: "Current User", points: 453, position: 3, trend: "down", avatar: null, isCurrentUser: true, predictions: 16, joinedDate: "2024-09-01T09:45:00" },
+      { id: 4, name: "Mike Jones", points: 432, position: 4, trend: "up", avatar: null, predictions: 15, joinedDate: "2024-09-05T16:20:00" },
+      { id: 5, name: "Sarah Williams", points: 418, position: 5, trend: "down", avatar: null, predictions: 14, joinedDate: "2024-09-10T11:10:00" },
+      { id: 6, name: "Robert Chen", points: 405, position: 6, trend: "up", avatar: null, predictions: 13, joinedDate: "2024-09-15T13:30:00" },
+      { id: 7, name: "Emma Wilson", points: 398, position: 7, trend: "down", avatar: null, predictions: 12, joinedDate: "2024-09-20T08:45:00" },
+      { id: 8, name: "David Clark", points: 382, position: 8, trend: "same", avatar: null, predictions: 11, joinedDate: "2024-09-25T15:00:00" },
     ]
   };
 };
@@ -476,7 +494,7 @@ export const europeanFixtures = [
     gameweek: null, // European competitions don't use gameweeks
     homeTeam: "Arsenal",
     awayTeam: "Bayern Munich",
-    date: "2025-05-28T20:00:00",
+    date: "2025-05-29T20:00:00",
     venue: "Emirates Stadium",
     competition: "Champions League",
     competitionCode: "CL",
@@ -488,7 +506,7 @@ export const europeanFixtures = [
     gameweek: null,
     homeTeam: "Real Madrid",
     awayTeam: "Man. City",
-    date: "2025-05-29T20:00:00",
+    date: "2025-05-30T20:00:00",
     venue: "Santiago Bernabéu",
     competition: "Champions League",
     competitionCode: "CL",
@@ -536,10 +554,10 @@ export const europeanFixtures = [
   {
     id: 206,
     gameweek: null,
-    homeTeam: "Tottenham",
+    homeTeam: "Spurs",
     awayTeam: "Fiorentina",
     date: "2025-06-03T19:00:00",
-    venue: "Tottenham Hotspur Stadium",
+    venue: "Spurs Hotspur Stadium",
     competition: "Europa Conference League",
     competitionCode: "EC",
     stage: "FINAL",
