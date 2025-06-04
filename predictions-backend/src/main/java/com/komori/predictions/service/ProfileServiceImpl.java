@@ -5,7 +5,9 @@ import com.komori.predictions.io.ProfileRequest;
 import com.komori.predictions.io.ProfileResponse;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -13,9 +15,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
+
     @Override
     public ProfileResponse createProfile(ProfileRequest profileRequest) {
-        UserEntity newProfile = profileRequestToUserEntity(profileRequest); //Convert request to user entity
+        if (userRepository.existsByEmail(profileRequest.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        }
+        UserEntity newProfile = profileRequestToUserEntity(profileRequest); // Convert request to user entity
         newProfile = userRepository.save(newProfile);
         return userEntityToProfileResponse(newProfile);
     }
