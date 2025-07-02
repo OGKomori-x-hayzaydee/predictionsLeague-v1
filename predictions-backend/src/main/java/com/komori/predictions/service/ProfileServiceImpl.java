@@ -6,6 +6,7 @@ import com.komori.predictions.io.ProfileResponse;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public ProfileResponse createProfile(ProfileRequest profileRequest) {
@@ -31,7 +33,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .email(profileRequest.getEmail())
                 .userID(UUID.randomUUID().toString())
                 .name(profileRequest.getName())
-                .password(profileRequest.getPassword())
+                .password(passwordEncoder.encode(profileRequest.getPassword()))
                 .accountVerified(false)
                 .resetOTPExpireAt(0L)
                 .verifyOTP(null)
