@@ -28,6 +28,7 @@ import java.util.List;
 public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtRequestFilter requestFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -38,7 +39,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/logout", "/reset-password").permitAll() // Public endpoints, don't require auth
                         .anyRequest().authenticated())
-                .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
 
         return httpSecurity.build();
     }

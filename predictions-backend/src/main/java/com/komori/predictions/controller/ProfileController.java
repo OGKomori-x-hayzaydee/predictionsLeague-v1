@@ -22,7 +22,9 @@ public class ProfileController {
     }
 
     @GetMapping("/profile")
-    // Annotation checks that user is still logged in before viewing profile
+    // This annotation injects the currently authenticated user's name into the email parameter
+    // The question mark after authentication makes it null-safe
+    // If name parameter is null then user is (ideally) prompted to log in
     public ProfileResponse getProfile(@CurrentSecurityContext(expression = "authentication?.name") String email) {
         return profileService.getProfile(email);
     }
