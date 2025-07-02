@@ -5,4 +5,6 @@ import com.komori.predictions.io.ProfileResponse;
 
 public interface ProfileService {
     ProfileResponse createProfile(ProfileRequest profileRequest);
+
+    ProfileResponse getProfile(String email);
 }

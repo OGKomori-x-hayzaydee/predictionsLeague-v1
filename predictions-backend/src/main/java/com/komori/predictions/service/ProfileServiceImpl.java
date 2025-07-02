@@ -6,6 +6,7 @@ import com.komori.predictions.io.ProfileResponse;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,6 +27,13 @@ public class ProfileServiceImpl implements ProfileService {
         UserEntity newProfile = profileRequestToUserEntity(profileRequest); // Convert request to user entity
         newProfile = userRepository.save(newProfile);
         return userEntityToProfileResponse(newProfile);
+    }
+
+    @Override
+    public ProfileResponse getProfile(String email) {
+        UserEntity existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        return userEntityToProfileResponse(existingUser);
     }
 
     private UserEntity profileRequestToUserEntity(ProfileRequest profileRequest) {
