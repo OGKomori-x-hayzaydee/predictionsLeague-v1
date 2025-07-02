@@ -1,7 +1,7 @@
 package com.komori.predictions.config;
 
 import com.komori.predictions.filter.JwtRequestFilter;
-import com.komori.predictions.service.AppUserDetailsService;
+import com.komori.predictions.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final AppUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     private final JwtRequestFilter requestFilter;
 
     @Bean

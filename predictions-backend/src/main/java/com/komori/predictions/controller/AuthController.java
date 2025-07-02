@@ -2,7 +2,7 @@ package com.komori.predictions.controller;
 
 import com.komori.predictions.io.AuthRequest;
 import com.komori.predictions.io.AuthResponse;
-import com.komori.predictions.service.AppUserDetailsService;
+import com.komori.predictions.service.CustomUserDetailsService;
 import com.komori.predictions.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +27,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthenticationManager authenticationManager;
-    private final AppUserDetailsService appUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest authRequest) {
         try {
             authenticate(authRequest.getEmail(), authRequest.getPassword());
-            final UserDetails userDetails = appUserDetailsService.loadUserByUsername(authRequest.getEmail());
+            final UserDetails userDetails = customUserDetailsService.loadUserByUsername(authRequest.getEmail());
             final String jwtToken = jwtUtil.generateToken(userDetails);
             ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken)
                     .httpOnly(true)
