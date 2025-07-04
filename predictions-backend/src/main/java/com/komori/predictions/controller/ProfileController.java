@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,9 +23,16 @@ public class ProfileController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody ProfileRequest profileRequest) {
-        ProfileResponse response = profileService.createProfile(profileRequest);
-        emailService.sendWelcomeEmail(response.getEmail(), response.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        try {
+            ProfileResponse response = profileService.createProfile(profileRequest);
+            emailService.sendWelcomeEmail(response.getEmail(), response.getName());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (ResponseStatusException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", e.getReason());
+            return ResponseEntity.status(e.getStatusCode()).body(error);
+        }
     }
 
     @GetMapping("/profile")
