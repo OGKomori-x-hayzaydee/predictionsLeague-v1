@@ -23,4 +23,28 @@ public class EmailService {
                 "Regards,\nTega from the Predictions Team");
         mailSender.send(mailMessage);
     }
+
+    public void sendVerifyOtpEmail(String toEmail, String name, String otp) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom(fromEmail);
+        mailMessage.setTo(toEmail);
+        mailMessage.setSubject("Verify your Account");
+        mailMessage.setText("Hello " + name + ",\n\n" +
+                "Welcome again! Verify your account with the following 6-digit code:\n\n" +
+                "Code: " + otp + "\n\n" +
+                "Regards,\nTega from the Predictions Team");
+        mailSender.send(mailMessage);
+    }
+
+    public void sendAccountVerifiedEmail(String toEmail, String name) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom(fromEmail);
+        mailMessage.setTo(toEmail);
+        mailMessage.setSubject("Account Verified Successfully!");
+        mailMessage.setText("Hello " + name + ",\n\n" +
+                "Your account has been verified successfully.\n\n" +
+                "Regards,\nTega from the Predictions Team");
+        mailSender.send(mailMessage);
+    }
+
 }

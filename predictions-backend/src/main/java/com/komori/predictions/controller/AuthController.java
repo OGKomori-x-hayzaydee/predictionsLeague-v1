@@ -1,11 +1,7 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.io.LoginRequest;
-import com.komori.predictions.io.LoginResponse;
-import com.komori.predictions.io.RegistrationRequest;
-import com.komori.predictions.io.RegistrationResponse;
+import com.komori.predictions.io.*;
 import com.komori.predictions.service.CustomUserDetailsService;
-import com.komori.predictions.service.EmailService;
 import com.komori.predictions.service.RegistrationService;
 import com.komori.predictions.util.JwtUtil;
 import jakarta.validation.Valid;
@@ -20,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +30,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
     private final RegistrationService registrationService;
-    private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
@@ -75,7 +71,6 @@ public class AuthController {
     public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequest request) {
         try {
             RegistrationResponse response = registrationService.registerNewUser(request);
-            emailService.sendWelcomeEmail(response.getEmail(), response.getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (ResponseStatusException e) {
             Map<String, Object> error = new HashMap<>();
@@ -86,7 +81,47 @@ public class AuthController {
             Map<String, Object> error = new HashMap<>();
             error.put("error", true);
             error.put("message", "Error sending welcome mail");
-            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PostMapping("/send-verify-otp")
+    public ResponseEntity<?> sendVerifyOtp(@RequestBody RegistrationResponse response) {
+        try {
+            registrationService.sendVerifyOtp(response.getEmail());
+            return ResponseEntity.ok("VerifyOTP sent successfully");
+        } catch (UsernameNotFoundException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (MailException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", "Error sending verifyOTP");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PostMapping("verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody OtpResponse response) {
+        try {
+            registrationService.verifyOTP(response.getEmail(), response.getOtpFromUser());
+            return ResponseEntity.ok("Account verified successfully");
+        } catch (UsernameNotFoundException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (ResponseStatusException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", e.getReason());
+            return ResponseEntity.status(e.getStatusCode()).body(error);
+        } catch (MailException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", "Error sending accountVerifiedEmail");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
