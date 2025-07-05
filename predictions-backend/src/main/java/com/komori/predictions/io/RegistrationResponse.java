@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 // Represents data being sent from the API
-public class ProfileResponse {
+public class RegistrationResponse {
     private String userID;
     private String name;
     private String email;

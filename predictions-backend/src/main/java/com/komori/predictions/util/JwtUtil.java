@@ -19,13 +19,9 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
-    }
-
-    private String createToken(Map<String, Object> claims, String username) {
         return Jwts.builder()
                 .claims(claims)
-                .subject(username)
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hour expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
@@ -45,13 +41,10 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    public Date extractExpirationFromToken(String token) {
-        Claims claims = extractAllClaims(token);
-        return claims.getExpiration();
-    }
-
     private Boolean isTokenExpired(String token) {
-        return extractExpirationFromToken(token).before(new Date());
+        Claims claims = extractAllClaims(token);
+        Date expiration = claims.getExpiration();
+        return expiration.before(new Date());
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {

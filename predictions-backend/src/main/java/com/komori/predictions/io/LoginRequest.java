@@ -1,18 +1,17 @@
 package com.komori.predictions.io;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-// Represents data coming into the API
-public class ProfileRequest {
-    @NotBlank(message = "Name cannot be empty")
-    private String name;
+public class LoginRequest {
     @Email(message = "Enter valid email address")
-    @NotBlank(message = "Enter an email address")
     private String email;
     private String password;
 }
