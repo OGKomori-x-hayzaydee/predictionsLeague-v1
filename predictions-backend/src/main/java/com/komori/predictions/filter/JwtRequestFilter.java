@@ -45,7 +45,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         // If not found in header, check cookies
-        // (Likely to be deleted as this isn't a recommended method)
         if (jwt == null) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
