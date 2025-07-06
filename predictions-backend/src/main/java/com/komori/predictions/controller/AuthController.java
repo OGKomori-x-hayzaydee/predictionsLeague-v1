@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,21 +45,21 @@ public class AuthController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
                     .body(new LoginResponse(loginRequest.getEmail(), jwtToken));
-        } catch (BadCredentialsException e) {
+        } catch (BadCredentialsException | UsernameNotFoundException e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", true);
             error.put("message", "Email or password is incorrect");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-        } catch (DisabledException e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", true);
-            error.put("message", "Account disabled");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         } catch (ResponseStatusException e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", true);
             error.put("message", e.getReason());
             return ResponseEntity.status(e.getStatusCode()).body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", true);
+            error.put("message", "Login failed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 
