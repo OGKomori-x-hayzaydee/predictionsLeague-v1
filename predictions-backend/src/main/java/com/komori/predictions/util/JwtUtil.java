@@ -17,11 +17,11 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String STORED_SECRET_KEY;
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims(claims)
-                .subject(userDetails.getUsername())
+                .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hour expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))

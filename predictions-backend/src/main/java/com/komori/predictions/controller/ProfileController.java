@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class ProfileController {
-    @GetMapping("/home")
+    @GetMapping("/profile")
     public ResponseEntity<?> viewHomepage(@CurrentSecurityContext(expression = "authentication?.name") String email) {
         return ResponseEntity.ok("Viewing the HomePage of " + email);
     }

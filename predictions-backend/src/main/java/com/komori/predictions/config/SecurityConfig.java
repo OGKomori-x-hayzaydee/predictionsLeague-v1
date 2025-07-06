@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/send-verify-otp", "verify-otp").permitAll() // Public endpoints, don't require auth
+                        .requestMatchers("/register", "/login", "/send-verify-otp", "/verify-otp").permitAll() // Public endpoints, don't require auth
                         .anyRequest().authenticated())
                 .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));

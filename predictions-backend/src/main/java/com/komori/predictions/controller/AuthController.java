@@ -1,8 +1,7 @@
 package com.komori.predictions.controller;
 
 import com.komori.predictions.io.*;
-import com.komori.predictions.service.CustomUserDetailsService;
-import com.komori.predictions.service.RegistrationService;
+import com.komori.predictions.service.AuthService;
 import com.komori.predictions.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,17 +27,16 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-    private final RegistrationService registrationService;
+    private final AuthService authService;
     private final AuthenticationManager authenticationManager;
-    private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-            final UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginRequest.getEmail());
-            final String jwtToken = jwtUtil.generateToken(userDetails);
+            authService.checkVerifiedStatus(loginRequest.getEmail());
+            final String jwtToken = jwtUtil.generateToken(loginRequest.getEmail());
             ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken)
                     .httpOnly(true)
                     .path("/") // Cookie is sent on all requests to the domain
@@ -59,18 +56,18 @@ public class AuthController {
             error.put("error", true);
             error.put("message", "Account disabled");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-        } catch (Exception e) {
+        } catch (ResponseStatusException e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", true);
-            error.put("message", "Login failed");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            error.put("message", e.getReason());
+            return ResponseEntity.status(e.getStatusCode()).body(error);
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequest request) {
         try {
-            RegistrationResponse response = registrationService.registerNewUser(request);
+            RegistrationResponse response = authService.registerNewUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (ResponseStatusException e) {
             Map<String, Object> error = new HashMap<>();
@@ -88,7 +85,7 @@ public class AuthController {
     @PostMapping("/send-verify-otp")
     public ResponseEntity<?> sendVerifyOtp(@RequestBody RegistrationResponse response) {
         try {
-            registrationService.sendVerifyOtp(response.getEmail());
+            authService.sendVerifyOtp(response.getEmail());
             return ResponseEntity.ok("VerifyOTP sent successfully");
         } catch (UsernameNotFoundException e) {
             Map<String, Object> error = new HashMap<>();
@@ -103,10 +100,10 @@ public class AuthController {
         }
     }
 
-    @PostMapping("verify-otp")
+    @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody OtpResponse response) {
         try {
-            registrationService.verifyOTP(response.getEmail(), response.getOtpFromUser());
+            authService.verifyOTP(response.getEmail(), response.getOtpFromUser());
             return ResponseEntity.ok("Account verified successfully");
         } catch (UsernameNotFoundException e) {
             Map<String, Object> error = new HashMap<>();

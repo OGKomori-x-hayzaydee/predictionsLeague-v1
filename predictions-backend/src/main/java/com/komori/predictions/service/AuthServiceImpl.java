@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-public class RegistrationServiceImpl implements RegistrationService {
+public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -62,6 +62,16 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         else {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "OTP is incorrect");
+        }
+    }
+
+    @Override
+    public void checkVerifiedStatus(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+
+        if (!user.getAccountVerified()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account not verified");
         }
     }
 

@@ -24,9 +24,9 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-    private final List<String> PUBLIC_URLS = List.of("/register", "/login", "/logout", "/reset-password");
+    private final List<String> PUBLIC_URLS = List.of("/register", "/login", "/send-verify-otp", "/verify-otp");
 
-    // Checks for a JWT token and sets Authentication Context if valid
+    // Checks for a JWT token and sets CurrentSecurityContext if valid
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
