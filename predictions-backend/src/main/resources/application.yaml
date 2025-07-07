@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          from: ${MAIL_FROM}
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+server:
+  servlet:
+    context-path: /api/v1.0 # all routes in this app will be prefixed with this
