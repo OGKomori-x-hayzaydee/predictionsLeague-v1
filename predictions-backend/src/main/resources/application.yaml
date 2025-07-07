@@ -7,9 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: true
   mail:
     host: smtp-relay.brevo.com
     port: 587

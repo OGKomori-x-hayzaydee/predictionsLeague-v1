@@ -1,6 +1,10 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.entity.UserEntity;
+import com.komori.predictions.exception.AccountNotVerifiedException;
+import com.komori.predictions.exception.EmailAlreadyExistsException;
+import com.komori.predictions.exception.OtpExpiredException;
+import com.komori.predictions.exception.OtpIncorrectException;
 import com.komori.predictions.io.RegistrationRequest;
 import com.komori.predictions.io.RegistrationResponse;
 import com.komori.predictions.repository.UserRepository;
@@ -11,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -54,7 +57,7 @@ public class AuthServiceTests {
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(true); // Assume that the email is NOT available
 
-        assertThrows(ResponseStatusException.class, () -> authService.registerNewUser(request));
+        assertThrows(EmailAlreadyExistsException.class, () -> authService.registerNewUser(request));
     }
 
     @Test
@@ -104,7 +107,7 @@ public class AuthServiceTests {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
 
-        authService.verifyOTP(email, otp);
+        assertDoesNotThrow(() -> authService.verifyOTP(email, otp));
 
         assertNull(currentUser.getVerifyOTP());
         assertNull(currentUser.getVerifyOTPExpireAt());
@@ -129,7 +132,7 @@ public class AuthServiceTests {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
 
-        assertThrows(ResponseStatusException.class, () -> authService.verifyOTP(email, otp));
+        assertThrows(OtpExpiredException.class, () -> authService.verifyOTP(email, otp));
     }
 
     @Test
@@ -147,7 +150,7 @@ public class AuthServiceTests {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
 
-        assertThrows(ResponseStatusException.class, () -> authService.verifyOTP(email, otp));
+        assertThrows(OtpIncorrectException.class, () -> authService.verifyOTP(email, otp));
     }
 
     @Test
@@ -177,7 +180,7 @@ public class AuthServiceTests {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
 
-        assertThrows(ResponseStatusException.class, () -> authService.checkVerifiedStatus(email));
+        assertThrows(AccountNotVerifiedException.class, () -> authService.checkVerifiedStatus(email));
     }
 
 }

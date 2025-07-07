@@ -1,15 +1,17 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.entity.UserEntity;
+import com.komori.predictions.exception.AccountNotVerifiedException;
+import com.komori.predictions.exception.EmailAlreadyExistsException;
+import com.komori.predictions.exception.OtpExpiredException;
+import com.komori.predictions.exception.OtpIncorrectException;
 import com.komori.predictions.io.RegistrationRequest;
 import com.komori.predictions.io.RegistrationResponse;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -24,7 +26,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegistrationResponse registerNewUser(RegistrationRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+            throw new EmailAlreadyExistsException();
         }
         UserEntity newUser = convertToUserEntity(request);
         userRepository.save(newUser);
@@ -51,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
         if (System.currentTimeMillis() > currentUser.getVerifyOTPExpireAt()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP expired");
+            throw new OtpExpiredException();
         }
         if (otp.equalsIgnoreCase(currentUser.getVerifyOTP())) {
             currentUser.setAccountVerified(true);
@@ -61,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
             emailService.sendAccountVerifiedEmail(email, currentUser.getName());
         }
         else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "OTP is incorrect");
+            throw new OtpIncorrectException();
         }
     }
 
@@ -71,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
         if (!user.getAccountVerified()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account not verified");
+            throw new AccountNotVerifiedException();
         }
     }
 
