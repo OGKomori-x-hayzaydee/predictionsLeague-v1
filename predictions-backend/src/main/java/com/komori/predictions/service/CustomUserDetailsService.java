@@ -14,6 +14,7 @@ import java.util.ArrayList;
 @Service
 @RequiredArgsConstructor
 // To load user-specific data from database
+// Used by authenticationManager
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
