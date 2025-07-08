@@ -51,6 +51,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<?> handlePasswordMismatch() {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Password is incorrect");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         log.error("Unhandled exception occurred", e);
