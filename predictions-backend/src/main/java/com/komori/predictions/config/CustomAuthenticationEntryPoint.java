@@ -1,6 +1,5 @@
 package com.komori.predictions.config;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -14,7 +13,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     // Operates when a user tries to access a protected resource without proper authentication
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.getWriter().write("{\"authenticated\": false, \"message\": \"User is not authenticated\"}");

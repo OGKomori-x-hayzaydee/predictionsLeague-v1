@@ -9,13 +9,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @Table(name = "user_entity")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,8 +26,13 @@ public class UserEntity {
     private String email;
     private String password;
     private Boolean accountVerified;
-    @CreationTimestamp
-    @Column(updatable = false)
+    @ManyToMany @JoinTable(
+            name = "user_league_table",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "league_id")
+    )
+    private Set<LeagueEntity> leagues;
+    @CreationTimestamp @Column(updatable = false)
     private Timestamp createdAt;
     @UpdateTimestamp
     private Timestamp updatedAt;

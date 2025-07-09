@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "otp_entity")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class OtpEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
