@@ -24,12 +24,7 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
     private String password;
-    private String verifyOTP;
     private Boolean accountVerified;
-    private Long verifyOTPExpireAt;
-    private String resetOTP;
-    private Long resetOTPExpireAt;
-
     @CreationTimestamp
     @Column(updatable = false)
     private Timestamp createdAt;

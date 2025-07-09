@@ -29,4 +29,4 @@ jwt:
 
 server:
   servlet:
-    context-path: /api/v1.0 # all routes in this app will be prefixed with this
+    context-path: /api # all routes in this app will be prefixed with this

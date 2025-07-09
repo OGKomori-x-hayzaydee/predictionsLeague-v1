@@ -1,18 +1,19 @@
 package com.komori.predictions.service;
 
+import com.komori.predictions.entity.OtpEntity;
 import com.komori.predictions.entity.UserEntity;
-import com.komori.predictions.exception.AccountNotVerifiedException;
-import com.komori.predictions.exception.EmailAlreadyExistsException;
-import com.komori.predictions.exception.OtpExpiredException;
-import com.komori.predictions.exception.OtpIncorrectException;
+import com.komori.predictions.exception.*;
 import com.komori.predictions.io.RegistrationRequest;
 import com.komori.predictions.io.RegistrationResponse;
+import com.komori.predictions.repository.OtpRepository;
 import com.komori.predictions.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,6 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
+    private final OtpRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -42,23 +44,37 @@ public class AuthServiceImpl implements AuthService {
         String otp = String.valueOf(ThreadLocalRandom.current().nextInt(100000,1000000));
         long otpExpiry = System.currentTimeMillis() + (15 * 60 * 1000); // 15 minute expiry
 
-        currentUser.setVerifyOTP(otp);
-        currentUser.setVerifyOTPExpireAt(otpExpiry);
-        userRepository.save(currentUser);
+        Optional<OtpEntity> otpEntityOptional = otpRepository.findByUserId(currentUser.getId());
+        OtpEntity otpEntity;
+        if (otpEntityOptional.isEmpty()) {
+            otpEntity = OtpEntity.builder().userId(currentUser.getId()).value(otp).expiration(otpExpiry).build();
+        }
+        else {
+            otpEntity = otpEntityOptional.get();
+            // Check how recently OTP was generated
+            otpEntity.setValue(otp);
+            otpEntity.setExpiration(otpExpiry);
+        }
+
+        otpRepository.save(otpEntity);
         emailService.sendVerifyOtpEmail(email, currentUser.getName(), otp);
     }
 
     @Override
+    @Transactional
     public void verifyOTP(String email, String otp) {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
-        if (System.currentTimeMillis() > currentUser.getVerifyOTPExpireAt()) {
+
+        OtpEntity otpEntity = otpRepository.findByUserId(currentUser.getId())
+                .orElseThrow(OtpNotFoundException::new);
+
+        if (System.currentTimeMillis() > otpEntity.getExpiration()) {
             throw new OtpExpiredException();
         }
-        if (otp.equalsIgnoreCase(currentUser.getVerifyOTP())) {
+        if (otp.equals(otpEntity.getValue())) {
             currentUser.setAccountVerified(true);
-            currentUser.setVerifyOTP(null);
-            currentUser.setVerifyOTPExpireAt(null);
+            otpRepository.deleteByUserId(currentUser.getId());
             userRepository.save(currentUser);
             emailService.sendAccountVerifiedEmail(email, currentUser.getName());
         }

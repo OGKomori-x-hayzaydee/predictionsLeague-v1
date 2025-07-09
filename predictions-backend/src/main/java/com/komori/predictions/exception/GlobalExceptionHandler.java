@@ -36,6 +36,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "OTP incorrect");
     }
 
+    @ExceptionHandler(OtpNotFoundException.class)
+    public ResponseEntity<?> handleOtpNotFound() {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "OTP not found for user");
+    }
+
     @ExceptionHandler(MailException.class)
     public ResponseEntity<?> handleMailException(MailException e) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());

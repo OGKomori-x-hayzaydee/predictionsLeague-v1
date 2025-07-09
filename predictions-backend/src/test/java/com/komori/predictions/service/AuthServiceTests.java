@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.komori.predictions.entity.OtpEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.AccountNotVerifiedException;
 import com.komori.predictions.exception.EmailAlreadyExistsException;
@@ -7,9 +8,11 @@ import com.komori.predictions.exception.OtpExpiredException;
 import com.komori.predictions.exception.OtpIncorrectException;
 import com.komori.predictions.io.RegistrationRequest;
 import com.komori.predictions.io.RegistrationResponse;
+import com.komori.predictions.repository.OtpRepository;
 import com.komori.predictions.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +29,8 @@ import static org.mockito.Mockito.*;
 public class AuthServiceTests {
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private OtpRepository otpRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
@@ -66,20 +71,29 @@ public class AuthServiceTests {
         String email = "test@example.com";
 
         UserEntity currentUser = UserEntity.builder()
+                .id(1L)
                 .name("Test")
                 .email(email)
                 .build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
+        when(otpRepository.findByUserId(currentUser.getId())).thenReturn(Optional.empty());
+
+        ArgumentCaptor<OtpEntity> otpEntityArgumentCaptor = ArgumentCaptor.forClass(OtpEntity.class);
 
         assertDoesNotThrow(() -> authService.sendVerifyOtp(email));
-        int otp = Integer.parseInt(currentUser.getVerifyOTP());
-        assertNotNull(currentUser.getVerifyOTP());
-        assertTrue(otp < 1000000 && otp >= 100000);
-        assertNotNull(currentUser.getVerifyOTPExpireAt());
+        verify(otpRepository).save(otpEntityArgumentCaptor.capture());
 
-        verify(userRepository).save(currentUser);
-        verify(emailService).sendVerifyOtpEmail(currentUser.getEmail(), currentUser.getName(), currentUser.getVerifyOTP());
+        OtpEntity savedOtp = otpEntityArgumentCaptor.getValue();
+        assertNotNull(savedOtp);
+        assertNotNull(savedOtp.getExpiration());
+        assertNotNull(savedOtp.getValue());
+        assertEquals(currentUser.getId(), savedOtp.getUserId());
+
+        int otp = Integer.parseInt(savedOtp.getValue());
+        assertTrue(otp < 1000000 && otp >= 100000);
+
+        verify(emailService).sendVerifyOtpEmail(currentUser.getEmail(), currentUser.getName(), savedOtp.getValue());
     }
 
     @Test
@@ -99,20 +113,25 @@ public class AuthServiceTests {
         String otp = "123456";
 
         UserEntity currentUser = UserEntity.builder()
+                .id(1L)
                 .name("Test")
                 .email(email)
-                .verifyOTP(otp)
-                .verifyOTPExpireAt(System.currentTimeMillis() + 60000)
+                .build();
+
+        OtpEntity currentOtp = OtpEntity.builder()
+                .userId(currentUser.getId())
+                .value(otp)
+                .expiration(System.currentTimeMillis() + 60000)
                 .build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
+        when(otpRepository.findByUserId(currentUser.getId())).thenReturn(Optional.of(currentOtp));
 
         assertDoesNotThrow(() -> authService.verifyOTP(email, otp));
 
-        assertNull(currentUser.getVerifyOTP());
-        assertNull(currentUser.getVerifyOTPExpireAt());
         assertTrue(currentUser.getAccountVerified());
 
+        verify(otpRepository).deleteByUserId(currentUser.getId());
         verify(userRepository).save(currentUser);
         verify(emailService).sendAccountVerifiedEmail(currentUser.getEmail(), currentUser.getName());
     }
@@ -126,11 +145,16 @@ public class AuthServiceTests {
         UserEntity currentUser = UserEntity.builder()
                 .name("Test")
                 .email(email)
-                .verifyOTP(otp)
-                .verifyOTPExpireAt(System.currentTimeMillis())
+                .build();
+
+        OtpEntity currentOtp = OtpEntity.builder()
+                .userId(currentUser.getId())
+                .value(otp)
+                .expiration(System.currentTimeMillis())
                 .build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
+        when(otpRepository.findByUserId(currentUser.getId())).thenReturn(Optional.of(currentOtp));
 
         assertThrows(OtpExpiredException.class, () -> authService.verifyOTP(email, otp));
     }
@@ -144,11 +168,16 @@ public class AuthServiceTests {
         UserEntity currentUser = UserEntity.builder()
                 .name("Test")
                 .email(email)
-                .verifyOTP("123455")
-                .verifyOTPExpireAt(System.currentTimeMillis() + 60000)
+                .build();
+
+        OtpEntity currentOtp = OtpEntity.builder()
+                .userId(currentUser.getId())
+                .value("123455")
+                .expiration(System.currentTimeMillis() + 60000)
                 .build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(currentUser));
+        when(otpRepository.findByUserId(currentUser.getId())).thenReturn(Optional.of(currentOtp));
 
         assertThrows(OtpIncorrectException.class, () -> authService.verifyOTP(email, otp));
     }
