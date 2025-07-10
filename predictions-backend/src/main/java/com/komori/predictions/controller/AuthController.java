@@ -1,6 +1,6 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.io.*;
+import com.komori.predictions.dto.*;
 import com.komori.predictions.service.AuthService;
 import com.komori.predictions.util.JwtUtil;
 import jakarta.validation.Valid;

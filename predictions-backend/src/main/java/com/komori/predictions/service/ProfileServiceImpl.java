@@ -20,7 +20,7 @@ public class ProfileServiceImpl implements ProfileService {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
-        emailService.sendResetPasswordEmail(email, currentUser.getName());
+        emailService.sendResetPasswordEmail(email, currentUser.getFirstName());
     }
 
     @Override
@@ -34,6 +34,6 @@ public class ProfileServiceImpl implements ProfileService {
 
         currentUser.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(currentUser);
-        emailService.sendResetPasswordEmail(email, currentUser.getName());
+        emailService.sendResetPasswordEmail(email, currentUser.getFirstName());
     }
 }

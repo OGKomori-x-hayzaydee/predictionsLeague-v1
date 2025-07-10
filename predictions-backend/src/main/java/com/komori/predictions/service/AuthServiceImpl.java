@@ -3,8 +3,8 @@ package com.komori.predictions.service;
 import com.komori.predictions.entity.OtpEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.*;
-import com.komori.predictions.io.RegistrationRequest;
-import com.komori.predictions.io.RegistrationResponse;
+import com.komori.predictions.dto.RegistrationRequest;
+import com.komori.predictions.dto.RegistrationResponse;
 import com.komori.predictions.repository.OtpRepository;
 import com.komori.predictions.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         otpRepository.save(otpEntity);
-        emailService.sendVerifyOtpEmail(email, currentUser.getName(), otp);
+        emailService.sendVerifyOtpEmail(email, currentUser.getFirstName(), otp);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
             currentUser.setAccountVerified(true);
             otpRepository.deleteByUserId(currentUser.getId());
             userRepository.save(currentUser);
-            emailService.sendAccountVerifiedEmail(email, currentUser.getName());
+            emailService.sendAccountVerifiedEmail(email, currentUser.getFirstName());
         }
         else {
             throw new OtpIncorrectException();
@@ -97,7 +97,8 @@ public class AuthServiceImpl implements AuthService {
     private UserEntity convertToUserEntity(RegistrationRequest request) {
         return UserEntity.builder()
                 .userID(UUID.randomUUID().toString())
-                .name(request.getName())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountVerified(false)
@@ -107,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
 
     private RegistrationResponse convertToRegistrationResponse(UserEntity entity) {
         return RegistrationResponse.builder()
-                .name(entity.getName())
+                .name(entity.getFirstName())
                 .email(entity.getEmail())
                 .build();
     }

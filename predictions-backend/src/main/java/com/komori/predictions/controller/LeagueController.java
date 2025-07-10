@@ -1,6 +1,7 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.entity.LeagueEntity;
+import com.komori.predictions.dto.LeagueSummary;
+import com.komori.predictions.dto.CreateLeagueRequest;
 import com.komori.predictions.service.LeagueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,15 +17,27 @@ import java.util.Set;
 public class LeagueController {
     private final LeagueService leagueService;
 
+    @GetMapping("/{uuid}")
+    public ResponseEntity<LeagueSummary> getLeague(@PathVariable String uuid) {
+        LeagueSummary league = leagueService.getLeague(uuid);
+        return ResponseEntity.ok().body(league);
+    }
+
     @GetMapping
-    public ResponseEntity<Set<LeagueEntity>> getLeaguesForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<LeagueEntity> leagues = leagueService.getLeaguesForUser(email);
+    public ResponseEntity<Set<LeagueSummary>> getLeaguesForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        Set<LeagueSummary> leagues = leagueService.getLeaguesForUser(email);
         return ResponseEntity.ok().body(leagues);
     }
 
     @PostMapping
-    public ResponseEntity<String> createLeague(String name) {
-        leagueService.createLeague(name);
-        return ResponseEntity.status(HttpStatus.CREATED).body("New league created");
+    public ResponseEntity<LeagueSummary> createLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @RequestBody CreateLeagueRequest leagueRequest) {
+        LeagueSummary newLeague = leagueService.createLeague(email, leagueRequest.getName(), leagueRequest.getPublicity());
+        return ResponseEntity.status(HttpStatus.CREATED).body(newLeague);
+    }
+
+    @PostMapping("/{uuid}/join")
+    public ResponseEntity<String> joinLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid) {
+        String leagueName = leagueService.joinLeague(email, uuid);
+        return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
     }
 }

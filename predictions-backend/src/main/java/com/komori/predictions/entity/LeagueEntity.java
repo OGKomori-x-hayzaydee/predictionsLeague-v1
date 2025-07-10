@@ -1,16 +1,14 @@
 package com.komori.predictions.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "league_entity")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,6 +18,17 @@ public class LeagueEntity {
     private String UUID;
     private String name;
     private String leagueCode;
-    @ManyToMany(mappedBy = "leagues")
-    private Set<UserEntity> users;
+    private Publicity publicity;
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "user_league_table",
+            joinColumns = @JoinColumn(name = "league_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserEntity> users = new HashSet<>();
+
+    public void addUser(UserEntity userEntity) {
+        this.users.add(userEntity);
+        userEntity.getLeagues().add(this);
+    }
 }
