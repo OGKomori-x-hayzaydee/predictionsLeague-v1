@@ -1,0 +1,31 @@
+HELP.md
+target/
+!**/src/main/java
+!**/src/test/java
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+*.env
+vars.env
+
+postgres
+kFjsmlJzLZwvWkMWQYGRQXAcpwpQNiEZ
+
+railway
+
+5432
+postgres.railway.internal
+
+jdbc:postgresql://<host>:<port>/<db>?sslmode=require
