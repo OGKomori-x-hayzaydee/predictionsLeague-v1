@@ -7,7 +7,6 @@ import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.LeagueNotFoundException;
 import com.komori.predictions.repository.LeagueRepository;
 import com.komori.predictions.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,6 @@ public class LeagueServiceImpl implements LeagueService {
     private final UserRepository userRepository;
 
     @Override
-    @Transactional
     public LeagueSummary createLeague(String email, String name, Publicity publicity) {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));

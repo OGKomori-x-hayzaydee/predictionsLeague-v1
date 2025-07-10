@@ -18,6 +18,7 @@ public class LeagueEntity {
     private String UUID;
     private String name;
     private String leagueCode;
+    @Enumerated(value = EnumType.STRING)
     private Publicity publicity;
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
