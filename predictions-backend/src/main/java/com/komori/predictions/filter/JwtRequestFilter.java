@@ -24,7 +24,7 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-    private final List<String> PUBLIC_URLS = List.of("/register", "/login", "/send-verify-otp", "/verify-otp");
+    private final List<String> PUBLIC_URLS = List.of("/auth/register", "/auth/login", "/auth/send-verify-otp", "/auth/verify-otp");
 
     // Checks for a JWT token and sets CurrentSecurityContext if valid
     @Override

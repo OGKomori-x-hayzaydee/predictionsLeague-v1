@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OtpNotFoundException.class)
     public ResponseEntity<?> handleOtpNotFound() {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "OTP not found for user");
+        return buildResponse(HttpStatus.NOT_FOUND, "OTP not found for user");
     }
 
     @ExceptionHandler(MailException.class)
@@ -53,12 +53,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<?> handleUsernameNotFound(UsernameNotFoundException e) {
-        return buildResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<?> handlePasswordMismatch() {
         return buildResponse(HttpStatus.BAD_REQUEST, "Password is incorrect");
+    }
+
+    @ExceptionHandler(LeagueNotFoundException.class)
+    public ResponseEntity<?> handleLeagueNotFound() {
+        return buildResponse(HttpStatus.NOT_FOUND, "League not found");
     }
 
     @ExceptionHandler(Exception.class)

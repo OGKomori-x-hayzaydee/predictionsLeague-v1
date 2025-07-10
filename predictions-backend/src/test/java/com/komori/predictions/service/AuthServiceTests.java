@@ -6,8 +6,8 @@ import com.komori.predictions.exception.AccountNotVerifiedException;
 import com.komori.predictions.exception.EmailAlreadyExistsException;
 import com.komori.predictions.exception.OtpExpiredException;
 import com.komori.predictions.exception.OtpIncorrectException;
-import com.komori.predictions.io.RegistrationRequest;
-import com.komori.predictions.io.RegistrationResponse;
+import com.komori.predictions.dto.RegistrationRequest;
+import com.komori.predictions.dto.RegistrationResponse;
 import com.komori.predictions.repository.OtpRepository;
 import com.komori.predictions.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class AuthServiceTests {
     @Test
     void registerNewUserTest1() {
         // Everything working
-        RegistrationRequest request = RegistrationRequest.builder().email("test@example.com").name("Username").password("password").build();
+        RegistrationRequest request = RegistrationRequest.builder().email("test@example.com").firstName("Username").password("password").build();
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(false); // Assume that the email is available
 
@@ -52,13 +52,13 @@ public class AuthServiceTests {
 
         verify(passwordEncoder).encode("password");
         verify(userRepository).save(any(UserEntity.class));
-        verify(emailService).sendWelcomeEmail(request.getEmail(), request.getName());
+        verify(emailService).sendWelcomeEmail(request.getEmail(), request.getFirstName());
     }
 
     @Test
     void registerNewUserTest2() {
         // Assume email is taken already
-        RegistrationRequest request = RegistrationRequest.builder().email("test@example.com").name("Username").password("password").build();
+        RegistrationRequest request = RegistrationRequest.builder().email("test@example.com").firstName("Username").password("password").build();
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(true); // Assume that the email is NOT available
 
@@ -72,7 +72,7 @@ public class AuthServiceTests {
 
         UserEntity currentUser = UserEntity.builder()
                 .id(1L)
-                .name("Test")
+                .firstName("Test")
                 .email(email)
                 .build();
 
@@ -93,7 +93,7 @@ public class AuthServiceTests {
         int otp = Integer.parseInt(savedOtp.getValue());
         assertTrue(otp < 1000000 && otp >= 100000);
 
-        verify(emailService).sendVerifyOtpEmail(currentUser.getEmail(), currentUser.getName(), savedOtp.getValue());
+        verify(emailService).sendVerifyOtpEmail(currentUser.getEmail(), currentUser.getFirstName(), savedOtp.getValue());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class AuthServiceTests {
 
         UserEntity currentUser = UserEntity.builder()
                 .id(1L)
-                .name("Test")
+                .firstName("Test")
                 .email(email)
                 .build();
 
@@ -133,7 +133,7 @@ public class AuthServiceTests {
 
         verify(otpRepository).deleteByUserId(currentUser.getId());
         verify(userRepository).save(currentUser);
-        verify(emailService).sendAccountVerifiedEmail(currentUser.getEmail(), currentUser.getName());
+        verify(emailService).sendAccountVerifiedEmail(currentUser.getEmail(), currentUser.getFirstName());
     }
 
     @Test
@@ -143,7 +143,7 @@ public class AuthServiceTests {
         String otp = "123456";
 
         UserEntity currentUser = UserEntity.builder()
-                .name("Test")
+                .firstName("Test")
                 .email(email)
                 .build();
 
@@ -166,7 +166,7 @@ public class AuthServiceTests {
         String otp = "123456";
 
         UserEntity currentUser = UserEntity.builder()
-                .name("Test")
+                .firstName("Test")
                 .email(email)
                 .build();
 

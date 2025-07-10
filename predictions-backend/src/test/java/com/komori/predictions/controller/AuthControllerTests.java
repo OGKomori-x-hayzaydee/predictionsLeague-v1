@@ -1,6 +1,6 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.io.*;
+import com.komori.predictions.dto.*;
 import com.komori.predictions.service.AuthService;
 import com.komori.predictions.util.JwtUtil;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ public class AuthControllerTests {
     @Test
     void registerTest1() {
         // Works fine
-        RegistrationRequest request  = RegistrationRequest.builder().email("test@example.com").name("Username").password("password").build();
+        RegistrationRequest request  = RegistrationRequest.builder().email("test@example.com").firstName("Username").password("password").build();
 
         ResponseEntity<RegistrationResponse> responseEntity = assertDoesNotThrow(() -> authController.register(request));
 
