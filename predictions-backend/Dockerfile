@@ -11,7 +11,7 @@ WORKDIR /app
 EXPOSE 8080
 
 # Copy .jar file into the container
-COPY target/*.jar app.jar
+COPY target/predictions_backend-0.0.1-SNAPSHOT.jar app.jar
 
 # Set default command that runs when Docker starts
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
