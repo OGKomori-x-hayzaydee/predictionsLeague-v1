@@ -76,6 +76,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Publicity mismatch");
     }
 
+    @ExceptionHandler(LeagueAlreadyJoinedException.class)
+    public ResponseEntity<?> handleLeagueAlreadyJoined() {
+        return buildResponse(HttpStatus.CONFLICT, "League already joined");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         log.error("Unhandled exception occurred", e);

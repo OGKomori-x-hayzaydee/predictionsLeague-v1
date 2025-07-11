@@ -34,6 +34,6 @@ public class ProfileServiceImpl implements ProfileService {
 
         currentUser.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(currentUser);
-        emailService.sendResetPasswordEmail(email, currentUser.getFirstName());
+        emailService.sendChangedPasswordEmail(email, currentUser.getFirstName());
     }
 }

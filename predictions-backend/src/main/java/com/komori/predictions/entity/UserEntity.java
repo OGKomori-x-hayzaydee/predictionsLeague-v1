@@ -26,6 +26,7 @@ public class UserEntity {
     private String email;
     private String password;
     private Boolean accountVerified;
+    private int totalPoints = 0;
     @ManyToMany(mappedBy = "users")
     @JsonIgnore @Builder.Default // retains default value (new HashSet instead of null)
     private Set<LeagueEntity> leagues = new HashSet<>();

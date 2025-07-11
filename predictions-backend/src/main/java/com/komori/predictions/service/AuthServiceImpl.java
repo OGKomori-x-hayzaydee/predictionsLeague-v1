@@ -103,6 +103,7 @@ public class AuthServiceImpl implements AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountVerified(false)
                 .leagues(new HashSet<>())
+                .totalPoints(0)
                 .build();
     }
 

@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface LeagueRepository extends JpaRepository<LeagueEntity, Long> {
     Optional<LeagueEntity> findByUUID(String uuid);
     boolean existsByLeagueCode(String code);
+    Optional<LeagueEntity> findByLeagueCode(String code);
 }

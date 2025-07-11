@@ -1,5 +1,6 @@
 package com.komori.predictions.controller;
 
+import com.komori.predictions.dto.LeagueStanding;
 import com.komori.predictions.dto.LeagueSummary;
 import com.komori.predictions.dto.CreateLeagueRequest;
 import com.komori.predictions.service.LeagueService;
@@ -18,9 +19,9 @@ public class LeagueController {
     private final LeagueService leagueService;
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<LeagueSummary> getLeague(@PathVariable String uuid) {
-        LeagueSummary league = leagueService.getLeague(uuid);
-        return ResponseEntity.ok().body(league);
+    public ResponseEntity<LeagueStanding> getLeagueStandings(@PathVariable String uuid) {
+        LeagueStanding standings = leagueService.getLeagueStandings(uuid);
+        return ResponseEntity.ok().body(standings);
     }
 
     @GetMapping
@@ -41,9 +42,9 @@ public class LeagueController {
         return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
     }
 
-    @PostMapping("/private/{uuid}/join")
-    public ResponseEntity<String> joinPrivateLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid, @RequestBody String code) {
-        String leagueName = leagueService.joinPrivateLeague(email, uuid, code);
+    @PostMapping("/private/{code}/join")
+    public ResponseEntity<String> joinPrivateLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String code) {
+        String leagueName = leagueService.joinPrivateLeague(email, code);
         return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
     }
 }

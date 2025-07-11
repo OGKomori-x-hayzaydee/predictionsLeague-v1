@@ -56,7 +56,7 @@ public class EmailService {
         mailMessage.setText("Hello " + name + ",\n\n" +
                 "We've received a request to reset your password. Click the link to verify:\n\n" +
                 "If you didn't request this, you can safely ignore this email. Or archive it. Or delete it. The choice is yours tbh.\n" +
-                "You should be more concerned that someone's trying to reset your password anyway so..." +
+                "You should be more concerned that someone's trying to reset your password anyway so...\n\n" +
                 "Regards,\nTega from the Predictions Team");
         mailSender.send(mailMessage);
     }
