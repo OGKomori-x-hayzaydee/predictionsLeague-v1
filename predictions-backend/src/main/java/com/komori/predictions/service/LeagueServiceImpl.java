@@ -4,7 +4,9 @@ import com.komori.predictions.dto.LeagueSummary;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.Publicity;
 import com.komori.predictions.entity.UserEntity;
+import com.komori.predictions.exception.IncorrectLeagueCodeException;
 import com.komori.predictions.exception.LeagueNotFoundException;
+import com.komori.predictions.exception.PublicityMismatchException;
 import com.komori.predictions.repository.LeagueRepository;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +28,11 @@ public class LeagueServiceImpl implements LeagueService {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
-        String leagueCode = generateLeagueCode();
-        while (leagueRepository.existsByLeagueCode(leagueCode)) {
-            leagueCode = generateLeagueCode();
+        String leagueCode = "";
+        if (publicity == Publicity.PRIVATE) {
+            do {
+                leagueCode = generateLeagueCode();
+            } while (leagueRepository.existsByLeagueCode(leagueCode));
         }
 
         LeagueEntity newLeague = new LeagueEntity();
@@ -45,6 +49,7 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public Set<LeagueSummary> getLeaguesForUser(String email) {
+        // Yet to be tested
         UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return Set.copyOf(userEntity.getLeagues().stream()
@@ -54,6 +59,7 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public LeagueSummary getLeague(String uuid) {
+        // Yet to be tested
         LeagueEntity league = leagueRepository.findByUUID(uuid)
                 .orElseThrow(LeagueNotFoundException::new);
 
@@ -61,21 +67,41 @@ public class LeagueServiceImpl implements LeagueService {
     }
 
     @Override
-    public String joinLeague(String email, String uuid) {
+    public String joinPublicLeague(String email, String uuid) {
+        // Yet to be tested
         LeagueEntity newLeague = leagueRepository.findByUUID(uuid)
                 .orElseThrow(LeagueNotFoundException::new);
+
+        if (newLeague.getPublicity() != Publicity.PUBLIC) {
+            throw new PublicityMismatchException();
+        }
 
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
-        Set<LeagueEntity> leagues = currentUser.getLeagues();
-        leagues.add(newLeague);
-        currentUser.setLeagues(leagues);
+        newLeague.addUser(currentUser);
+        leagueRepository.save(newLeague);
 
-        Set<UserEntity> users = newLeague.getUsers();
-        users.add(currentUser);
+        return newLeague.getName();
+    }
 
-        userRepository.save(currentUser);
+    @Override
+    public String joinPrivateLeague(String email, String uuid, String code) {
+        // Yet to be tested
+        LeagueEntity newLeague = leagueRepository.findByUUID(uuid)
+                .orElseThrow(LeagueNotFoundException::new);
+
+        if (!code.equals(newLeague.getLeagueCode())) {
+            throw new IncorrectLeagueCodeException();
+        }
+        if (newLeague.getPublicity() != Publicity.PRIVATE) {
+            throw new PublicityMismatchException();
+        }
+
+        UserEntity currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+
+        newLeague.addUser(currentUser);
         leagueRepository.save(newLeague);
 
         return newLeague.getName();

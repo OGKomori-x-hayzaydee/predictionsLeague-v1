@@ -66,6 +66,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, "League not found");
     }
 
+    @ExceptionHandler(IncorrectLeagueCodeException.class)
+    public ResponseEntity<?> handleIncorrectLeague() {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Incorrect league code");
+    }
+
+    @ExceptionHandler(PublicityMismatchException.class)
+    public ResponseEntity<?> handlePublicityMismatch() {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Publicity mismatch");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         log.error("Unhandled exception occurred", e);

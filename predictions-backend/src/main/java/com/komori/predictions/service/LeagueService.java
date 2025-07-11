@@ -9,5 +9,6 @@ public interface LeagueService {
     LeagueSummary createLeague(String email, String name, Publicity publicity);
     Set<LeagueSummary> getLeaguesForUser(String email);
     LeagueSummary getLeague(String uuid);
-    String joinLeague(String email, String uuid);
+    String joinPublicLeague(String email, String uuid);
+    String joinPrivateLeague(String email, String uuid, String code);
 }

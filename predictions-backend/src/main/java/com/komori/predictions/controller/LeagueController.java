@@ -35,9 +35,15 @@ public class LeagueController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newLeague);
     }
 
-    @PostMapping("/{uuid}/join")
-    public ResponseEntity<String> joinLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid) {
-        String leagueName = leagueService.joinLeague(email, uuid);
+    @PostMapping("/public/{uuid}/join")
+    public ResponseEntity<String> joinPublicLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid) {
+        String leagueName = leagueService.joinPublicLeague(email, uuid);
+        return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
+    }
+
+    @PostMapping("/private/{uuid}/join")
+    public ResponseEntity<String> joinPrivateLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid, @RequestBody String code) {
+        String leagueName = leagueService.joinPrivateLeague(email, uuid, code);
         return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
     }
 }
