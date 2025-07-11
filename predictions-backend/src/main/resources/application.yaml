@@ -6,7 +6,7 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     open-in-view: true
   mail:
     host: smtp-relay.brevo.com
@@ -24,6 +24,7 @@ spring:
           from: ${MAIL_FROM}
   flyway:
     baseline-on-migrate: true
+    enabled: true
 
 jwt:
   secret:
