@@ -59,4 +59,16 @@ public class AuthController {
         authService.verifyOTP(response.getEmail(), response.getOtpFromUser());
         return ResponseEntity.ok("Account verified successfully");
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        ResponseCookie cookie = ResponseCookie.from("jwt")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0) // To delete the cookie
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("Logged out successfully");
+    }
 }
