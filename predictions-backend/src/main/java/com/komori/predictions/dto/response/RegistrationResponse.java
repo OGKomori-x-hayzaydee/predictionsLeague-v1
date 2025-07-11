@@ -1,16 +1,16 @@
-package com.komori.predictions.dto;
+package com.komori.predictions.dto.response;
 
-import com.komori.predictions.entity.Publicity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CreateLeagueRequest {
+// Represents data being sent from the API
+public class RegistrationResponse {
     private String name;
-    private Publicity publicity;
+    private String email;
 }

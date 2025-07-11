@@ -1,7 +1,7 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.dto.RegistrationRequest;
-import com.komori.predictions.dto.RegistrationResponse;
+import com.komori.predictions.dto.request.RegistrationRequest;
+import com.komori.predictions.dto.response.RegistrationResponse;
 
 public interface AuthService {
     RegistrationResponse registerNewUser(RegistrationRequest request);

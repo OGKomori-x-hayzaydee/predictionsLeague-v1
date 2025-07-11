@@ -1,4 +1,4 @@
-package com.komori.predictions.dto;
+package com.komori.predictions.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResponse {
-    private String email;
-    private String jwtToken;
+public class PasswordChangeRequest {
+    private String oldPassword;
+    private String newPassword;
 }

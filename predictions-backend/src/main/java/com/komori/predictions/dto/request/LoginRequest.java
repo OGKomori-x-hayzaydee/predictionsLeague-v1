@@ -1,4 +1,4 @@
-package com.komori.predictions.dto;
+package com.komori.predictions.dto.request;
 
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;

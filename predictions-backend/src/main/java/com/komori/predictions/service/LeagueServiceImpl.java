@@ -1,7 +1,7 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.dto.LeagueStanding;
-import com.komori.predictions.dto.LeagueSummary;
+import com.komori.predictions.dto.response.LeagueStanding;
+import com.komori.predictions.dto.response.LeagueSummary;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.Publicity;
 import com.komori.predictions.entity.UserEntity;

@@ -1,6 +1,6 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.dto.PasswordChangeRequest;
+import com.komori.predictions.dto.request.PasswordChangeRequest;
 import com.komori.predictions.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

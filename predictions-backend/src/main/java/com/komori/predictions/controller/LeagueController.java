@@ -1,8 +1,8 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.dto.LeagueStanding;
-import com.komori.predictions.dto.LeagueSummary;
-import com.komori.predictions.dto.CreateLeagueRequest;
+import com.komori.predictions.dto.response.LeagueStanding;
+import com.komori.predictions.dto.response.LeagueSummary;
+import com.komori.predictions.dto.request.CreateLeagueRequest;
 import com.komori.predictions.service.LeagueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

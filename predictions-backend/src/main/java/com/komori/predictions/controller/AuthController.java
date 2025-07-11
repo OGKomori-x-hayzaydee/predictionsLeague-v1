@@ -1,6 +1,10 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.dto.*;
+import com.komori.predictions.dto.request.LoginRequest;
+import com.komori.predictions.dto.request.RegistrationRequest;
+import com.komori.predictions.dto.response.LoginResponse;
+import com.komori.predictions.dto.response.OtpResponse;
+import com.komori.predictions.dto.response.RegistrationResponse;
 import com.komori.predictions.service.AuthService;
 import com.komori.predictions.util.JwtUtil;
 import jakarta.validation.Valid;

@@ -1,4 +1,4 @@
-package com.komori.predictions.dto;
+package com.komori.predictions.dto.response;
 
 import com.komori.predictions.entity.Publicity;
 import lombok.AllArgsConstructor;
