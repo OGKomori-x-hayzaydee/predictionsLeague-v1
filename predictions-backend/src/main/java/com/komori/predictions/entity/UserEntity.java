@@ -27,7 +27,7 @@ public class UserEntity {
     private String password;
     private Boolean accountVerified;
     @ManyToMany(mappedBy = "users")
-    @JsonIgnore
+    @JsonIgnore @Builder.Default // retains default value (new HashSet instead of null)
     private Set<LeagueEntity> leagues = new HashSet<>();
     @CreationTimestamp @Column(updatable = false)
     private Timestamp createdAt;

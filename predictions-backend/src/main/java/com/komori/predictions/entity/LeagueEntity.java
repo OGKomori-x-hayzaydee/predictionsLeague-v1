@@ -25,7 +25,7 @@ public class LeagueEntity {
             name = "user_league_table",
             joinColumns = @JoinColumn(name = "league_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    ) @Builder.Default // retains default value (new HashSet instead of null)
     private Set<UserEntity> users = new HashSet<>();
 
     public void addUser(UserEntity userEntity) {
