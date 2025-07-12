@@ -104,6 +104,7 @@ public class AuthServiceImpl implements AuthService {
                 .accountVerified(false)
                 .leagues(new HashSet<>())
                 .totalPoints(0)
+                .favouriteTeam(request.getFavouriteTeam())
                 .build();
     }
 

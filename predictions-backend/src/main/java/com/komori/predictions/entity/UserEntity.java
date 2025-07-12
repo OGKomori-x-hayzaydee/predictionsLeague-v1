@@ -28,6 +28,8 @@ public class UserEntity {
     private Boolean accountVerified;
     @Builder.Default
     private int totalPoints = 0;
+    @Enumerated(value = EnumType.STRING)
+    private Team favouriteTeam;
     @ManyToMany(mappedBy = "users")
     @JsonIgnore @Builder.Default // retains default value (new HashSet instead of null)
     private Set<LeagueEntity> leagues = new HashSet<>();

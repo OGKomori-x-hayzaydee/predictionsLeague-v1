@@ -1,6 +1,5 @@
 package com.komori.predictions.dto.request;
 
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class LoginRequest {
-    @Email(message = "Enter valid email address")
     private String email;
     private String password;
 }

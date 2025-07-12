@@ -1,5 +1,6 @@
 package com.komori.predictions.dto.request;
 
+import com.komori.predictions.entity.Team;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,4 +12,5 @@ public class RegistrationRequest {
     private String lastName;
     private String email;
     private String password;
+    private Team favouriteTeam;
 }
