@@ -39,7 +39,8 @@ public class AuthController {
                 .httpOnly(true)
                 .path("/") // Cookie is sent on all requests to the domain
                 .maxAge(Duration.ofDays(1))
-                .sameSite("Strict") // Protects against CSRF
+                .sameSite("None") // Enables cookie creation in the browser from cross-origins
+                .secure(true)
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
