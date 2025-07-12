@@ -2,7 +2,6 @@ package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.request.LoginRequest;
 import com.komori.predictions.dto.request.RegistrationRequest;
-import com.komori.predictions.dto.response.LoginResponse;
 import com.komori.predictions.dto.response.RegistrationResponse;
 import com.komori.predictions.service.AuthService;
 import com.komori.predictions.util.JwtUtil;
@@ -16,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,12 +41,10 @@ public class AuthControllerTests {
         doNothing().when(authService).checkVerifiedStatus(request.getEmail());
         when(jwtUtil.generateToken(request.getEmail())).thenReturn("jwtToken");
 
-        ResponseEntity<LoginResponse> responseEntity = assertDoesNotThrow(() -> authController.login(request));
+        ResponseEntity<String> responseEntity = assertDoesNotThrow(() -> authController.login(request));
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("jwtToken", Objects.requireNonNull(responseEntity.getBody()).getJwtToken());
         assertNotNull(responseEntity.getBody());
-        assertInstanceOf(LoginResponse.class, responseEntity.getBody());
         assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.SET_COOKIE));
 
         verify(jwtUtil).generateToken(request.getEmail());

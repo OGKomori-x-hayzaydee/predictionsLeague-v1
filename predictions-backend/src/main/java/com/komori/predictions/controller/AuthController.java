@@ -2,7 +2,6 @@ package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.request.LoginRequest;
 import com.komori.predictions.dto.request.RegistrationRequest;
-import com.komori.predictions.dto.response.LoginResponse;
 import com.komori.predictions.dto.response.OtpResponse;
 import com.komori.predictions.dto.response.RegistrationResponse;
 import com.komori.predictions.service.AuthService;
@@ -31,7 +30,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         authService.checkVerifiedStatus(loginRequest.getEmail());
         final String jwtToken = jwtUtil.generateToken(loginRequest.getEmail());
@@ -44,7 +43,7 @@ public class AuthController {
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new LoginResponse(loginRequest.getEmail(), jwtToken));
+                .body("Login successful");
     }
 
     @PostMapping("/register")
