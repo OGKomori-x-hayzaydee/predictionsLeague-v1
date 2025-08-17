@@ -39,7 +39,7 @@ public class AuthControllerTests {
 
         when(authenticationManager.authenticate(any())).thenReturn(fakeAuth);
         doNothing().when(authService).checkVerifiedStatus(request.getEmail());
-        when(jwtUtil.generateToken(request.getEmail())).thenReturn("jwtToken");
+        when(jwtUtil.generateAccessToken(request.getEmail())).thenReturn("jwtToken");
 
         ResponseEntity<String> responseEntity = assertDoesNotThrow(() -> authController.login(request));
 
@@ -47,7 +47,7 @@ public class AuthControllerTests {
         assertNotNull(responseEntity.getBody());
         assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.SET_COOKIE));
 
-        verify(jwtUtil).generateToken(request.getEmail());
+        verify(jwtUtil).generateAccessToken(request.getEmail());
     }
 
     @Test
