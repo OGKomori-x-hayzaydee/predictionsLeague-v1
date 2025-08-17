@@ -17,13 +17,24 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String STORED_SECRET_KEY;
 
-    public String generateToken(String email) {
+    public String generateAccessToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 1 day expiration
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // 5 min expiration
+                .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+                .compact();
+    }
+
+    public String generateRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        return Jwts.builder()
+                .claims(claims)
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 14)) // 14 day expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
@@ -41,13 +52,13 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         Claims claims = extractAllClaims(token);
         Date expiration = claims.getExpiration();
         return expiration.before(new Date());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateAccessToken(String token, UserDetails userDetails) {
         final String email = extractEmailFromToken(token);
         return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }

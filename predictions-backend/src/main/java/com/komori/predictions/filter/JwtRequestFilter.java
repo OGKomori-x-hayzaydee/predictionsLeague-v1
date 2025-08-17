@@ -24,7 +24,7 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-    private final List<String> PUBLIC_URLS = List.of("/auth/register", "/auth/login", "/auth/send-verify-otp", "/auth/verify-otp");
+    private final List<String> PUBLIC_URLS = List.of("/auth/register", "/auth/login", "/auth/send-verify-otp", "/auth/verify-otp", "/auth/refresh");
 
     // Checks for a JWT token and sets CurrentSecurityContext if valid
     @Override
@@ -49,7 +49,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("jwt")) {
+                    if (cookie.getName().equals("access")) {
                         jwt = cookie.getValue();
                         break;
                     }
@@ -62,7 +62,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             email = jwtUtil.extractEmailFromToken(jwt);
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-                if (jwtUtil.validateToken(jwt, userDetails)) {
+                if (jwtUtil.validateAccessToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
