@@ -49,14 +49,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     .build();
             userRepository.save(newUser);
             emailService.sendWelcomeEmail(email, firstName);
-            response.sendRedirect("http://localhost:5173");
+            response.sendRedirect("http://localhost:5173/dashboard");
         } else {
-            if (user.get().getAccountVerified()) {
-                response.sendRedirect("http://localhost:5173");
-            }
-            else {
-                response.sendRedirect("http://localhost:5173");
-            }
+            response.sendRedirect("http://localhost:5173/dashboard");
         }
     }
 }
