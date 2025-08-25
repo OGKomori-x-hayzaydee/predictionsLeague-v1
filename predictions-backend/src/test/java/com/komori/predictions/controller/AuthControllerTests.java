@@ -3,10 +3,10 @@ package com.komori.predictions.controller;
 import com.komori.predictions.dto.request.LoginRequest;
 import com.komori.predictions.dto.request.RegistrationRequest;
 import com.komori.predictions.dto.response.RegistrationResponse;
-import com.komori.predictions.service.AuthService;
-import com.komori.predictions.util.JwtUtil;
+import com.komori.predictions.security.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.komori.predictions.service.AuthService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,8 +26,6 @@ public class AuthControllerTests {
     private AuthService authService;
     @Mock
     private AuthenticationManager authenticationManager;
-    @Mock
-    private JwtUtil jwtUtil;
     @InjectMocks
     private AuthController authController;
 
@@ -39,15 +37,12 @@ public class AuthControllerTests {
 
         when(authenticationManager.authenticate(any())).thenReturn(fakeAuth);
         doNothing().when(authService).checkVerifiedStatus(request.getEmail());
-        when(jwtUtil.generateAccessToken(request.getEmail())).thenReturn("jwtToken");
 
         ResponseEntity<String> responseEntity = assertDoesNotThrow(() -> authController.login(request));
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
         assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.SET_COOKIE));
-
-        verify(jwtUtil).generateAccessToken(request.getEmail());
     }
 
     @Test

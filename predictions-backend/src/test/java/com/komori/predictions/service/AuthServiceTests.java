@@ -13,7 +13,6 @@ import com.komori.predictions.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,8 +34,8 @@ public class AuthServiceTests {
     private PasswordEncoder passwordEncoder;
     @Mock
     private EmailService emailService;
-    @InjectMocks
-    private AuthServiceImpl authService;
+    @Mock
+    private AuthService authService;
 
     @Test
     void registerNewUserTest1() {

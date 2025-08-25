@@ -1,7 +1,6 @@
-package com.komori.predictions.filter;
+package com.komori.predictions.security;
 
 import com.komori.predictions.service.CustomUserDetailsService;
-import com.komori.predictions.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

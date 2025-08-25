@@ -1,6 +1,8 @@
 package com.komori.predictions.config;
 
-import com.komori.predictions.filter.JwtRequestFilter;
+import com.komori.predictions.security.CustomAuthenticationEntryPoint;
+import com.komori.predictions.security.CustomAuthenticationSuccessHandler;
+import com.komori.predictions.security.JwtRequestFilter;
 import com.komori.predictions.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,20 +30,21 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtRequestFilter requestFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
+        return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/login", "/auth/send-verify-otp", "/auth/verify-otp", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Public endpoints, don't require auth
                         .anyRequest().authenticated())
+                .oauth2Login(login -> login.successHandler(successHandler))
                 .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
-
-        return httpSecurity.build();
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+                .build();
     }
 
     @Bean

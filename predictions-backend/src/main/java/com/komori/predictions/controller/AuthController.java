@@ -4,8 +4,8 @@ import com.komori.predictions.dto.request.LoginRequest;
 import com.komori.predictions.dto.request.RegistrationRequest;
 import com.komori.predictions.dto.response.OtpResponse;
 import com.komori.predictions.dto.response.RegistrationResponse;
+import com.komori.predictions.security.JwtUtil;
 import com.komori.predictions.service.AuthService;
-import com.komori.predictions.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Duration;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,24 +29,8 @@ public class AuthController {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         authService.checkVerifiedStatus(loginRequest.getEmail());
 
-        String accessToken = jwtUtil.generateAccessToken(loginRequest.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(loginRequest.getEmail());
-
-        ResponseCookie accessCookie = ResponseCookie.from("access", accessToken)
-                .httpOnly(true)
-                .path("/")
-                .secure(true)
-                .maxAge(Duration.ofMinutes(5))
-                .sameSite("None")
-                .build();
-
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh", refreshToken)
-                .httpOnly(true)
-                .path("/")
-                .secure(true)
-                .maxAge(Duration.ofDays(14))
-                .sameSite("None")
-                .build();
+        ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(loginRequest.getEmail());
+        ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(loginRequest.getEmail());
 
         HttpHeaders cookieHeaders = new HttpHeaders();
         cookieHeaders.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
@@ -127,21 +109,8 @@ public class AuthController {
         }
 
         String email = jwtUtil.extractEmailFromToken(refreshToken);
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh", jwtUtil.generateRefreshToken(email))
-                .httpOnly(true)
-                .path("/")
-                .secure(true)
-                .maxAge(Duration.ofDays(14))
-                .sameSite("None")
-                .build();
-
-        ResponseCookie accessCookie = ResponseCookie.from("access", jwtUtil.generateAccessToken(email))
-                .httpOnly(true)
-                .path("/")
-                .secure(true)
-                .maxAge(Duration.ofMinutes(5))
-                .sameSite("None")
-                .build();
+        ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
+        ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());

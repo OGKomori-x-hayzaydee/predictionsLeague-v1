@@ -1,13 +1,15 @@
-package com.komori.predictions.util;
+package com.komori.predictions.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String STORED_SECRET_KEY;
 
-    public String generateAccessToken(String email) {
+    private String generateAccessToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims(claims)
@@ -28,7 +30,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
+    private String generateRefreshToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims(claims)
@@ -37,6 +39,26 @@ public class JwtUtil {
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 14)) // 14 day expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
+    }
+
+    public ResponseCookie createAccessTokenCookie(String email) {
+        return ResponseCookie.from("access", generateAccessToken(email))
+                .httpOnly(true)
+                .path("/")
+                .secure(true)
+                .maxAge(Duration.ofMinutes(5))
+                .sameSite("None")
+                .build();
+    }
+
+    public ResponseCookie createRefreshTokenCookie(String email) {
+        return ResponseCookie.from("refresh", generateRefreshToken(email))
+                .httpOnly(true)
+                .path("/")
+                .secure(true)
+                .maxAge(Duration.ofDays(14))
+                .sameSite("None")
+                .build();
     }
 
     private Claims extractAllClaims(String token) {

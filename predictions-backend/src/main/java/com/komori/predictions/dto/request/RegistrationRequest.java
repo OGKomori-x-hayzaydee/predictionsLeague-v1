@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 // Represents data coming into the API
 public class RegistrationRequest {
+    private String username;
     private String firstName;
     private String lastName;
     private String email;

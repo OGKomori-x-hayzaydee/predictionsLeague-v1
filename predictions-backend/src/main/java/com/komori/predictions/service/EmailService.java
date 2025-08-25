@@ -13,7 +13,7 @@ public class EmailService {
     private String fromEmail;
     private final JavaMailSender mailSender;
 
-    void sendWelcomeEmail(String toEmail, String name) {
+    public void sendWelcomeEmail(String toEmail, String name) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(fromEmail);
         mailMessage.setTo(toEmail);
@@ -24,7 +24,7 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-    void sendVerifyOtpEmail(String toEmail, String name, String otp) {
+    public void sendVerifyOtpEmail(String toEmail, String name, String otp) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(fromEmail);
         mailMessage.setTo(toEmail);
@@ -37,7 +37,7 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-    void sendAccountVerifiedEmail(String toEmail, String name) {
+    public void sendAccountVerifiedEmail(String toEmail, String name) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(fromEmail);
         mailMessage.setTo(toEmail);
@@ -48,7 +48,7 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-    void sendResetPasswordEmail(String toEmail, String name) {
+    public void sendResetPasswordEmail(String toEmail, String name) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(fromEmail);
         mailMessage.setTo(toEmail);
@@ -61,7 +61,7 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-    void sendChangedPasswordEmail(String toEmail, String name) {
+    public void sendChangedPasswordEmail(String toEmail, String name) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(fromEmail);
         mailMessage.setTo(toEmail);
