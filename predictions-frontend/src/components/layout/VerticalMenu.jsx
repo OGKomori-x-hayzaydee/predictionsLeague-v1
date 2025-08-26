@@ -10,9 +10,10 @@ import {
   GearIcon,
   ExitIcon,
 } from "@radix-ui/react-icons";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { ThemeContext } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function VerticalMenu({
   activeItem,
@@ -21,6 +22,25 @@ export default function VerticalMenu({
 }) {
   // Get theme context
   const { theme } = useContext(ThemeContext);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      console.log("🔄 Logging out...");
+      const result = await logout();
+      console.log("✅ Logout result:", result);
+      
+      // Navigate to landing page after successful logout
+      navigate("/");
+    } catch (error) {
+      console.error("❌ Logout error:", error);
+      // Even if logout fails, redirect to landing page
+      navigate("/");
+    }
+  };
+
   // Menu items configuration
   const menuItems = [
     {
@@ -136,7 +156,7 @@ export default function VerticalMenu({
                 ? 'text-white/50 hover:text-red-300' 
                 : 'text-slate-400 hover:text-red-500'
               } transition-colors mt-8`}
-              onClick={() => alert("Logging out...")}
+              onClick={handleLogout}
               title={isCollapsed ? "Logout" : ""}
             >
               <span className={isCollapsed ? "" : "mr-3"}>

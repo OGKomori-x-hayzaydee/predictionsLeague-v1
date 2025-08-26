@@ -365,7 +365,7 @@ const PotentialPointsSummary = ({ predictions, teamLogos }) => {
                     >
                       {" "}
                       <span
-                        className={`text-sm font-medium ${getThemeStyles(
+                        className={`text-sm font-medium mr-2 ${getThemeStyles(
                           theme,
                           text.secondary
                         )}`}
