@@ -18,7 +18,7 @@ spring:
             scope:
               - "email"
               - "profile"
-            redirect-uri: "${BACKEND_URL}/api/login/oauth2/code/google"
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: "authorization_code"
         provider:
           google:
@@ -49,3 +49,4 @@ jwt:
 server:
   servlet:
     context-path: /api # all routes in this app will be prefixed with this
+  forward-headers-strategy: framework
