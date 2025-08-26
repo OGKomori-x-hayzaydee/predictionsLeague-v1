@@ -1,37 +1,86 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Container, Button, TextField } from "@radix-ui/themes";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { EyeOpenIcon, EyeClosedIcon } from "@radix-ui/react-icons";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
+import OAuthLoginSection from "../components/auth/OAuthLogin";
+import oauthAPI from "../services/api/oauthAPI";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
+  const [oauthError, setOauthError] = useState(null);
+  
+  const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the intended destination after login
+  const from = location.state?.from?.pathname || "/home/dashboard";
+
+  // Check for OAuth errors in URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const errorParam = urlParams.get('error');
+    
+    if (errorParam) {
+      setOauthError(decodeURIComponent(errorParam));
+      // Clean up URL
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.search, navigate, location.pathname]);
+
+  const handleOAuthLogin = (providerId) => {
+    try {
+      console.log(`🔄 Starting OAuth login with ${providerId}`);
+      oauthAPI.initiateLogin(providerId, from);
+    } catch (error) {
+      console.error('❌ OAuth login error:', error);
+      setOauthError(error.message);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
+    setValidationErrors({});
+    
+    // Basic client-side validation
+    const errors = {};
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Please enter a valid email address";
+    }
+    
+    if (!password.trim()) {
+      errors.password = "Password is required";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
     
     try {
-      // Simulate login delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await login({
+        username: email, // Temp auth accepts any credentials
+        password: password,
+      });
       
-      // Here you would normally have your authentication logic
-      console.log("Logging in with:", { email, password });
-      
-      // Redirect to dashboard after successful login
-      navigate("/dashboard");
-    } catch (err) {
-      setError("Invalid email or password. Please try again.");
-    } finally {
-      setIsLoading(false);
+      if (result.success) {
+        // Redirect to intended destination or dashboard
+        navigate(from, { replace: true });
+      }
+    } catch (loginError) {
+      // Handle any unexpected errors
+      console.error('Login error:', loginError);
     }
   };
 
@@ -94,44 +143,72 @@ export default function Login() {
               </motion.p>
             </div>
 
-            {error && (
+            {(error || oauthError) && (
               <motion.div 
                 className="bg-red-900/30 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg mb-6"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                {error}
+                {error || oauthError}
               </motion.div>
             )}
+
+            {/* OAuth Login Section */}
+            <OAuthLoginSection 
+              onOAuthLogin={handleOAuthLogin}
+              disabled={isLoading}
+              className="mb-6"
+            />
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="email" className="block text-teal-200 text-sm font-medium mb-2 font-outfit">
                   email address
                 </label>
-                <div className="bg-primary-600/50 rounded-md border border-primary-400/30 focus-within:border-teal-500 transition-colors">
+                <div className={`bg-primary-600/50 rounded-md border transition-colors ${
+                  validationErrors.email 
+                    ? 'border-red-500/50 focus-within:border-red-500' 
+                    : 'border-primary-400/30 focus-within:border-teal-500'
+                }`}>
                   <input
                     id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (validationErrors.email) {
+                        setValidationErrors(prev => ({ ...prev, email: null }));
+                      }
+                    }}
                     placeholder="your@email.com"
                     required
                     className="w-full px-3 py-2 bg-transparent text-white font-outfit placeholder-white/40 outline-none"
                   />
                 </div>
+                {validationErrors.email && (
+                  <p className="text-red-400 text-xs mt-1 font-outfit">{validationErrors.email}</p>
+                )}
               </div>
 
               <div>
                 <label htmlFor="password" className="block text-teal-200 text-sm font-medium mb-2 font-outfit">
                   password
                 </label>
-                <div className="relative bg-primary-600/50 rounded-md border border-primary-400/30 focus-within:border-teal-500 transition-colors">
+                <div className={`relative bg-primary-600/50 rounded-md border transition-colors ${
+                  validationErrors.password 
+                    ? 'border-red-500/50 focus-within:border-red-500' 
+                    : 'border-primary-400/30 focus-within:border-teal-500'
+                }`}>
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (validationErrors.password) {
+                        setValidationErrors(prev => ({ ...prev, password: null }));
+                      }
+                    }}
                     placeholder="••••••••"
                     required
                     className="w-full px-3 py-2 bg-transparent text-white font-outfit placeholder-white/40 outline-none pr-10"
@@ -145,6 +222,9 @@ export default function Login() {
                     {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
                   </button>
                 </div>
+                {validationErrors.password && (
+                  <p className="text-red-400 text-xs mt-1 font-outfit">{validationErrors.password}</p>
+                )}
                 <div className="flex justify-end mt-1">
                   <Link to="/forgot-password" className="text-sm text-teal-300 hover:text-teal-200 font-outfit">
                     forgot password?

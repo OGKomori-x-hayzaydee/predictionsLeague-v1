@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import leagueAPI from '../services/api/leagueAPI.js';
+import { showToast } from '../services/notificationService.js';
 
 const useLeagues = () => {
   const [myLeagues, setMyLeagues] = useState([]);
@@ -6,199 +8,97 @@ const useLeagues = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Simulated API call to fetch user leagues
+  // Fetch user leagues using the API (with fallback to mock data)
   const fetchMyLeagues = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Mock data - this would be replaced with actual API call
-      const leaguesData = [
-        {
-          id: 1,
-          name: "Global Premier League Predictions",
-          type: "public",
-          members: 10843,
-          position: 567,
-          rank: "Silver II",
-          points: 345,
-          pointsLeader: 521,
-          isAdmin: false,
-          description: "Official global league for all Premier League prediction enthusiasts."
-        },
-        {
-          id: 2,
-          name: "Friends & Family",
-          type: "private",
-          members: 12,
-          position: 3,
-          rank: "Gold",
-          points: 453,
-          pointsLeader: 478,
-          isAdmin: true,
-          description: "Our private prediction league for bragging rights at family gatherings!"
-        },
-        {
-          id: 3,
-          name: "Office Rivalry",
-          type: "private",
-          members: 8,
-          position: 1,
-          rank: "Leader",
-          points: 482,
-          pointsLeader: 482,
-          isAdmin: true,
-          description: "Settle workplace debates through the beautiful game."
-        },
-        {
-          id: 4,
-          name: "Reddit r/PremierLeague",
-          type: "public",
-          members: 5432,
-          position: 78,
-          rank: "Platinum",
-          points: 471,
-          pointsLeader: 543,
-          isAdmin: false,
-          description: "The official prediction league for the Premier League subreddit."
-        }
-      ];
-      
-      setMyLeagues(leaguesData);
-      setError(null);
+      const response = await leagueAPI.getUserLeagues();
+      if (response.success) {
+        setMyLeagues(response.leagues);
+      } else {
+        throw new Error(response.error || 'Failed to fetch leagues');
+      }
     } catch (err) {
-      setError('Failed to load your leagues. Please try again later.');
+      setError(err.message);
       console.error('Error fetching leagues:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Simulated API call to fetch featured leagues
+  // Fetch featured leagues (with fallback to mock data)
   const fetchFeaturedLeagues = async () => {
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data - would be replaced with actual API call
-      const featuredData = [
-        {
-          id: 101,
-          name: "Official NBC Sports League",
-          type: "public",
-          members: 24567,
-          pointsToQualify: null,
-          description: "NBC Sports official prediction challenge with weekly prizes!",
-          sponsor: "NBC Sports",
-          hasAwards: true
-        },
-        {
-          id: 102,
-          name: "Sky Sports Super 6",
-          type: "public",
-          members: 31245,
-          pointsToQualify: null,
-          description: "Predict six matches each week with a chance to win £250,000.",
-          sponsor: "Sky Sports",
-          hasAwards: true
-        },
-        {
-          id: 103,
-          name: "Premier League Legends",
-          type: "public",
-          members: 8762,
-          pointsToQualify: 1200,
-          description: "Elite league for the top 10% of predictors from previous season.",
-          sponsor: null,
-          hasAwards: true
-        },
-        {
-          id: 104,
-          name: "FPL Integration Challenge",
-          type: "public",
-          members: 15328,
-          pointsToQualify: null,
-          description: "Link your FPL team and earn bonus points based on your squad performance.",
-          sponsor: "Fantasy Premier League",
-          hasAwards: false
-        }
-      ];
-      
-      setFeaturedLeagues(featuredData);
+      const response = await leagueAPI.getFeaturedLeagues();
+      if (response.success) {
+        setFeaturedLeagues(response.leagues);
+      } else {
+        throw new Error(response.error || 'Failed to fetch featured leagues');
+      }
     } catch (err) {
       console.error('Error fetching featured leagues:', err);
+      // The leagueAPI already handles fallback to mock data
     }
   };
 
   // Join a league by code
-  const joinLeague = async (leagueCode) => {
+  const joinLeague = async (joinCode) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Simulate successful join
-      // In a real app, this would return the joined league data from the API
-      const joinedLeague = {
-        id: 999,
-        name: `League ${leagueCode}`,
-        type: "private",
-        members: 15,
-        position: 15,
-        rank: "Bronze",
-        points: 0,
-        pointsLeader: 450,
-        isAdmin: false,
-        description: "You've just joined this league"
-      };
-      
-      // Add the joined league to myLeagues
-      setMyLeagues(prev => [...prev, joinedLeague]);
-      
-      return { success: true, message: "Successfully joined league!", league: joinedLeague };
+      const response = await leagueAPI.joinLeague(joinCode);
+      if (response.success) {
+        showToast('Successfully joined league!', 'success');
+        // Refresh user leagues to include the newly joined league
+        await fetchMyLeagues();
+        return { success: true };
+      } else {
+        showToast(response.error || 'Failed to join league', 'error');
+        return { success: false, error: response.error };
+      }
     } catch (err) {
-      return { success: false, message: "Failed to join league. Invalid code or server error." };
+      showToast('Error joining league', 'error');
+      console.error('Error joining league:', err);
+      return { success: false, error: err.message };
     }
   };
 
-  // Join a featured league directly
+  // Join a featured league
   const joinFeaturedLeague = async (leagueId) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Find the featured league by ID
-      const leagueToJoin = featuredLeagues.find(league => league.id === leagueId);
-      
-      if (!leagueToJoin) {
-        return { success: false, message: "League not found" };
-      }
-      
-      // Transform featured league to user league format
-      const joinedLeague = {
-        id: leagueToJoin.id,
-        name: leagueToJoin.name,
-        type: leagueToJoin.type,
-        members: leagueToJoin.members,
-        position: leagueToJoin.members, // Start at bottom position
-        rank: "Bronze",
-        points: 0,
-        pointsLeader: 550,
-        isAdmin: false,
-        description: leagueToJoin.description
-      };
-      
-      // Check if already joined
-      const alreadyJoined = myLeagues.some(league => league.id === leagueId);
-      
-      if (!alreadyJoined) {
-        setMyLeagues(prev => [...prev, joinedLeague]);
-        return { success: true, message: "Successfully joined league!" };
+      // For featured leagues, we use a special code format
+      const response = await leagueAPI.joinLeague(`FEATURED_${leagueId}`);
+      if (response.success) {
+        showToast('Successfully joined featured league!', 'success');
+        await fetchMyLeagues();
+        return { success: true };
       } else {
-        return { success: false, message: "You've already joined this league" };
+        showToast(response.error || 'Failed to join featured league', 'error');
+        return { success: false, error: response.error };
       }
     } catch (err) {
-      return { success: false, message: "Failed to join league. Please try again." };
+      showToast('Error joining featured league', 'error');
+      console.error('Error joining featured league:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Create a new league
+  const createLeague = async (leagueData) => {
+    try {
+      const response = await leagueAPI.createLeague(leagueData);
+      if (response.success) {
+        showToast('League created successfully!', 'success');
+        // Refresh user leagues to include the newly created league
+        await fetchMyLeagues();
+        return { success: true, league: response.league };
+      } else {
+        showToast(response.error || 'Failed to create league', 'error');
+        return { success: false, error: response.error };
+      }
+    } catch (err) {
+      showToast('Error creating league', 'error');
+      console.error('Error creating league:', err);
+      return { success: false, error: err.message };
     }
   };
 
@@ -215,7 +115,9 @@ const useLeagues = () => {
     error, 
     joinLeague,
     joinFeaturedLeague,
-    refreshMyLeagues: fetchMyLeagues
+    createLeague,
+    refreshMyLeagues: fetchMyLeagues,
+    refreshFeaturedLeagues: fetchFeaturedLeagues
   };
 };
 
