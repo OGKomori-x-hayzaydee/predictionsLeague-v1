@@ -1,0 +1,51 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google: # For connecting Google account
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - "email"
+              - "profile"
+            redirect-uri: "${BACKEND_URL}/api/login/oauth2/code/google"
+            authorization-grant-type: "authorization_code"
+        provider:
+          google:
+            authorization-uri: "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline"
+            token-uri: "https://oauth2.googleapis.com/token"
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          from: ${MAIL_FROM}
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+server:
+  servlet:
+    context-path: /api # all routes in this app will be prefixed with this

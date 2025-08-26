@@ -1,0 +1,67 @@
+package com.komori.predictions.controller;
+
+import com.komori.predictions.dto.request.LoginRequest;
+import com.komori.predictions.dto.request.RegistrationRequest;
+import com.komori.predictions.dto.response.RegistrationResponse;
+import com.komori.predictions.security.JwtUtil;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import com.komori.predictions.service.AuthService;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class AuthControllerTests {
+    @Mock
+    private AuthService authService;
+    @Mock
+    private AuthenticationManager authenticationManager;
+    @InjectMocks
+    private AuthController authController;
+
+    @Test
+    void loginTest1() {
+        // Everything works
+        LoginRequest request = LoginRequest.builder().email("test@example.com").password("password").build();
+        Authentication fakeAuth = mock(Authentication.class);
+
+        when(authenticationManager.authenticate(any())).thenReturn(fakeAuth);
+        doNothing().when(authService).checkVerifiedStatus(request.getEmail());
+
+        ResponseEntity<String> responseEntity = assertDoesNotThrow(() -> authController.login(request));
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.SET_COOKIE));
+    }
+
+    @Test
+    void registerTest1() {
+        // Works fine
+        RegistrationRequest request  = RegistrationRequest.builder().email("test@example.com").firstName("Username").password("password").build();
+
+        ResponseEntity<RegistrationResponse> responseEntity = assertDoesNotThrow(() -> authController.register(request));
+
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void sendVerifyOtpTest() {
+        RegistrationResponse response = RegistrationResponse.builder().name("Username").email("test@example.com").build();
+
+        ResponseEntity<String> responseEntity = assertDoesNotThrow(() -> authController.sendVerifyOtp(response));
+
+        assertEquals("VerifyOTP sent successfully", responseEntity.getBody());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+}
