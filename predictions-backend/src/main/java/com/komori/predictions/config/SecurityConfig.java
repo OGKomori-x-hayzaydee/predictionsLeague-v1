@@ -1,7 +1,7 @@
 package com.komori.predictions.config;
 
 import com.komori.predictions.security.CustomAuthenticationEntryPoint;
-import com.komori.predictions.security.CustomAuthenticationSuccessHandler;
+import com.komori.predictions.security.OAuth2AuthenticationSuccessHandler;
 import com.komori.predictions.security.JwtRequestFilter;
 import com.komori.predictions.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtRequestFilter requestFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomAuthenticationSuccessHandler successHandler;
+    private final OAuth2AuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

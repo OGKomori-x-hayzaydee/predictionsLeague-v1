@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final EmailService emailService;
@@ -41,6 +41,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         // send appropriate redirect
         Optional<UserEntity> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
+            // if registering
             UserEntity newUser = UserEntity.builder()
                     .userID(UUID.randomUUID().toString())
                     .email(email)
@@ -49,8 +50,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                     .build();
             userRepository.save(newUser);
             emailService.sendWelcomeEmail(email, firstName);
-            response.sendRedirect("http://localhost:5173/home/dashboard");
+            response.sendRedirect("http://localhost:5173/auth/oauth/callback");
         } else {
+            // if logging in
             response.sendRedirect("http://localhost:5173/home/dashboard");
         }
     }
