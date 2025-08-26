@@ -29,7 +29,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         OAuth2User oAuth2User = ((OAuth2AuthenticationToken) authentication).getPrincipal();
         String firstName = oAuth2User.getAttribute("given_name");
-        String lastName = oAuth2User.getAttribute("last_name");
+        String lastName = oAuth2User.getAttribute("family_name");
         String email = oAuth2User.getAttribute("email");
 
         ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
