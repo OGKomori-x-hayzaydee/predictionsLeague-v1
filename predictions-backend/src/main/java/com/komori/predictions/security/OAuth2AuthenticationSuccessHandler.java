@@ -53,7 +53,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             response.sendRedirect("http://localhost:5173/auth/oauth/callback");
         } else {
             // if logging in
-            response.sendRedirect("http://localhost:5173/home/dashboard");
+            response.sendRedirect("http://localhost:5173/auth/oauth/callback");
         }
     }
 }
