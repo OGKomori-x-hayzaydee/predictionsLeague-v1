@@ -8,22 +8,6 @@ spring:
     hibernate:
       ddl-auto: none
     open-in-view: true
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google: # For connecting Google account
-#            client-id: ${GOOGLE_CLIENT_ID}
-#            client-secret: ${GOOGLE_CLIENT_SECRET}
-#            scope:
-#              - "email"
-#              - "profile"
-#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-#            authorization-grant-type: "authorization_code"
-#        provider:
-#          google:
-#            authorization-uri: "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline"
-#            token-uri: "https://oauth2.googleapis.com/token"
   mail:
     host: smtp-relay.brevo.com
     port: 587
@@ -49,6 +33,11 @@ jwt:
 server:
   servlet:
     context-path: /api # all routes in this app will be prefixed with this
+    session:
+      cookie:
+        same-site: none
+        secure: true
+  forward-headers-strategy: framework
 
 app:
   frontend-url: ${FRONTEND_URL}
