@@ -1,7 +1,6 @@
 package com.komori.predictions.config;
 
 import com.komori.predictions.security.CustomAuthenticationEntryPoint;
-import com.komori.predictions.security.OAuth2AuthenticationSuccessHandler;
 import com.komori.predictions.security.JwtRequestFilter;
 import com.komori.predictions.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtRequestFilter requestFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final OAuth2AuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -39,9 +37,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/send-verify-otp", "/auth/verify-otp", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Public endpoints, don't require auth
+                        .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Public endpoints, don't require auth
                         .anyRequest().authenticated())
-                .oauth2Login(login -> login.successHandler(successHandler))
                 .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .build();
@@ -53,9 +50,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsFilter corsFilter(AppProperties appProperties) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

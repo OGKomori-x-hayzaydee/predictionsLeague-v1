@@ -87,21 +87,13 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@CookieValue(name = "jwt", required = false) String accessToken,
-                                     @CookieValue(name = "refresh", required = false) String refreshToken) {
+    public ResponseEntity<?> refresh(@CookieValue(name = "refresh", required = false) String refreshToken) {
 
-        if (refreshToken == null && accessToken == null) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("User is not logged in");
-        }
-
-        if (refreshToken == null && jwtUtil.isTokenExpired(accessToken)) {
+        if (refreshToken == null) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body("No refresh token found");
         }
-
         if (jwtUtil.isTokenExpired(refreshToken)) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
@@ -111,7 +103,6 @@ public class AuthController {
         String email = jwtUtil.extractEmailFromToken(refreshToken);
         ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
         ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
-
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
