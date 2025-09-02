@@ -1,17 +1,17 @@
 package com.komori.predictions.controller;
 
 import com.komori.predictions.config.AppProperties;
+import com.komori.predictions.dto.request.RegistrationCallbackRequest;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.repository.UserRepository;
 import com.komori.predictions.security.JwtUtil;
+import com.komori.predictions.service.OAuth2Service;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -27,6 +27,7 @@ public class OAuth2Controller {
     private final UserRepository userRepository;
     private final RestTemplateBuilder restTemplateBuilder;
     private final AppProperties appProperties;
+    private final OAuth2Service oAuth2Service;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @GetMapping("/login")
@@ -71,5 +72,13 @@ public class OAuth2Controller {
         } else { // User Login
             response.sendRedirect(appProperties.getFrontendUrl() + "/dashboard");
         }
+    }
+
+    @PostMapping("/finish-registration")
+    public ResponseEntity<String> finishRegistration(
+            @CurrentSecurityContext(expression = "authentication?.name") String email,
+            @RequestBody RegistrationCallbackRequest request) {
+        oAuth2Service.finishRegistration(email, request);
+        return ResponseEntity.ok("Registration successful");
     }
 }
