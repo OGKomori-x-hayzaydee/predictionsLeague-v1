@@ -44,13 +44,7 @@ export const authAPI = {
   },
 
   /**
-   * Register new user
-   * @param {Object} userData - User registration data
-   * @param {string} userData.username - Username
-   * @param {string} userData.email - Email address
-   * @param {string} userData.password - Password
-   * @param {string} userData.confirmPassword - Password confirmation (validated on frontend)
-   * @returns {Promise<Object>} Registration response with user data
+    Register new user
    */
   async register(userData) {
     try {
@@ -94,7 +88,6 @@ export const authAPI = {
 
   /**
    * Logout user
-   * @returns {Promise<Object>} Logout response
    */
   async logout() {
     try {
@@ -200,23 +193,42 @@ export const authAPI = {
 
   /**
    * Get current user information
-   * Used to verify authentication status with HTTP-only cookies
+   * Uses existing protected endpoint since /auth/me doesn't exist
    * @returns {Promise<Object>} Current user data
    */
   async getCurrentUser() {
     try {
-      const response = await apiCall({
+      // Use existing protected endpoint to verify authentication
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/profile/home`, {
         method: 'GET',
-        url: '/auth/me',
+        credentials: 'include', // Include HTTP-only cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (response.success) {
-        return {
-          success: true,
-          user: response.data,
-        };
+      if (response.ok) {
+        const responseText = await response.text();
+        console.log('Auth check response:', responseText);
+        
+        // Extract email from response text "Viewing the HomePage of {email}"
+        const emailMatch = responseText.match(/of (.+)$/);
+        const email = emailMatch ? emailMatch[1].trim() : null;
+        
+        if (email) {
+          return {
+            success: true,
+            user: {
+              email: email,
+              authenticated: true,
+              source: 'profile-endpoint'
+            },
+          };
+        } else {
+          throw new Error('Could not extract user info from response');
+        }
       } else {
-        throw new Error(response.error?.message || 'Failed to get user data');
+        throw new Error(`Authentication check failed: ${response.status}`);
       }
     } catch (error) {
       // Don't show error notifications for auth checks

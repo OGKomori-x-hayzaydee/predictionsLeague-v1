@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { getTokens, setTokens, clearTokens } from '../services/api/baseAPI.js';
 import baseAPI from '../services/api/baseAPI.js';
 import authAPI from '../services/api/authAPI.js';
+import authService from '../services/auth/AuthService.js';
 
 // Auth states
 const AUTH_STATES = {
@@ -96,14 +97,15 @@ export const AuthProvider = ({ children }) => {
       
       if (isAuthenticated) {
         try {
-          // Try to make an authenticated request to verify the session
-          // This will work if HTTP-only cookies are valid
-          const response = await authAPI.getCurrentUser();
+          // Use centralized auth service to check authentication
+          const authResult = await authService.checkAuth({ 
+            source: 'auth-context-init' 
+          });
           
-          if (response.success && response.user) {
+          if (authResult.isAuthenticated && authResult.user) {
             dispatch({
               type: AUTH_ACTIONS.LOGIN_SUCCESS,
-              payload: { user: response.user },
+              payload: { user: authResult.user },
             });
           } else {
             // Clear invalid auth state

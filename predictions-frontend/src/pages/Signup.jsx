@@ -57,7 +57,12 @@ export default function Signup() {
   const handleOAuthSignup = (providerId) => {
     try {
       console.log(`🔄 Starting OAuth signup with ${providerId}`);
-      oauthAPI.initiateLogin(providerId, '/home/dashboard');
+      
+      // Store that this is a signup flow (not login)
+      sessionStorage.setItem('oauth_flow_type', 'signup');
+      
+      // For signup, always redirect to onboarding even if user exists
+      oauthAPI.initiateLogin(providerId, '/onboarding/select-team');
     } catch (error) {
       console.error('❌ OAuth signup error:', error);
       setOauthError(error.message);

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { MagnifyingGlassIcon, ChartBarIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, BarChartIcon } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 
 const EmptyPredictionState = ({ searchQuery }) => {
@@ -19,7 +19,7 @@ const EmptyPredictionState = ({ searchQuery }) => {
             }`}
           />
         ) : (
-          <ChartBarIcon
+          <BarChartIcon
             className={`w-8 h-8 ${
               theme === "dark" ? "text-white/40" : "text-gray-400"
             }`}

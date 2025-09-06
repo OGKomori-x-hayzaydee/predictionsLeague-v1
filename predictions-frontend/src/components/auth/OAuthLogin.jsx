@@ -1,166 +1,44 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import oauthAPI from '../../services/api/oauthAPI';
+import oauthAPI from '../../services/api/oauthAPI.js';
 
-/**
- * OAuth Login Button Component
- * Renders a button for OAuth provider login
- */
-const OAuthButton = ({ provider, onClick, disabled = false }) => {
-  const handleClick = () => {
-    if (!disabled && onClick) {
-      onClick(provider.id);
-    }
-  };
-
-  // Handle both component and string icons
-  const IconComponent = provider.icon;
-  const isComponent = typeof IconComponent === 'function';
-
-  return (
-    <motion.button
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
-      onClick={handleClick}
-      disabled={disabled}
-      className={`
-        w-full flex items-center justify-center gap-3 px-4 py-3 
-        rounded-lg border transition-all duration-200 font-outfit
-        ${disabled 
-          ? 'opacity-50 cursor-not-allowed bg-gray-800 border-gray-700' 
-          : 'bg-slate-800/50 hover:bg-slate-700/60 border-slate-600/50 hover:border-teal-400/50 hover:shadow-lg backdrop-blur-sm'
-        }
-      `}
-    >
-      <div className="flex items-center justify-center w-5 h-5">
-        {isComponent ? (
-          <IconComponent size={20} />
-        ) : (
-          <span className="text-xl">{provider.icon}</span>
-        )}
-      </div>
-      <span className="text-teal-100 font-medium">
-        Continue with {provider.name}
-      </span>
-    </motion.button>
-  );
-};
-
-/**
- * OAuth Login Section Component
- * Renders all available OAuth providers with divider
- */
-const OAuthLoginSection = ({ onOAuthLogin, disabled = false, className = '' }) => {
-  const providers = oauthAPI.getAvailableProviders();
-
-  const handleOAuthLogin = (providerId) => {
-    if (disabled) return;
-    
+const OAuthLoginSection = ({ onOAuthLogin, disabled = false, className = "" }) => {
+  
+  const handleGoogleLogin = () => {
     try {
-      console.log(`🔄 Starting OAuth login with ${providerId}`);
-      
+      // Call the prop function if provided, otherwise use oauthAPI directly
       if (onOAuthLogin) {
-        onOAuthLogin(providerId);
+        onOAuthLogin('google');
       } else {
-        // Default behavior - redirect to OAuth provider
-        oauthAPI.initiateLogin(providerId);
+        oauthAPI.initiateLogin('google');
       }
     } catch (error) {
-      console.error('❌ OAuth login error:', error);
-      // You might want to show a toast notification here
+      console.error('OAuth login error:', error);
     }
   };
 
-  if (providers.length === 0) {
-    return null;
-  }
-
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* OAuth Provider Buttons */}
-      <div className="space-y-3">
-        {providers.map((provider) => (
-          <OAuthButton
-            key={provider.id}
-            provider={provider}
-            onClick={handleOAuthLogin}
-            disabled={disabled}
-          />
-        ))}
+    <div className={`oauth-login-section ${className}`}>
+      <div className="flex items-center my-4">
+        <div className="flex-grow border-t border-primary-400/30"></div>
+        <span className="px-4 text-white/60 text-sm font-outfit">or continue with</span>
+        <div className="flex-grow border-t border-primary-400/30"></div>
       </div>
-
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/20" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-primary-500 px-2 text-white/60 font-outfit">
-            or continue with email
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/**
- * OAuth Callback Processing Component
- * Shows loading state while processing OAuth callback
- */
-export const OAuthCallbackHandler = ({ onSuccess, onError }) => {
-  React.useEffect(() => {
-    const processCallback = async () => {
-      try {
-        console.log('🔄 Processing OAuth callback...');
-        const result = await oauthAPI.handleCallback();
-        
-        if (result.success) {
-          console.log('✅ OAuth callback successful:', result);
-          if (onSuccess) {
-            onSuccess(result);
-          }
-        } else {
-          console.error('❌ OAuth callback failed:', result);
-          if (onError) {
-            onError(result);
-          }
-        }
-      } catch (error) {
-        console.error('❌ OAuth callback processing error:', error);
-        if (onError) {
-          onError({ success: false, error: error.message });
-        }
-      }
-    };
-
-    // Check if this is actually an OAuth callback
-    if (oauthAPI.isOAuthCallback()) {
-      processCallback();
-    } else {
-      // Not an OAuth callback, redirect to login
-      window.location.href = '/login';
-    }
-  }, [onSuccess, onError]);
-
-  return (
-    <div className="min-h-screen bg-primary-500 flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-primary-500/60 backdrop-blur-md rounded-xl p-8 border border-primary-400/20 text-center"
+      
+      <button
+        onClick={handleGoogleLogin}
+        disabled={disabled}
+        className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-4 rounded-md transition-colors duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
-        <h2 className="text-xl text-teal-100 font-dmSerif mb-2">
-          Completing your login...
-        </h2>
-        <p className="text-white/70 font-outfit">
-          Please wait while we process your authentication
-        </p>
-      </motion.div>
+        <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span>{disabled ? 'Signing in...' : 'Continue with Google'}</span>
+      </button>
     </div>
   );
 };
 
-export { OAuthButton, OAuthLoginSection };
 export default OAuthLoginSection;

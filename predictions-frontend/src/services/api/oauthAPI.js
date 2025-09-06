@@ -1,128 +1,74 @@
-/**
- * OAuth API service for frontend OAuth2 integration
- * Works with Spring Security OAuth2 backend redirects
- */
-import GoogleIcon from '../../components/icons/GoogleIcon.jsx';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
-export const oauthAPI = {
-  /**
-   * OAuth provider configuration
-   * These URLs should match the backend OAuth2 endpoints
-   */
-  providers: {
-    google: {
-      name: 'Google',
-      loginUrl: `${API_BASE_URL}/oauth2/authorization/google`,
-      icon: GoogleIcon, // Official Google icon component
-    },
-  },
+class OAuthAPI {
+  constructor() {
+    this.oauthBaseUrl = import.meta.env.VITE_OAUTH_BASE_URL; // Your proxy URL
+    this.frontendBaseUrl = window.location.origin;
+  }
 
   /**
-   * Initiate OAuth login by redirecting to backend OAuth endpoint
-   * @param {string} provider - OAuth provider name (google, github, facebook)
-   * @param {string} redirectPath - Frontend path to redirect to after successful login
+   * Initiate OAuth login through your proxy
    */
-  initiateLogin(provider, redirectPath = '/home/dashboard') {
-    if (!this.providers[provider]) {
-      throw new Error(`Unsupported OAuth provider: ${provider}`);
-    }
-
-    // Store intended redirect path in sessionStorage for post-login redirect
-    if (redirectPath) {
-      sessionStorage.setItem('oauth_redirect_path', redirectPath);
-    }
-
-    // Store current location for fallback
-    sessionStorage.setItem('oauth_origin_path', window.location.pathname);
-
-    // Redirect to backend OAuth2 authorization endpoint
-    // Backend will handle OAuth flow and redirect back to frontend success URL
-    const oauthUrl = `${this.providers[provider].loginUrl}?redirect_uri=${encodeURIComponent(window.location.origin + '/auth/oauth/callback')}`;
+  initiateLogin(provider = 'google', redirectPath = '/home/dashboard') {
+    console.log(`🔄 Starting OAuth login with ${provider} via proxy`);
     
-    console.log(`🔄 Initiating OAuth login with ${provider}:`, oauthUrl);
+    // Store intended destination
+    sessionStorage.setItem('oauth_redirect_path', redirectPath);
+    sessionStorage.setItem('oauth_flow_type', 'login');
+    sessionStorage.setItem('oauth_provider', provider);
+    sessionStorage.setItem('oauth_timestamp', Date.now().toString());
+    
+    // Build OAuth proxy URL
+    const callbackUrl = `${this.frontendBaseUrl}/auth/callback`;
+    const oauthUrl = `${this.oauthBaseUrl}/oauth2/start?rd=${encodeURIComponent(callbackUrl)}`;
+    
+    console.log('🔗 OAuth URL:', oauthUrl);
+    console.log('🔙 Callback URL:', callbackUrl);
+    
+    // Redirect to your OAuth2 proxy
     window.location.href = oauthUrl;
-  },
+  }
 
   /**
-   * Handle OAuth callback - called when user returns from OAuth provider
-   * The backend should have already set HTTP-only cookies at this point
+   * Handle OAuth callback - user returns from OAuth proxy
    */
   async handleCallback() {
-    try {
-      console.log('🔄 Processing OAuth callback...');
-      
-      // Check if we have authentication cookies (backend should have set them)
-      // We'll use the existing auth check endpoint to verify authentication
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        method: 'GET',
-        credentials: 'include', // Include HTTP-only cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        console.log('✅ OAuth authentication successful:', userData);
-        
-        // Get redirect path from storage
-        const redirectPath = sessionStorage.getItem('oauth_redirect_path') || '/home/dashboard';
-        const originPath = sessionStorage.getItem('oauth_origin_path') || '/';
-        
-        // Clean up storage
-        sessionStorage.removeItem('oauth_redirect_path');
-        sessionStorage.removeItem('oauth_origin_path');
-        
-        return {
-          success: true,
-          user: userData,
-          redirectPath,
-        };
-      } else {
-        throw new Error('OAuth authentication failed');
-      }
-    } catch (error) {
-      console.error('❌ OAuth callback error:', error);
-      
-      // Clean up storage on error
-      sessionStorage.removeItem('oauth_redirect_path');
-      sessionStorage.removeItem('oauth_origin_path');
-      
-      return {
-        success: false,
-        error: error.message,
-        redirectPath: '/login',
-      };
+    console.log('🔄 Handling OAuth callback');
+    
+    const redirectPath = sessionStorage.getItem('oauth_redirect_path') || '/home/dashboard';
+    const flowType = sessionStorage.getItem('oauth_flow_type') || 'login';
+    const provider = sessionStorage.getItem('oauth_provider') || 'google';
+    const timestamp = sessionStorage.getItem('oauth_timestamp');
+    
+    // Security check - callback should happen within reasonable time
+    if (timestamp && (Date.now() - parseInt(timestamp)) > 600000) { // 10 minutes
+      throw new Error('OAuth session expired - please try again');
     }
-  },
+    
+    // Clean up session storage
+    sessionStorage.removeItem('oauth_redirect_path');
+    sessionStorage.removeItem('oauth_flow_type');
+    sessionStorage.removeItem('oauth_provider');
+    sessionStorage.removeItem('oauth_timestamp');
+    
+    // Return success info
+    return {
+      success: true,
+      redirectPath,
+      flowType,
+      provider
+    };
+  }
 
   /**
-   * Get list of available OAuth providers for UI rendering
+   * Check if user returned from OAuth provider
    */
-  getAvailableProviders() {
-    return Object.entries(this.providers).map(([key, config]) => ({
-      id: key,
-      name: config.name,
-      icon: config.icon,
-    }));
-  },
+  isOAuthReturn() {
+    const hasOAuthState = sessionStorage.getItem('oauth_flow_type') !== null;
+    const fromGoogle = document.referrer.includes('accounts.google.com');
+    const fromProxy = document.referrer.includes(this.oauthBaseUrl);
+    
+    return hasOAuthState && (fromGoogle || fromProxy);
+  }
+}
 
-  /**
-   * Check if current URL is an OAuth callback
-   */
-  isOAuthCallback() {
-    return window.location.pathname === '/auth/oauth/callback';
-  },
-
-  /**
-   * Extract OAuth error from URL parameters (if any)
-   */
-  getOAuthError() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('error') || urlParams.get('error_description');
-  },
-};
-
+const oauthAPI = new OAuthAPI();
 export default oauthAPI;
