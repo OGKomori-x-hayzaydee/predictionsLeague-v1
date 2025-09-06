@@ -1,10 +1,10 @@
 package com.komori.predictions.service;
 
+import com.komori.predictions.dto.request.RegistrationCallbackRequest;
 import com.komori.predictions.entity.OtpEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.*;
 import com.komori.predictions.dto.request.RegistrationRequest;
-import com.komori.predictions.dto.response.RegistrationResponse;
 import com.komori.predictions.repository.OtpRepository;
 import com.komori.predictions.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -25,15 +25,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    public RegistrationResponse registerNewUser(RegistrationRequest request) {
+    public void registerNewUser(RegistrationRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
         UserEntity newUser = convertToUserEntity(request);
         userRepository.save(newUser);
-        RegistrationResponse response = convertToRegistrationResponse(newUser);
-        emailService.sendWelcomeEmail(response.getEmail(), response.getName());
-        return response;
+        emailService.sendWelcomeEmail(request.getEmail(), request.getFirstName());
     }
 
     public void sendVerifyOtp(String email) {
@@ -80,6 +78,19 @@ public class AuthService {
         }
     }
 
+    public void finishRegistration(String email, RegistrationCallbackRequest request) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found: " + email));
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new UsernameTakenException();
+        }
+
+        user.setFavouriteTeam(request.getFavouriteTeam());
+        user.setUsername(request.getUsername());
+        userRepository.save(user);
+    }
+
     public void checkVerifiedStatus(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
@@ -92,20 +103,11 @@ public class AuthService {
     private UserEntity convertToUserEntity(RegistrationRequest request) {
         return UserEntity.builder()
                 .userID(UUID.randomUUID().toString())
-                .username(request.getUsername())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .accountVerified(false)
-                .favouriteTeam(request.getFavouriteTeam())
-                .build();
-    }
-
-    private RegistrationResponse convertToRegistrationResponse(UserEntity entity) {
-        return RegistrationResponse.builder()
-                .name(entity.getFirstName())
-                .email(entity.getEmail())
                 .build();
     }
 }
