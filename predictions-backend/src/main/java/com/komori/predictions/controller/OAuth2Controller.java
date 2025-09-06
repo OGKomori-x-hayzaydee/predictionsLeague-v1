@@ -59,16 +59,18 @@ public class OAuth2Controller {
 
             String firstName = (String) userInfo.get("given_name");
             String lastName = (String) userInfo.get("family_name");
+            String picture = (String) userInfo.get("picture");
 
             UserEntity newUser = UserEntity.builder()
                     .userID(UUID.randomUUID().toString())
                     .email(email)
                     .firstName(firstName)
                     .lastName(lastName)
+                    .profilePictureUrl(picture)
                     .accountVerified(true)
                     .build();
             userRepository.save(newUser);
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/oauth/callback");
+            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/oauth/complete");
         } else { // User Login
             response.sendRedirect(appProperties.getFrontendUrl() + "/dashboard");
         }

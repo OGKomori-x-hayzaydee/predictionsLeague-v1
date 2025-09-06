@@ -26,6 +26,7 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
     private String password;
+    private String profilePictureUrl;
     private Boolean accountVerified;
     @Builder.Default
     private int totalPoints = 0;
