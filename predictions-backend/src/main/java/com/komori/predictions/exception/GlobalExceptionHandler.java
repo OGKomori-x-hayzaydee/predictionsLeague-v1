@@ -81,6 +81,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "League already joined");
     }
 
+    @ExceptionHandler(UsernameTakenException.class)
+    public ResponseEntity<?> handleUsernameTaken() {
+        return buildResponse(HttpStatus.CONFLICT, "Username already taken");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         log.error("Unexpected error occurred: {}", e.getMessage());
@@ -91,8 +96,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
+        body.put("error", message);
         return ResponseEntity.status(status).body(body);
     }
 }

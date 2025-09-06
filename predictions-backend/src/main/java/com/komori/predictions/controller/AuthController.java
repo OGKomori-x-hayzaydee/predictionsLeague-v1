@@ -1,6 +1,7 @@
 package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.request.LoginRequest;
+import com.komori.predictions.dto.request.RegistrationCallbackRequest;
 import com.komori.predictions.dto.request.RegistrationRequest;
 import com.komori.predictions.dto.response.OtpResponse;
 import com.komori.predictions.dto.response.RegistrationResponse;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,9 +44,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegistrationResponse> register(@Valid @RequestBody RegistrationRequest request) {
-        RegistrationResponse response = authService.registerNewUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest request) {
+        authService.registerNewUser(request);
+        return ResponseEntity.ok("First step successful");
     }
 
     @PostMapping("/send-verify-otp")
@@ -57,6 +59,14 @@ public class AuthController {
     public ResponseEntity<String> verifyOtp(@RequestBody OtpResponse response) {
         authService.verifyOTP(response.getEmail(), response.getOtpFromUser());
         return ResponseEntity.ok("Account verified successfully");
+    }
+
+    @PostMapping("/finish-registration")
+    public ResponseEntity<String> finishRegistration(
+            @CurrentSecurityContext(expression = "authentication?.name") String email,
+            @RequestBody RegistrationCallbackRequest request) {
+        authService.finishRegistration(email, request);
+        return ResponseEntity.ok("Registration successful");
     }
 
     @PostMapping("/logout")
