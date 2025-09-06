@@ -20,7 +20,7 @@ import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
 import SearchInput from "../common/SearchInput";
 import { ThemeContext } from "../../context/ThemeContext";
-import { text, backgrounds, buttons } from "../../utils/themeUtils";
+import { text, buttons } from "../../utils/themeUtils";
 
 const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   const [activeTab, setActiveTab] = useState("my-leagues");
