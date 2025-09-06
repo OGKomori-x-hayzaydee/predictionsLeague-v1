@@ -7,7 +7,10 @@ import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
 import OAuthLoginSection from "../components/auth/OAuthLogin";
+import OAuthStatusHandler from "../components/auth/OAuthStatusHandler";
 import oauthAPI from "../services/api/oauthAPI";
+import oauthStateManager from "../services/oauth/OAuthStateManager";
+import authService from "../services/auth/AuthService";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,21 +26,13 @@ export default function Login() {
   // Get the intended destination after login
   const from = location.state?.from?.pathname || "/home/dashboard";
 
-  // Check for OAuth errors in URL parameters
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const errorParam = urlParams.get('error');
-    
-    if (errorParam) {
-      setOauthError(decodeURIComponent(errorParam));
-      // Clean up URL
-      navigate(location.pathname, { replace: true });
-    }
-  }, [location.search, navigate, location.pathname]);
-
   const handleOAuthLogin = (providerId) => {
     try {
       console.log(`🔄 Starting OAuth login with ${providerId}`);
+      
+      // Store that this is a login flow (not signup)
+      sessionStorage.setItem('oauth_flow_type', 'login');
+      
       oauthAPI.initiateLogin(providerId, from);
     } catch (error) {
       console.error('❌ OAuth login error:', error);
@@ -87,6 +82,7 @@ export default function Login() {
   return (
     <>
       <Navbar />
+      <OAuthStatusHandler />
       <Box className="relative overflow-hidden bg-primary-500 min-h-screen">
         {/* Background elements */}
         <div className="absolute inset-0 z-0 overflow-hidden">

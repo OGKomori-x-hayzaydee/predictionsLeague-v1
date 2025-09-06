@@ -21,6 +21,25 @@ const PrivateRoute = ({
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
   
+  // Add debugging for OAuth callback scenarios
+  React.useEffect(() => {
+    console.log('🔒 PrivateRoute check:', {
+      path: location.pathname,
+      isAuthenticated,
+      isLoading,
+      hasUser: !!user,
+      referrer: document.referrer
+    });
+    
+    // Special logging for potential OAuth redirects
+    if (document.referrer && document.referrer.includes('google')) {
+      console.log('🚨 DETECTED: Potential OAuth redirect hit PrivateRoute!');
+      console.log('🚨 This suggests backend redirected to dashboard instead of callback');
+      console.log('🚨 Backend should redirect to: /auth/oauth/callback');
+      console.log('🚨 But instead redirected to:', location.pathname);
+    }
+  }, [location.pathname, isAuthenticated, isLoading, user]);
+  
   // Show loading state while checking authentication
   if (isLoading) {
     return fallback || <LoadingState message="Checking authentication..." />;
@@ -28,6 +47,7 @@ const PrivateRoute = ({
   
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    console.log('🔒 PrivateRoute: Not authenticated, redirecting to login');
     // Save the attempted location for redirecting after login
     return (
       <Navigate 

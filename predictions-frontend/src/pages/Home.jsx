@@ -26,6 +26,24 @@ export default function Home() {
   const navigate = useNavigate();
 
   const { theme } = useContext(ThemeContext);
+  
+  // Add debugging for OAuth redirect detection
+  useEffect(() => {
+    console.log('🏠 Home page loaded:', {
+      view,
+      currentPath: window.location.pathname,
+      referrer: document.referrer
+    });
+    
+    // Check if this is an inappropriate OAuth redirect
+    if (document.referrer && document.referrer.includes('google')) {
+      console.log('🚨 CRITICAL: OAuth redirected to Home instead of /auth/oauth/callback!');
+      console.log('🚨 This means your backend OAuth success handler is misconfigured');
+      console.log('🚨 Backend should redirect to: http://localhost:5173/auth/oauth/callback');
+      console.log('🚨 But instead redirected to:', window.location.href);
+    }
+  }, [view]);
+  
   // Valid views
   const validViews = [
     "dashboard",
