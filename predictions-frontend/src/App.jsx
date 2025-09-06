@@ -13,6 +13,7 @@ import HowToPlay from "./pages/HowToPlay";
 import Home from "./pages/Home";
 import OAuthCallback from "./pages/OAuthCallback";
 import OAuthOnboarding from "./pages/OAuthOnboarding";
+import EmailVerification from "./pages/EmailVerification";
 
 function App() {
   return (
@@ -46,6 +47,16 @@ function App() {
 
                 {/* OAuth callback route - publicly accessible during auth process */}
                 <Route path="/auth/callback" element={<OAuthCallback />} />
+
+                {/* Email verification route - shared by signup and OAuth */}
+                <Route 
+                  path="/verify-email" 
+                  element={
+                    <PublicRoute>
+                      <EmailVerification />
+                    </PublicRoute>
+                  } 
+                />
 
                 {/* Onboarding route */}
                 <Route
