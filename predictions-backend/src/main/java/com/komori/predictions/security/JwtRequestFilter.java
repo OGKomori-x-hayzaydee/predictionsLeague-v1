@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -25,13 +24,12 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
-    private final List<String> PUBLIC_URLS = List.of("/auth/register", "/auth/login", "/auth/send-verify-otp", "/auth/verify-otp", "/auth/refresh");
 
     // Checks for a JWT token and sets CurrentSecurityContext if valid
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-        if (PUBLIC_URLS.contains(path) || path.startsWith("/swagger-ui/") || path.startsWith("/v3/api-docs")) {
+        if (path.startsWith("/auth") || path.startsWith("/oauth") || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -67,6 +65,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
+            } else {
+                SecurityContextHolder.clearContext();
             }
         } else { // If jwt is still null
             SecurityContextHolder.clearContext();
