@@ -68,7 +68,7 @@ public class OAuth2Controller {
             userRepository.save(newUser);
             response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
         } else { // User Login
-            response.sendRedirect(appProperties.getFrontendUrl() + "/dashboard");
+            response.sendRedirect(appProperties.getFrontendUrl() + "/home/dashboard");
         }
     }
 }
