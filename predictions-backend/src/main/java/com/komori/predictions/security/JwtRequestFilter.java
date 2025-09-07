@@ -1,6 +1,5 @@
 package com.komori.predictions.security;
 
-import com.komori.predictions.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -11,18 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
-    private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
 
     // Checks for a JWT token and sets CurrentSecurityContext if valid
@@ -59,9 +57,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (jwt != null) {
             String email = jwtUtil.extractEmailFromToken(jwt);
             if (email != null) {
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-                if (jwtUtil.validateAccessToken(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                if (jwtUtil.validateAccessToken(jwt, email)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }

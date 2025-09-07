@@ -5,7 +5,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -82,8 +81,8 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
 
-    public Boolean validateAccessToken(String token, UserDetails userDetails) {
-        final String email = extractEmailFromToken(token);
-        return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    public Boolean validateAccessToken(String token, String email) {
+        final String tokenEmail = extractEmailFromToken(token);
+        return email.equals(tokenEmail) && !isTokenExpired(token);
     }
 }
