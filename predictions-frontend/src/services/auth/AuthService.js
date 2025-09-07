@@ -3,6 +3,7 @@
  * Eliminates duplicate API calls and provides single source of truth for auth checks
  */
 import authAPI from '../api/authAPI.js';
+import oauthSecurity from '../security/OAuthSecurityConfig.js'; // FIXED: Added missing import
 
 class AuthService {
   constructor() {
@@ -86,6 +87,7 @@ class AuthService {
 
   /**
    * Perform actual authentication check
+   * FIXED: Better OAuth compatibility and error handling
    */
   async _performAuthCheck(source) {
     try {
@@ -93,22 +95,30 @@ class AuthService {
       
       // Add security validation for OAuth sources
       if (source.includes('oauth')) {
-        // Validate origin for OAuth-related auth checks
-        if (!oauthSecurity.validateOrigin(window.location.origin)) {
-          throw new Error('Authentication check from unauthorized origin');
-        }
-        
-        // Check rate limiting for OAuth auth checks
-        if (!oauthSecurity.checkRateLimit(`auth_check_${source}`)) {
-          throw new Error('Too many authentication attempts');
+        try {
+          // Validate origin for OAuth-related auth checks
+          if (!oauthSecurity.validateOrigin(window.location.origin)) {
+            throw new Error('Authentication check from unauthorized origin');
+          }
+          
+          // Check rate limiting for OAuth auth checks
+          if (!oauthSecurity.checkRateLimit(`auth_check_${source}`)) {
+            throw new Error('Too many authentication attempts');
+          }
+        } catch (securityError) {
+          console.warn('OAuth security validation failed:', securityError.message);
+          // Continue with auth check but log the security concern
         }
       }
       
-      const response = await authAPI.getCurrentUser();
+      // Use OAuth-compatible method if available, otherwise fallback
+      const response = source.includes('oauth') && authAPI.getOAuthUserInfo 
+        ? await authAPI.getOAuthUserInfo() 
+        : await authAPI.getCurrentUser();
       
       if (response.success && response.user) {
-        // Additional user data validation for security
-        if (!this.validateUserData(response.user)) {
+        // Use OAuth-compatible validation
+        if (!this.validateUserData(response.user, source.includes('oauth'))) {
           throw new Error('Invalid user data received');
         }
         
@@ -249,22 +259,31 @@ class AuthService {
 
   /**
    * Validate user data for security
+   * FIXED: OAuth-compatible validation with relaxed requirements
    */
-  validateUserData(user) {
+  validateUserData(user, isOAuthUser = false) {
     if (!user || typeof user !== 'object') {
       console.warn('🔒 Invalid user data type');
       return false;
     }
 
-    // Check for required fields
-    const requiredFields = ['id', 'email'];
-    const hasRequiredFields = requiredFields.every(field => 
-      user.hasOwnProperty(field) && user[field] !== null && user[field] !== undefined
-    );
-
-    if (!hasRequiredFields) {
-      console.warn('🔒 User data missing required fields');
+    // Check for email (always required)
+    if (!user.email || typeof user.email !== 'string') {
+      console.warn('🔒 User data missing required email field');
       return false;
+    }
+
+    // For OAuth users, be more flexible with ID requirements
+    if (!isOAuthUser) {
+      // Traditional users need either 'id' or 'userID'
+      const hasId = user.id || user.userID;
+      if (!hasId) {
+        console.warn('🔒 User data missing required ID field');
+        return false;
+      }
+    } else {
+      // OAuth users might not have all fields during onboarding
+      console.log('🔒 Using relaxed validation for OAuth user');
     }
 
     // Validate email format

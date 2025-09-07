@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import {
   EyeOpenIcon,
   EyeClosedIcon,
-  PersonIcon,
   CheckIcon,
 } from "@radix-ui/react-icons";
 import { useAuth } from "../context/AuthContext";
@@ -13,44 +12,69 @@ import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
 import OAuthLoginSection from "../components/auth/OAuthLogin";
 import oauthAPI from "../services/api/oauthAPI";
+import authAPI from "../services/api/authAPI";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    otp: "",
+    username: "",
     favouriteTeam: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     firstName: null,
     lastName: null,
-    username: null,
     email: null,
     password: null,
     confirmPassword: null,
+    otp: null,
+    username: null,
     favouriteTeam: null,
     submit: null
   });
   const [formStep, setFormStep] = useState(1);
   const [oauthError, setOauthError] = useState(null);
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   const { register, isLoading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check for OAuth errors in URL parameters
+  // Check for OAuth errors in URL parameters and handle step restoration
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const errorParam = urlParams.get('error');
+    const stepParam = urlParams.get('step');
     
     if (errorParam) {
       setOauthError(decodeURIComponent(errorParam));
       // Clean up URL
       navigate(location.pathname, { replace: true });
+    }
+
+    // Handle returning from email verification
+    if (stepParam === '3') {
+      const savedData = sessionStorage.getItem('signup_data');
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          setFormData(prev => ({ ...prev, ...parsedData }));
+          setFormStep(3);
+          // Clean up URL and session storage
+          sessionStorage.removeItem('signup_data');
+          navigate(location.pathname, { replace: true });
+        } catch (error) {
+          console.error('Failed to restore signup data:', error);
+          // If data is corrupted, start over
+          navigate('/signup', { replace: true });
+        }
+      }
     }
   }, [location.search, navigate, location.pathname]);
 
@@ -117,15 +141,14 @@ export default function Signup() {
   const validateStep = (step) => {
     const newErrors = {};
 
-    // Validate based on current step
+    // Step 1: User details & password
     if (step === 1) {
-      if (!formData.username.trim()) {
-        newErrors.username = "Username is required";
-      } else if (formData.username.length < 3) {
-        newErrors.username = "Username must be at least 3 characters";
-      } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-        newErrors.username =
-          "Username can only contain letters, numbers, and underscores";
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = "First name is required";
+      }
+
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = "Last name is required";
       }
 
       if (!formData.email.trim()) {
@@ -133,7 +156,7 @@ export default function Signup() {
       } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
         newErrors.email = "Please enter a valid email address";
       }
-    } else if (step === 2) {
+
       if (!formData.password) {
         newErrors.password = "Password is required";
       } else if (formData.password.length < 8) {
@@ -148,23 +171,61 @@ export default function Signup() {
       } else if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = "Passwords do not match";
       }
+    } 
+    // Step 3: Preferences (username & favourite team)
+    else if (step === 3) {
+      if (!formData.username.trim()) {
+        newErrors.username = "Username is required";
+      } else if (formData.username.length < 3) {
+        newErrors.username = "Username must be at least 3 characters";
+      } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+        newErrors.username =
+          "Username can only contain letters, numbers, and underscores";
+      }
+
+      if (!formData.favouriteTeam) {
+        newErrors.favouriteTeam = "Please select your favourite team";
+      }
     }
 
     setErrors(prev => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNextStep = (e) => {
+  const handleNextStep = async (e) => {
     // Prevent form submission when clicking Continue
     e.preventDefault();
     console.log(`➡️ handleNextStep called - Current step: ${formStep}`);
 
-    if (validateStep(formStep)) {
-      console.log(`✅ Step ${formStep} validation passed, moving to step ${formStep + 1}`);
-      setFormStep((prev) => prev + 1);
-    } else {
+    if (!validateStep(formStep)) {
       console.log(`❌ Step ${formStep} validation failed`);
+      return;
     }
+
+    console.log(`✅ Step ${formStep} validation passed`);
+
+    // If moving from step 1 to step 2, redirect to shared email verification
+    if (formStep === 1) {
+      console.log('📧 Redirecting to email verification page');
+      
+      // Store signup data in sessionStorage for after verification
+      sessionStorage.setItem('signup_data', JSON.stringify({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      }));
+      
+      // Redirect to shared email verification
+      navigate(`/verify-email?flow=signup&email=${encodeURIComponent(formData.email)}&redirect=${encodeURIComponent('/signup?step=3')}`, { 
+        replace: true 
+      });
+      return;
+    }
+
+    console.log(`Moving to step ${formStep + 1}`);
+    setFormStep((prev) => prev + 1);
   };
 
   const handlePrevStep = () => {
@@ -187,24 +248,24 @@ export default function Signup() {
     clearError();
 
     console.log("📋 Form data being sent:", {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       username: formData.username,
       email: formData.email,
       password: formData.password ? "[HIDDEN]" : "empty",
       confirmPassword: formData.confirmPassword ? "[HIDDEN]" : "empty",
-      firstName: formData.firstName,
-      lastName: formData.lastName,
       favouriteTeam: formData.favouriteTeam.toUpperCase(),
     });
 
     try {
       console.log("🔄 Calling register function...");
       const result = await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         username: formData.username,
         email: formData.email,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
         favouriteTeam: formData.favouriteTeam.toUpperCase(),
       });
 
@@ -229,12 +290,12 @@ export default function Signup() {
       if (Object.keys(fieldErrors).length > 0) {
         setErrors(prev => ({ ...prev, ...fieldErrors }));
         // Go back to the step with errors
-        if (fieldErrors.username || fieldErrors.email) {
+        if (fieldErrors.firstName || fieldErrors.lastName || fieldErrors.email || fieldErrors.password || fieldErrors.confirmPassword) {
           console.log("↩️ Going back to step 1 due to field errors");
           setFormStep(1);
-        } else if (fieldErrors.password || fieldErrors.confirmPassword) {
-          console.log("↩️ Going back to step 2 due to password errors");
-          setFormStep(2);
+        } else if (fieldErrors.username || fieldErrors.favouriteTeam) {
+          console.log("↩️ Going back to step 3 due to preference errors");
+          setFormStep(3);
         }
       } else {
         console.log("⚠️ Setting general submit error");
@@ -304,7 +365,7 @@ export default function Signup() {
 
             <div className="mb-8">
               <div className="flex items-center justify-between">
-                {[1, 2, 3].map((step) => (
+                {[1, 3].map((step, index) => (
                   <div key={step} className="flex flex-col items-center">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium font-outfit 
@@ -316,14 +377,10 @@ export default function Signup() {
                               : "bg-primary-600/80 text-indigo-200"
                           }`}
                     >
-                      {formStep > step ? <CheckIcon /> : step}
+                      {formStep > step ? <CheckIcon /> : index + 1}
                     </div>
                     <div className="text-xs mt-1 text-teal-200 font-outfit">
-                      {step === 1
-                        ? "account"
-                        : step === 2
-                        ? "security"
-                        : "preferences"}
+                      {step === 1 ? "details" : "preferences"}
                     </div>
                   </div>
                 ))}
@@ -332,7 +389,7 @@ export default function Signup() {
                 <motion.div
                   className="absolute left-0 top-0 h-full bg-teal-500"
                   initial={{ width: "0%" }}
-                  animate={{ width: `${(formStep - 1) * 50}%` }}
+                  animate={{ width: formStep === 3 ? "100%" : "0%" }}
                   transition={{ duration: 0.4 }}
                 />
               </div>
@@ -435,38 +492,7 @@ export default function Signup() {
                         </p>
                       )}
                     </div>
-                  </div>
-                  <div className="mb-4">
-                    <label
-                      htmlFor="username"
-                      className="block text-teal-200 text-sm font-medium mb-2 font-outfit"
-                    >
-                      username
-                    </label>
-                    <div
-                      className={`bg-primary-600/50 rounded-md border ${
-                        errors.username
-                          ? "border-red-500"
-                          : "border-primary-400/30"
-                      } focus-within:border-teal-500 transition-colors`}
-                    >
-                      <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        value={formData.username}
-                        onChange={handleChange}
-                        placeholder="choose a username"
-                        className="w-full px-3 py-2 bg-transparent text-white font-outfit placeholder-white/40 outline-none"
-                      />
-                    </div>
-                    {errors.username && (
-                      <p className="text-red-300 text-xs mt-1">
-                        {errors.username}
-                      </p>
-                    )}
-                  </div>
-
+                  </div>               
                   <div>
                     <label
                       htmlFor="email"
@@ -497,18 +523,6 @@ export default function Signup() {
                       </p>
                     )}
                   </div>
-                </motion.div>
-              )}
-
-              {/* Step 2: Password */}
-              {formStep === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
                   <div className="mb-4">
                     <label
                       htmlFor="password"
@@ -611,6 +625,36 @@ export default function Signup() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
+                  <div className="mb-4">
+                    <label
+                      htmlFor="username"
+                      className="block text-teal-200 text-sm font-medium mb-2 font-outfit"
+                    >
+                      username
+                    </label>
+                    <div
+                      className={`bg-primary-600/50 rounded-md border ${
+                        errors.username
+                          ? "border-red-500"
+                          : "border-primary-400/30"
+                      } focus-within:border-teal-500 transition-colors`}
+                    >
+                      <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        value={formData.username}
+                        onChange={handleChange}
+                        placeholder="choose a username"
+                        className="w-full px-3 py-2 bg-transparent text-white font-outfit placeholder-white/40 outline-none"
+                      />
+                    </div>
+                    {errors.username && (
+                      <p className="text-red-300 text-xs mt-1">
+                        {errors.username}
+                      </p>
+                    )}
+                  </div>
                   <div>
                     <label
                       htmlFor="favouriteTeam"
@@ -618,7 +662,11 @@ export default function Signup() {
                     >
                       favourite team
                     </label>
-                    <div className="bg-primary-600/50 rounded-md border border-primary-400/30 focus-within:border-teal-500 transition-colors">
+                    <div className={`bg-primary-600/50 rounded-md border ${
+                        errors.favouriteTeam
+                          ? "border-red-500"
+                          : "border-primary-400/30"
+                      } focus-within:border-teal-500 transition-colors`}>
                       <select
                         id="favouriteTeam"
                         name="favouriteTeam"
@@ -640,6 +688,11 @@ export default function Signup() {
                         ))}
                       </select>
                     </div>
+                    {errors.favouriteTeam && (
+                      <p className="text-red-300 text-xs mt-1">
+                        {errors.favouriteTeam}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-6">
@@ -711,7 +764,7 @@ export default function Signup() {
                       ? "creating account..."
                       : formStep === 3
                       ? "create account"
-                      : "continue"}
+                      : "verify email"}
                   </Button>
                 </motion.div>
               </div>

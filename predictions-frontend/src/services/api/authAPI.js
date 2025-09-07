@@ -44,7 +44,7 @@ export const authAPI = {
   },
 
   /**
-    Register new user
+   * Register new user
    */
   async register(userData) {
     try {
@@ -233,6 +233,153 @@ export const authAPI = {
     } catch (error) {
       // Don't show error notifications for auth checks
       console.error('getCurrentUser error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * ADDED: Get user info compatible with OAuth flow
+   * Provides better structure for OAuth users during onboarding
+   * @returns {Promise<Object>} OAuth-compatible user data
+   */
+  async getOAuthUserInfo() {
+    try {
+      console.log('🔄 Getting OAuth-compatible user info');
+      
+      // First check if user is authenticated using existing endpoint
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/profile/home`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const responseText = await response.text();
+        
+        // Extract email from response text
+        const emailMatch = responseText.match(/of (.+)$/);
+        const email = emailMatch ? emailMatch[1].trim() : null;
+        
+        if (email) {
+          // TODO: When your backend provides a proper user info endpoint, use it here
+          // For now, provide OAuth-compatible structure with what we have
+          return {
+            success: true,
+            user: {
+              email: email,
+              authenticated: true,
+              source: 'oauth-compatible',
+              // Placeholder fields for OAuth users
+              // These will be properly populated by your backend
+              userID: null, // Will be filled by backend
+              username: null, // Will be filled during onboarding  
+              firstName: null, // Will be filled by backend
+              lastName: null, // Will be filled by backend
+              favouriteTeam: null, // Will be filled during onboarding
+              profilePicture: null, // Will be filled by backend
+              isOAuthUser: true, // Mark as OAuth user
+            },
+          };
+        } else {
+          throw new Error('Could not extract user info from response');
+        }
+      } else {
+        throw new Error(`OAuth user info check failed: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('getOAuthUserInfo error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Calls the backend endpoint to finish user onboarding
+   * @param {Object} profileData - Profile completion data
+   * @param {string} profileData.username - Chosen username
+   * @param {string} profileData.favouriteTeam - Selected favorite team
+   * @returns {Promise<Object>} Profile completion response
+   */
+  async completeOAuthProfile(profileData) {
+    try {
+      console.log('🔄 Completing OAuth profile');
+      
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/oauth2/complete-profile`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: profileData.username,
+          favouriteTeam: profileData.favouriteTeam
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.success) {
+          // Mark as authenticated with complete profile
+          setTokens('http-only', 'http-only');
+          
+          return {
+            success: true,
+            user: result.user,
+            message: result.message || 'Profile completed successfully'
+          };
+        } else {
+          throw new Error(result.error || 'Profile completion failed');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        
+        if (response.status === 409) {
+          throw new Error(errorData.error || 'Username already taken');
+        } else if (response.status === 400) {
+          throw new Error(errorData.error || 'Invalid profile data');
+        } else if (response.status === 401) {
+          throw new Error('Not authenticated - please sign in again');
+        } else {
+          throw new Error(errorData.error || 'Failed to complete profile');
+        }
+      }
+    } catch (error) {
+      console.error('OAuth profile completion error:', error);
+      handleApiError(error, { customMessage: 'Failed to complete profile. Please try again.' });
+      throw error;
+    }
+  },
+
+  /**
+   * ADDED: Check if current user needs to complete OAuth onboarding
+   * Useful for determining redirect logic
+   * @returns {Promise<Object>} Onboarding status
+   */
+  async checkOAuthOnboardingStatus() {
+    try {
+      // This would ideally call a dedicated endpoint, but for now we use profile check
+      const userInfo = await this.getOAuthUserInfo();
+      
+      if (userInfo.success && userInfo.user) {
+        const user = userInfo.user;
+        const needsOnboarding = !user.username || !user.favouriteTeam;
+        
+        return {
+          success: true,
+          needsOnboarding,
+          user: user,
+          missingFields: {
+            username: !user.username,
+            favouriteTeam: !user.favouriteTeam,
+          }
+        };
+      } else {
+        throw new Error('Could not determine onboarding status');
+      }
+    } catch (error) {
+      console.error('OAuth onboarding status check error:', error);
       throw error;
     }
   },
