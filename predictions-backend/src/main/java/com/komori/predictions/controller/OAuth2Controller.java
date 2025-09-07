@@ -66,7 +66,7 @@ public class OAuth2Controller {
                     .accountVerified(true)
                     .build();
             userRepository.save(newUser);
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/oauth/complete");
+            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
         } else { // User Login
             response.sendRedirect(appProperties.getFrontendUrl() + "/dashboard");
         }
