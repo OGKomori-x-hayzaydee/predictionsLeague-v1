@@ -77,6 +77,7 @@ public class AuthController {
                 .secure(true)
                 .maxAge(0)
                 .sameSite("None")
+                .domain(".predictionsleague.xyz")
                 .build();
 
         ResponseCookie accessCookie = ResponseCookie.from("jwt")
@@ -85,6 +86,7 @@ public class AuthController {
                 .secure(true)
                 .maxAge(0)
                 .sameSite("None")
+                .domain(".predictionsleague.xyz")
                 .build();
 
         HttpHeaders headers = new HttpHeaders();

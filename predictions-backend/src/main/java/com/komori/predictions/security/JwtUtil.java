@@ -48,6 +48,7 @@ public class JwtUtil {
                 .secure(true)
                 .maxAge(Duration.ofMinutes(5))
                 .sameSite("None")
+                .domain(".predictionsleague.xyz")
                 .build();
     }
 
@@ -58,6 +59,7 @@ public class JwtUtil {
                 .secure(true)
                 .maxAge(Duration.ofDays(14))
                 .sameSite("None")
+                .domain(".predictionsleague.xyz")
                 .build();
     }
 
