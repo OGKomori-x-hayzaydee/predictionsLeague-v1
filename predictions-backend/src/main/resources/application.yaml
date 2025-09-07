@@ -39,7 +39,6 @@ jwt:
 
 server:
   servlet:
-    context-path: /api # all routes in this app will be prefixed with this
     session:
       cookie:
         same-site: none
