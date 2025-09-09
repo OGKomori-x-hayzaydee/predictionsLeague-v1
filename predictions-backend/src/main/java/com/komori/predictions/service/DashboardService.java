@@ -25,6 +25,7 @@ public class DashboardService {
                 .favouriteTeam(user.getFavouriteTeam())
                 .lastName(user.getLastName())
                 .firstName(user.getFirstName())
+                .username(user.getUsername())
                 .profilePicture(user.getProfilePictureUrl())
                 .build();
     }
