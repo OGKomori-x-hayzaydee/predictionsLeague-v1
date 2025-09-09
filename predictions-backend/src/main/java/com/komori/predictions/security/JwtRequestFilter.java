@@ -12,24 +12,32 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    private final List<String> PUBLIC_URLS = List.of(
+            "/oauth2/login", "/auth/login", "/auth/logout", "/auth/register", "/swagger-ui", "/v3/api-docs"
+    );
+    private final PathMatcher pathMatcher;
 
     // Checks for a JWT token and sets CurrentSecurityContext if valid
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-        if (path.startsWith("/auth") || path.startsWith("/oauth") || path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")) {
-            filterChain.doFilter(request, response);
-            return;
+        for (String publicUrl : PUBLIC_URLS) {
+            if (pathMatcher.match(publicUrl, path)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         String jwt = null;
