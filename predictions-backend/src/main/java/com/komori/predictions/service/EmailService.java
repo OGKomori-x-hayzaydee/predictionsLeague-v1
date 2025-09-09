@@ -19,7 +19,7 @@ public class EmailService {
         mailMessage.setTo(toEmail);
         mailMessage.setSubject("👋🏾 Welcome to the Predictions League!");
         mailMessage.setText("Hello " + name + ",\n\n" +
-                "Welcome to the Predictions League (took you long enough to join lol)! We know you'll love your time here!\n\n" +
+                "Welcome to the Predictions League! We know you'll love your time here!\n\n" +
                 "Regards,\nTega from the Predictions Team");
         mailSender.send(mailMessage);
     }
@@ -32,7 +32,7 @@ public class EmailService {
         mailMessage.setText("Hello " + name + ",\n\n" +
                 "Welcome (again)! To login, verify your account with the following 6-digit code:\n\n" +
                 "Code: " + otp + "\n\n" +
-                "This code expires in 15 minutes.\nBe quick! You don't have much time...\n\n" +
+                "This code expires in 15 minutes.\n\n" +
                 "Regards,\nTega from the Predictions Team");
         mailSender.send(mailMessage);
     }
@@ -43,7 +43,7 @@ public class EmailService {
         mailMessage.setTo(toEmail);
         mailMessage.setSubject("🔓 Account Verified Successfully!");
         mailMessage.setText("Hello " + name + ",\n\n" +
-                "Your account has been verified successfully! That was fast btw.\n\n" +
+                "Your account has been verified successfully!\n\n" +
                 "Regards,\nTega from the Predictions Team");
         mailSender.send(mailMessage);
     }

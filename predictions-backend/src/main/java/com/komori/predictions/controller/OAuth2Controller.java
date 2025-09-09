@@ -3,7 +3,7 @@ package com.komori.predictions.controller;
 import com.komori.predictions.config.AppProperties;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.repository.UserRepository;
-import com.komori.predictions.security.JwtUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,7 +20,6 @@ import java.util.UUID;
 @RequestMapping("/oauth2")
 @RequiredArgsConstructor
 public class OAuth2Controller {
-    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RestTemplateBuilder restTemplateBuilder;
     private final AppProperties appProperties;
@@ -30,10 +29,8 @@ public class OAuth2Controller {
     public void login(@RequestHeader(name = "X-Forwarded-Access-Token") String accessToken,
                       @RequestHeader(name = "X-Forwarded-Email") String email,
                       HttpServletResponse response) throws IOException {
-        ResponseCookie access = jwtUtil.createAccessTokenCookie(email);
-        ResponseCookie refresh = jwtUtil.createRefreshTokenCookie(email);
-        response.addHeader(HttpHeaders.SET_COOKIE, access.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refresh.toString());
+        Cookie emailCookie = new Cookie("email", email);
+        response.addCookie(emailCookie);
 
         Optional<UserEntity> user = userRepository.findByEmail(email);
         if (user.isEmpty()) { // User Registration

@@ -1,10 +1,6 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.dto.request.LoginRequest;
-import com.komori.predictions.dto.request.RegistrationCallbackRequest;
-import com.komori.predictions.dto.request.RegistrationRequest;
-import com.komori.predictions.dto.response.OtpResponse;
-import com.komori.predictions.dto.response.RegistrationResponse;
+import com.komori.predictions.dto.request.*;
 import com.komori.predictions.security.JwtUtil;
 import com.komori.predictions.service.AuthService;
 import jakarta.validation.Valid;
@@ -15,7 +11,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,13 +25,7 @@ public class AuthController {
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         authService.checkVerifiedStatus(loginRequest.getEmail());
-
-        ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(loginRequest.getEmail());
-        ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(loginRequest.getEmail());
-
-        HttpHeaders cookieHeaders = new HttpHeaders();
-        cookieHeaders.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        cookieHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        HttpHeaders cookieHeaders = createCookieHeaders(loginRequest.getEmail());
 
         return ResponseEntity.ok()
                 .headers(cookieHeaders)
@@ -50,23 +39,26 @@ public class AuthController {
     }
 
     @PostMapping("/send-verify-otp")
-    public ResponseEntity<String> sendVerifyOtp(@RequestBody RegistrationResponse response) {
-        authService.sendVerifyOtp(response.getEmail());
+    public ResponseEntity<String> sendVerifyOtp(@RequestBody ResendOtpRequest request) {
+        authService.sendVerifyOtp(request.getEmail());
         return ResponseEntity.ok("VerifyOTP sent successfully");
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@RequestBody OtpResponse response) {
-        authService.verifyOTP(response.getEmail(), response.getOtpFromUser());
+    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        authService.verifyOTP(request.getEmail(), request.getOtpFromUser());
         return ResponseEntity.ok("Account verified successfully");
     }
 
     @PostMapping("/finish-registration")
-    public ResponseEntity<String> finishRegistration(
-            @CurrentSecurityContext(expression = "authentication?.name") String email,
-            @RequestBody RegistrationCallbackRequest request) {
+    public ResponseEntity<String> finishRegistration(@RequestBody FinishRegistrationRequest request,
+                                                     @CookieValue(name = "email") String email) {
         authService.finishRegistration(email, request);
-        return ResponseEntity.ok("Registration successful");
+        HttpHeaders cookieHeaders = createCookieHeaders(email);
+
+        return ResponseEntity.ok()
+                .headers(cookieHeaders)
+                .body("Registration successful");
     }
 
     @PostMapping("/logout")
@@ -113,14 +105,18 @@ public class AuthController {
         }
 
         String email = jwtUtil.extractEmailFromToken(refreshToken);
-        ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
-        ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
+        HttpHeaders headers = createCookieHeaders(email);
         return ResponseEntity.ok()
                 .headers(headers)
                 .body("Refresh successful");
+    }
+
+    private HttpHeaders createCookieHeaders(String email) {
+        ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
+        ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
+        HttpHeaders cookieHeaders = new HttpHeaders();
+        cookieHeaders.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        cookieHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        return cookieHeaders;
     }
 }

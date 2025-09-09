@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegistrationCallbackRequest {
+public class FinishRegistrationRequest {
     private Team favouriteTeam;
     private String username;
 }

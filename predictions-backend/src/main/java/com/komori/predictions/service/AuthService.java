@@ -1,6 +1,6 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.dto.request.RegistrationCallbackRequest;
+import com.komori.predictions.dto.request.FinishRegistrationRequest;
 import com.komori.predictions.entity.OtpEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.*;
@@ -32,6 +32,7 @@ public class AuthService {
         UserEntity newUser = convertToUserEntity(request);
         userRepository.save(newUser);
         emailService.sendWelcomeEmail(request.getEmail(), request.getFirstName());
+        sendVerifyOtp(request.getEmail());
     }
 
     public void sendVerifyOtp(String email) {
@@ -43,7 +44,11 @@ public class AuthService {
         Optional<OtpEntity> otpEntityOptional = otpRepository.findByUserId(currentUser.getId());
         OtpEntity otpEntity;
         if (otpEntityOptional.isEmpty()) {
-            otpEntity = OtpEntity.builder().userId(currentUser.getId()).value(otp).expiration(otpExpiry).build();
+            otpEntity = OtpEntity.builder()
+                    .userId(currentUser.getId())
+                    .value(otp)
+                    .expiration(otpExpiry)
+                    .build();
         }
         else {
             otpEntity = otpEntityOptional.get();
@@ -78,9 +83,9 @@ public class AuthService {
         }
     }
 
-    public void finishRegistration(String email, RegistrationCallbackRequest request) {
+    public void finishRegistration(String email, FinishRegistrationRequest request) {
         UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new UsernameTakenException();

@@ -1,4 +1,4 @@
-package com.komori.predictions.dto.response;
+package com.komori.predictions.dto.request;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OtpResponse {
+public class VerifyOtpRequest {
     String email;
     String otpFromUser;
 }
