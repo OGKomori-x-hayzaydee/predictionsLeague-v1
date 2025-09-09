@@ -25,7 +25,7 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final List<String> PUBLIC_URLS = List.of(
-            "/oauth2/login", "/auth/login", "/auth/logout", "/auth/register", "/swagger-ui", "/v3/api-docs"
+            "/oauth2/**", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**"
     );
     private final PathMatcher pathMatcher;
 
