@@ -4,7 +4,6 @@ import com.komori.predictions.config.AppProperties;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.repository.UserRepository;
 import com.komori.predictions.security.JwtUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -60,9 +59,9 @@ public class OAuth2Controller {
                     .accountVerified(true)
                     .build();
             userRepository.save(newUser);
-
-            Cookie emailCookie = new Cookie("email", email);
-            response.addCookie(emailCookie);
+            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
+        } else if (user.get().getFavouriteTeam() == null || user.get().getUsername() == null) {
+            // Incomplete registration
             response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
         } else { // User Login
             ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);

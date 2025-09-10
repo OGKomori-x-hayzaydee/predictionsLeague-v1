@@ -83,8 +83,8 @@ public class AuthService {
         }
     }
 
-    public void finishRegistration(String email, FinishRegistrationRequest request) {
-        UserEntity user = userRepository.findByEmail(email)
+    public void finishRegistration(FinishRegistrationRequest request) {
+        UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
         if (userRepository.existsByUsername(request.getUsername())) {

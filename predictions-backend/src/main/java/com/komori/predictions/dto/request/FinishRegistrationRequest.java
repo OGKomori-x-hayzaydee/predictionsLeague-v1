@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class FinishRegistrationRequest {
+    private String email;
     private Team favouriteTeam;
     private String username;
 }

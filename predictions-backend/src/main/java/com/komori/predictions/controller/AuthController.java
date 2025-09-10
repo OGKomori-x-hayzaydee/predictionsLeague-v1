@@ -51,10 +51,9 @@ public class AuthController {
     }
 
     @PostMapping("/finish-registration")
-    public ResponseEntity<String> finishRegistration(@RequestBody FinishRegistrationRequest request,
-                                                     @CookieValue(name = "email") String email) {
-        authService.finishRegistration(email, request);
-        HttpHeaders cookieHeaders = jwtUtil.createCookieHeaders(email);
+    public ResponseEntity<String> finishRegistration(@RequestBody FinishRegistrationRequest request) {
+        authService.finishRegistration(request);
+        HttpHeaders cookieHeaders = jwtUtil.createCookieHeaders(request.getEmail());
 
         return ResponseEntity.ok()
                 .headers(cookieHeaders)
