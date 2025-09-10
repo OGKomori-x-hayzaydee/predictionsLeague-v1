@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmailService {
     private final RestTemplate restTemplate;
-    @Value("${spring.mail.properties.mail.smtp.from}")
+    @Value("${brevo.from-email}")
     private String fromEmail;
     @Value("${brevo.api-key}")
     private String apiKey;
