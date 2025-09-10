@@ -32,7 +32,6 @@ public class AuthService {
         UserEntity newUser = convertToUserEntity(request);
         userRepository.save(newUser);
         emailService.sendWelcomeEmail(request.getEmail(), request.getFirstName());
-        sendVerifyOtp(request.getEmail());
     }
 
     public void sendVerifyOtp(String email) {
