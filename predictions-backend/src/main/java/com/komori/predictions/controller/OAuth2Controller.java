@@ -59,10 +59,10 @@ public class OAuth2Controller {
                     .accountVerified(true)
                     .build();
             userRepository.save(newUser);
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
+            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback?email=" + email);
         } else if (user.get().getFavouriteTeam() == null || user.get().getUsername() == null) {
             // Incomplete registration
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
+            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback?email=" + email);
         } else { // User Login
             ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
             ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);

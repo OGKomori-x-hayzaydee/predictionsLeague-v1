@@ -25,7 +25,7 @@ public class JwtUtil {
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // 5 min expiration
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 5 min expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
@@ -46,7 +46,7 @@ public class JwtUtil {
                 .httpOnly(true)
                 .path("/")
                 .secure(true)
-                .maxAge(Duration.ofMinutes(5))
+                .maxAge(Duration.ofMinutes(15))
                 .sameSite("None")
                 .domain(".predictionsleague.xyz")
                 .build();
