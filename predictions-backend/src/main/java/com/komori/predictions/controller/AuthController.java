@@ -25,7 +25,7 @@ public class AuthController {
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         authService.checkVerifiedStatus(loginRequest.getEmail());
-        HttpHeaders cookieHeaders = createCookieHeaders(loginRequest.getEmail());
+        HttpHeaders cookieHeaders = jwtUtil.createCookieHeaders(loginRequest.getEmail());
 
         return ResponseEntity.ok()
                 .headers(cookieHeaders)
@@ -54,7 +54,7 @@ public class AuthController {
     public ResponseEntity<String> finishRegistration(@RequestBody FinishRegistrationRequest request,
                                                      @CookieValue(name = "email") String email) {
         authService.finishRegistration(email, request);
-        HttpHeaders cookieHeaders = createCookieHeaders(email);
+        HttpHeaders cookieHeaders = jwtUtil.createCookieHeaders(email);
 
         return ResponseEntity.ok()
                 .headers(cookieHeaders)
@@ -105,18 +105,9 @@ public class AuthController {
         }
 
         String email = jwtUtil.extractEmailFromToken(refreshToken);
-        HttpHeaders headers = createCookieHeaders(email);
+        HttpHeaders headers = jwtUtil.createCookieHeaders(email);
         return ResponseEntity.ok()
                 .headers(headers)
                 .body("Refresh successful");
-    }
-
-    private HttpHeaders createCookieHeaders(String email) {
-        ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
-        ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
-        HttpHeaders cookieHeaders = new HttpHeaders();
-        cookieHeaders.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        cookieHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-        return cookieHeaders;
     }
 }

@@ -8,35 +8,18 @@ spring:
     hibernate:
       ddl-auto: none
     open-in-view: true
-  mail:
-    host: smtp-relay.brevo.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    protocol: smtp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          from: ${MAIL_FROM}
   flyway:
     baseline-on-migrate: true
     enabled: true
-
 aws:
   s3:
     bucket: ${S3_BUCKET_NAME}
     region: eu-west-2
     access-key: ${S3_ACCESS_KEY}
     secret-key: ${S3_SECRET_KEY}
-
 jwt:
   secret:
     key: ${JWT_SECRET_KEY}
-
 server:
   servlet:
     session:
@@ -44,6 +27,8 @@ server:
         same-site: none
         secure: true
   forward-headers-strategy: framework
-
 app:
   frontend-url: ${FRONTEND_URL}
+brevo:
+  api-key: ${BREVO_API_KEY}
+  from-email: ${BREVO_FROM_EMAIL}

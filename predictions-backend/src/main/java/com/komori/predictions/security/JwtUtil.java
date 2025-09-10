@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +61,15 @@ public class JwtUtil {
                 .sameSite("None")
                 .domain(".predictionsleague.xyz")
                 .build();
+    }
+
+    public HttpHeaders createCookieHeaders(String email) {
+        ResponseCookie accessCookie = createAccessTokenCookie(email);
+        ResponseCookie refreshCookie = createRefreshTokenCookie(email);
+        HttpHeaders cookieHeaders = new HttpHeaders();
+        cookieHeaders.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        cookieHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        return cookieHeaders;
     }
 
     private Claims extractAllClaims(String token) {
