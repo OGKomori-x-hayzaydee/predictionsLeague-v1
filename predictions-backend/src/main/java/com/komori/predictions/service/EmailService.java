@@ -1,7 +1,5 @@
 package com.komori.predictions.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.request.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,6 @@ public class EmailService {
     private String fromEmail;
     @Value("${brevo.api-key}")
     private String apiKey;
-    private final String fromName = "The Predictions League";
 
     public void sendWelcomeEmail(String toEmail, String name) {
         String htmlContent = """
@@ -39,20 +36,8 @@ public class EmailService {
           </body>
         </html>
        """.formatted(name);
-        EmailRequest request = EmailRequest.builder()
-                .to(List.of(new EmailRequest.NameAndEmail(toEmail, name)))
-                .sender(new EmailRequest.NameAndEmail(fromEmail, fromName))
-                .subject("👋🏾 Welcome to the Predictions League!")
-                .htmlContent(htmlContent)
-                .build();
 
-        try {
-            log.info("Request:\n\n\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
-        } catch (JsonProcessingException e) {
-            log.error("Json Exception.");
-        }
-
-        sendEmail(request);
+        sendEmail("👋🏾 Welcome to the Predictions League!", htmlContent, name, toEmail);
     }
 
     public void sendVerifyOtpEmail(String toEmail, String name, String otp) {
@@ -69,14 +54,8 @@ public class EmailService {
           </body>
         </html>
         """.formatted(name, otp);
-        EmailRequest request = EmailRequest.builder()
-                .to(List.of(new EmailRequest.NameAndEmail(toEmail, name)))
-                .sender(new EmailRequest.NameAndEmail(fromEmail, fromName))
-                .subject("🔒 Verify your Account")
-                .htmlContent(htmlContent)
-                .build();
 
-        sendEmail(request);
+        sendEmail("🔒 Verify your Account", htmlContent, name, toEmail);
     }
 
     public void sendAccountVerifiedEmail(String toEmail, String name) {
@@ -92,14 +71,7 @@ public class EmailService {
         </html>
         """.formatted(name);
 
-        EmailRequest request = EmailRequest.builder()
-                .to(List.of(new EmailRequest.NameAndEmail(toEmail, name)))
-                .sender(new EmailRequest.NameAndEmail(fromEmail, fromName))
-                .subject("🔓 Account Verified Successfully!")
-                .htmlContent(htmlContent)
-                .build();
-
-        sendEmail(request);
+        sendEmail("🔓 Account Verified Successfully!", htmlContent, name, toEmail);
     }
 
     public void sendResetPasswordEmail(String toEmail, String name) {
@@ -128,14 +100,7 @@ public class EmailService {
 </html>
 """.formatted(name);
 
-        EmailRequest request = EmailRequest.builder()
-                .to(List.of(new EmailRequest.NameAndEmail(toEmail, name)))
-                .sender(new EmailRequest.NameAndEmail(fromEmail, fromName))
-                .subject("🗝️ Reset your password")
-                .htmlContent(htmlContent)
-                .build();
-
-        sendEmail(request);
+        sendEmail("🗝️ Reset your password", htmlContent, name, toEmail);
     }
 
     public void sendChangedPasswordEmail(String toEmail, String name) {
@@ -152,17 +117,17 @@ public class EmailService {
 </html>
 """.formatted(name);
 
+        sendEmail("✅ Your password has been changed", htmlContent, name, toEmail);
+    }
+
+    private void sendEmail(String subject, String htmlContent, String name, String toEmail) {
         EmailRequest request = EmailRequest.builder()
-                .to(List.of(new EmailRequest.NameAndEmail(toEmail, name)))
-                .sender(new EmailRequest.NameAndEmail(fromEmail, fromName))
-                .subject("✅ Your password has been changed")
+                .to(List.of(new EmailRequest.NameAndEmail(name, toEmail)))
+                .sender(new EmailRequest.NameAndEmail("The Predictions League", fromEmail))
+                .subject(subject)
                 .htmlContent(htmlContent)
                 .build();
 
-        sendEmail(request);
-    }
-
-    private void sendEmail(EmailRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
