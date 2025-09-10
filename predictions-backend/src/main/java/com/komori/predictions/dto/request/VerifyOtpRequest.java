@@ -8,5 +8,5 @@ import lombok.*;
 @Builder
 public class VerifyOtpRequest {
     String email;
-    String otpFromUser;
+    String otp;
 }
