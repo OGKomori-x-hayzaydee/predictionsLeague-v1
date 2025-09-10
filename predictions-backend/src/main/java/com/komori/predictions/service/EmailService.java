@@ -1,7 +1,10 @@
 package com.komori.predictions.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.request.EmailRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -41,6 +45,12 @@ public class EmailService {
                 .subject("👋🏾 Welcome to the Predictions League!")
                 .htmlContent(htmlContent)
                 .build();
+
+        try {
+            log.info("Request:\n\n\n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
+        } catch (JsonProcessingException e) {
+            log.error("Json Exception.");
+        }
 
         sendEmail(request);
     }
