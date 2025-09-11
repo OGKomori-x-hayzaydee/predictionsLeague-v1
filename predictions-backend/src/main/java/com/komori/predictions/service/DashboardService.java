@@ -4,6 +4,7 @@ import com.komori.predictions.dto.enumerated.Team;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.LeagueSummary;
 import com.komori.predictions.dto.response.Match;
+import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
@@ -39,6 +40,7 @@ public class DashboardService {
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
         return Set.copyOf(user.getLeagues().stream()
+                .map(UserLeagueEntity::getLeague)
                 .map(entity -> entityToSummary(entity, user.getId()))
                 .toList());
     }
@@ -63,11 +65,11 @@ public class DashboardService {
         return Set.of(firstTestMatch, secondTestMatch);
     }
 
-    private LeagueSummary entityToSummary(UserLeagueEntity entity, Long userId) {
-        int rank = userRepository.findUserRankInLeague(userId, entity.getLeague().getId());
+    private LeagueSummary entityToSummary(LeagueEntity league, Long userId) {
+        int rank = userRepository.findUserRankInLeague(userId, league.getId());
         return LeagueSummary.builder()
-                .name(entity.getLeague().getName())
-                .members(entity.getLeague().getUsers().size())
+                .name(league.getName())
+                .members(league.getUsers().size())
                 .userPosition(rank)
                 .build();
     }

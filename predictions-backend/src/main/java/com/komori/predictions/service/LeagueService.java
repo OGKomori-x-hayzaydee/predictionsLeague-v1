@@ -55,12 +55,7 @@ public class LeagueService {
                 .build();
         leagueRepository.save(newLeague);
 
-        UserLeagueEntity userLeague = UserLeagueEntity.builder()
-                .league(newLeague)
-                .user(currentUser)
-                .isAdmin(true)
-                .isOwner(true)
-                .build();
+        UserLeagueEntity userLeague = new UserLeagueEntity(currentUser, newLeague, true, true);
         userLeagueRepository.save(userLeague);
     }
 

@@ -2,16 +2,12 @@ package com.komori.predictions.entity;
 
 import com.komori.predictions.entity.id.UserLeagueId;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "user_league_table")
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class UserLeagueEntity {
     @EmbeddedId
@@ -23,9 +19,11 @@ public class UserLeagueEntity {
     private Boolean isOwner;
     private Boolean isAdmin;
 
-    public UserLeagueEntity(UserEntity user, LeagueEntity league) {
+    public UserLeagueEntity(UserEntity user, LeagueEntity league, Boolean isOwner, Boolean isAdmin) {
         this.user = user;
         this.league = league;
+        this.isOwner = isOwner;
+        this.isAdmin = isAdmin;
         this.id = new UserLeagueId(user.getId(), league.getId());
     }
 }
