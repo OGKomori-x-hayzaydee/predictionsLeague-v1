@@ -26,7 +26,7 @@ public class LeagueEntity {
     @Enumerated(value = EnumType.STRING)
     private Publicity publicity;
     @OneToMany(mappedBy = "league") @Builder.Default
-    private Set<UserEntity> users = new HashSet<>();
+    private Set<UserLeagueEntity> users = new HashSet<>();
     @CreationTimestamp
     private Timestamp createdAt;
 }

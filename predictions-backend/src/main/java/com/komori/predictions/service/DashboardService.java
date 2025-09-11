@@ -4,9 +4,9 @@ import com.komori.predictions.dto.enumerated.Team;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.LeagueSummary;
 import com.komori.predictions.dto.response.Match;
-import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.entity.UserEntity;
+import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -63,11 +63,11 @@ public class DashboardService {
         return Set.of(firstTestMatch, secondTestMatch);
     }
 
-    private LeagueSummary entityToSummary(LeagueEntity entity, Long userId) {
-        int rank = userRepository.findUserRankInLeague(userId, entity.getId());
+    private LeagueSummary entityToSummary(UserLeagueEntity entity, Long userId) {
+        int rank = userRepository.findUserRankInLeague(userId, entity.getLeague().getId());
         return LeagueSummary.builder()
-                .name(entity.getName())
-                .members(entity.getUsers().size())
+                .name(entity.getLeague().getName())
+                .members(entity.getLeague().getUsers().size())
                 .userPosition(rank)
                 .build();
     }

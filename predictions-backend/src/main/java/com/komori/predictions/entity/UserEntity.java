@@ -34,7 +34,7 @@ public class UserEntity {
     @Enumerated(value = EnumType.STRING)
     private Team favouriteTeam;
     @OneToMany(mappedBy = "user") @JsonIgnore @Builder.Default // retains default value (new HashSet instead of null)
-    private Set<LeagueEntity> leagues = new HashSet<>();
+    private Set<UserLeagueEntity> leagues = new HashSet<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore @Builder.Default
     private Set<PredictionEntity> predictions = new HashSet<>();
