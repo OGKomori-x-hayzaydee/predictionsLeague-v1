@@ -1,7 +1,7 @@
 package com.komori.predictions.controller;
 
+import com.komori.predictions.dto.response.LeagueCard;
 import com.komori.predictions.dto.response.LeagueStanding;
-import com.komori.predictions.dto.response.LeagueSummary;
 import com.komori.predictions.dto.request.CreateLeagueRequest;
 import com.komori.predictions.service.LeagueService;
 import lombok.RequiredArgsConstructor;
@@ -18,22 +18,22 @@ import java.util.Set;
 public class LeagueController {
     private final LeagueService leagueService;
 
+    @GetMapping("/user")
+    public ResponseEntity<Set<LeagueCard>> getLeagueCardsForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        Set<LeagueCard> leagues = leagueService.getLeagueCardsForUser(email);
+        return ResponseEntity.ok().body(leagues);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @RequestBody CreateLeagueRequest leagueRequest) {
+        leagueService.createLeague(email, leagueRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body("League created!");
+    }
+
     @GetMapping("/{uuid}")
     public ResponseEntity<LeagueStanding> getLeagueStandings(@PathVariable String uuid) {
         LeagueStanding standings = leagueService.getLeagueStandings(uuid);
         return ResponseEntity.ok().body(standings);
-    }
-
-    @GetMapping
-    public ResponseEntity<Set<LeagueSummary>> getLeaguesForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<LeagueSummary> leagues = leagueService.getLeaguesForUser(email);
-        return ResponseEntity.ok().body(leagues);
-    }
-
-    @PostMapping
-    public ResponseEntity<LeagueSummary> createLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @RequestBody CreateLeagueRequest leagueRequest) {
-        LeagueSummary newLeague = leagueService.createLeague(email, leagueRequest.getName(), leagueRequest.getPublicity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(newLeague);
     }
 
     @PostMapping("/public/{uuid}/join")
