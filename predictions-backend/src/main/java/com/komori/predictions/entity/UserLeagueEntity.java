@@ -22,4 +22,10 @@ public class UserLeagueEntity {
     private LeagueEntity league;
     private Boolean isOwner;
     private Boolean isAdmin;
+
+    public UserLeagueEntity(UserEntity user, LeagueEntity league) {
+        this.user = user;
+        this.league = league;
+        this.id = new UserLeagueId(user.getId(), league.getId());
+    }
 }
