@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LeagueSummary {
+public class DashboardLeagueSummary {
     private String id;
     private String name;
     private int members;

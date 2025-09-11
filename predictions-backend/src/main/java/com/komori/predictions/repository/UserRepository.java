@@ -34,5 +34,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
         ) sub
     WHERE id = :userId
     """, nativeQuery = true)
-    Integer findUserRankInLeague(@Param(("userId")) Long userId, @Param("leagueId") Long leagueId);
+    Integer findUserRankInLeague(@Param("userId") Long userId, @Param("leagueId") Long leagueId);
 }

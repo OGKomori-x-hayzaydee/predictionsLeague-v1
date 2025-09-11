@@ -1,11 +1,13 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.dto.request.CreateLeagueRequest;
-import com.komori.predictions.dto.response.LeagueCard;
+import com.komori.predictions.dto.response.LeagueOverview;
+import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.dto.enumerated.Publicity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
+import com.komori.predictions.exception.LeagueNotFoundException;
 import com.komori.predictions.repository.LeagueRepository;
 import com.komori.predictions.repository.UserLeagueRepository;
 import com.komori.predictions.repository.UserRepository;
@@ -23,16 +25,6 @@ public class LeagueService {
     private final LeagueRepository leagueRepository;
     private final UserRepository userRepository;
     private final UserLeagueRepository userLeagueRepository;
-
-    public Set<LeagueCard> getLeagueCardsForUser(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return Set.copyOf(userEntity.getLeagues().stream()
-                .map(UserLeagueEntity::getLeague)
-                .map(league -> leagueEntityToCard(league, userEntity))
-                .toList());
-    }
 
     public void createLeague(String email, CreateLeagueRequest request) {
         UserEntity currentUser = userRepository.findByEmail(email)
@@ -59,6 +51,26 @@ public class LeagueService {
         userLeagueRepository.save(userLeague);
     }
 
+    public Set<LeagueOverview> getLeagueOverviewForUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return Set.copyOf(user.getLeagues().stream()
+                .map(UserLeagueEntity::getLeague)
+                .map(league -> leagueEntityToCard(league, user))
+                .toList());
+    }
+
+    public LeagueStanding getLeagueStanding(String email, String uuid) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        LeagueEntity league = leagueRepository.findByUUID(uuid)
+                .orElseThrow(LeagueNotFoundException::new);
+
+        return leagueEntityToStanding(league, user);
+    }
+
     private String generateLeagueCode() {
         String chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         Random random = new Random();
@@ -73,21 +85,40 @@ public class LeagueService {
         return code.toString();
     }
 
-    private LeagueCard leagueEntityToCard(LeagueEntity league, UserEntity user) {
-        return LeagueCard.builder()
+    private LeagueOverview leagueEntityToCard(LeagueEntity league, UserEntity user) {
+        return LeagueOverview.builder()
                 .id(league.getUUID())
                 .name(league.getName())
                 .description(league.getDescription())
-                .memberCount(league.getUsers().size())
-                .currentRank(userRepository.findUserRankInLeague(user.getId(), league.getId()))
-                .totalPoints(user.getTotalPoints())
+                .members(league.getUsers().size())
+                .position(userRepository.findUserRankInLeague(user.getId(), league.getId()))
+                .points(user.getTotalPoints())
                 .joinCode(league.getLeagueCode())
-                .isOwner(userLeagueRepository.isUserOwner(league.getId(), user.getId()))
                 .isAdmin(userLeagueRepository.isUserAdmin(league.getId(), user.getId()))
-                .status(league.getStatus())
+                .type(league.getPublicity())
                 .createdAt(league.getCreatedAt())
-                .gameweek(4)
-                .nextDeadline(Instant.now().plusSeconds(1000000))
                 .build();
+    }
+
+    private LeagueStanding leagueEntityToStanding(LeagueEntity league, UserEntity user) {
+        List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague(league);
+        Set<LeagueStanding.LeagueMember> members = new HashSet<>();
+        userLeagueEntities.forEach(entity -> {
+            LeagueEntity leagueEntity = entity.getLeague();
+            UserEntity userEntity = entity.getUser();
+            LeagueStanding.LeagueMember member = LeagueStanding.LeagueMember.builder()
+                    .id(userEntity.getUserID())
+                    .username(userEntity.getUsername())
+                    .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
+                    .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
+                    .points(userEntity.getTotalPoints())
+                    .predictions(10)
+                    .joinedAt(Instant.now())
+                    .isCurrentUser(Objects.equals(userEntity.getId(), user.getId()))
+                    .build();
+            members.add(member);
+        });
+
+        return new LeagueStanding(league.getUUID(), members);
     }
 }

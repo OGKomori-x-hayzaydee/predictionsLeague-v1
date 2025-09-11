@@ -2,7 +2,7 @@ package com.komori.predictions.service;
 
 import com.komori.predictions.dto.enumerated.Team;
 import com.komori.predictions.dto.response.DashboardEssentials;
-import com.komori.predictions.dto.response.LeagueSummary;
+import com.komori.predictions.dto.response.DashboardLeagueSummary;
 import com.komori.predictions.dto.response.Match;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.PredictionEntity;
@@ -35,7 +35,7 @@ public class DashboardService {
         return user.getPredictions();
     }
 
-    public Set<LeagueSummary> getLeagues(String email) {
+    public Set<DashboardLeagueSummary> getLeagues(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
@@ -65,9 +65,9 @@ public class DashboardService {
         return Set.of(firstTestMatch, secondTestMatch);
     }
 
-    private LeagueSummary entityToSummary(LeagueEntity league, Long userId) {
+    private DashboardLeagueSummary entityToSummary(LeagueEntity league, Long userId) {
         int rank = userRepository.findUserRankInLeague(userId, league.getId());
-        return LeagueSummary.builder()
+        return DashboardLeagueSummary.builder()
                 .name(league.getName())
                 .members(league.getUsers().size())
                 .userPosition(rank)

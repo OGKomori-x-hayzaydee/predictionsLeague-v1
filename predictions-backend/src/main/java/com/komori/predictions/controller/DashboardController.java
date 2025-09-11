@@ -1,7 +1,7 @@
 package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.response.DashboardEssentials;
-import com.komori.predictions.dto.response.LeagueSummary;
+import com.komori.predictions.dto.response.DashboardLeagueSummary;
 import com.komori.predictions.dto.response.Match;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.service.DashboardService;
@@ -33,8 +33,8 @@ public class DashboardController {
     }
 
     @GetMapping("/leagues/user")
-    public ResponseEntity<Set<LeagueSummary>> getLeagues(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<LeagueSummary> leagues = dashboardService.getLeagues(email);
+    public ResponseEntity<Set<DashboardLeagueSummary>> getLeagues(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        Set<DashboardLeagueSummary> leagues = dashboardService.getLeagues(email);
         return ResponseEntity.ok(leagues);
     }
 

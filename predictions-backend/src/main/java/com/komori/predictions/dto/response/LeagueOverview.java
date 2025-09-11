@@ -1,29 +1,26 @@
 package com.komori.predictions.dto.response;
 
+import com.komori.predictions.dto.enumerated.Publicity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LeagueCard {
+public class LeagueOverview {
     private String id;
     private String name;
     private String description;
-    private Integer memberCount;
-    private Integer currentRank;
-    private Integer totalPoints;
+    private Integer members;
+    private Integer position;
+    private Integer points;
     private String joinCode;
-    private Boolean isOwner;
     private Boolean isAdmin;
-    private String status;
+    private Publicity type;
     private Timestamp createdAt;
-    private Integer gameweek;
-    private Instant nextDeadline;
 }
