@@ -1,6 +1,5 @@
 package com.komori.predictions.dto.response;
 
-import com.komori.predictions.entity.Publicity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class LeagueSummary {
-    private String uuid;
+    private String id;
     private String name;
-    private Publicity publicity;
-    private int numberOfMembers;
+    private int members;
+    private int userPosition;
 }

@@ -1,6 +1,7 @@
 package com.komori.predictions.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.komori.predictions.dto.enumerated.Team;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,6 +36,9 @@ public class UserEntity {
     @ManyToMany(mappedBy = "users")
     @JsonIgnore @Builder.Default // retains default value (new HashSet instead of null)
     private Set<LeagueEntity> leagues = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore @Builder.Default
+    private Set<PredictionEntity> predictions = new HashSet<>();
     @CreationTimestamp @Column(updatable = false)
     private Timestamp createdAt;
     @UpdateTimestamp

@@ -1,5 +1,6 @@
 package com.komori.predictions.entity;
 
+import com.komori.predictions.dto.enumerated.Publicity;
 import jakarta.persistence.*;
 import lombok.*;
 

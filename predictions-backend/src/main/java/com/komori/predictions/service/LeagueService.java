@@ -3,7 +3,7 @@ package com.komori.predictions.service;
 import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.dto.response.LeagueSummary;
 import com.komori.predictions.entity.LeagueEntity;
-import com.komori.predictions.entity.Publicity;
+import com.komori.predictions.dto.enumerated.Publicity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.IncorrectLeagueCodeException;
 import com.komori.predictions.exception.LeagueAlreadyJoinedException;
@@ -134,10 +134,9 @@ public class LeagueService {
 
     private LeagueSummary leagueEntityToSummary(LeagueEntity league) {
         return LeagueSummary.builder()
-                .uuid(league.getUUID())
+                .id(league.getUUID())
                 .name(league.getName())
-                .publicity(league.getPublicity())
-                .numberOfMembers(league.getUsers().size())
+                .members(league.getUsers().size())
                 .build();
     }
 }

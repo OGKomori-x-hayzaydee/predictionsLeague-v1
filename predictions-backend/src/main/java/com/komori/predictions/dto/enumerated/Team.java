@@ -1,4 +1,4 @@
-package com.komori.predictions.entity;
+package com.komori.predictions.dto.enumerated;
 
 public enum Team {
     ARSENAL,

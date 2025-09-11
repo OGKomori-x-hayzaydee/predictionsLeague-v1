@@ -1,6 +1,6 @@
 package com.komori.predictions.dto.request;
 
-import com.komori.predictions.entity.Publicity;
+import com.komori.predictions.dto.enumerated.Publicity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
