@@ -1,12 +1,16 @@
 package com.komori.predictions.entity.id;
 
 import jakarta.persistence.Embeddable;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Embeddable
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserLeagueId implements Serializable {
     private Long userId;
     private Long leagueId;
