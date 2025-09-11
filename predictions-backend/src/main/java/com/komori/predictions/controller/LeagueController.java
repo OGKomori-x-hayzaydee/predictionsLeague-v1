@@ -1,7 +1,6 @@
 package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.response.LeagueCard;
-import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.dto.request.CreateLeagueRequest;
 import com.komori.predictions.service.LeagueService;
 import lombok.RequiredArgsConstructor;
@@ -28,23 +27,5 @@ public class LeagueController {
     public ResponseEntity<?> createLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @RequestBody CreateLeagueRequest leagueRequest) {
         leagueService.createLeague(email, leagueRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("League created!");
-    }
-
-    @GetMapping("/{uuid}")
-    public ResponseEntity<LeagueStanding> getLeagueStandings(@PathVariable String uuid) {
-        LeagueStanding standings = leagueService.getLeagueStandings(uuid);
-        return ResponseEntity.ok().body(standings);
-    }
-
-    @PostMapping("/public/{uuid}/join")
-    public ResponseEntity<String> joinPublicLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid) {
-        String leagueName = leagueService.joinPublicLeague(email, uuid);
-        return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
-    }
-
-    @PostMapping("/private/{code}/join")
-    public ResponseEntity<String> joinPrivateLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String code) {
-        String leagueName = leagueService.joinPrivateLeague(email, code);
-        return ResponseEntity.ok().body("Successfully joined " + leagueName + " league");
     }
 }
