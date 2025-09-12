@@ -1,16 +1,19 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.dto.request.CreateLeagueRequest;
+import com.komori.predictions.dto.request.JoinLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.dto.enumerated.Publicity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
+import com.komori.predictions.exception.IncorrectLeagueCodeException;
 import com.komori.predictions.exception.LeagueNotFoundException;
 import com.komori.predictions.repository.LeagueRepository;
 import com.komori.predictions.repository.UserLeagueRepository;
 import com.komori.predictions.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -69,6 +72,29 @@ public class LeagueService {
                 .orElseThrow(LeagueNotFoundException::new);
 
         return leagueEntityToStanding(league, user);
+    }
+
+    public void joinLeague(String email, JoinLeagueRequest request) {
+        LeagueEntity league = leagueRepository.findByUUID(request.getUuid())
+                .orElseThrow(LeagueNotFoundException::new);
+
+        if (!league.getLeagueCode().equals(request.getLeagueCode())) {
+            throw new IncorrectLeagueCodeException();
+        }
+
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        UserLeagueEntity newEntity = new UserLeagueEntity(user, league, false, false);
+        userLeagueRepository.save(newEntity);
+    }
+
+    @Transactional
+    public void deleteLeague(String uuid) {
+        LeagueEntity league = leagueRepository.findByUUID(uuid)
+                .orElseThrow(LeagueNotFoundException::new);
+
+        userLeagueRepository.deleteAllByLeague(league);
     }
 
     private String generateLeagueCode() {

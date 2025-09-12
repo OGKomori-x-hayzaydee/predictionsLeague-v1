@@ -19,6 +19,7 @@ public interface UserLeagueRepository extends JpaRepository<UserLeagueEntity, Us
     """)
     boolean isUserAdmin(@Param("leagueId") Long leagueId, @Param("userId") Long userId);
 
-
     List<UserLeagueEntity> findAllByLeague(LeagueEntity league);
+
+    void deleteAllByLeague(LeagueEntity league);
 }
