@@ -11,4 +11,6 @@ public interface LeagueRepository extends JpaRepository<LeagueEntity, Long> {
     boolean existsByLeagueCode(String code);
 
     Optional<LeagueEntity> findByUUID(String uuid);
+
+    Optional<LeagueEntity> findByLeagueCode(String leagueCode);
 }

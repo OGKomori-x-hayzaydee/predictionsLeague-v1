@@ -2,8 +2,8 @@ package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
+import com.komori.predictions.dto.response.DashboardPredictionSummary;
 import com.komori.predictions.dto.response.Match;
-import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +27,8 @@ public class DashboardController {
     }
 
     @GetMapping("/predictions/recent")
-    public ResponseEntity<Set<PredictionEntity>> getPredictions(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<PredictionEntity> predictions = dashboardService.getPredictions(email);
+    public ResponseEntity<Set<DashboardPredictionSummary>> getPredictions(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        Set<DashboardPredictionSummary> predictions = dashboardService.getPredictions(email);
         return ResponseEntity.ok(predictions);
     }
 

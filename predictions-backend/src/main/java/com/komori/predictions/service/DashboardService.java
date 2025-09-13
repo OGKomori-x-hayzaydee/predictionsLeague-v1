@@ -3,9 +3,9 @@ package com.komori.predictions.service;
 import com.komori.predictions.dto.enumerated.Team;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
+import com.komori.predictions.dto.response.DashboardPredictionSummary;
 import com.komori.predictions.dto.response.Match;
 import com.komori.predictions.entity.LeagueEntity;
-import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.repository.UserRepository;
@@ -28,11 +28,13 @@ public class DashboardService {
         return userEntityToDashboardDetails(user);
     }
 
-    public Set<PredictionEntity> getPredictions(String email) {
+    public Set<DashboardPredictionSummary> getPredictions(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
-        return user.getPredictions();
+        return Set.copyOf(user.getPredictions().stream()
+                .map(DashboardPredictionSummary::new)
+                .toList());
     }
 
     public Set<DashboardLeagueSummary> getLeagues(String email) {

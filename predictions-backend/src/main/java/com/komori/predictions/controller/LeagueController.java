@@ -1,6 +1,5 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.dto.request.JoinLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.request.CreateLeagueRequest;
 import com.komori.predictions.dto.response.LeagueStanding;
@@ -37,9 +36,9 @@ public class LeagueController {
         return ResponseEntity.ok(standing);
     }
 
-    @PostMapping("/join")
-    public ResponseEntity<?> joinLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @RequestBody JoinLeagueRequest request) {
-        leagueService.joinLeague(email, request);
+    @PostMapping("/{code}/join")
+    public ResponseEntity<?> joinLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String code) {
+        leagueService.joinLeague(email, code);
         return ResponseEntity.ok("League joined successfully!");
     }
 

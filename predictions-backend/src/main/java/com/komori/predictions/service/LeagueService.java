@@ -1,14 +1,12 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.dto.request.CreateLeagueRequest;
-import com.komori.predictions.dto.request.JoinLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.dto.enumerated.Publicity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
-import com.komori.predictions.exception.IncorrectLeagueCodeException;
 import com.komori.predictions.exception.LeagueNotFoundException;
 import com.komori.predictions.repository.LeagueRepository;
 import com.komori.predictions.repository.UserLeagueRepository;
@@ -74,13 +72,9 @@ public class LeagueService {
         return leagueEntityToStanding(league, user);
     }
 
-    public void joinLeague(String email, JoinLeagueRequest request) {
-        LeagueEntity league = leagueRepository.findByUUID(request.getUuid())
+    public void joinLeague(String email, String code) {
+        LeagueEntity league = leagueRepository.findByLeagueCode(code)
                 .orElseThrow(LeagueNotFoundException::new);
-
-        if (!league.getLeagueCode().equals(request.getLeagueCode())) {
-            throw new IncorrectLeagueCodeException();
-        }
 
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
