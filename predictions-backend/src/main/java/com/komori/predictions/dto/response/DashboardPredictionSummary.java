@@ -30,8 +30,8 @@ public class DashboardPredictionSummary {
     private Integer gameweek;
 
     public DashboardPredictionSummary(PredictionEntity entity) {
-        this.id = entity.getUuid();
-        this.userId = entity.getUser().getUserID();
+        this.id = entity.getUUID();
+        this.userId = entity.getUser().getUUID();
         this.matchId = entity.getMatchId();
         this.homeTeam = entity.getHomeTeam();
         this.awayTeam = entity.getAwayTeam();

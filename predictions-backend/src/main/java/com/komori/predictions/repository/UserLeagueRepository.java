@@ -1,7 +1,6 @@
 package com.komori.predictions.repository;
 
 import com.komori.predictions.entity.LeagueEntity;
-import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.entity.id.UserLeagueId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserLeagueRepository extends JpaRepository<UserLeagueEntity, UserLeagueId> {
@@ -25,5 +25,5 @@ public interface UserLeagueRepository extends JpaRepository<UserLeagueEntity, Us
 
     void deleteAllByLeague(LeagueEntity league);
 
-    void deleteByUserAndLeague(UserEntity user, LeagueEntity league);
+    Optional<UserLeagueEntity> findByUserUUIDAndLeagueUUID(String userId, String leagueId);
 }

@@ -1,6 +1,6 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.dto.request.RemoveUserRequest;
+import com.komori.predictions.dto.request.UserLeagueActionRequest;
 import com.komori.predictions.dto.request.UpdateLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.request.CreateLeagueRequest;
@@ -50,8 +50,14 @@ public class LeagueController {
         return ResponseEntity.ok("League updated successfully!");
     }
 
+    @PutMapping("/add-admin")
+    public ResponseEntity<String> makeUserAdmin(@RequestBody UserLeagueActionRequest request) {
+        leagueService.makeUserAdmin(request);
+        return ResponseEntity.ok("Admins updated successfully!");
+    }
+
     @DeleteMapping("/remove-user")
-    public ResponseEntity<String> removeUserFromLeague(@RequestBody RemoveUserRequest request) {
+    public ResponseEntity<String> removeUserFromLeague(@RequestBody UserLeagueActionRequest request) {
         leagueService.removeUserFromLeague(request);
         return ResponseEntity.ok("User removed successfully!");
     }

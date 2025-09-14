@@ -31,7 +31,7 @@ public class ProfileService {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
-        String key = "profile-pictures/" + currentUser.getUserID() + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+        String key = "profile-pictures/" + currentUser.getUUID() + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(file.getContentType());

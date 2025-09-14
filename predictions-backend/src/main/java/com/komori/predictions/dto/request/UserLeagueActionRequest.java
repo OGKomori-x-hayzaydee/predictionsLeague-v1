@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RemoveUserRequest {
+public class UserLeagueActionRequest {
     private String leagueId;
     private String userId;
 }

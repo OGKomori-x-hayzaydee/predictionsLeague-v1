@@ -1,7 +1,7 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.dto.request.CreateLeagueRequest;
-import com.komori.predictions.dto.request.RemoveUserRequest;
+import com.komori.predictions.dto.request.UserLeagueActionRequest;
 import com.komori.predictions.dto.request.UpdateLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.response.LeagueStanding;
@@ -85,6 +85,15 @@ public class LeagueService {
         userLeagueRepository.save(newEntity);
     }
 
+    @Transactional
+    public void makeUserAdmin(UserLeagueActionRequest request) {
+        UserLeagueEntity entity = userLeagueRepository.findByUserUUIDAndLeagueUUID(request.getUserId(), request.getLeagueId())
+                        .orElseThrow(() -> new UsernameNotFoundException("User is not in league"));
+        entity.setIsAdmin(true);
+        userLeagueRepository.save(entity);
+    }
+
+    @Transactional
     public void updateLeague(UpdateLeagueRequest request) {
         LeagueEntity league = leagueRepository.findByUUID(request.getId())
                 .orElseThrow(LeagueNotFoundException::new);
@@ -94,15 +103,11 @@ public class LeagueService {
         leagueRepository.save(league);
     }
 
-    @Transactional
-    public void removeUserFromLeague(RemoveUserRequest request) {
-        LeagueEntity league = leagueRepository.findByUUID(request.getLeagueId())
-                .orElseThrow(LeagueNotFoundException::new);
+    public void removeUserFromLeague(UserLeagueActionRequest request) {
+        UserLeagueEntity entity = userLeagueRepository.findByUserUUIDAndLeagueUUID(request.getUserId(), request.getLeagueId())
+                .orElseThrow(() -> new UsernameNotFoundException("User is not in league"));
 
-        UserEntity user = userRepository.findByUserID(request.getUserId())
-                .orElseThrow(() -> new UsernameNotFoundException("userID not found"));
-
-        userLeagueRepository.deleteByUserAndLeague(user, league);
+        userLeagueRepository.delete(entity);
     }
 
     @Transactional
@@ -149,7 +154,7 @@ public class LeagueService {
             LeagueEntity leagueEntity = entity.getLeague();
             UserEntity userEntity = entity.getUser();
             LeagueStanding.LeagueMember member = LeagueStanding.LeagueMember.builder()
-                    .id(userEntity.getUserID())
+                    .id(userEntity.getUUID())
                     .username(userEntity.getUsername())
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
@@ -157,6 +162,7 @@ public class LeagueService {
                     .predictions(10)
                     .joinedAt(Instant.now())
                     .isCurrentUser(Objects.equals(userEntity.getId(), user.getId()))
+                    .isAdmin(entity.getIsAdmin())
                     .build();
             members.add(member);
         });

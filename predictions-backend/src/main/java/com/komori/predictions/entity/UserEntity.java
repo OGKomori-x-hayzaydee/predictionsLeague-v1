@@ -20,7 +20,7 @@ import java.util.Set;
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String userID;
+    private String UUID;
     private String firstName;
     private String lastName;
     private String username;

@@ -106,7 +106,7 @@ public class AuthService {
 
     private UserEntity convertToUserEntity(RegistrationRequest request) {
         return UserEntity.builder()
-                .userID(UUID.randomUUID().toString())
+                .UUID(UUID.randomUUID().toString())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())

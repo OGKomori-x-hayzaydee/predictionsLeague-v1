@@ -8,6 +8,7 @@ import lombok.*;
 import java.time.Instant;
 import java.util.Set;
 
+@SuppressWarnings("JpaDataSourceORMInspection")
 @Entity
 @Table(name = "prediction_entity")
 @Data
@@ -17,7 +18,8 @@ import java.util.Set;
 public class PredictionEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String uuid;
+    private String UUID;
+    @SuppressWarnings("JpaDataSourceORMInspection")
     @ManyToOne @JoinColumn(name = "user_id")
     private UserEntity user;
     private Long matchId;

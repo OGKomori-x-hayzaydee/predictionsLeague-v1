@@ -27,5 +27,6 @@ public class LeagueStanding {
         private Integer predictions;
         private Instant joinedAt;
         private Boolean isCurrentUser;
+        private Boolean isAdmin;
     }
 }

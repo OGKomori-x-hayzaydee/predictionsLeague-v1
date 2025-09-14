@@ -51,7 +51,7 @@ public class OAuth2Controller {
             String picture = (String) userInfo.get("picture");
 
             UserEntity newUser = UserEntity.builder()
-                    .userID(UUID.randomUUID().toString())
+                    .UUID(UUID.randomUUID().toString())
                     .email(email)
                     .firstName(firstName)
                     .lastName(lastName)
