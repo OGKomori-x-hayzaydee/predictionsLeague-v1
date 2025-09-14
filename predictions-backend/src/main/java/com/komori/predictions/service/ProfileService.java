@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.komori.predictions.dto.response.ProfileOverview;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.PasswordMismatchException;
 import com.komori.predictions.repository.UserRepository;
@@ -26,6 +27,13 @@ public class ProfileService {
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public ProfileOverview viewProfile(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+
+        return new ProfileOverview(user);
+    }
 
     public String setProfilePicture(MultipartFile file, String email) throws IOException {
         UserEntity currentUser = userRepository.findByEmail(email)

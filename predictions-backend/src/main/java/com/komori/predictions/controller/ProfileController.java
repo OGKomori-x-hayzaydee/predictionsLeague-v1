@@ -1,6 +1,7 @@
 package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.request.PasswordChangeRequest;
+import com.komori.predictions.dto.response.ProfileOverview;
 import com.komori.predictions.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProfileController {
     private final ProfileService profileService;
+
+    @GetMapping
+    public ResponseEntity<ProfileOverview> viewProfile(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        ProfileOverview overview = profileService.viewProfile(email);
+        return ResponseEntity.ok(overview);
+    }
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(String email) {
