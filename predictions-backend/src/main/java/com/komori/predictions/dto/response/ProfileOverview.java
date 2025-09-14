@@ -27,6 +27,7 @@ public class ProfileOverview {
     public ProfileOverview(UserEntity entity) {
         this.id = entity.getUUID();
         this.username = entity.getUsername();
+        this.email = entity.getEmail();
         this.firstName = entity.getFirstName();
         this.lastName = entity.getLastName();
         this.profilePicture = entity.getProfilePictureUrl();
