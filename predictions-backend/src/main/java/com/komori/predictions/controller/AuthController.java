@@ -71,7 +71,7 @@ public class AuthController {
                 .domain(".predictionsleague.xyz")
                 .build();
 
-        ResponseCookie accessCookie = ResponseCookie.from("jwt")
+        ResponseCookie accessCookie = ResponseCookie.from("access")
                 .httpOnly(true)
                 .path("/")
                 .secure(true)
