@@ -78,7 +78,7 @@ public class DashboardService {
 
     private DashboardEssentials userEntityToDashboardDetails(UserEntity user) {
         int globalRank = userRepository.findUserRank(user.getId());
-        int totalUsers = userRepository.findAll().size();
+        int totalUsers = (int) userRepository.count();
         return DashboardEssentials.builder()
                 .user(new DashboardEssentials.User(
                         user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), 1, 1

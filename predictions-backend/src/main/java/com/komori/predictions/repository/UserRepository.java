@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Query(value = """
     SELECT rank FROM (
-            SELECT id, RANK() OVER (ORDER BY user_entity.total_points DESC) AS rank
+            SELECT id, RANK() OVER (ORDER BY total_points DESC) AS rank
                 FROM user_entity
         ) sub
     WHERE id = :id
@@ -35,4 +35,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     WHERE id = :userId
     """, nativeQuery = true)
     Integer findUserRankInLeague(@Param("userId") Long userId, @Param("leagueId") Long leagueId);
+
+    Optional<UserEntity> findByUserID(String userID);
 }

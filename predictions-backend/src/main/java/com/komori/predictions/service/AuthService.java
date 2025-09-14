@@ -73,7 +73,7 @@ public class AuthService {
         }
         if (otp.equals(otpEntity.getValue())) {
             currentUser.setAccountVerified(true);
-            otpRepository.deleteByUserId(currentUser.getId());
+            otpRepository.deleteByUserId(currentUser.getId()); // Reason for transactional
             userRepository.save(currentUser);
             emailService.sendAccountVerifiedEmail(email, currentUser.getFirstName());
         }

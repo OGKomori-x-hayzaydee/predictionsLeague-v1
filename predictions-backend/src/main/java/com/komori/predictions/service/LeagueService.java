@@ -1,6 +1,8 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.dto.request.CreateLeagueRequest;
+import com.komori.predictions.dto.request.RemoveUserRequest;
+import com.komori.predictions.dto.request.UpdateLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.entity.LeagueEntity;
@@ -81,6 +83,26 @@ public class LeagueService {
 
         UserLeagueEntity newEntity = new UserLeagueEntity(user, league, false, false);
         userLeagueRepository.save(newEntity);
+    }
+
+    public void updateLeague(UpdateLeagueRequest request) {
+        LeagueEntity league = leagueRepository.findByUUID(request.getId())
+                .orElseThrow(LeagueNotFoundException::new);
+
+        league.setName(request.getName());
+        league.setDescription(request.getDescription());
+        leagueRepository.save(league);
+    }
+
+    @Transactional
+    public void removeUserFromLeague(RemoveUserRequest request) {
+        LeagueEntity league = leagueRepository.findByUUID(request.getLeagueId())
+                .orElseThrow(LeagueNotFoundException::new);
+
+        UserEntity user = userRepository.findByUserID(request.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("userID not found"));
+
+        userLeagueRepository.deleteByUserAndLeague(user, league);
     }
 
     @Transactional

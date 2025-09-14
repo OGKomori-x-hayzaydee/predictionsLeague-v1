@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface OtpRepository extends JpaRepository<OtpEntity, Long> {
     Optional<OtpEntity> findByUserId(Long userId);
+
     void deleteByUserId(Long userId);
 }

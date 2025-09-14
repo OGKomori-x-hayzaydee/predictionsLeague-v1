@@ -1,6 +1,7 @@
 package com.komori.predictions.repository;
 
 import com.komori.predictions.entity.LeagueEntity;
+import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.entity.id.UserLeagueId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface UserLeagueRepository extends JpaRepository<UserLeagueEntity, UserLeagueId> {
+    // This query uses JPQL rather than SQL
     @Query(value = """
     select case when count(ul) > 0 then true else false end
     from UserLeagueEntity ul
@@ -22,4 +24,6 @@ public interface UserLeagueRepository extends JpaRepository<UserLeagueEntity, Us
     List<UserLeagueEntity> findAllByLeague(LeagueEntity league);
 
     void deleteAllByLeague(LeagueEntity league);
+
+    void deleteByUserAndLeague(UserEntity user, LeagueEntity league);
 }
