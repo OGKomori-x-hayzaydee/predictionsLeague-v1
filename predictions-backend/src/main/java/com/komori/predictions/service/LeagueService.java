@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 
 @SuppressWarnings("DuplicatedCode")
@@ -159,8 +158,8 @@ public class LeagueService {
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
                     .points(userEntity.getTotalPoints())
-                    .predictions(10)
-                    .joinedAt(Instant.now())
+                    .predictions(userEntity.getPredictions().size())
+                    .joinedAt(entity.getJoinedAt().toInstant())
                     .isCurrentUser(Objects.equals(userEntity.getId(), user.getId()))
                     .isAdmin(entity.getIsAdmin())
                     .build();

@@ -4,6 +4,9 @@ import com.komori.predictions.entity.id.UserLeagueId;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "user_league_table")
@@ -18,6 +21,8 @@ public class UserLeagueEntity {
     private LeagueEntity league;
     private Boolean isOwner;
     private Boolean isAdmin;
+    @CreationTimestamp
+    private Timestamp joinedAt;
 
     public UserLeagueEntity(UserEntity user, LeagueEntity league, Boolean isOwner, Boolean isAdmin) {
         this.user = user;
