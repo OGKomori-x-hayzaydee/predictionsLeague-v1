@@ -23,5 +23,13 @@ public class StatsTeamPerformance {
         private Integer correct;
         private Double accuracy;
         private Integer points;
+
+        public TeamPerformance(TeamPerformanceProjection projection) {
+            this.team = projection.getTeam();
+            this.predictions = projection.getTotal();
+            this.correct = projection.getCorrect();
+            this.accuracy = (projection.getTotal() == 0) ? 0.0 : ((projection.getCorrect() * 100.0)/projection.getTotal());
+            this.points = projection.getPoints();
+        }
     }
 }

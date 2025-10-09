@@ -5,12 +5,10 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.komori.predictions.dto.enumerated.Team;
-import com.komori.predictions.dto.response.ProfileOverview;
-import com.komori.predictions.dto.response.StatsHighlights;
-import com.komori.predictions.dto.response.StatsMonthlyPerformance;
-import com.komori.predictions.dto.response.StatsTeamPerformance;
+import com.komori.predictions.dto.response.*;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.PasswordMismatchException;
+import com.komori.predictions.repository.PredictionRepository;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +24,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
-    private final AmazonS3 amazonS3;
     @Value("${aws.s3.bucket}")
     private String bucketName;
+    private final AmazonS3 amazonS3;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    private final PredictionRepository predictionRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ProfileOverview viewProfile(String email) {
@@ -61,17 +60,21 @@ public class ProfileService {
     }
 
     public StatsTeamPerformance getTeamPerformance(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+        TeamPerformanceProjection Arsenal = predictionRepository.getTeamPerformanceByEmail(email, Team.ARSENAL);
+        TeamPerformanceProjection Chelsea = predictionRepository.getTeamPerformanceByEmail(email, Team.CHELSEA);
+        TeamPerformanceProjection ManCity = predictionRepository.getTeamPerformanceByEmail(email, Team.MANCITY);
+        TeamPerformanceProjection ManUtd = predictionRepository.getTeamPerformanceByEmail(email, Team.MANCITY);
+        TeamPerformanceProjection Liverpool = predictionRepository.getTeamPerformanceByEmail(email, Team.LIVERPOOL);
+        TeamPerformanceProjection Spurs = predictionRepository.getTeamPerformanceByEmail(email, Team.SPURS);
 
         return StatsTeamPerformance.builder()
                 .data(List.of(
-                        new StatsTeamPerformance.TeamPerformance(Team.ARSENAL, 0, 0, 0.0, user.getTotalPoints()),
-                        new StatsTeamPerformance.TeamPerformance(Team.CHELSEA, 0, 0, 0.0, 0),
-                        new StatsTeamPerformance.TeamPerformance(Team.MANCITY, 0, 0, 0.0, 0),
-                        new StatsTeamPerformance.TeamPerformance(Team.MANUTD, 0, 0, 0.0, 0),
-                        new StatsTeamPerformance.TeamPerformance(Team.SPURS, 0, 0, 0.0, 0),
-                        new StatsTeamPerformance.TeamPerformance(Team.LIVERPOOL, 0, 0, 0.0, 0)
+                        new StatsTeamPerformance.TeamPerformance(Arsenal),
+                        new StatsTeamPerformance.TeamPerformance(Chelsea),
+                        new StatsTeamPerformance.TeamPerformance(ManCity),
+                        new StatsTeamPerformance.TeamPerformance(ManUtd),
+                        new StatsTeamPerformance.TeamPerformance(Liverpool),
+                        new StatsTeamPerformance.TeamPerformance(Spurs)
                 ))
                 .build();
     }
