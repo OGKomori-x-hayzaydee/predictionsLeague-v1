@@ -2,6 +2,9 @@ package com.komori.predictions.controller;
 
 import com.komori.predictions.dto.request.PasswordChangeRequest;
 import com.komori.predictions.dto.response.ProfileOverview;
+import com.komori.predictions.dto.response.StatsHighlights;
+import com.komori.predictions.dto.response.StatsMonthlyPerformance;
+import com.komori.predictions.dto.response.StatsTeamPerformance;
 import com.komori.predictions.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,24 @@ public class ProfileController {
     public ResponseEntity<ProfileOverview> viewProfile(@CurrentSecurityContext(expression = "authentication?.name") String email) {
         ProfileOverview overview = profileService.viewProfile(email);
         return ResponseEntity.ok(overview);
+    }
+
+    @GetMapping("/statistics/highlights")
+    public ResponseEntity<StatsHighlights> getStatsHighlights(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        StatsHighlights highlights = profileService.getStatsHighlights(email);
+        return ResponseEntity.ok(highlights);
+    }
+
+    @GetMapping("/statistics/team-performance")
+    public ResponseEntity<StatsTeamPerformance> getTeamPerformance(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        StatsTeamPerformance performance = profileService.getTeamPerformance(email);
+        return ResponseEntity.ok(performance);
+    }
+
+    @GetMapping("/statistics/monthly-performance")
+    public ResponseEntity<StatsMonthlyPerformance> getMonthlyPerformance(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        StatsMonthlyPerformance performance = profileService.getMonthlyPerformance(email);
+        return ResponseEntity.ok(performance);
     }
 
     @PostMapping("/reset-password")
