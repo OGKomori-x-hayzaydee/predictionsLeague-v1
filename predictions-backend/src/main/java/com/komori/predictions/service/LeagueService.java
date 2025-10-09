@@ -11,12 +11,13 @@ import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.exception.LeagueNotFoundException;
 import com.komori.predictions.repository.LeagueRepository;
+import com.komori.predictions.repository.PredictionRepository;
 import com.komori.predictions.repository.UserLeagueRepository;
 import com.komori.predictions.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -27,6 +28,7 @@ public class LeagueService {
     private final LeagueRepository leagueRepository;
     private final UserRepository userRepository;
     private final UserLeagueRepository userLeagueRepository;
+    private final PredictionRepository predictionRepository;
 
     public void createLeague(String email, CreateLeagueRequest request) {
         UserEntity currentUser = userRepository.findByEmail(email)
@@ -53,6 +55,7 @@ public class LeagueService {
         userLeagueRepository.save(userLeague);
     }
 
+    @Transactional(readOnly = true)
     public Set<LeagueOverview> getLeagueOverviewForUser(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -146,7 +149,7 @@ public class LeagueService {
                 .build();
     }
 
-    private LeagueStanding leagueEntityToStanding(LeagueEntity league, UserEntity user) {
+    protected LeagueStanding leagueEntityToStanding(LeagueEntity league, UserEntity user) {
         List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague(league);
         Set<LeagueStanding.LeagueMember> members = new HashSet<>();
         userLeagueEntities.forEach(entity -> {
@@ -158,7 +161,7 @@ public class LeagueService {
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
                     .points(userEntity.getTotalPoints())
-                    .predictions(userEntity.getPredictions().size())
+                    .predictions(predictionRepository.countByUser(user))
                     .joinedAt(entity.getJoinedAt().toInstant())
                     .isCurrentUser(Objects.equals(userEntity.getId(), user.getId()))
                     .isAdmin(entity.getIsAdmin())

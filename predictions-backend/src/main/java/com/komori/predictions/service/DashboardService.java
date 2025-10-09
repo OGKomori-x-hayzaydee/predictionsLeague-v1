@@ -8,18 +8,22 @@ import com.komori.predictions.dto.response.Match;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
+import com.komori.predictions.repository.PredictionRepository;
 import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
     private final UserRepository userRepository;
+    private final PredictionRepository predictionRepository;
 
     public DashboardEssentials getDashboardDetails(String email) {
         UserEntity user = userRepository.findByEmail(email)
@@ -29,14 +33,12 @@ public class DashboardService {
     }
 
     public Set<DashboardPredictionSummary> getPredictions(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
-
-        return Set.copyOf(user.getPredictions().stream()
+        return predictionRepository.findAllByUser_Email(email).stream()
                 .map(DashboardPredictionSummary::new)
-                .toList());
+                .collect(Collectors.toSet());
     }
 
+    @Transactional(readOnly = true)
     public Set<DashboardLeagueSummary> getLeagues(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
