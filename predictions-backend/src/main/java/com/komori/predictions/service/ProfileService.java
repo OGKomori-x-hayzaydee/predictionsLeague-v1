@@ -4,7 +4,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.komori.predictions.dto.enumerated.Team;
+import com.komori.predictions.dto.projection.MonthlyPerformanceProjection;
+import com.komori.predictions.dto.projection.TeamPerformanceProjection;
 import com.komori.predictions.dto.response.*;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.exception.PasswordMismatchException;
@@ -60,43 +61,37 @@ public class ProfileService {
     }
 
     public StatsTeamPerformance getTeamPerformance(String email) {
-        TeamPerformanceProjection Arsenal = predictionRepository.getTeamPerformanceByEmail(email, Team.ARSENAL);
-        TeamPerformanceProjection Chelsea = predictionRepository.getTeamPerformanceByEmail(email, Team.CHELSEA);
-        TeamPerformanceProjection ManCity = predictionRepository.getTeamPerformanceByEmail(email, Team.MANCITY);
-        TeamPerformanceProjection ManUtd = predictionRepository.getTeamPerformanceByEmail(email, Team.MANCITY);
-        TeamPerformanceProjection Liverpool = predictionRepository.getTeamPerformanceByEmail(email, Team.LIVERPOOL);
-        TeamPerformanceProjection Spurs = predictionRepository.getTeamPerformanceByEmail(email, Team.SPURS);
+        List<TeamPerformanceProjection> projections = predictionRepository.getTeamPerformanceByEmail(email);
 
         return StatsTeamPerformance.builder()
                 .data(List.of(
-                        new StatsTeamPerformance.TeamPerformance(Arsenal),
-                        new StatsTeamPerformance.TeamPerformance(Chelsea),
-                        new StatsTeamPerformance.TeamPerformance(ManCity),
-                        new StatsTeamPerformance.TeamPerformance(ManUtd),
-                        new StatsTeamPerformance.TeamPerformance(Liverpool),
-                        new StatsTeamPerformance.TeamPerformance(Spurs)
+                        new StatsTeamPerformance.TeamPerformance(projections.getFirst()),
+                        new StatsTeamPerformance.TeamPerformance(projections.get(1)),
+                        new StatsTeamPerformance.TeamPerformance(projections.get(2)),
+                        new StatsTeamPerformance.TeamPerformance(projections.get(3)),
+                        new StatsTeamPerformance.TeamPerformance(projections.get(4)),
+                        new StatsTeamPerformance.TeamPerformance(projections.getLast())
                 ))
                 .build();
     }
 
     public StatsMonthlyPerformance getMonthlyPerformance(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+        List<MonthlyPerformanceProjection> projections = predictionRepository.getMonthlyPerformance(email);
 
         return StatsMonthlyPerformance.builder()
                 .data(List.of(
-                        new StatsMonthlyPerformance.MonthlyPerformance("Jan", user.getTotalPoints(), 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Feb", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Mar", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Apr", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("May", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Jun", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Jul", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Aug", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Sep", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Oct", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Nov", 0, 0, 0.0),
-                        new StatsMonthlyPerformance.MonthlyPerformance("Dec", 0, 0, 0.0)
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.getFirst()),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(1)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(2)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(3)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(4)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(5)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(6)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(7)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(8)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(9)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.get(10)),
+                        new StatsMonthlyPerformance.MonthlyPerformance(projections.getLast())
                 ))
                 .build();
     }

@@ -14,15 +14,5 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-
-  app:
-    build: .
-    depends_on:
-      - db
-    ports:
-      - "8080:8080"
-    env_file:
-      - vars.env
-
 volumes:
   postgres-data:

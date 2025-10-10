@@ -1,6 +1,6 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.dto.enumerated.Team;
+import com.komori.predictions.dto.projection.AccuracyStatsProjection;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
 import com.komori.predictions.dto.response.DashboardPredictionSummary;
@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,23 +50,7 @@ public class DashboardService {
     }
 
     public Set<Match> getMatches(@SuppressWarnings("unused") String email) {
-        Match firstTestMatch = Match.builder()
-                .date(Instant.now())
-                .homeTeam(Team.ARSENAL)
-                .awayTeam(Team.CHELSEA)
-                .gameweek(15)
-                .predicted(false)
-                .build();
-
-        Match secondTestMatch = Match.builder()
-                .date(Instant.now())
-                .homeTeam(Team.SPURS)
-                .awayTeam(Team.LIVERPOOL)
-                .gameweek(15)
-                .predicted(true)
-                .build();
-
-        return Set.of(firstTestMatch, secondTestMatch);
+        return new HashSet<>();
     }
 
     private DashboardLeagueSummary entityToSummary(LeagueEntity league, Long userId) {
@@ -81,9 +65,10 @@ public class DashboardService {
     private DashboardEssentials userEntityToDashboardDetails(UserEntity user) {
         int globalRank = userRepository.findUserRank(user.getId());
         int totalUsers = (int) userRepository.count();
+        AccuracyStatsProjection accuracyStatsProjection = predictionRepository.getAccuracyStatsByUserId(user.getId());
         return DashboardEssentials.builder()
                 .user(new DashboardEssentials.User(
-                        user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), 1, 1
+                        user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), predictionRepository.countByUser(user), 0
                 ))
                 .season(new DashboardEssentials.Season(
                         4, 38, "Fri 18:00"
@@ -91,10 +76,10 @@ public class DashboardService {
                 .stats(new DashboardEssentials.Stats(
                         new DashboardEssentials.Stats.WeeklyPoints(
                                 0,
-                                1,
-                                14),
+                                globalRank,
+                                0),
                         new DashboardEssentials.Stats.AccuracyRate(
-                                60D, 4
+                                accuracyStatsProjection.getAccuracy(), accuracyStatsProjection.getCorrect()
                         ),
                         new DashboardEssentials.Stats.AvailableChips(
                                 0, "No chips available to use"

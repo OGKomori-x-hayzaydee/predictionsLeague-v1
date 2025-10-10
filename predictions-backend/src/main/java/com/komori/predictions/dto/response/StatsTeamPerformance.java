@@ -1,6 +1,7 @@
 package com.komori.predictions.dto.response;
 
 import com.komori.predictions.dto.enumerated.Team;
+import com.komori.predictions.dto.projection.TeamPerformanceProjection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
