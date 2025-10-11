@@ -71,7 +71,7 @@ public class DashboardService {
                         user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), predictionRepository.countByUser(user), 0
                 ))
                 .season(new DashboardEssentials.Season(
-                        4, 38, "Fri 18:00"
+                        7, 38, "Fri 18:00"
                 ))
                 .stats(new DashboardEssentials.Stats(
                         new DashboardEssentials.Stats.WeeklyPoints(

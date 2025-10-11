@@ -13,4 +13,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
     private String frontendUrl;
+    private String fixtureApiKey;
+    private String fixtureBaseUrl;
 }

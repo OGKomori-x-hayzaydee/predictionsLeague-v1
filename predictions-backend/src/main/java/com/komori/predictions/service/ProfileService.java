@@ -50,12 +50,12 @@ public class ProfileService {
                         .points(user.getTotalPoints())
                         .build())
                 .mostActiveDay(StatsHighlights.StatsHighlightsDay.builder()
-                        .day("Saturday")
-                        .percentage(70.0)
+                        .day("None")
+                        .percentage(0.0)
                         .build())
                 .favoriteFixture(StatsHighlights.StatsHighlightsFixture.builder()
-                        .fixture("Arsenal Vs Chelsea")
-                        .accuracy(90.0)
+                        .fixture("None")
+                        .accuracy(0.0)
                         .build())
                 .build();
     }
