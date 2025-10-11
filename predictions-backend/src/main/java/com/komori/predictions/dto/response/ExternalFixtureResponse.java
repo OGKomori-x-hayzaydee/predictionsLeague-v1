@@ -21,12 +21,14 @@ public class ExternalFixtureResponse {
     private List<Match> matches;
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Filters {
         private String season;
         private String matchday;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ResultSet {
         private Integer count;
         private String first;
@@ -35,6 +37,7 @@ public class ExternalFixtureResponse {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Competition {
         private Integer id;
         private String name;
@@ -44,6 +47,7 @@ public class ExternalFixtureResponse {
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Match {
         private Area area;
         private Competition competition;
@@ -62,6 +66,7 @@ public class ExternalFixtureResponse {
         private List<Referee> referees;
 
         @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Area {
             private Integer id;
             private String name;
@@ -70,6 +75,7 @@ public class ExternalFixtureResponse {
         }
 
         @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Season {
             private Integer id;
             private String startDate;
@@ -79,6 +85,7 @@ public class ExternalFixtureResponse {
         }
 
         @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Team {
             private Integer id;
             private String name;
@@ -88,6 +95,7 @@ public class ExternalFixtureResponse {
         }
 
         @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Score {
             private String winner;
             private String duration;
@@ -95,6 +103,7 @@ public class ExternalFixtureResponse {
             private HomeAwayScore halfTime;
 
             @Data
+            @JsonIgnoreProperties(ignoreUnknown = true)
             public static class HomeAwayScore {
                 private Integer home;
                 private Integer away;
@@ -102,11 +111,13 @@ public class ExternalFixtureResponse {
         }
 
         @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Odds {
             private String msg;
         }
 
         @Data
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Referee {
             private Integer id;
             private String name;
