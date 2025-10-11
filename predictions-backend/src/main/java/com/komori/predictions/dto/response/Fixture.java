@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -16,7 +16,7 @@ public class Fixture {
     private String id;
     private String homeTeam;
     private String awayTeam;
-    private Instant date;
+    private LocalDateTime date;
     private String competition;
     private String status;
     private String venue;
@@ -28,7 +28,7 @@ public class Fixture {
         this.id = match.getId().toString();
         this.homeTeam = match.getHomeTeam().getShortName();
         this.awayTeam = match.getAwayTeam().getShortName();
-        this.date = match.getUtcDate().toInstant();
+        this.date = match.getUtcDate().toLocalDateTime();
         this.competition = "Premier League";
         this.status = match.getStatus();
         this.venue = FixtureDetails.VENUES.get(match.getHomeTeam().getTla());
