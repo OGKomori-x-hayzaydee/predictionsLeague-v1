@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +21,14 @@ public class FixtureDetails {
     private String apiKey;
     private final RestTemplate restTemplate;
     public static int currentMatchday;
+    public static final Set<String> BIG_SIX_TEAMS = Set.of(
+            "Man City",
+            "Man United",
+            "Liverpool",
+            "Tottenham",
+            "Arsenal",
+            "Chelsea"
+    );
     public static final Map<String, String> VENUES = Map.ofEntries(
             Map.entry("LIV","Anfield"),
             Map.entry("BOU","Vitality Stadium"),

@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -51,6 +52,17 @@ public class FixtureService {
 
     public List<Fixture> getFixtures() {
         //noinspection unchecked
-        return (List<Fixture>) redisTemplate.opsForValue().get("fixtures");
+        List<Fixture> fixtures = (List<Fixture>) redisTemplate.opsForValue().get("fixtures");
+        if (fixtures == null) {
+            throw new RuntimeException("Failed to fetch data from Redis");
+        }
+        List<Fixture> filteredFixtures = new ArrayList<>();
+        for (Fixture fixture : fixtures) {
+            if (FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getHomeTeam()) || FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getAwayTeam())) {
+                filteredFixtures.add(fixture);
+            }
+        }
+
+        return filteredFixtures;
     }
 }
