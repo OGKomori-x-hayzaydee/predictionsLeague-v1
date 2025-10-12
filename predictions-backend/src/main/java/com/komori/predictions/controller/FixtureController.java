@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/external-fixtures")
+@RequestMapping("/fixtures")
 @RequiredArgsConstructor
 public class FixtureController {
     private final FixtureService fixtureService;
 
-    @GetMapping("/fixtures")
+    @GetMapping
     public ResponseEntity<List<Fixture>> getFixtures() {
         List<Fixture> fixtures = fixtureService.getFixtures();
         return ResponseEntity.ok(fixtures);
