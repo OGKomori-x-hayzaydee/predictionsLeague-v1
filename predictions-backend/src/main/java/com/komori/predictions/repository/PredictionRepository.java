@@ -29,38 +29,46 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     AccuracyStatsProjection getAccuracyStatsByUserId(@Param("userId") Long userId);
 
     @Query(value = """
+    WITH teams AS (
+        SELECT 'ARSENAL' AS team
+            UNION ALL SELECT 'CHELSEA'
+            UNION ALL SELECT 'LIVERPOOL'
+            UNION ALL SELECT 'MANCITY'
+            UNION ALL SELECT 'MANUTD'
+            UNION ALL SELECT 'SPURS'
+    )
     SELECT
             t.team,
-            COUNT(*) AS total,
-            SUM(CASE WHEN p.correct = TRUE THEN 1 ELSE 0 END) AS correct,
-            SUM(p.points) AS points
-    FROM (
-            SELECT 'ARSENAL' AS team
-                    UNION ALL SELECT 'CHELSEA'
-                    UNION ALL SELECT 'LIVERPOOL'
-                    UNION ALL SELECT 'MANCITY'
-                    UNION ALL SELECT 'MANUTD'
-                    UNION ALL SELECT 'SPURS'
-    ) t
+            COUNT(p.id) AS total,
+            COALESCE(SUM(CASE WHEN p.correct THEN 1 ELSE 0 END),0) AS correct,
+            COALESCE(SUM(p.points),0) AS points
+    FROM teams t
     LEFT JOIN prediction_entity p
-    ON (p.home_team = t.team OR p.away_team = t.team)
-    JOIN user_entity u ON p.user_id = u.id
-    WHERE u.email = :email
+            ON (p.home_team = t.team OR p.away_team = t.team)
+    LEFT JOIN user_entity u
+            ON p.user_id = u.id
+            AND u.email = :email
     GROUP BY t.team
     """, nativeQuery = true)
     List<TeamPerformanceProjection> getTeamPerformanceByEmail(@Param("email") String email);
 
     @Query(value = """
+    WITH months AS (
+            SELECT generate_series(1,12) AS month
+    )
     SELECT
-            EXTRACT(MONTH FROM p.date) AS month,
-            COUNT(*) AS total,
-            SUM(CASE WHEN p.correct THEN 1 ELSE 0 END) AS correct,
-            SUM(p.points) AS points
-    FROM prediction_entity p
-    JOIN user_entity u ON p.user_id = u.id
-    WHERE u.email = :email
-    GROUP BY month
-    ORDER BY month
+            m.month,
+            COUNT(p.id) AS total,
+            COALESCE(SUM(CASE WHEN p.correct THEN 1 ELSE 0 END),0) AS correct,
+            COALESCE(SUM(p.points),0) AS points
+    FROM months m
+    LEFT JOIN prediction_entity p
+        ON EXTRACT(MONTH FROM p.date) = m.month
+    LEFT JOIN user_entity u
+        ON u.id = p.user_id
+        AND u.email = :email
+    GROUP BY m.month
+    ORDER BY m.month
     """, nativeQuery = true)
     List<MonthlyPerformanceProjection> getMonthlyPerformance(@Param("email") String email);
 }
