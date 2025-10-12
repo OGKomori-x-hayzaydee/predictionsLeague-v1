@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.projection.AccuracyStatsProjection;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
@@ -71,7 +72,7 @@ public class DashboardService {
                         user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), predictionRepository.countByUser(user), 0
                 ))
                 .season(new DashboardEssentials.Season(
-                        7, 38, "Fri 18:00"
+                        FixtureDetails.currentMatchday, 38, "Fri 18:00"
                 ))
                 .stats(new DashboardEssentials.Stats(
                         new DashboardEssentials.Stats.WeeklyPoints(
