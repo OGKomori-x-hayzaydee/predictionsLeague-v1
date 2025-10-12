@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/oauth2/**", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Public endpoints, don't require auth
+                        .requestMatchers("/fixtures", "/oauth2/**", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Public endpoints, don't require auth
                         .anyRequest().authenticated())
                 .requestCache(RequestCacheConfigurer::disable)
                 .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class)
