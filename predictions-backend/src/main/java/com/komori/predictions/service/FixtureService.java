@@ -21,12 +21,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FixtureService {
-    private final RedisTemplate<String, Object> redisTemplate;
     @Value("${app.fixture-api-key}")
     private String apiKey;
     @Value("${app.fixture-base-url}")
     private String fixtureBaseUrl;
     private final RestTemplate restTemplate;
+    private final RedisTemplate<String, Fixture> redisTemplate;
 
     @PostConstruct
     @Scheduled(cron = "0 0 0 * * *")
@@ -47,12 +47,13 @@ public class FixtureService {
         }
 
         List<Fixture> fixtures = response.getMatches().stream().map(Fixture::new).toList();
-        redisTemplate.opsForValue().set("fixtures", fixtures);
+        for (Fixture fixture : fixtures) {
+            redisTemplate.opsForList().rightPush("fixtures", fixture);
+        }
     }
 
     public List<Fixture> getFixtures() {
-        //noinspection unchecked
-        List<Fixture> fixtures = (List<Fixture>) redisTemplate.opsForValue().get("fixtures");
+        List<Fixture> fixtures = redisTemplate.opsForList().range("fixtures", 0, -1);
         if (fixtures == null) {
             throw new RuntimeException("Failed to fetch data from Redis");
         }
