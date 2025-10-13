@@ -1,8 +1,6 @@
 package com.komori.predictions.dto.response;
 
-import com.komori.predictions.dto.enumerated.Team;
 import com.komori.predictions.entity.PredictionEntity;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,13 +13,9 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class DashboardPredictionSummary {
-    private String id;
-    private String userId;
     private Long matchId;
-    @Enumerated(value = EnumType.STRING)
-    private Team homeTeam;
-    @Enumerated(value = EnumType.STRING)
-    private Team awayTeam;
+    private String homeTeam;
+    private String awayTeam;
     private Integer homeScore;
     private Integer awayScore;
     private Boolean correct;
@@ -30,8 +24,6 @@ public class DashboardPredictionSummary {
     private Integer gameweek;
 
     public DashboardPredictionSummary(PredictionEntity entity) {
-        this.id = entity.getUUID();
-        this.userId = entity.getUser().getUUID();
         this.matchId = entity.getMatchId();
         this.homeTeam = entity.getHomeTeam();
         this.awayTeam = entity.getAwayTeam();

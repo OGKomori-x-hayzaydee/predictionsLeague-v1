@@ -23,7 +23,7 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     SELECT
             COUNT(*) AS total,
             SUM(CASE WHEN p.correct = TRUE THEN 1 ELSE 0 END) AS correct
-    FROM prediction_entity p
+    FROM predictions p
     WHERE p.user_id = :userId
     """, nativeQuery = true)
     AccuracyStatsProjection getAccuracyStatsByUserId(@Param("userId") Long userId);
@@ -43,9 +43,9 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
             COALESCE(SUM(CASE WHEN p.correct THEN 1 ELSE 0 END),0) AS correct,
             COALESCE(SUM(p.points),0) AS points
     FROM teams t
-    LEFT JOIN prediction_entity p
+    LEFT JOIN predictions p
             ON (p.home_team = t.team OR p.away_team = t.team)
-    LEFT JOIN user_entity u
+    LEFT JOIN users u
             ON p.user_id = u.id
             AND u.email = :email
     GROUP BY t.team
@@ -62,9 +62,9 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
             COALESCE(SUM(CASE WHEN p.correct THEN 1 ELSE 0 END),0) AS correct,
             COALESCE(SUM(p.points),0) AS points
     FROM months m
-    LEFT JOIN prediction_entity p
+    LEFT JOIN predictions p
         ON EXTRACT(MONTH FROM p.date) = m.month
-    LEFT JOIN user_entity u
+    LEFT JOIN users u
         ON u.id = p.user_id
         AND u.email = :email
     GROUP BY m.month

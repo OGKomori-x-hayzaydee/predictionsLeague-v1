@@ -1,13 +1,12 @@
 package com.komori.predictions.controller;
 
+import com.komori.predictions.dto.request.PredictionRequest;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.service.PredictionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -21,5 +20,11 @@ public class PredictionController {
     public ResponseEntity<Set<PredictionEntity>> getPredictionsForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
         Set<PredictionEntity> predictions = predictionService.getPredictionsForUser(email);
         return ResponseEntity.ok(predictions);
+    }
+
+    @PostMapping("/make-prediction")
+    public ResponseEntity<String> makePrediction(@RequestBody PredictionRequest request, @CurrentSecurityContext(expression = "authentication?.name") String email) {
+        predictionService.makePrediction(email, request);
+        return ResponseEntity.ok("Prediction made successfully!");
     }
 }

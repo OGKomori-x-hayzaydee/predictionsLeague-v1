@@ -37,3 +37,7 @@ app:
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}
+
+logging:
+  level:
+    org.springframework.data.redis: error

@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = """
     SELECT rank FROM (
             SELECT id, RANK() OVER (ORDER BY total_points DESC) AS rank
-                FROM user_entity
+                FROM users
         ) sub
     WHERE id = :id
     """, nativeQuery = true)
@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = """
     SELECT rank FROM (
             SELECT u.id, RANK() OVER (ORDER BY u.total_points DESC) AS rank
-            FROM user_entity AS u
+            FROM users AS u
             JOIN user_league_table AS ult on u.id = ult.user_id
             WHERE ult.league_id = :leagueId
         ) sub
