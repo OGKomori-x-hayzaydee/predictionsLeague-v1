@@ -124,7 +124,9 @@ public class FixtureDetails {
                     }
 
                     for (ExternalTeamResponse.ExternalPlayer player : response.getSquad()) {
-                        redisPlayerTemplate.opsForList().rightPush(redisKey, new Player(player));
+                        if (!player.getPosition().contains("keeper")) {
+                            redisPlayerTemplate.opsForList().rightPush(redisKey, new Player(player));
+                        }
                     }
 
                     Thread.sleep(10000);
