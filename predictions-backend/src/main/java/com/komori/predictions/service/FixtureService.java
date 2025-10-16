@@ -49,6 +49,7 @@ public class FixtureService {
         }
 
         List<Fixture> fixtures = response.getMatches().stream().map(Fixture::new).toList();
+        redisFixtureTemplate.delete("fixtures");
         for (Fixture fixture : fixtures) {
             redisFixtureTemplate.opsForList().rightPush("fixtures", fixture);
         }
