@@ -21,6 +21,5 @@ public class ChipEntity {
     private UserEntity user;
     @Enumerated(value = EnumType.STRING)
     private Chip type;
-    private Integer cooldownRemaining;
     private Integer lastGameweekUsed;
 }

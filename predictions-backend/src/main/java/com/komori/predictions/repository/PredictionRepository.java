@@ -71,4 +71,6 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     ORDER BY m.month
     """, nativeQuery = true)
     List<MonthlyPerformanceProjection> getMonthlyPerformance(@Param("email") String email);
+
+    PredictionEntity findByMatchIdAndUser_Email(Long matchId, String userEmail);
 }

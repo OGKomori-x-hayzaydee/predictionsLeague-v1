@@ -34,6 +34,7 @@ app:
   frontend-url: ${FRONTEND_URL}
   fixture-api-key: ${FIXTURE_API_KEY}
   fixture-base-url: ${FIXTURE_BASE_URL}
+  team-base-url: ${TEAM_BASE_URL}
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}

@@ -15,4 +15,5 @@ public class AppProperties {
     private String frontendUrl;
     private String fixtureApiKey;
     private String fixtureBaseUrl;
+    private String teamBaseUrl;
 }

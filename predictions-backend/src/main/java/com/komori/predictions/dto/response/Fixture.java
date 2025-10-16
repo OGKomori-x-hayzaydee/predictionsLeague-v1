@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,7 +16,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Fixture {
     private String id;
+    private Integer homeId;
     private String homeTeam;
+    private Integer awayId;
     private String awayTeam;
     private LocalDateTime date;
     private String competition;
@@ -23,10 +27,14 @@ public class Fixture {
     private Integer gameweek;
     private Integer homeScore;
     private Integer awayScore;
+    private List<Player> homePlayers;
+    private List<Player> awayPlayers;
 
     public Fixture(ExternalFixtureResponse.Match match) {
         this.id = match.getId().toString();
+        this.homeId = match.getHomeTeam().getId();
         this.homeTeam = match.getHomeTeam().getShortName();
+        this.awayId = match.getAwayTeam().getId();
         this.awayTeam = match.getAwayTeam().getShortName();
         this.date = match.getUtcDate().toLocalDateTime();
         this.competition = "Premier League";
@@ -35,5 +43,7 @@ public class Fixture {
         this.gameweek = match.getMatchday();
         this.homeScore = match.getScore().getFullTime().getHome();
         this.awayScore = match.getScore().getFullTime().getAway();
+        this.homePlayers = new ArrayList<>();
+        this.awayPlayers = new ArrayList<>();
     }
 }

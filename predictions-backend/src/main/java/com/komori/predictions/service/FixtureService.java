@@ -3,6 +3,7 @@ package com.komori.predictions.service;
 import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.response.ExternalFixtureResponse;
 import com.komori.predictions.dto.response.Fixture;
+import com.komori.predictions.dto.response.Player;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,12 +22,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FixtureService {
+    private final RedisTemplate<String, Player> redisPlayerTemplate;
     @Value("${app.fixture-api-key}")
     private String apiKey;
     @Value("${app.fixture-base-url}")
     private String fixtureBaseUrl;
     private final RestTemplate restTemplate;
-    private final RedisTemplate<String, Fixture> redisTemplate;
+    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
 
     @PostConstruct
     @Scheduled(cron = "0 0 0 * * *")
@@ -48,18 +50,23 @@ public class FixtureService {
 
         List<Fixture> fixtures = response.getMatches().stream().map(Fixture::new).toList();
         for (Fixture fixture : fixtures) {
-            redisTemplate.opsForList().rightPush("fixtures", fixture);
+            redisFixtureTemplate.opsForList().rightPush("fixtures", fixture);
         }
     }
 
     public List<Fixture> getFixtures() {
-        List<Fixture> fixtures = redisTemplate.opsForList().range("fixtures", 0, -1);
+        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         if (fixtures == null) {
             throw new RuntimeException("Failed to fetch data from Redis");
         }
         List<Fixture> filteredFixtures = new ArrayList<>();
         for (Fixture fixture : fixtures) {
             if (FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getHomeTeam()) || FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getAwayTeam())) {
+                // add Players from Redis
+                List<Player> homePlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getHomeId() + ":players", 0, -1);
+                List<Player> awayPlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getAwayId() + ":players", 0, -1);
+                fixture.setHomePlayers(homePlayers);
+                fixture.setAwayPlayers(awayPlayers);
                 filteredFixtures.add(fixture);
             }
         }
