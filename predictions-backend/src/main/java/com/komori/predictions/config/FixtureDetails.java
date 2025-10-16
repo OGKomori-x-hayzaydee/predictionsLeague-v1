@@ -127,7 +127,7 @@ public class FixtureDetails {
                         redisPlayerTemplate.opsForList().rightPush(redisKey, new Player(player));
                     }
 
-                    Thread.sleep(4000);
+                    Thread.sleep(10000);
                 } catch (Exception e) {
                     throw new RuntimeException("Error in retrieving teams: ", e);
                 }
