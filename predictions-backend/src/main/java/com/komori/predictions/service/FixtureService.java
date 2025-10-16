@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -51,7 +50,9 @@ public class FixtureService {
         List<Fixture> fixtures = response.getMatches().stream().map(Fixture::new).toList();
         redisFixtureTemplate.delete("fixtures");
         for (Fixture fixture : fixtures) {
-            redisFixtureTemplate.opsForList().rightPush("fixtures", fixture);
+            if (FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getHomeTeam()) || FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getAwayTeam())) {
+                redisFixtureTemplate.opsForList().rightPush("fixtures", fixture);
+            }
         }
     }
 
@@ -60,18 +61,14 @@ public class FixtureService {
         if (fixtures == null) {
             throw new RuntimeException("Failed to fetch data from Redis");
         }
-        List<Fixture> filteredFixtures = new ArrayList<>();
-        for (Fixture fixture : fixtures) {
-            if (FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getHomeTeam()) || FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getAwayTeam())) {
-                // add Players from Redis
-                List<Player> homePlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getHomeId() + ":players", 0, -1);
-                List<Player> awayPlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getAwayId() + ":players", 0, -1);
-                fixture.setHomePlayers(homePlayers);
-                fixture.setAwayPlayers(awayPlayers);
-                filteredFixtures.add(fixture);
-            }
-        }
 
-        return filteredFixtures;
+        fixtures.forEach(fixture -> {
+            List<Player> homePlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getHomeId() + ":players", 0, -1);
+            List<Player> awayPlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getAwayId() + ":players", 0, -1);
+            fixture.setHomePlayers(homePlayers);
+            fixture.setAwayPlayers(awayPlayers);
+        });
+
+        return fixtures;
     }
 }
