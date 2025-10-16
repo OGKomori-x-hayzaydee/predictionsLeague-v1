@@ -123,7 +123,7 @@ public class FixtureDetails {
                         throw new RuntimeException("Error fetching API data for team " + TEAM_IDS.get(currentTeam));
                     }
 
-                    for (ExternalTeamResponse.ExternalPlayer player : response.getPlayers()) {
+                    for (ExternalTeamResponse.ExternalPlayer player : response.getSquad()) {
                         redisPlayerTemplate.opsForList().rightPush(redisKey, new Player(player));
                     }
 

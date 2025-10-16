@@ -16,7 +16,7 @@ import java.util.List;
 public class ExternalTeamResponse {
     private Long id;
     private String shortName;
-    private List<ExternalPlayer> players;
+    private List<ExternalPlayer> squad;
 
     @Data
     @AllArgsConstructor
