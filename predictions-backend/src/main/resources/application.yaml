@@ -35,6 +35,7 @@ app:
   fixture-api-key: ${FIXTURE_API_KEY}
   fixture-base-url: ${FIXTURE_BASE_URL}
   team-base-url: ${TEAM_BASE_URL}
+  competition-base-url: ${COMPETITION_BASE_URL}
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}

@@ -1,6 +1,6 @@
 package com.komori.predictions.config;
 
-import com.komori.predictions.dto.response.ExternalFixtureResponse;
+import com.komori.predictions.dto.response.ExternalCompetitionResponse;
 import com.komori.predictions.dto.response.ExternalTeamResponse;
 import com.komori.predictions.dto.response.Player;
 import jakarta.annotation.PostConstruct;
@@ -25,6 +25,8 @@ public class FixtureDetails {
     private String apiKey;
     @Value("${app.team-base-url}")
     private String teamBaseUrl;
+    @Value("${app.competition-base-url}")
+    private String competitionBaseUrl;
     private final RestTemplate restTemplate;
     public static int currentMatchday;
     public static final Set<String> BIG_SIX_TEAMS = Set.of(
@@ -83,19 +85,19 @@ public class FixtureDetails {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Auth-Token", apiKey);
         HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
-        ResponseEntity<ExternalFixtureResponse> responseEntity = restTemplate.exchange(
-                "https://api.football-data.org/v4/teams/66/matches?status=SCHEDULED&limit=1&competitions=PL",
+        ResponseEntity<ExternalCompetitionResponse> responseEntity = restTemplate.exchange(
+                competitionBaseUrl + "PL",
                 HttpMethod.GET,
                 httpEntity,
-                ExternalFixtureResponse.class
+                ExternalCompetitionResponse.class
         );
 
-        ExternalFixtureResponse response = responseEntity.getBody();
+        ExternalCompetitionResponse response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
             throw new RuntimeException("Error fetching API data for matchday.");
         }
 
-        currentMatchday = response.getMatches().getFirst().getMatchday();
+        currentMatchday = response.getCurrentSeason().getCurrentMatchday();
     }
 
     @PostConstruct
