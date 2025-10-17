@@ -3,7 +3,6 @@ package com.komori.predictions.controller;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
 import com.komori.predictions.dto.response.DashboardPredictionSummary;
-import com.komori.predictions.dto.response.Match;
 import com.komori.predictions.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +35,5 @@ public class DashboardController {
     public ResponseEntity<Set<DashboardLeagueSummary>> getLeagues(@CurrentSecurityContext(expression = "authentication?.name") String email) {
         Set<DashboardLeagueSummary> leagues = dashboardService.getLeagues(email);
         return ResponseEntity.ok(leagues);
-    }
-
-    @GetMapping("/matches/upcoming")
-    public ResponseEntity<Set<Match>> getMatches(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<Match> matches = dashboardService.getMatches(email);
-        return ResponseEntity.ok(matches);
     }
 }

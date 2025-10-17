@@ -48,7 +48,6 @@ public class ExternalFixtureResponse {
             private String name;
             private String shortName;
             private String tla;
-            private String crest;
         }
 
         @Data

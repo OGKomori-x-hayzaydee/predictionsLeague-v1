@@ -5,7 +5,6 @@ import com.komori.predictions.dto.projection.AccuracyStatsProjection;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
 import com.komori.predictions.dto.response.DashboardPredictionSummary;
-import com.komori.predictions.dto.response.Match;
 import com.komori.predictions.entity.LeagueEntity;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.entity.UserLeagueEntity;
@@ -16,7 +15,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,10 +46,6 @@ public class DashboardService {
                 .map(UserLeagueEntity::getLeague)
                 .map(entity -> entityToSummary(entity, user.getId()))
                 .toList());
-    }
-
-    public Set<Match> getMatches(@SuppressWarnings("unused") String email) {
-        return new HashSet<>();
     }
 
     private DashboardLeagueSummary entityToSummary(LeagueEntity league, Long userId) {

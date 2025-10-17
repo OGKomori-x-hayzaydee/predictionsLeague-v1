@@ -18,4 +18,5 @@ public class AppProperties {
     private String squadListBaseUrl;
     private String fixtureListBaseUrl;
     private String competitionBaseUrl;
+    private String fixtureBaseUrl;
 }

@@ -1,18 +1,7 @@
 package com.komori.predictions.config;
 
-import com.komori.predictions.dto.response.ExternalCompetitionResponse;
-import com.komori.predictions.dto.response.ExternalTeamResponse;
-import com.komori.predictions.dto.response.Player;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.Set;
@@ -20,13 +9,6 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class FixtureDetails {
-    @Value("${app.squad-list-base-url}")
-    private String squadListBaseUrl;
-    @Value("${app.competition-base-url}")
-    private String competitionBaseUrl;
-    private final RedisTemplate<String, Player> redisPlayerTemplate;
-    private final HttpHeaders secondApiHeaders;
-    private final RestTemplate restTemplate;
     public static int currentMatchday;
     public static final Set<String> BIG_SIX_TEAMS = Set.of(
             "Man City",
@@ -80,59 +62,4 @@ public class FixtureDetails {
             Map.entry("Leeds", 63),
             Map.entry("Everton", 45)
     );
-
-    @PostConstruct
-    public void setCurrentMatchday() {
-        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
-        ResponseEntity<ExternalCompetitionResponse> responseEntity = restTemplate.exchange(
-                competitionBaseUrl + "PL",
-                HttpMethod.GET,
-                httpEntity,
-                ExternalCompetitionResponse.class
-        );
-
-        ExternalCompetitionResponse response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError()) {
-            throw new RuntimeException("Error setting current matchday");
-        }
-
-        currentMatchday = response.getCurrentSeason().getCurrentMatchday();
-    }
-
-    @PostConstruct
-    public void loadPlayers() {
-        new Thread(this::loadMissingPlayers).start();
-    }
-
-    private void loadMissingPlayers() {
-        for (int currentTeam : TEAM_IDS.values()) {
-            String redisKey = "team:" + currentTeam + ":players";
-            if (!redisPlayerTemplate.hasKey(redisKey)) {
-                try {
-                    HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
-                    ResponseEntity<ExternalTeamResponse> responseEntity = restTemplate.exchange(
-                            squadListBaseUrl + currentTeam,
-                            HttpMethod.GET,
-                            httpEntity,
-                            ExternalTeamResponse.class
-                    );
-
-                    ExternalTeamResponse response = responseEntity.getBody();
-                    if (response == null || responseEntity.getStatusCode().isError()) {
-                        throw new RuntimeException("Error fetching API data for team " + currentTeam);
-                    }
-
-                    for (ExternalTeamResponse.Squad.Player player : response.getResponse().getFirst().getPlayers()) {
-                        if (!player.getPosition().contains("keeper")) {
-                            redisPlayerTemplate.opsForList().rightPush(redisKey, new Player(player));
-                        }
-                    }
-
-                    Thread.sleep(10000);
-                } catch (Exception e) {
-                    throw new RuntimeException("Error in retrieving teams: ", e);
-                }
-            }
-        }
-    }
 }

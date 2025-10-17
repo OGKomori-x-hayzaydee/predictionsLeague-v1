@@ -37,6 +37,7 @@ app:
   squad-list-base-url: ${SQUAD_LIST_BASE_URL}
   fixture-list-base-url: ${FIXTURE_LIST_BASE_URL}
   competition-base-url: ${COMPETITION_BASE_URL}
+  fixture-base-url: ${FIXTURE_BASE_URL}
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}
