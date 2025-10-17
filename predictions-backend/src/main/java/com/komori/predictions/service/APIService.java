@@ -30,7 +30,6 @@ public class APIService {
     private final RestTemplate restTemplate;
     private final RedisTemplate<String, Player> redisPlayerTemplate;
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
-    private final FixtureSchedulerService fixtureSchedulerService;
 
     public void updateUpcomingFixtures() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
@@ -53,8 +52,6 @@ public class APIService {
                 redisFixtureTemplate.opsForList().rightPush("fixtures", fixture);
             }
         }
-
-        fixtureSchedulerService.scheduleFixturesForTheDay();
     }
 
     public void setCurrentMatchday() {

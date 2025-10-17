@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PostConstructService {
     private final APIService apiService;
+    private final FixtureSchedulerService fixtureSchedulerService;
 
     @PostConstruct
     @Scheduled(cron = "0 0 0 * * *")
     public void updateUpcomingFixturesOnStartup() {
         apiService.updateUpcomingFixtures();
+        fixtureSchedulerService.scheduleFixturesForTheDay();
     }
 
     @PostConstruct
