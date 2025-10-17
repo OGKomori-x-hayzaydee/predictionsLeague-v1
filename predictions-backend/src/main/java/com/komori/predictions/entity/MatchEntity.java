@@ -16,6 +16,7 @@ public class MatchEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long matchId;
+    private Integer oldFixtureId;
     private Integer gameweek;
     private String homeTeam;
     private String awayTeam;

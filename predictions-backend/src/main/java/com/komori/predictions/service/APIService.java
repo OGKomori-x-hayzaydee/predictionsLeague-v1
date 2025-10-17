@@ -1,7 +1,13 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.config.FixtureDetails;
+import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.*;
+import com.komori.predictions.dto.response.api1.ExternalCompetitionResponse;
+import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
+import com.komori.predictions.dto.response.api2.ExternalEventsResponse;
+import com.komori.predictions.dto.response.api2.ExternalFixtureResponse2;
+import com.komori.predictions.dto.response.api2.ExternalTeamResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +33,10 @@ public class APIService {
     private String fixtureListBaseUrl;
     @Value("${app.fixture-base-url}")
     private String fixtureBaseUrl;
+    @Value("${app.events-base-url}")
+    private String eventsBaseUrl;
+    @Value("${app.live-fixture-base-url}")
+    private String liveFixtureBaseUrl;
     private final HttpHeaders firstApiHeaders;
     private final HttpHeaders secondApiHeaders;
     private final RestTemplate restTemplate;
@@ -33,14 +45,14 @@ public class APIService {
 
     public void updateUpcomingFixtures() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
-        ResponseEntity<ExternalFixtureResponse> responseEntity = restTemplate.exchange(
+        ResponseEntity<ExternalFixtureResponse1> responseEntity = restTemplate.exchange(
                 fixtureListBaseUrl + FixtureDetails.currentMatchday,
                 HttpMethod.GET,
                 httpEntity,
-                ExternalFixtureResponse.class
+                ExternalFixtureResponse1.class
         );
 
-        ExternalFixtureResponse response = responseEntity.getBody();
+        ExternalFixtureResponse1 response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
             throw new RuntimeException("Error fetching API data for fixtures.");
         }
@@ -103,20 +115,75 @@ public class APIService {
         }
     }
 
-    public String getGameStatus(Fixture fixture) {
+    public ExternalFixtureResponse1.Match getGameStatus(Fixture fixture) {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
-        ResponseEntity<ExternalFixtureResponse.Match> responseEntity = restTemplate.exchange(
+        ResponseEntity<ExternalFixtureResponse1.Match> responseEntity = restTemplate.exchange(
                 fixtureBaseUrl + fixture.getId(),
                 HttpMethod.GET,
                 httpEntity,
-                ExternalFixtureResponse.Match.class
+                ExternalFixtureResponse1.Match.class
         );
 
-        ExternalFixtureResponse.Match response = responseEntity.getBody();
+        ExternalFixtureResponse1.Match response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
             throw new RuntimeException("Error checking match status for " + fixture.getHomeTeam() + " vs " + fixture.getAwayTeam());
         }
 
-        return response.getStatus();
+        return response;
+    }
+
+    public Long getSecondFixtureId(Fixture fixture) {
+        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
+        ResponseEntity<ExternalFixtureResponse2> responseEntity = restTemplate.exchange(
+                liveFixtureBaseUrl + 39,
+                HttpMethod.GET,
+                httpEntity,
+                ExternalFixtureResponse2.class
+        );
+
+        ExternalFixtureResponse2 response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError()) {
+            throw new RuntimeException("Error getting secondFixtureId for " + fixture.getHomeTeam() + " vs " + fixture.getAwayTeam());
+        }
+
+        if (response.getResponse().isEmpty()) {
+            return -1L;
+        }
+
+        for (ExternalFixtureResponse2.FixtureDetails fixtureDetails : response.getResponse()) {
+            Integer storedHomeId = FixtureDetails.TEAM_IDS.get(fixture.getHomeTeam());
+            Integer retrievedHomeId = fixtureDetails.getTeams().getHomeTeam().getId();
+            if (Objects.equals(storedHomeId, retrievedHomeId)) return fixtureDetails.getFixture().getId();
+        }
+
+        return -1L;
+    }
+
+    public HomeAndAwayScorers getGoalScorers(Fixture fixture, Long fixtureId) {
+        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
+        ResponseEntity<ExternalEventsResponse> responseEntity = restTemplate.exchange(
+                eventsBaseUrl + fixtureId,
+                HttpMethod.GET,
+                httpEntity,
+                ExternalEventsResponse.class
+        );
+
+        ExternalEventsResponse response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError()) {
+            throw new RuntimeException("Error getting goal scorers for fixture " + fixtureId);
+        }
+
+        List<String> homeScorers = new ArrayList<>();
+        List<String> awayScorers = new ArrayList<>();
+
+        for (ExternalEventsResponse.Goal goal : response.getResponse()) {
+            if (Objects.equals(goal.getTeam().getId(), FixtureDetails.TEAM_IDS.get(fixture.getHomeTeam()))) {
+                homeScorers.add(goal.getPlayer().getName());
+            } else {
+                awayScorers.add(goal.getPlayer().getName());
+            }
+        }
+
+        return new HomeAndAwayScorers(homeScorers, awayScorers);
     }
 }

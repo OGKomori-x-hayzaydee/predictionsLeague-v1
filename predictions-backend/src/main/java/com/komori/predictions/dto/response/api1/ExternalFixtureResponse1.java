@@ -1,4 +1,4 @@
-package com.komori.predictions.dto.response;
+package com.komori.predictions.dto.response.api1;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ExternalFixtureResponse {
+public class ExternalFixtureResponse1 {
+    // Used to get upcoming fixtures
     private Competition competition;
     private List<Match> matches;
 

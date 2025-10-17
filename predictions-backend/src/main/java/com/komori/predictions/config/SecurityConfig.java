@@ -96,7 +96,7 @@ public class SecurityConfig {
     @Bean
     public HttpHeaders secondApiHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-host", "v3.football.api-sports.io");
+        headers.set("x-rapidapi-host", "v3.football.api1-sports.io");
         headers.set("x-rapidapi-key", secondApiKey);
         return headers;
     }

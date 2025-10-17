@@ -1,4 +1,4 @@
-package com.komori.predictions.dto.response;
+package com.komori.predictions.dto.response.api1;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

@@ -38,6 +38,8 @@ app:
   fixture-list-base-url: ${FIXTURE_LIST_BASE_URL}
   competition-base-url: ${COMPETITION_BASE_URL}
   fixture-base-url: ${FIXTURE_BASE_URL}
+  events-base-url: ${EVENTS_BASE_URL}
+  live-fixture-base-url: ${LIVE_FIXTURE_BASE_URL}
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}

@@ -54,7 +54,7 @@ public class FixtureDetails {
             Map.entry("Wolverhampton", 39),
             Map.entry("Man City", 50),
             Map.entry("Nottingham", 65),
-            Map.entry("Brentford", 16),
+            Map.entry("Brentford", 55),
             Map.entry("Chelsea", 49),
             Map.entry("Crystal Palace", 52),
             Map.entry("Man United", 33),

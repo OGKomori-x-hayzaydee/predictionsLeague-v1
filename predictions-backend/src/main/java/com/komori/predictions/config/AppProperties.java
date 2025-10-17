@@ -19,4 +19,6 @@ public class AppProperties {
     private String fixtureListBaseUrl;
     private String competitionBaseUrl;
     private String fixtureBaseUrl;
+    private String eventsBaseUrl;
+    private String liveFixtureBaseUrl;
 }

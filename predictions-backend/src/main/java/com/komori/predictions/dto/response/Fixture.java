@@ -1,6 +1,7 @@
 package com.komori.predictions.dto.response;
 
 import com.komori.predictions.config.FixtureDetails;
+import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +31,7 @@ public class Fixture {
     private List<Player> homePlayers;
     private List<Player> awayPlayers;
 
-    public Fixture(ExternalFixtureResponse.Match match) {
+    public Fixture(ExternalFixtureResponse1.Match match) {
         this.id = match.getId();
         this.homeId = match.getHomeTeam().getId();
         this.homeTeam = match.getHomeTeam().getShortName();

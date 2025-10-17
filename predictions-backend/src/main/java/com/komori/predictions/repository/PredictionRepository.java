@@ -30,12 +30,12 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
 
     @Query(value = """
     WITH teams AS (
-        SELECT 'ARSENAL' AS team
-            UNION ALL SELECT 'CHELSEA'
-            UNION ALL SELECT 'LIVERPOOL'
-            UNION ALL SELECT 'MANCITY'
-            UNION ALL SELECT 'MANUTD'
-            UNION ALL SELECT 'SPURS'
+        SELECT 'Arsenal' AS team
+            UNION ALL SELECT 'Chelsea'
+            UNION ALL SELECT 'Liverpool'
+            UNION ALL SELECT 'Man City'
+            UNION ALL SELECT 'Man United'
+            UNION ALL SELECT 'Tottenham'
     )
     SELECT
             t.team,

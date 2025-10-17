@@ -1,6 +1,7 @@
 package com.komori.predictions.dto.response;
 
 import com.komori.predictions.dto.enumerated.Position;
+import com.komori.predictions.dto.response.api2.ExternalTeamResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

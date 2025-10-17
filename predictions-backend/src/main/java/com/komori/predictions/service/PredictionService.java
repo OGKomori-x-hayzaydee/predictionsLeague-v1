@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,20 @@ public class PredictionService {
     public void makePrediction(String email, PredictionRequest request) {
         UserEntity user = userRepository.findByEmail(email)
                         .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
-        predictionRepository.save(new PredictionEntity(user, request));
+
+        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(request.getMatchId(), email);
+        if (prediction == null) {
+            predictionRepository.save(new PredictionEntity(user, request));
+        } else {
+            prediction.setDate(Instant.now());
+            prediction.setChips(request.getChips());
+            prediction.setHomeScore(request.getHomeScore());
+            prediction.setAwayScore(request.getAwayScore());
+            prediction.setHomeScorers(request.getHomeScorers());
+            prediction.setAwayScorers(request.getAwayScorers());
+            predictionRepository.save(prediction);
+        }
+
     }
 
     public void updateDatabaseAfterGame() {
@@ -41,9 +55,9 @@ public class PredictionService {
     }
 
     // Scoring System
-    public Integer getPredictionScore(String email, Long matchId) {
-        MatchEntity match = matchRepository.findByMatchId(matchId);
-        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(match.getMatchId(), email);
+    public Integer getPredictionScore(String email, Integer matchId) {
+        MatchEntity match = matchRepository.findByOldFixtureId(matchId);
+        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(match.getOldFixtureId().longValue(), email);
 
         int points = 0;
         int actualHome = match.getHomeScore();
