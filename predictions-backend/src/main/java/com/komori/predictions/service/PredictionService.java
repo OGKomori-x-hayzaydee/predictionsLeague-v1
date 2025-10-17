@@ -36,6 +36,10 @@ public class PredictionService {
         predictionRepository.save(new PredictionEntity(user, request));
     }
 
+    public void updateDatabaseAfterGame() {
+
+    }
+
     // Scoring System
     public Integer getPredictionScore(String email, Long matchId) {
         MatchEntity match = matchRepository.findByMatchId(matchId);

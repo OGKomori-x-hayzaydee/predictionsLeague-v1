@@ -1,11 +1,11 @@
 package com.komori.predictions.controller;
 
-import com.komori.predictions.config.AppProperties;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.repository.UserRepository;
 import com.komori.predictions.security.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -19,9 +19,10 @@ import java.util.UUID;
 @RequestMapping("/oauth2")
 @RequiredArgsConstructor
 public class OAuth2Controller {
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
-    private final AppProperties appProperties;
     private final JwtUtil jwtUtil;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -59,16 +60,16 @@ public class OAuth2Controller {
                     .accountVerified(true)
                     .build();
             userRepository.save(newUser);
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback?email=" + email);
+            response.sendRedirect(frontendUrl + "/auth/callback?email=" + email);
         } else if (user.get().getFavouriteTeam() == null || user.get().getUsername() == null) {
             // Incomplete registration
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback?email=" + email);
+            response.sendRedirect(frontendUrl + "/auth/callback?email=" + email);
         } else { // User Login
             ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
             ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-            response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback?destination=dashboard");
+            response.sendRedirect(frontendUrl + "/auth/callback?destination=dashboard");
         }
     }
 }

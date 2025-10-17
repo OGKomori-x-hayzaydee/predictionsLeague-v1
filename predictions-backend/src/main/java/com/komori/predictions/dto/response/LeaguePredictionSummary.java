@@ -1,7 +1,7 @@
 package com.komori.predictions.dto.response;
 
 import com.komori.predictions.dto.enumerated.Chip;
-import com.komori.predictions.dto.enumerated.Status;
+import com.komori.predictions.dto.enumerated.PredictionStatus;
 import com.komori.predictions.dto.enumerated.Team;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +34,7 @@ public class LeaguePredictionSummary {
     private Instant date;
     private Integer gameweek;
     private String venue;
-    private Status status;
+    private PredictionStatus status;
     private List<Chip> chips;
     private Instant predictedAt;
 }

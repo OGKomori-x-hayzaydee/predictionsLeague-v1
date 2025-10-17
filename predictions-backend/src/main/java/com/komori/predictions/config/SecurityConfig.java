@@ -4,9 +4,11 @@ import com.komori.predictions.security.CustomAuthenticationEntryPoint;
 import com.komori.predictions.security.JwtRequestFilter;
 import com.komori.predictions.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,6 +31,12 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+    @Value("${app.first-api-key}")
+    private String firstApiKey;
+    @Value("${app.second-api-key}")
+    private String secondApiKey;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
     private final CustomUserDetailsService userDetailsService;
     private final JwtRequestFilter requestFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
@@ -54,9 +62,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter(AppProperties appProperties) {
+    public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
+        configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
@@ -76,5 +84,20 @@ public class SecurityConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder.build();
+    }
+
+    @Bean
+    public HttpHeaders firstApiHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Auth-Token", firstApiKey);
+        return headers;
+    }
+
+    @Bean
+    public HttpHeaders secondApiHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-rapidapi-host", "v3.football.api-sports.io");
+        headers.set("x-rapidapi-key", secondApiKey);
+        return headers;
     }
 }

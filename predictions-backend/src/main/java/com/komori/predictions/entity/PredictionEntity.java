@@ -1,7 +1,7 @@
 package com.komori.predictions.entity;
 
 import com.komori.predictions.dto.enumerated.Chip;
-import com.komori.predictions.dto.enumerated.Status;
+import com.komori.predictions.dto.enumerated.PredictionStatus;
 import com.komori.predictions.dto.request.PredictionRequest;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,7 +30,7 @@ public class PredictionEntity {
     private Integer points;
     private Boolean correct;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private PredictionStatus status;
     @Enumerated(EnumType.STRING)
     private List<Chip> chips;
     private Instant date;
@@ -47,7 +47,7 @@ public class PredictionEntity {
         this.awayScorers = request.getAwayScorers();
         this.points = 0;
         this.correct = false;
-        this.status = Status.PENDING;
+        this.status = PredictionStatus.PENDING;
         this.chips = request.getChips();
         this.date = Instant.now();
         this.gameweek = request.getGameweek();

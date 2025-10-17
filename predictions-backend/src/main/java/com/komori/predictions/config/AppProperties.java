@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
     private String frontendUrl;
-    private String fixtureApiKey;
-    private String fixtureBaseUrl;
-    private String teamBaseUrl;
+    private String firstApiKey;
+    private String secondApiKey;
+    private String squadListBaseUrl;
+    private String fixtureListBaseUrl;
     private String competitionBaseUrl;
 }

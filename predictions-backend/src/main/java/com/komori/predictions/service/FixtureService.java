@@ -21,22 +21,19 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FixtureService {
+    @Value("${app.fixture-list-base-url}")
+    private String fixtureListBaseUrl;
     private final RedisTemplate<String, Player> redisPlayerTemplate;
-    @Value("${app.fixture-api-key}")
-    private String apiKey;
-    @Value("${app.fixture-base-url}")
-    private String fixtureBaseUrl;
     private final RestTemplate restTemplate;
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
+    private final HttpHeaders firstApiHeaders;
 
     @PostConstruct
     @Scheduled(cron = "0 0 0 * * *")
     public void updateUpcomingFixtures() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Auth-Token", apiKey);
-        HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+        HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
         ResponseEntity<ExternalFixtureResponse> responseEntity = restTemplate.exchange(
-                fixtureBaseUrl + FixtureDetails.currentMatchday,
+                fixtureListBaseUrl + FixtureDetails.currentMatchday,
                 HttpMethod.GET,
                 httpEntity,
                 ExternalFixtureResponse.class
@@ -63,8 +60,8 @@ public class FixtureService {
         }
 
         fixtures.forEach(fixture -> {
-            List<Player> homePlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getHomeId() + ":players", 0, -1);
-            List<Player> awayPlayers = redisPlayerTemplate.opsForList().range("team:" + fixture.getAwayId() + ":players", 0, -1);
+            List<Player> homePlayers = redisPlayerTemplate.opsForList().range("team:" + FixtureDetails.TEAM_IDS.get(fixture.getHomeTeam()) + ":players", 0, -1);
+            List<Player> awayPlayers = redisPlayerTemplate.opsForList().range("team:" + FixtureDetails.TEAM_IDS.get(fixture.getAwayTeam()) + ":players", 0, -1);
             fixture.setHomePlayers(homePlayers);
             fixture.setAwayPlayers(awayPlayers);
         });

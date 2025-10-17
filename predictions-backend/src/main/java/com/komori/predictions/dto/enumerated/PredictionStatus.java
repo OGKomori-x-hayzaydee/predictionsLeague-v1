@@ -1,5 +1,5 @@
 package com.komori.predictions.dto.enumerated;
 
-public enum Status {
+public enum PredictionStatus {
     COMPLETED, PENDING
 }

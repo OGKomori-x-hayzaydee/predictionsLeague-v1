@@ -20,13 +20,12 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class FixtureDetails {
-    private final RedisTemplate<String, Player> redisPlayerTemplate;
-    @Value("${app.fixture-api-key}")
-    private String apiKey;
-    @Value("${app.team-base-url}")
-    private String teamBaseUrl;
+    @Value("${app.squad-list-base-url}")
+    private String squadListBaseUrl;
     @Value("${app.competition-base-url}")
     private String competitionBaseUrl;
+    private final RedisTemplate<String, Player> redisPlayerTemplate;
+    private final HttpHeaders secondApiHeaders;
     private final RestTemplate restTemplate;
     public static int currentMatchday;
     public static final Set<String> BIG_SIX_TEAMS = Set.of(
@@ -59,32 +58,32 @@ public class FixtureDetails {
             Map.entry("LEE","Elland Road"),
             Map.entry("EVE","Hill Dickinson Stadium")
     );
-    public static final Map<Integer, String> TEAM_IDS = Map.ofEntries(
-            Map.entry(64, "Liverpool"),
-            Map.entry(1044, "Bournemouth"),
-            Map.entry(58, "Aston Villa"),
-            Map.entry(67, "Newcastle"),
-            Map.entry(397, "Brighton Hove"),
-            Map.entry(63, "Fulham"),
-            Map.entry(71, "Sunderland"),
-            Map.entry(563, "West Ham"),
-            Map.entry(73, "Tottenham"),
-            Map.entry(328, "Burnley"),
-            Map.entry(76, "Wolverhampton"),
-            Map.entry(65, "Man City"),
-            Map.entry(351, "Nottingham"),
-            Map.entry(402, "Brentford"),
-            Map.entry(61, "Chelsea"),
-            Map.entry(354, "Crystal Palace"),
-            Map.entry(66, "Man United"),
-            Map.entry(57, "Arsenal")
+    public static final Map<String, Integer> TEAM_IDS = Map.ofEntries(
+            Map.entry("Liverpool", 40),
+            Map.entry("Bournemouth", 35),
+            Map.entry("Aston Villa", 66),
+            Map.entry("Newcastle", 34),
+            Map.entry("Brighton Hove", 51),
+            Map.entry("Fulham", 36),
+            Map.entry("Sunderland", 746),
+            Map.entry("West Ham", 48),
+            Map.entry("Tottenham", 47),
+            Map.entry("Burnley", 44),
+            Map.entry("Wolverhampton", 39),
+            Map.entry("Man City", 50),
+            Map.entry("Nottingham", 65),
+            Map.entry("Brentford", 16),
+            Map.entry("Chelsea", 49),
+            Map.entry("Crystal Palace", 52),
+            Map.entry("Man United", 33),
+            Map.entry("Arsenal", 42),
+            Map.entry("Leeds", 63),
+            Map.entry("Everton", 45)
     );
 
     @PostConstruct
     public void setCurrentMatchday() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Auth-Token", apiKey);
-        HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
         ResponseEntity<ExternalCompetitionResponse> responseEntity = restTemplate.exchange(
                 competitionBaseUrl + "PL",
                 HttpMethod.GET,
@@ -94,7 +93,7 @@ public class FixtureDetails {
 
         ExternalCompetitionResponse response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
-            throw new RuntimeException("Error fetching API data for matchday.");
+            throw new RuntimeException("Error setting current matchday");
         }
 
         currentMatchday = response.getCurrentSeason().getCurrentMatchday();
@@ -106,15 +105,13 @@ public class FixtureDetails {
     }
 
     private void loadMissingPlayers() {
-        for (int currentTeam : TEAM_IDS.keySet()) {
+        for (int currentTeam : TEAM_IDS.values()) {
             String redisKey = "team:" + currentTeam + ":players";
             if (!redisPlayerTemplate.hasKey(redisKey)) {
                 try {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.set("X-Auth-Token", apiKey);
-                    HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+                    HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
                     ResponseEntity<ExternalTeamResponse> responseEntity = restTemplate.exchange(
-                            teamBaseUrl + currentTeam,
+                            squadListBaseUrl + currentTeam,
                             HttpMethod.GET,
                             httpEntity,
                             ExternalTeamResponse.class
@@ -122,10 +119,10 @@ public class FixtureDetails {
 
                     ExternalTeamResponse response = responseEntity.getBody();
                     if (response == null || responseEntity.getStatusCode().isError()) {
-                        throw new RuntimeException("Error fetching API data for team " + TEAM_IDS.get(currentTeam));
+                        throw new RuntimeException("Error fetching API data for team " + currentTeam);
                     }
 
-                    for (ExternalTeamResponse.ExternalPlayer player : response.getSquad()) {
+                    for (ExternalTeamResponse.Squad.Player player : response.getResponse().getFirst().getPlayers()) {
                         if (!player.getPosition().contains("keeper")) {
                             redisPlayerTemplate.opsForList().rightPush(redisKey, new Player(player));
                         }

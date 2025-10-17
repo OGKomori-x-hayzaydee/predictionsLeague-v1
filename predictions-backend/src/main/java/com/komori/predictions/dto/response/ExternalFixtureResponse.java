@@ -15,26 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalFixtureResponse {
-    private Filters filters;
-    private ResultSet resultSet;
     private Competition competition;
     private List<Match> matches;
-
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Filters {
-        private String season;
-        private String matchday;
-    }
-
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ResultSet {
-        private Integer count;
-        private String first;
-        private String last;
-        private Integer played;
-    }
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -49,40 +31,15 @@ public class ExternalFixtureResponse {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Match {
-        private Area area;
         private Competition competition;
-        private Season season;
         private Integer id;
         private OffsetDateTime utcDate;
         private String status;
         private Integer matchday;
-        private String stage;
-        private String group;
         private OffsetDateTime lastUpdated;
         private Team homeTeam;
         private Team awayTeam;
         private Score score;
-        private Odds odds;
-        private List<Referee> referees;
-
-        @Data
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Area {
-            private Integer id;
-            private String name;
-            private String code;
-            private String flag;
-        }
-
-        @Data
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Season {
-            private Integer id;
-            private String startDate;
-            private String endDate;
-            private Integer currentMatchday;
-            private String winner;
-        }
 
         @Data
         @JsonIgnoreProperties(ignoreUnknown = true)
@@ -98,7 +55,6 @@ public class ExternalFixtureResponse {
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Score {
             private String winner;
-            private String duration;
             private HomeAwayScore fullTime;
             private HomeAwayScore halfTime;
 
@@ -108,21 +64,6 @@ public class ExternalFixtureResponse {
                 private Integer home;
                 private Integer away;
             }
-        }
-
-        @Data
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Odds {
-            private String msg;
-        }
-
-        @Data
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Referee {
-            private Integer id;
-            private String name;
-            private String type;
-            private String nationality;
         }
     }
 }

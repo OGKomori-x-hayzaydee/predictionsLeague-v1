@@ -14,13 +14,13 @@ public class Player {
     private String name;
     private Position position;
 
-    public Player(ExternalTeamResponse.ExternalPlayer externalPlayer) {
+    public Player(ExternalTeamResponse.Squad.Player externalPlayer) {
         this.name = externalPlayer.getName();
         this.position = getPositionFromExternalData(externalPlayer.getPosition());
     }
 
     private Position getPositionFromExternalData(String position) {
-        if (position.contains("Back")) {
+        if (position.contains("Defender")) {
             return Position.DEFENDER;
         }
         if (position.contains("Midfield")) {

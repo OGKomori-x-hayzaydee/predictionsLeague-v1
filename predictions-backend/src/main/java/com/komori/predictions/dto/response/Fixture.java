@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Fixture {
-    private String id;
+    private Integer id;
     private Integer homeId;
     private String homeTeam;
     private Integer awayId;
@@ -31,7 +31,7 @@ public class Fixture {
     private List<Player> awayPlayers;
 
     public Fixture(ExternalFixtureResponse.Match match) {
-        this.id = match.getId().toString();
+        this.id = match.getId();
         this.homeId = match.getHomeTeam().getId();
         this.homeTeam = match.getHomeTeam().getShortName();
         this.awayId = match.getAwayTeam().getId();

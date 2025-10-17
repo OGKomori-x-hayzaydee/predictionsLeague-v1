@@ -14,16 +14,30 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalTeamResponse {
-    private Long id;
-    private String shortName;
-    private List<ExternalPlayer> squad;
+    private List<Squad> response;
 
     @Data
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ExternalPlayer {
-        private Long id;
-        private String name;
-        private String position;
+    public static class Squad {
+        private Team team;
+        private List<Player> players;
+
+        @Data
+        @AllArgsConstructor
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Team {
+            private Integer id;
+            private String name;
+        }
+
+        @Data
+        @AllArgsConstructor
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Player {
+            private Integer id;
+            private String name;
+            private String position;
+        }
     }
 }
