@@ -2,7 +2,6 @@ package com.komori.predictions.service;
 
 import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.response.*;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,7 +9,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,8 +32,6 @@ public class APIService {
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
     private final FixtureSchedulerService fixtureSchedulerService;
 
-    @PostConstruct
-    @Scheduled(cron = "0 0 0 * * *")
     public void updateUpcomingFixtures() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
         ResponseEntity<ExternalFixtureResponse> responseEntity = restTemplate.exchange(
@@ -61,7 +57,6 @@ public class APIService {
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }
 
-    @PostConstruct
     public void setCurrentMatchday() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
         ResponseEntity<ExternalCompetitionResponse> responseEntity = restTemplate.exchange(
@@ -79,12 +74,7 @@ public class APIService {
         FixtureDetails.currentMatchday = response.getCurrentSeason().getCurrentMatchday();
     }
 
-    @PostConstruct
-    public void loadPlayers() {
-        new Thread(this::loadMissingPlayers).start();
-    }
-
-    private void loadMissingPlayers() {
+    public void loadMissingPlayers() {
         for (int currentTeam : FixtureDetails.TEAM_IDS.values()) {
             String redisKey = "team:" + currentTeam + ":players";
             if (!redisPlayerTemplate.hasKey(redisKey)) {
