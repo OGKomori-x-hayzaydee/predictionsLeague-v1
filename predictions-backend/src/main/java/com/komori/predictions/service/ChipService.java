@@ -37,7 +37,7 @@ public class ChipService {
     }
 
     @Transactional
-    public void updateChipStatusAfterPrediction(String email, PredictionRequest prediction) {
+    public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
         List<ChipEntity> chips = chipRepository.findAllByUser_Email(email);
         for (ChipEntity entity : chips) {
             if (prediction.getChips().contains(entity.getType())) {
@@ -52,5 +52,10 @@ public class ChipService {
             }
         }
         chipRepository.saveAllAndFlush(chips);
+    }
+
+    @Transactional
+    public void updateAllGameweekCooldowns() {
+        chipRepository.decrementGameweeksRemainingForAllUsers();
     }
 }

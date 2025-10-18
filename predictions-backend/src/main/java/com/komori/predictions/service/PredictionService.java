@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,17 +39,15 @@ public class PredictionService {
         PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(request.getMatchId(), email);
         if (prediction == null) {
             predictionRepository.save(new PredictionEntity(user, request));
+            chipService.updateChipStatusAfterNewPrediction(email, request);
         } else {
             prediction.setDate(Instant.now());
-            prediction.setChips(request.getChips());
             prediction.setHomeScore(request.getHomeScore());
             prediction.setAwayScore(request.getAwayScore());
             prediction.setHomeScorers(request.getHomeScorers());
             prediction.setAwayScorers(request.getAwayScorers());
             predictionRepository.save(prediction);
         }
-
-        chipService.updateChipStatusAfterPrediction(email, request);
     }
 
     @Transactional

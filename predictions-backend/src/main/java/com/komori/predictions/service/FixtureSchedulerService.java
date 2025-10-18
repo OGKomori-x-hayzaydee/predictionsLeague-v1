@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import com.komori.predictions.dto.response.Fixture;
@@ -29,6 +30,7 @@ public class FixtureSchedulerService {
     private final APIService apiService;
     private final PredictionService predictionService;
     private final MatchRepository matchRepository;
+    private final ChipService chipService;
 
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
@@ -112,6 +114,12 @@ public class FixtureSchedulerService {
 
                 // Update user scores and shii
                 predictionService.updateDatabaseAfterGame(matchEntity);
+
+                // Increment current Matchday if appropriate
+                boolean allFinished = fixtures.stream()
+                        .allMatch(f -> f.getStatus().equalsIgnoreCase("FINISHED"));
+                if (allFinished) FixtureDetails.currentMatchday++;
+                chipService.updateAllGameweekCooldowns();
 
                 // End the scheduler
                 pollingTask[0].cancel(false);
