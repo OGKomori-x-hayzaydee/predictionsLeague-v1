@@ -26,4 +26,6 @@ public interface UserLeagueRepository extends JpaRepository<UserLeagueEntity, Us
     void deleteAllByLeague(LeagueEntity league);
 
     Optional<UserLeagueEntity> findByUserUUIDAndLeagueUUID(String userId, String leagueId);
+
+    List<UserLeagueEntity> findAllByLeague_UUID(String leagueUUID);
 }

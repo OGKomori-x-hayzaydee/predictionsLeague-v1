@@ -2,6 +2,8 @@ package com.komori.predictions.dto.response;
 
 import com.komori.predictions.dto.enumerated.Chip;
 import com.komori.predictions.dto.enumerated.PredictionStatus;
+import com.komori.predictions.entity.MatchEntity;
+import com.komori.predictions.entity.PredictionEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,10 +31,33 @@ public class LeaguePredictionSummary {
     private List<String> actualAwayScorers;
     private Boolean correct;
     private Integer points;
-    private Instant date;
     private Integer gameweek;
     private String venue;
     private PredictionStatus status;
     private List<Chip> chips;
     private Instant predictedAt;
+
+    public LeaguePredictionSummary(PredictionEntity prediction, MatchEntity match) {
+        this.matchId = prediction.getMatchId();
+        this.userId = prediction.getUser().getUUID();
+        this.homeTeam = prediction.getHomeTeam();
+        this.awayTeam = prediction.getAwayTeam();
+        this.homeScore = prediction.getHomeScore();
+        this.awayScore = prediction.getAwayScore();
+        this.homeScorers = prediction.getHomeScorers();
+        this.awayScorers = prediction.getAwayScorers();
+        if (match != null) {
+            this.actualHomeScore = match.getHomeScore();
+            this.actualAwayScore = match.getAwayScore();
+            this.actualHomeScorers = match.getHomeScorers();
+            this.actualAwayScorers = match.getAwayScorers();
+            this.venue = match.getVenue();
+        }
+        this.correct = prediction.getCorrect();
+        this.points = prediction.getPoints();
+        this.gameweek = prediction.getGameweek();
+        this.status = prediction.getStatus();
+        this.chips = prediction.getChips();
+        this.predictedAt = prediction.getDate();
+    }
 }

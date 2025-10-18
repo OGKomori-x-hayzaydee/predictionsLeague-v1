@@ -155,7 +155,7 @@ public class APIService {
 
         for (ExternalFixtureResponse2.FixtureDetails fixtureDetails : response.getResponse()) {
             Integer storedHomeId = FixtureDetails.TEAM_IDS.get(fixture.getHomeTeam());
-            Integer retrievedHomeId = fixtureDetails.getTeams().getHomeTeam().getId();
+            Integer retrievedHomeId = fixtureDetails.getTeams().getHome().getId();
             if (Objects.equals(storedHomeId, retrievedHomeId)) return fixtureDetails.getFixture().getId();
         }
 

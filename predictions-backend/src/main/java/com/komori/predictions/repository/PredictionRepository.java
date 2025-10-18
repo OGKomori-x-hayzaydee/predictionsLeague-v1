@@ -74,4 +74,6 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     PredictionEntity findByMatchIdAndUser_Email(Long matchId, String userEmail);
 
     List<PredictionEntity> findAllByMatchId(Long matchId);
+
+    List<PredictionEntity> findAllByUserAndGameweek(UserEntity user, Integer gameweek);
 }

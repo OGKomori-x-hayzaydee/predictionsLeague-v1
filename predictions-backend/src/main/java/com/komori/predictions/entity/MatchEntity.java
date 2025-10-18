@@ -24,4 +24,5 @@ public class MatchEntity {
     private Integer awayScore;
     private List<String> homeScorers;
     private List<String> awayScorers;
+    private String venue;
 }

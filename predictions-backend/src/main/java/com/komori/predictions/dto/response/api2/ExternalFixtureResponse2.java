@@ -37,8 +37,8 @@ public class ExternalFixtureResponse2 {
         @AllArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Teams {
-            private HomeAndAway homeTeam;
-            private HomeAndAway awayTeam;
+            private HomeAndAway home;
+            private HomeAndAway away;
 
             @Data
             @AllArgsConstructor

@@ -4,6 +4,7 @@ import com.komori.predictions.dto.request.UserLeagueActionRequest;
 import com.komori.predictions.dto.request.UpdateLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
 import com.komori.predictions.dto.request.CreateLeagueRequest;
+import com.komori.predictions.dto.response.LeaguePredictionSummary;
 import com.komori.predictions.dto.response.LeagueStanding;
 import com.komori.predictions.service.LeagueService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -36,6 +38,12 @@ public class LeagueController {
     public ResponseEntity<LeagueStanding> getLeagueStandings(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid) {
         LeagueStanding standing = leagueService.getLeagueStanding(email, uuid);
         return ResponseEntity.ok(standing);
+    }
+
+    @GetMapping("{uuid}/predictions/{gameweek}")
+    public ResponseEntity<List<LeaguePredictionSummary>> getUserPredictions(@PathVariable String uuid, @PathVariable Integer gameweek) {
+        List<LeaguePredictionSummary> predictions = leagueService.getLeaguePredictions(uuid, gameweek);
+        return ResponseEntity.ok(predictions);
     }
 
     @PostMapping("/{code}/join")

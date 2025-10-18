@@ -66,6 +66,7 @@ public class FixtureSchedulerService {
             if (currentMatch.getStatus().equalsIgnoreCase("IN_PLAY")) {
                 log.info("Match is now live! Fetching second fixture ID...");
                 Long secondFixtureId = apiService.getSecondFixtureId(fixture);
+                log.info("Second fixtureId retrieved: {}", secondFixtureId);
                 if (secondFixtureId == -1) {
                     log.info("Second fixture ID not found for {}, skipping this iteration", fixture.getId());
                     return;
@@ -116,6 +117,7 @@ public class FixtureSchedulerService {
                         .awayTeam(fixture.getAwayTeam())
                         .homeScorers(scorers.homeScorers())
                         .awayScorers(scorers.awayScorers())
+                        .venue(FixtureDetails.VENUES.get(currentMatch.getHomeTeam().getTla()))
                         .build();
                 matchEntity = matchRepository.saveAndFlush(matchEntity);
 

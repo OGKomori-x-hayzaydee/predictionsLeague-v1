@@ -4,16 +4,12 @@ import com.komori.predictions.dto.request.CreateLeagueRequest;
 import com.komori.predictions.dto.request.UserLeagueActionRequest;
 import com.komori.predictions.dto.request.UpdateLeagueRequest;
 import com.komori.predictions.dto.response.LeagueOverview;
+import com.komori.predictions.dto.response.LeaguePredictionSummary;
 import com.komori.predictions.dto.response.LeagueStanding;
-import com.komori.predictions.entity.LeagueEntity;
+import com.komori.predictions.entity.*;
 import com.komori.predictions.dto.enumerated.Publicity;
-import com.komori.predictions.entity.UserEntity;
-import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.exception.LeagueNotFoundException;
-import com.komori.predictions.repository.LeagueRepository;
-import com.komori.predictions.repository.PredictionRepository;
-import com.komori.predictions.repository.UserLeagueRepository;
-import com.komori.predictions.repository.UserRepository;
+import com.komori.predictions.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,6 +25,7 @@ public class LeagueService {
     private final UserRepository userRepository;
     private final UserLeagueRepository userLeagueRepository;
     private final PredictionRepository predictionRepository;
+    private final MatchRepository matchRepository;
 
     public void createLeague(String email, CreateLeagueRequest request) {
         UserEntity currentUser = userRepository.findByEmail(email)
@@ -74,6 +71,20 @@ public class LeagueService {
                 .orElseThrow(LeagueNotFoundException::new);
 
         return leagueEntityToStanding(league, user);
+    }
+
+    public List<LeaguePredictionSummary> getLeaguePredictions(String uuid, Integer gameweek) {
+        List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague_UUID(uuid);
+        List<LeaguePredictionSummary> predictions = new ArrayList<>();
+        for (UserLeagueEntity entity : userLeagueEntities) {
+            UserEntity user = entity.getUser();
+            List<PredictionEntity> predictionEntities = predictionRepository.findAllByUserAndGameweek(user, gameweek);
+            predictionEntities.forEach(e -> {
+                MatchEntity match = matchRepository.findByOldFixtureId(e.getMatchId().intValue());
+                predictions.add(new LeaguePredictionSummary(e, match));
+            });
+        }
+        return predictions;
     }
 
     public void joinLeague(String email, String code) {
