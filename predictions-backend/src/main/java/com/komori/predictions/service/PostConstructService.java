@@ -25,6 +25,7 @@ public class PostConstructService {
         apiService.setCurrentMatchday();
         log.info("Updating upcoming fixtures...");
         apiService.updateUpcomingFixtures();
+        log.info("Scheduling matches for the day...");
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }
 
