@@ -12,8 +12,13 @@ public class PostConstructService {
     private final FixtureSchedulerService fixtureSchedulerService;
 
     @PostConstruct
-    @Scheduled(cron = "0 0 0 * * *")
     public void updateUpcomingFixturesOnStartup() {
+        apiService.updateUpcomingFixtures();
+        fixtureSchedulerService.scheduleFixturesForTheDay();
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void updateUpcomingFixturesDaily() {
         apiService.updateUpcomingFixtures();
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }
