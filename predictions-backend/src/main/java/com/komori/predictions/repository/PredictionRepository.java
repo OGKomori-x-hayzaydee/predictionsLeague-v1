@@ -11,11 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Set;
 
 @Repository
 public interface PredictionRepository extends JpaRepository<PredictionEntity, Long> {
-    Set<PredictionEntity> findAllByUser_Email(String userEmail);
+    List<PredictionEntity> findAllByUser_Email(String userEmail);
 
     Integer countByUser(UserEntity user);
 

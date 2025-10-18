@@ -3,6 +3,7 @@ package com.komori.predictions.service;
 import com.komori.predictions.dto.enumerated.Chip;
 import com.komori.predictions.dto.enumerated.PredictionStatus;
 import com.komori.predictions.dto.request.PredictionRequest;
+import com.komori.predictions.dto.response.UserPrediction;
 import com.komori.predictions.entity.MatchEntity;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.entity.UserEntity;
@@ -28,8 +29,18 @@ public class PredictionService {
     private final MatchRepository matchRepository;
     private final ChipService chipService;
 
-    public Set<PredictionEntity> getPredictionsForUser(String email) {
-        return predictionRepository.findAllByUser_Email(email);
+    public List<UserPrediction> getPredictionsForUser(String email) {
+        List<PredictionEntity> predictionEntities = predictionRepository.findAllByUser_Email(email);
+        if (predictionEntities.isEmpty()) return new ArrayList<>();
+
+        List<UserPrediction> userPredictions = new ArrayList<>();
+        predictionEntities.forEach(p -> {
+            MatchEntity match = matchRepository.findByOldFixtureId(p.getMatchId().intValue());
+            if (match != null) {
+                userPredictions.add(new UserPrediction(match, p));
+            }
+        });
+        return userPredictions;
     }
 
     public void makePrediction(String email, PredictionRequest request) {
