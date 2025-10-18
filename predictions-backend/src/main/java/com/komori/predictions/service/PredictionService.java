@@ -1,6 +1,7 @@
 package com.komori.predictions.service;
 
 import com.komori.predictions.dto.enumerated.Chip;
+import com.komori.predictions.dto.enumerated.PredictionStatus;
 import com.komori.predictions.dto.request.PredictionRequest;
 import com.komori.predictions.entity.MatchEntity;
 import com.komori.predictions.entity.PredictionEntity;
@@ -11,10 +12,12 @@ import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,12 +53,21 @@ public class PredictionService {
 
     }
 
-    public void updateDatabaseAfterGame() {
-
+    @Transactional
+    public void updateDatabaseAfterGame(MatchEntity match) {
+        List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getMatchId());
+        for (PredictionEntity prediction : predictions) {
+            int points = getPredictionScore(prediction.getUser().getEmail(), match.getMatchId().intValue());
+            boolean correct = isPredictionCorrect(prediction, match);
+            prediction.setPoints(points);
+            prediction.setCorrect(correct);
+            prediction.setStatus(PredictionStatus.COMPLETED);
+        }
+        predictionRepository.saveAllAndFlush(predictions);
     }
 
     // Scoring System
-    public Integer getPredictionScore(String email, Integer matchId) {
+    public Integer getPredictionScore(String email, int matchId) {
         MatchEntity match = matchRepository.findByOldFixtureId(matchId);
         PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(match.getOldFixtureId().longValue(), email);
 
@@ -145,5 +157,9 @@ public class PredictionService {
         }
 
         return totalCount;
+    }
+
+    private boolean isPredictionCorrect(PredictionEntity prediction, MatchEntity match) {
+        return (Objects.equals(prediction.getHomeScore(), match.getHomeScore())) && (Objects.equals(prediction.getAwayScore(), match.getAwayScore()));
     }
 }

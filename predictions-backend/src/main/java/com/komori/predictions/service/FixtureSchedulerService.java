@@ -108,10 +108,10 @@ public class FixtureSchedulerService {
                         .homeScorers(scorers.homeScorers())
                         .awayScorers(scorers.awayScorers())
                         .build();
-                matchRepository.saveAndFlush(matchEntity);
+                matchEntity = matchRepository.saveAndFlush(matchEntity);
 
                 // Update user scores and shii
-                predictionService.updateDatabaseAfterGame();
+                predictionService.updateDatabaseAfterGame(matchEntity);
 
                 // End the scheduler
                 pollingTask[0].cancel(false);
