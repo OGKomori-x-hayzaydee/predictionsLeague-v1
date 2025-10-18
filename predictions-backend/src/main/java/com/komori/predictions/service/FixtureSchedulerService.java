@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -36,7 +34,8 @@ public class FixtureSchedulerService {
         List<Fixture> fixtures = getFixturesForTheDay();
         if (!fixtures.isEmpty()) {
             for (Fixture fixture : fixtures) {
-                long delayMillis = Duration.between(LocalDateTime.now(), fixture.getDate()).toMillis();
+                Instant fixtureInstant = fixture.getDate().toInstant();
+                long delayMillis = Duration.between(Instant.now(), fixtureInstant).toMillis();
                 if (delayMillis < 0) continue;
 
                 log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
@@ -51,9 +50,11 @@ public class FixtureSchedulerService {
             fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
         }
 
-        LocalDate today = LocalDate.now();
+        ZoneId zoneId = ZoneId.of("UTC");
+        LocalDate today = LocalDate.now(zoneId);
+
         return fixtures.stream()
-                .filter(fixture -> fixture.getDate().isEqual(today.atStartOfDay()))
+                .filter(fixture -> fixture.getDate().atZoneSameInstant(zoneId).toLocalDate().isEqual(today))
                 .toList();
     }
 
