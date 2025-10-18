@@ -45,13 +45,11 @@ public class ChipService {
                 entity.setSeasonUsageCount(entity.getSeasonUsageCount() + 1);
                 if (entity.getType() == Chip.WILDCARD) {
                     entity.setRemainingGameweeks(entity.getRemainingGameweeks() + 7);
-                }
-                else if (entity.getType() == Chip.SCORER_FOCUS || entity.getType() == Chip.DEFENSE_PLUS_PLUS) {
+                } else if (entity.getType() == Chip.SCORER_FOCUS || entity.getType() == Chip.DEFENSE_PLUS_PLUS) {
                     entity.setRemainingGameweeks(entity.getRemainingGameweeks() + 5);
                 }
             }
         }
-        chipRepository.saveAllAndFlush(chips);
     }
 
     @Transactional

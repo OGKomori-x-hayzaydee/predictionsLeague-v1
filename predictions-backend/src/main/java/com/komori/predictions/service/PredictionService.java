@@ -60,7 +60,6 @@ public class PredictionService {
             prediction.setAwayScore(request.getAwayScore());
             prediction.setHomeScorers(request.getHomeScorers());
             prediction.setAwayScorers(request.getAwayScorers());
-            predictionRepository.saveAndFlush(prediction);
         }
     }
 

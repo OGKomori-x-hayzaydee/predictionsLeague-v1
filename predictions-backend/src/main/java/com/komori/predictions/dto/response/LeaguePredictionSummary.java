@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LeaguePredictionSummary {
     private Long matchId;
-    private String userId;
+    private String username;
     private String homeTeam;
     private String awayTeam;
     private Integer homeScore;
@@ -39,7 +39,7 @@ public class LeaguePredictionSummary {
 
     public LeaguePredictionSummary(PredictionEntity prediction, MatchEntity match) {
         this.matchId = prediction.getMatchId();
-        this.userId = prediction.getUser().getUUID();
+        this.username = prediction.getUser().getUsername();
         this.homeTeam = prediction.getHomeTeam();
         this.awayTeam = prediction.getAwayTeam();
         this.homeScore = prediction.getHomeScore();
