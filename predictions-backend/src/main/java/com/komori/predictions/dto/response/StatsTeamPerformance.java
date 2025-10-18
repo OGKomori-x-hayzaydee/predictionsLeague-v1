@@ -26,11 +26,30 @@ public class StatsTeamPerformance {
         private Integer points;
 
         public TeamPerformance(TeamPerformanceProjection projection) {
-            this.team = projection.getTeam();
+            this.team = mapStringToTeam(projection.getTeam());
             this.predictions = projection.getTotal();
             this.correct = projection.getCorrect();
             this.accuracy = (projection.getTotal() == 0) ? 0.0 : ((projection.getCorrect() * 100.0)/projection.getTotal());
             this.points = projection.getPoints();
+        }
+
+        private Team mapStringToTeam(String team) {
+            if (team.equalsIgnoreCase("arsenal")) {
+                return Team.ARSENAL;
+            }
+            if (team.equalsIgnoreCase("chelsea")) {
+                return Team.CHELSEA;
+            }
+            if (team.equalsIgnoreCase("liverpool")) {
+                return Team.LIVERPOOL;
+            }
+            if (team.equalsIgnoreCase("tottenham")) {
+                return Team.SPURS;
+            }
+            if (team.equalsIgnoreCase("man city")) {
+                return Team.MANCITY;
+            }
+            return Team.MANUTD;
         }
     }
 }

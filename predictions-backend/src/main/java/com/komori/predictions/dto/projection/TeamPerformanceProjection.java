@@ -1,9 +1,7 @@
 package com.komori.predictions.dto.projection;
 
-import com.komori.predictions.dto.enumerated.Team;
-
 public interface TeamPerformanceProjection {
-    Team getTeam();
+    String getTeam();
 
     Integer getTotal();
 
