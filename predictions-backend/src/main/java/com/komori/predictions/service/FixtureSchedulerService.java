@@ -64,8 +64,10 @@ public class FixtureSchedulerService {
         watcherHolder[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
             ExternalFixtureResponse1.Match currentMatch = apiService.getGameStatus(fixture);
             if (currentMatch.getStatus().equalsIgnoreCase("IN_PLAY")) {
+                log.info("Match is now live! Fetching second fixture ID...");
                 Long secondFixtureId = apiService.getSecondFixtureId(fixture);
                 if (secondFixtureId == -1) {
+                    log.info("Second fixture ID not found for {}, skipping this iteration", fixture.getId());
                     return;
                 }
                 startGoalPolling(fixture, secondFixtureId);
@@ -76,12 +78,14 @@ public class FixtureSchedulerService {
     }
 
     private void startGoalPolling(Fixture fixture, Long secondFixtureId) {
+        log.info("Starting goal polling for fixture {}", fixture.getId());
         final ScheduledFuture<?>[] pollingTask = new ScheduledFuture<?>[1];
 
         pollingTask[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
             ExternalFixtureResponse1.Match currentMatch = apiService.getGameStatus(fixture);
             if (currentMatch.getStatus().equalsIgnoreCase("FINISHED")) {
                 // Update Redis cache
+                log.info("Updating Redis cache...");
                 List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
                 while (fixtures == null) {
                     fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
@@ -95,12 +99,14 @@ public class FixtureSchedulerService {
                     }
                 }
                 redisFixtureTemplate.delete("fixtures");
-                fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixture",f));
+                fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixtures",f));
 
                 // Retrieve goalscorers
+                log.info("Retrieving goalscorers...");
                 HomeAndAwayScorers scorers = apiService.getGoalScorers(fixture, secondFixtureId);
 
                 // Save match to DB
+                log.info("Saving match to DB...");
                 MatchEntity matchEntity = MatchEntity.builder()
                         .matchId(secondFixtureId)
                         .oldFixtureId(fixture.getId())
@@ -114,19 +120,23 @@ public class FixtureSchedulerService {
                 matchEntity = matchRepository.saveAndFlush(matchEntity);
 
                 // Update user scores and shii
+                log.info("Updating database...");
                 predictionService.updateDatabaseAfterGame(matchEntity);
 
                 // Increment current Matchday if appropriate
+                log.info("Checking current Matchday incrementing...");
                 boolean allFinished = fixtures.stream()
                         .allMatch(f -> f.getStatus().equalsIgnoreCase("FINISHED"));
                 if (allFinished) FixtureDetails.currentMatchday++;
                 chipService.updateAllGameweekCooldowns();
 
                 // End the scheduler
+                log.info("Ending scheduler!");
                 pollingTask[0].cancel(false);
             }
-            else if (currentMatch.getStatus().equalsIgnoreCase("PAUSED")) {
-                // Update halftime score
+            else if (currentMatch.getStatus().equalsIgnoreCase("IN_PLAY")) {
+                // Update score
+                log.info("Updating live score in redis...");
                 List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
                 while (fixtures == null) {
                     fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
@@ -139,7 +149,9 @@ public class FixtureSchedulerService {
                     }
                 }
                 redisFixtureTemplate.delete("fixtures");
-                fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixture",f));
+                fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixtures",f));
+            } else {
+                log.info("IN_PLAY and FINISHED statuses not identified. Waiting for next iteration...");
             }
         }, 0, 3, TimeUnit.MINUTES);
     }

@@ -9,6 +9,7 @@ import com.komori.predictions.dto.response.api2.ExternalEventsResponse;
 import com.komori.predictions.dto.response.api2.ExternalFixtureResponse2;
 import com.komori.predictions.dto.response.api2.ExternalTeamResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class APIService {
@@ -81,6 +83,7 @@ public class APIService {
         }
 
         FixtureDetails.currentMatchday = response.getCurrentSeason().getCurrentMatchday();
+        log.info("Set current matchday to GW{}", FixtureDetails.currentMatchday);
     }
 
     public void loadMissingPlayers() {

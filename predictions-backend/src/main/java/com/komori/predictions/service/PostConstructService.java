@@ -2,9 +2,11 @@ package com.komori.predictions.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostConstructService {
@@ -13,6 +15,7 @@ public class PostConstructService {
 
     @PostConstruct
     public void updateUpcomingFixturesOnStartup() {
+        log.info("Updating upcoming fixtures...");
         apiService.updateUpcomingFixtures();
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }
@@ -25,6 +28,7 @@ public class PostConstructService {
 
     @PostConstruct
     public void setCurrentMatchdayOnStartup() {
+        log.info("Setting current matchday...");
         apiService.setCurrentMatchday();
     }
 

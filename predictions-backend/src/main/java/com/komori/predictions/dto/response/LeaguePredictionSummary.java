@@ -2,7 +2,6 @@ package com.komori.predictions.dto.response;
 
 import com.komori.predictions.dto.enumerated.Chip;
 import com.komori.predictions.dto.enumerated.PredictionStatus;
-import com.komori.predictions.dto.enumerated.Team;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LeaguePredictionSummary {
-    private String id;
     private Long matchId;
     private String userId;
-    private Team homeTeam;
-    private Team awayTeam;
+    private String homeTeam;
+    private String awayTeam;
     private Integer homeScore;
     private Integer awayScore;
     private List<String> homeScorers;

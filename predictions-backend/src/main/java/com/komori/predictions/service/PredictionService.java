@@ -66,6 +66,7 @@ public class PredictionService {
 
     @Transactional
     public void updateDatabaseAfterGame(MatchEntity match) {
+        // Updating DB:
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getMatchId());
         for (PredictionEntity prediction : predictions) {
             int points = getPredictionScore(prediction.getUser().getEmail(), match.getMatchId().intValue());
