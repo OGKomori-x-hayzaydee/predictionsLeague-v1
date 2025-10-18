@@ -29,6 +29,7 @@ public class PredictionService {
     private final PredictionRepository predictionRepository;
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
+    private final ChipService chipService;
 
     public Set<PredictionEntity> getPredictionsForUser(String email) {
         return predictionRepository.findAllByUser_Email(email);
@@ -51,6 +52,7 @@ public class PredictionService {
             predictionRepository.save(prediction);
         }
 
+        chipService.updateChipStatusAfterPrediction(email, request);
     }
 
     @Transactional

@@ -24,13 +24,15 @@ public class AuthService {
     private final OtpRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final ChipService chipService;
 
     public void registerNewUser(RegistrationRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException();
         }
         UserEntity newUser = convertToUserEntity(request);
-        userRepository.save(newUser);
+        newUser = userRepository.save(newUser);
+        chipService.createChipsForNewUser(newUser);
         emailService.sendWelcomeEmail(request.getEmail(), request.getFirstName());
     }
 

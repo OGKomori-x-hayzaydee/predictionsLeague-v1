@@ -3,6 +3,7 @@ package com.komori.predictions.controller;
 import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.repository.UserRepository;
 import com.komori.predictions.security.JwtUtil;
+import com.komori.predictions.service.ChipService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("/oauth2")
 @RequiredArgsConstructor
 public class OAuth2Controller {
+    private final ChipService chipService;
     @Value("${app.frontend-url}")
     private String frontendUrl;
     private final UserRepository userRepository;
@@ -59,7 +61,8 @@ public class OAuth2Controller {
                     .profilePictureUrl(picture)
                     .accountVerified(true)
                     .build();
-            userRepository.save(newUser);
+            newUser = userRepository.save(newUser);
+            chipService.createChipsForNewUser(newUser);
             response.sendRedirect(frontendUrl + "/auth/callback?email=" + email);
         } else if (user.get().getFavouriteTeam() == null || user.get().getUsername() == null) {
             // Incomplete registration
