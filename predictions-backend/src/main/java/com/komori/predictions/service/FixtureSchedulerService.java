@@ -39,8 +39,8 @@ public class FixtureSchedulerService {
                 long delayMillis = Duration.between(LocalDateTime.now(), fixture.getDate()).toMillis();
                 if (delayMillis < 0) continue;
 
-                scheduledExecutorService.schedule(() -> watchFixture(fixture), delayMillis, TimeUnit.MILLISECONDS);
                 log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
+                scheduledExecutorService.schedule(() -> watchFixture(fixture), delayMillis, TimeUnit.MILLISECONDS);
             }
         }
     }

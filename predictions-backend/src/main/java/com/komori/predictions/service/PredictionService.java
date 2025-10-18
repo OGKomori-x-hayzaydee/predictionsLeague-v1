@@ -38,18 +38,21 @@ public class PredictionService {
             MatchEntity match = matchRepository.findByOldFixtureId(p.getMatchId().intValue());
             if (match != null) {
                 userPredictions.add(new UserPrediction(match, p));
+            } else {
+                userPredictions.add(new UserPrediction(p));
             }
         });
         return userPredictions;
     }
 
+    @Transactional
     public void makePrediction(String email, PredictionRequest request) {
         UserEntity user = userRepository.findByEmail(email)
                         .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
         PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(request.getMatchId(), email);
         if (prediction == null) {
-            predictionRepository.save(new PredictionEntity(user, request));
+            predictionRepository.saveAndFlush(new PredictionEntity(user, request));
             chipService.updateChipStatusAfterNewPrediction(email, request);
         } else {
             prediction.setDate(Instant.now());
@@ -57,7 +60,7 @@ public class PredictionService {
             prediction.setAwayScore(request.getAwayScore());
             prediction.setHomeScorers(request.getHomeScorers());
             prediction.setAwayScorers(request.getAwayScorers());
-            predictionRepository.save(prediction);
+            predictionRepository.saveAndFlush(prediction);
         }
     }
 

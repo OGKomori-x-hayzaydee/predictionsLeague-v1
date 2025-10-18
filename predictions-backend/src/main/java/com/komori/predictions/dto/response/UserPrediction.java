@@ -54,4 +54,24 @@ public class UserPrediction {
         this.date = entity.getDate();
         this.gameweek = entity.getGameweek();
     }
+
+    public UserPrediction(PredictionEntity entity) {
+        this.matchId = entity.getMatchId();
+        this.homeTeam = entity.getHomeTeam();
+        this.awayTeam = entity.getAwayTeam();
+        this.homeScore = entity.getHomeScore();
+        this.awayScore = entity.getAwayScore();
+        this.actualHomeScore = null;
+        this.actualAwayScore = null;
+        this.homeScorers = entity.getHomeScorers();
+        this.awayScorers = entity.getAwayScorers();
+        this.actualHomeScorers = null;
+        this.actualAwayScorers = null;
+        this.points = entity.getPoints();
+        this.correct = entity.getCorrect();
+        this.status = entity.getStatus();
+        this.chips = entity.getChips();
+        this.date = entity.getDate();
+        this.gameweek = entity.getGameweek();
+    }
 }
