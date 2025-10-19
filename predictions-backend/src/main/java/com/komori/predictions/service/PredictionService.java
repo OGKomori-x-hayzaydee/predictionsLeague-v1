@@ -64,7 +64,7 @@ public class PredictionService {
 
     public void updateDatabaseAfterGame(MatchEntity match) {
         // Updating DB:
-        List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getMatchId());
+        List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getOldFixtureId().longValue());
         for (PredictionEntity prediction : predictions) {
             int points = getPredictionScore(prediction.getUser().getEmail(), match.getMatchId().intValue());
             boolean correct = isPredictionCorrect(prediction, match);
@@ -144,7 +144,7 @@ public class PredictionService {
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         Map<String, Long> predHomeMap = predHomeScorers.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        Map<String, Long> predAwayMap = actualHomeScorers.stream()
+        Map<String, Long> predAwayMap = predAwayScorers.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         return actualHomeMap.equals(predHomeMap) && actualAwayMap.equals(predAwayMap);

@@ -47,6 +47,8 @@ public class FixtureSchedulerService {
     private List<Fixture> getFixturesForTheDay() {
         List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
         while (fixtures == null) {
+            log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
+            apiService.updateUpcomingFixtures();
             fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
         }
 
@@ -88,8 +90,10 @@ public class FixtureSchedulerService {
                 // Update Redis cache
                 log.info("Updating Redis cache...");
                 List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
-                while (fixtures == null) {
-                    fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
+                if (fixtures == null) {
+                    log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
+                    apiService.updateUpcomingFixtures();
+                    return;
                 }
 
                 for (Fixture retrievedFixture : fixtures) {
@@ -127,18 +131,21 @@ public class FixtureSchedulerService {
 
                 // Increment current Matchday if appropriate
                 log.info("Checking current Matchday incrementing...");
-                boolean allFinished = fixtures.stream()
-                        .allMatch(f -> f.getStatus().equalsIgnoreCase("FINISHED"));
-                if (allFinished) FixtureDetails.currentMatchday++;
-                chipService.updateAllGameweekCooldowns();
+                boolean isLastFixture = fixtures.stream()
+                        .noneMatch(f -> f.getDate().isAfter(fixture.getDate())
+                                // tie-breaker by ID
+                        || ((f.getDate().isEqual(fixture.getDate())) && f.getId() > fixture.getId()));
+                if (isLastFixture) {
+                    FixtureDetails.currentMatchday++;
+                    chipService.updateAllGameweekCooldowns();
+                }
 
                 // End the scheduler
-                log.info("Ending scheduler!");
+                log.info("Ending scheduler for fixture {}", fixture.getId());
                 pollingTask[0].cancel(false);
             }
             else if (currentMatch.getStatus().equalsIgnoreCase("IN_PLAY")) {
                 // Update score
-                log.info("Updating live score in redis...");
                 List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
                 while (fixtures == null) {
                     fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
@@ -152,8 +159,6 @@ public class FixtureSchedulerService {
                 }
                 redisFixtureTemplate.delete("fixtures");
                 fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixtures",f));
-            } else {
-                log.info("IN_PLAY and FINISHED statuses not identified. Waiting for next iteration...");
             }
         }, 0, 3, TimeUnit.MINUTES);
     }
