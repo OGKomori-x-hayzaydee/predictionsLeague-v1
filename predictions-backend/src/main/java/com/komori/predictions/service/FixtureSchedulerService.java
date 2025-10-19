@@ -114,7 +114,8 @@ public class FixtureSchedulerService {
                 log.info("Saving match to DB...");
                 MatchEntity matchEntity = MatchEntity.builder()
                         .matchId(secondFixtureId)
-                        .oldFixtureId(fixture.getId())
+                        .oldFixtureId(fixture.getId().longValue())
+                        .gameweek(FixtureDetails.currentMatchday)
                         .homeScore(currentMatch.getScore().getFullTime().getHome())
                         .awayScore(currentMatch.getScore().getFullTime().getAway())
                         .homeTeam(fixture.getHomeTeam())
@@ -127,7 +128,11 @@ public class FixtureSchedulerService {
 
                 // Update user scores and shii
                 log.info("Updating database...");
-                predictionService.updateDatabaseAfterGame(matchEntity);
+                try {
+                    predictionService.updateDatabaseAfterGame(matchEntity);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error in updating database", e);
+                }
 
                 // Increment current Matchday if appropriate
                 log.info("Checking current Matchday incrementing...");
