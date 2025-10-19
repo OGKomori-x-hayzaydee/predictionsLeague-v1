@@ -1,5 +1,6 @@
 package com.komori.predictions.repository;
 
+import com.komori.predictions.dto.enumerated.Chip;
 import com.komori.predictions.entity.ChipEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,4 +20,6 @@ public interface ChipRepository extends JpaRepository<ChipEntity, Long> {
         where c.remainingGameweeks > 0
     """)
     void decrementGameweeksRemainingForAllUsers();
+
+    ChipEntity findByUser_EmailAndType(String userEmail, Chip type);
 }

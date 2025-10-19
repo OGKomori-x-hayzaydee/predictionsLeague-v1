@@ -13,7 +13,6 @@ import com.komori.predictions.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -45,7 +44,6 @@ public class PredictionService {
         return userPredictions;
     }
 
-    @Transactional
     public void makePrediction(String email, PredictionRequest request) {
         UserEntity user = userRepository.findByEmail(email)
                         .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
@@ -60,10 +58,10 @@ public class PredictionService {
             prediction.setAwayScore(request.getAwayScore());
             prediction.setHomeScorers(request.getHomeScorers());
             prediction.setAwayScorers(request.getAwayScorers());
+            predictionRepository.saveAndFlush(prediction);
         }
     }
 
-    @Transactional
     public void updateDatabaseAfterGame(MatchEntity match) {
         // Updating DB:
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getMatchId());
@@ -74,7 +72,7 @@ public class PredictionService {
             prediction.setCorrect(correct);
             prediction.setStatus(PredictionStatus.COMPLETED);
         }
-        predictionRepository.saveAllAndFlush(predictions);
+        predictionRepository.saveAll(predictions);
     }
 
     // Scoring System

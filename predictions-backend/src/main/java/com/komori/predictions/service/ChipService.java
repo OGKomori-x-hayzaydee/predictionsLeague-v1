@@ -36,19 +36,17 @@ public class ChipService {
         chipRepository.saveAllAndFlush(chips);
     }
 
-    @Transactional
     public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
-        List<ChipEntity> chips = chipRepository.findAllByUser_Email(email);
-        for (ChipEntity entity : chips) {
-            if (prediction.getChips().contains(entity.getType())) {
-                entity.setLastUsedGameweek(prediction.getGameweek());
-                entity.setSeasonUsageCount(entity.getSeasonUsageCount() + 1);
-                if (entity.getType() == Chip.WILDCARD) {
-                    entity.setRemainingGameweeks(entity.getRemainingGameweeks() + 7);
-                } else if (entity.getType() == Chip.SCORER_FOCUS || entity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                    entity.setRemainingGameweeks(entity.getRemainingGameweeks() + 5);
-                }
+        for (Chip chip : prediction.getChips()) {
+            ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
+            chipEntity.setLastUsedGameweek(prediction.getGameweek());
+            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+            if (chipEntity.getType() == Chip.WILDCARD) {
+                chipEntity.setRemainingGameweeks(7);
+            } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
+                chipEntity.setRemainingGameweeks(5);
             }
+            chipRepository.save(chipEntity);
         }
     }
 
