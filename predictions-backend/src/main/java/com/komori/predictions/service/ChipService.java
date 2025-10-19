@@ -38,15 +38,17 @@ public class ChipService {
 
     public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
         for (Chip chip : prediction.getChips()) {
-            ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
-            chipEntity.setLastUsedGameweek(prediction.getGameweek());
-            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
-            if (chipEntity.getType() == Chip.WILDCARD) {
-                chipEntity.setRemainingGameweeks(7);
-            } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                chipEntity.setRemainingGameweeks(5);
+            if (chip != Chip.DOUBLE_DOWN) {
+                ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
+                chipEntity.setLastUsedGameweek(prediction.getGameweek());
+                chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+                if (chipEntity.getType() == Chip.WILDCARD) {
+                    chipEntity.setRemainingGameweeks(7);
+                } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
+                    chipEntity.setRemainingGameweeks(5);
+                }
+                chipRepository.save(chipEntity);
             }
-            chipRepository.save(chipEntity);
         }
     }
 
