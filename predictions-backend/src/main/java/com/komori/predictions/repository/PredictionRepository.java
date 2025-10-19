@@ -44,9 +44,7 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     FROM teams t
     LEFT JOIN predictions p
             ON (p.home_team = t.team OR p.away_team = t.team)
-    JOIN users u
-            ON p.user_id = u.id
-    WHERE u.email = :email
+            AND p.user_id = (SELECT id FROM users WHERE email = :email)
     GROUP BY t.team
     """, nativeQuery = true)
     List<TeamPerformanceProjection> getTeamPerformanceByEmail(@Param("email") String email);
@@ -63,9 +61,7 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     FROM months m
     LEFT JOIN predictions p
             ON EXTRACT(MONTH FROM p.date) = m.month
-    JOIN users u
-            ON u.id = p.user_id
-    WHERE u.email = :email
+            AND p.user_id = (SELECT id FROM users WHERE email = :email)
     GROUP BY m.month
     ORDER BY m.month
     """, nativeQuery = true)
