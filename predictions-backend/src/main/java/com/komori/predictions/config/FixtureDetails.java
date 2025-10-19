@@ -1,13 +1,13 @@
 package com.komori.predictions.config;
 
-import lombok.RequiredArgsConstructor;
+import com.komori.predictions.service.APIService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Set;
 
 @Component
-@RequiredArgsConstructor
 public class FixtureDetails {
     public static int currentMatchday;
     public static final Set<String> BIG_SIX_TEAMS = Set.of(
@@ -62,4 +62,15 @@ public class FixtureDetails {
             Map.entry("Leeds", 63),
             Map.entry("Everton", 45)
     );
+
+    public FixtureDetails(RedisTemplate<String, Object> redisGeneralTemplate, APIService apiService) {
+        Object value = redisGeneralTemplate.opsForValue().get("currentMatchday");
+        if (value instanceof Integer) {
+            currentMatchday = (int) value;
+        } else if (value instanceof String) {
+            currentMatchday = Integer.parseInt((String) value);
+        } else {
+            apiService.setCurrentMatchday();
+        }
+    }
 }

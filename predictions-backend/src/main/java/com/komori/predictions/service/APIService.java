@@ -27,6 +27,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class APIService {
+    private final RedisTemplate<String, Object> redisGeneralTemplate;
     @Value("${app.squad-list-base-url}")
     private String squadListBaseUrl;
     @Value("${app.competition-base-url}")
@@ -82,7 +83,9 @@ public class APIService {
             throw new RuntimeException("Error setting current matchday");
         }
 
-        FixtureDetails.currentMatchday = response.getCurrentSeason().getCurrentMatchday();
+        Integer matchday = response.getCurrentSeason().getCurrentMatchday();
+        FixtureDetails.currentMatchday = matchday;
+        redisGeneralTemplate.opsForValue().set("currentMatchday", matchday);
         log.info("Set current matchday to GW{}", FixtureDetails.currentMatchday);
     }
 
