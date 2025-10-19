@@ -15,7 +15,9 @@ public class PostConstructService {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void updateUpcomingFixturesDaily() {
+        log.info("Updating upcoming fixtures...");
         apiService.updateUpcomingFixtures();
+        log.info("Scheduling matches for the day...");
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }
 
