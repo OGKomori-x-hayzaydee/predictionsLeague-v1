@@ -69,11 +69,14 @@ public class PredictionService {
         // Updating DB:
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getOldFixtureId());
         for (PredictionEntity prediction : predictions) {
-            int points = getPredictionScore(prediction.getUser().getEmail(), match.getOldFixtureId().intValue());
+            UserEntity user = prediction.getUser();
+            int points = getPredictionScore(user.getEmail(), match.getOldFixtureId().intValue());
             boolean correct = isPredictionCorrect(prediction, match);
             prediction.setPoints(points);
             prediction.setCorrect(correct);
             prediction.setStatus(PredictionStatus.COMPLETED);
+            user.setTotalPoints(user.getTotalPoints() + points);
+            userRepository.save(user);
         }
         predictionRepository.saveAll(predictions);
     }

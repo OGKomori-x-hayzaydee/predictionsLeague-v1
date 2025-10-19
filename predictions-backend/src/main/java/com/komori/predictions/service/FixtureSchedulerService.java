@@ -143,6 +143,7 @@ public class FixtureSchedulerService {
                 if (isLastFixture) {
                     FixtureDetails.currentMatchday++;
                     chipService.updateAllGameweekCooldowns();
+                    apiService.updateUpcomingFixtures();
                 }
 
                 // End the scheduler
