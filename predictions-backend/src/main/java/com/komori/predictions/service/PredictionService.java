@@ -58,6 +58,9 @@ public class PredictionService {
             prediction.setAwayScore(request.getAwayScore());
             prediction.setHomeScorers(request.getHomeScorers());
             prediction.setAwayScorers(request.getAwayScorers());
+            if (prediction.getChips().isEmpty()) {
+                prediction.setChips(request.getChips());
+            }
             predictionRepository.saveAndFlush(prediction);
         }
     }
