@@ -69,7 +69,7 @@ public class PredictionService {
         // Updating DB:
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getOldFixtureId());
         for (PredictionEntity prediction : predictions) {
-            int points = getPredictionScore(prediction.getUser().getEmail(), match.getMatchId().intValue());
+            int points = getPredictionScore(prediction.getUser().getEmail(), match.getOldFixtureId().intValue());
             boolean correct = isPredictionCorrect(prediction, match);
             prediction.setPoints(points);
             prediction.setCorrect(correct);
@@ -79,9 +79,9 @@ public class PredictionService {
     }
 
     // Scoring System
-    public Integer getPredictionScore(String email, int matchId) {
-        MatchEntity match = matchRepository.findByOldFixtureId(matchId);
-        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(match.getOldFixtureId(), email);
+    public Integer getPredictionScore(String email, int oldFixtureId) {
+        MatchEntity match = matchRepository.findByOldFixtureId(oldFixtureId);
+        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email((long) oldFixtureId, email);
 
         int points = 0;
         int actualHome = match.getHomeScore();
