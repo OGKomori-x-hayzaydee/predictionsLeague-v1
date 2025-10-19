@@ -51,7 +51,6 @@ public class PredictionService {
         PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(request.getMatchId(), email);
         if (prediction == null) {
             predictionRepository.saveAndFlush(new PredictionEntity(user, request));
-            chipService.updateChipStatusAfterNewPrediction(email, request);
         } else {
             prediction.setDate(Instant.now());
             prediction.setHomeScore(request.getHomeScore());
@@ -63,6 +62,7 @@ public class PredictionService {
             }
             predictionRepository.saveAndFlush(prediction);
         }
+        chipService.updateChipStatusAfterNewPrediction(email, request);
     }
 
     public void updateDatabaseAfterGame(MatchEntity match) {
