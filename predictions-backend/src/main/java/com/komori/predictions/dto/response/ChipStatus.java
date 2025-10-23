@@ -39,7 +39,7 @@ public class ChipStatus {
         }
 
         private boolean isChipAvailable(ChipEntity entity) {
-            if (entity.getType() == Chip.ALL_IN_WEEK || entity.getType() == Chip.OPPORTUNIST) {
+            if (entity.getType() == Chip.ALL_IN_WEEK) {
                 return !Objects.equals(entity.getSeasonUsageCount(), entity.getSeasonLimit());
             }
 
@@ -51,7 +51,7 @@ public class ChipStatus {
                 return "Available";
             }
 
-            if (entity.getType() == Chip.ALL_IN_WEEK || entity.getType() == Chip.OPPORTUNIST) {
+            if (entity.getType() == Chip.ALL_IN_WEEK) {
                 return "Season limit reached";
             }
 

@@ -27,10 +27,10 @@ public class ChipService {
     public void createChipsForNewUser(UserEntity newUser) {
         List<ChipEntity> chips = List.of(
                 ChipEntity.builder().user(newUser).type(Chip.WILDCARD).seasonUsageCount(0).remainingGameweeks(0).build(),
-                ChipEntity.builder().user(newUser).type(Chip.OPPORTUNIST).seasonLimit(2).seasonUsageCount(0).build(),
                 ChipEntity.builder().user(newUser).type(Chip.DEFENSE_PLUS_PLUS).seasonUsageCount(0).remainingGameweeks(0).build(),
                 ChipEntity.builder().user(newUser).type(Chip.ALL_IN_WEEK).seasonLimit(4).seasonUsageCount(0).build(),
-                ChipEntity.builder().user(newUser).type(Chip.SCORER_FOCUS).seasonUsageCount(0).remainingGameweeks(0).build()
+                ChipEntity.builder().user(newUser).type(Chip.SCORER_FOCUS).seasonUsageCount(0).remainingGameweeks(0).build(),
+                ChipEntity.builder().user(newUser).type(Chip.DOUBLE_DOWN).seasonUsageCount(0).remainingGameweeks(0).build()
         );
 
         chipRepository.saveAllAndFlush(chips);
@@ -38,17 +38,17 @@ public class ChipService {
 
     public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
         for (Chip chip : prediction.getChips()) {
-            if (chip != Chip.DOUBLE_DOWN) {
-                ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
-                chipEntity.setLastUsedGameweek(prediction.getGameweek());
-                chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
-                if (chipEntity.getType() == Chip.WILDCARD) {
-                    chipEntity.setRemainingGameweeks(7);
-                } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                    chipEntity.setRemainingGameweeks(5);
-                }
-                chipRepository.save(chipEntity);
+            ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
+            chipEntity.setLastUsedGameweek(prediction.getGameweek());
+            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+            if (chipEntity.getType() == Chip.WILDCARD) {
+                chipEntity.setRemainingGameweeks(7);
+            } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
+                chipEntity.setRemainingGameweeks(5);
+            } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
+                chipEntity.setRemainingGameweeks(1);
             }
+            chipRepository.save(chipEntity);
         }
     }
 

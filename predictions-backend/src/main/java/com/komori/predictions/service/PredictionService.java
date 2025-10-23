@@ -57,9 +57,7 @@ public class PredictionService {
             prediction.setAwayScore(request.getAwayScore());
             prediction.setHomeScorers(request.getHomeScorers());
             prediction.setAwayScorers(request.getAwayScorers());
-            if (prediction.getChips().isEmpty()) {
-                prediction.setChips(request.getChips());
-            }
+            prediction.setChips(request.getChips());
             predictionRepository.saveAndFlush(prediction);
         }
         chipService.updateChipStatusAfterNewPrediction(email, request);
@@ -128,15 +126,17 @@ public class PredictionService {
         }
 
         // Total
-        if (chips.contains(Chip.DOUBLE_DOWN) && chips.contains(Chip.WILDCARD)) {
-            return points * 6;
-        } else if (chips.contains(Chip.WILDCARD)) {
-            return points * 3;
-        } else if (chips.contains(Chip.DOUBLE_DOWN)) {
-            return points * 2;
-        } else {
-            return points;
+        if (chips.contains(Chip.WILDCARD)) {
+            points *= 3;
         }
+        if (chips.contains(Chip.DOUBLE_DOWN)) {
+            points *= 2;
+        }
+        if (chips.contains(Chip.DEFENSE_PLUS_PLUS)) {
+            points += 5 * cleanSheetsPredicted(predHome, actualHome, predAway, actualAway);
+        }
+
+        return points;
     }
 
     private boolean scorersMatchExactly(List<String> actualHomeScorers, List<String> actualAwayScorers, List<String> predHomeScorers, List<String> predAwayScorers) {
@@ -176,5 +176,17 @@ public class PredictionService {
 
     private boolean isPredictionCorrect(PredictionEntity prediction, MatchEntity match) {
         return (Objects.equals(prediction.getHomeScore(), match.getHomeScore())) && (Objects.equals(prediction.getAwayScore(), match.getAwayScore()));
+    }
+
+    private int cleanSheetsPredicted(int predHome, int actualHome, int predAway, int actualAway) {
+        int cleanSheets = 0;
+        if (predHome == 0 && actualHome == 0) {
+            cleanSheets++;
+        }
+        if (predAway == 0 && actualAway == 0) {
+            cleanSheets++;
+        }
+
+        return cleanSheets;
     }
 }
