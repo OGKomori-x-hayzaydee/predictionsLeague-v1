@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@SuppressWarnings("DuplicatedCode")
 @Service
 @RequiredArgsConstructor
 public class LeagueService {
@@ -160,7 +159,7 @@ public class LeagueService {
                 .build();
     }
 
-    protected LeagueStanding leagueEntityToStanding(LeagueEntity league, UserEntity user) {
+    protected LeagueStanding leagueEntityToStanding(LeagueEntity league, UserEntity currentUser) {
         List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague(league);
         Set<LeagueStanding.LeagueMember> members = new HashSet<>();
         userLeagueEntities.forEach(entity -> {
@@ -172,9 +171,9 @@ public class LeagueService {
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
                     .points(userEntity.getTotalPoints())
-                    .predictions(predictionRepository.countByUser(user))
+                    .predictions(predictionRepository.countByUser(userEntity))
                     .joinedAt(entity.getJoinedAt().toInstant())
-                    .isCurrentUser(Objects.equals(userEntity.getId(), user.getId()))
+                    .isCurrentUser(Objects.equals(userEntity.getId(), currentUser.getId()))
                     .isAdmin(entity.getIsAdmin())
                     .build();
             members.add(member);
