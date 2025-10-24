@@ -1,8 +1,6 @@
 package com.komori.predictions.repository;
 
-import com.komori.predictions.dto.projection.AccuracyStatsProjection;
-import com.komori.predictions.dto.projection.MonthlyPerformanceProjection;
-import com.komori.predictions.dto.projection.TeamPerformanceProjection;
+import com.komori.predictions.dto.projection.*;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -66,6 +64,40 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     ORDER BY m.month
     """, nativeQuery = true)
     List<MonthlyPerformanceProjection> getMonthlyPerformance(@Param("email") String email);
+
+    @Query(value = """
+    SELECT
+            gameweek AS gameweek,
+            SUM(points) AS points
+    FROM predictions p
+    WHERE p.user_id = (SELECT id FROM users WHERE email = :email)
+    GROUP BY gameweek
+    ORDER BY points DESC
+    LIMIT 1
+    """, nativeQuery = true)
+    BestGameweekProjection getBestGameweek(@Param("email") String email);
+
+    @Query(value = """
+    SELECT
+            CASE EXTRACT(DOW FROM p.date)
+                WHEN 0 THEN 'Sunday'
+                WHEN 1 THEN 'Monday'
+                WHEN 2 THEN 'Tuesday'
+                WHEN 3 THEN 'Wednesday'
+                WHEN 4 THEN 'Thursday'
+                WHEN 5 THEN 'Friday'
+                WHEN 6 THEN 'Saturday'
+            END AS day,
+            (COUNT(*) * 100.0 / (SELECT COUNT(*)
+                                FROM predictions
+                                WHERE predictions.user_id = (SELECT id FROM users WHERE email = :email))) AS percentage
+    FROM predictions p
+    WHERE p.user_id = (SELECT id FROM users WHERE email = :email)
+    GROUP BY day
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+    """, nativeQuery = true)
+    MostActiveDayProjection getMostActiveDay(@Param("email") String email);
 
     PredictionEntity findByMatchIdAndUser_Email(Long matchId, String userEmail);
 

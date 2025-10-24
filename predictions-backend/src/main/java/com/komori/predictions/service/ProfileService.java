@@ -4,7 +4,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.komori.predictions.dto.projection.BestGameweekProjection;
 import com.komori.predictions.dto.projection.MonthlyPerformanceProjection;
+import com.komori.predictions.dto.projection.MostActiveDayProjection;
 import com.komori.predictions.dto.projection.TeamPerformanceProjection;
 import com.komori.predictions.dto.response.*;
 import com.komori.predictions.entity.UserEntity;
@@ -41,20 +43,36 @@ public class ProfileService {
     }
 
     public StatsHighlights getStatsHighlights(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+        BestGameweekProjection gameweekProjection = predictionRepository.getBestGameweek(email);
+        if (gameweekProjection == null) {
+            return StatsHighlights.builder()
+                    .bestGameweek(StatsHighlights.StatsHighlightsGameweek.builder()
+                            .gameweek("None")
+                            .points(0)
+                            .build())
+                    .mostActiveDay(StatsHighlights.StatsHighlightsDay.builder()
+                            .day("None")
+                            .percentage(0.0)
+                            .build())
+                    .favoriteFixture(StatsHighlights.StatsHighlightsFixture.builder()
+                            .fixture("None")
+                            .accuracy(0.0)
+                            .build())
+                    .build();
+        }
 
+        MostActiveDayProjection dayProjection = predictionRepository.getMostActiveDay(email);
         return StatsHighlights.builder()
                 .bestGameweek(StatsHighlights.StatsHighlightsGameweek.builder()
-                        .gameweek("GW1")
-                        .points(user.getTotalPoints())
+                        .gameweek("GW" + gameweekProjection.getGameweek())
+                        .points(gameweekProjection.getPoints())
                         .build())
                 .mostActiveDay(StatsHighlights.StatsHighlightsDay.builder()
-                        .day("None")
-                        .percentage(0.0)
+                        .day(dayProjection.getDay())
+                        .percentage(dayProjection.getPercentage())
                         .build())
                 .favoriteFixture(StatsHighlights.StatsHighlightsFixture.builder()
-                        .fixture("None")
+                        .fixture("Coming soon")
                         .accuracy(0.0)
                         .build())
                 .build();
