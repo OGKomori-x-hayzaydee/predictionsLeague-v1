@@ -69,7 +69,7 @@ public class ProfileService {
                         .build())
                 .mostActiveDay(StatsHighlights.StatsHighlightsDay.builder()
                         .day(dayProjection.getDay())
-                        .percentage(dayProjection.getPercentage())
+                        .percentage((double) Math.round(dayProjection.getPercentage() * 100.0 / 100.0))
                         .build())
                 .favoriteFixture(StatsHighlights.StatsHighlightsFixture.builder()
                         .fixture("Coming soon")
