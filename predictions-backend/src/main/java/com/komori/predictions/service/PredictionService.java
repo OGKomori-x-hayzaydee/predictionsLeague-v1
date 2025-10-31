@@ -132,6 +132,9 @@ public class PredictionService {
         if (chips.contains(Chip.DOUBLE_DOWN)) {
             points *= 2;
         }
+        if (chips.contains(Chip.ALL_IN_WEEK)) {
+            points *= 2;
+        }
         if (chips.contains(Chip.DEFENSE_PLUS_PLUS)) {
             points += 5 * cleanSheetsPredicted(predHome, actualHome, predAway, actualAway);
         }

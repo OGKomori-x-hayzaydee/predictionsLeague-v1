@@ -42,9 +42,9 @@ public class ChipService {
             chipEntity.setLastUsedGameweek(prediction.getGameweek());
             chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
             if (chipEntity.getType() == Chip.WILDCARD) {
-                chipEntity.setRemainingGameweeks(7);
+                chipEntity.setRemainingGameweeks(8);
             } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                chipEntity.setRemainingGameweeks(5);
+                chipEntity.setRemainingGameweeks(6);
             } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
                 chipEntity.setRemainingGameweeks(1);
             }
