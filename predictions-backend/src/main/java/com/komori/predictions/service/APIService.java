@@ -27,7 +27,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class APIService {
-    private final RedisTemplate<String, Object> redisGeneralTemplate;
     @Value("${app.squad-list-base-url}")
     private String squadListBaseUrl;
     @Value("${app.competition-base-url}")
@@ -45,6 +44,7 @@ public class APIService {
     private final RestTemplate restTemplate;
     private final RedisTemplate<String, Player> redisPlayerTemplate;
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
+    private final RedisTemplate<String, Object> redisGeneralTemplate;
 
     public void updateUpcomingFixtures() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);

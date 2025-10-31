@@ -29,6 +29,7 @@ public class FixtureSchedulerService {
     private final PredictionService predictionService;
     private final MatchRepository matchRepository;
     private final ChipService chipService;
+    private final RedisTemplate<String, Object> redisGeneralTemplate;
 
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
@@ -142,6 +143,7 @@ public class FixtureSchedulerService {
                         || ((f.getDate().isEqual(fixture.getDate())) && f.getId() > fixture.getId()));
                 if (isLastFixture) {
                     FixtureDetails.currentMatchday++;
+                    redisGeneralTemplate.opsForValue().set("currentMatchday", FixtureDetails.currentMatchday);
                     chipService.updateAllGameweekCooldowns();
                     apiService.updateUpcomingFixtures();
                 }
