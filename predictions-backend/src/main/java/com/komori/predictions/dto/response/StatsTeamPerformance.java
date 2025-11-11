@@ -30,6 +30,7 @@ public class StatsTeamPerformance {
             this.predictions = projection.getTotal();
             this.correct = projection.getCorrect();
             this.accuracy = (projection.getTotal() == 0) ? 0.0 : ((projection.getCorrect() * 100.0)/projection.getTotal());
+            this.accuracy = Math.round(this.accuracy * 100.0) / 100.0;
             this.points = projection.getPoints();
         }
 
