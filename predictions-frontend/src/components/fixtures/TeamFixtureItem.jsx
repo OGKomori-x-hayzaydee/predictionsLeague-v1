@@ -3,6 +3,8 @@ import { ClockIcon } from "@radix-ui/react-icons";
 import { normalizeTeamName, getTeamLogo } from "../../utils/teamUtils";
 import { getLogoUrl } from "../../utils/logoCache";
 import { teamLogos } from "../../data/sampleData";
+import { isPredictionDeadlinePassed } from "../../utils/dateUtils";
+import { showToast } from "../../services/notificationService";
 
 const TeamFixtureItem = ({ fixture, team, onFixtureSelect }) => {
   // Get team logo from context, cache or use placeholder
@@ -24,7 +26,13 @@ const TeamFixtureItem = ({ fixture, team, onFixtureSelect }) => {
   return (
     <div
       className="p-3 hover:bg-primary-700/20 cursor-pointer transition-colors"
-      onClick={() => onFixtureSelect(fixture)}
+      onClick={() => {
+        if (isPredictionDeadlinePassed(fixture.date)) {
+          showToast('Deadline has passed for this match', 'error');
+          return;
+        }
+        onFixtureSelect(fixture);
+      }}
     >
       <div className="flex justify-between items-center mb-1">
         <div className="text-xs text-white/50">

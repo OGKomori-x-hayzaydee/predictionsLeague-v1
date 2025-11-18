@@ -12,22 +12,27 @@ export default function StepIndicator({ currentStep }) {
   ];
 
   return (
-    <div
-      className={`px-4 py-3 ${getThemeStyles(theme, {
-        dark: "bg-slate-800/30 border-slate-700/60",
-        light: "bg-slate-50/30 border-slate-200/60",
-      })} border-b font-outfit`}
-    >
+    <div className={`rounded-xl p-4 font-outfit ${getThemeStyles(theme, {
+      dark: 'bg-slate-800/50 border border-slate-700/60',
+      light: 'bg-slate-50 border border-slate-200'
+    })}`}>
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-3">
           {steps.map((step, index) => (
             <div key={step.number} className="flex items-center">
               <div className="flex items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium transition-all duration-200 ${
                     currentStep >= step.number
-                      ? `bg-${step.color}-500 text-slate-900 shadow-lg shadow-${step.color}-500/25`
-                      : "bg-slate-700/70 text-slate-400"
+                      ? step.color === "emerald"
+                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                        : step.color === "blue"
+                        ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                        : "bg-purple-500 text-white shadow-lg shadow-purple-500/25"
+                      : getThemeStyles(theme, {
+                          dark: "bg-slate-700/70 text-slate-400",
+                          light: "bg-slate-200 text-slate-500"
+                        })
                   }`}
                 >
                   {step.number}
@@ -36,10 +41,19 @@ export default function StepIndicator({ currentStep }) {
                   className={`text-sm ml-3 transition-colors ${
                     currentStep === step.number
                       ? step.color === "emerald"
-                        ? getThemeStyles(theme, status.success.text) + " font-medium"
+                        ? getThemeStyles(theme, {
+                            dark: "text-emerald-300 font-medium",
+                            light: "text-emerald-700 font-medium"
+                          })
                         : step.color === "blue"
-                        ? getThemeStyles(theme, status.info.text) + " font-medium"
-                        : "text-purple-300 font-medium"
+                        ? getThemeStyles(theme, {
+                            dark: "text-blue-300 font-medium",
+                            light: "text-blue-700 font-medium"
+                          })
+                        : getThemeStyles(theme, {
+                            dark: "text-purple-300 font-medium",
+                            light: "text-purple-700 font-medium"
+                          })
                       : getThemeStyles(theme, text.muted)
                   }`}
                 >
@@ -49,8 +63,17 @@ export default function StepIndicator({ currentStep }) {
               
               {index < steps.length - 1 && (
                 <div
-                  className={`w-12 h-0.5 rounded-full transition-colors ${
-                    currentStep > step.number ? `bg-${step.color}-500/70` : "bg-slate-600/50"
+                  className={`w-12 h-0.5 rounded-full mx-3 transition-colors ${
+                    currentStep > step.number 
+                      ? step.color === "emerald"
+                        ? "bg-emerald-500/70"
+                        : step.color === "blue"
+                        ? "bg-blue-500/70"
+                        : "bg-purple-500/70"
+                      : getThemeStyles(theme, {
+                          dark: "bg-slate-600/50",
+                          light: "bg-slate-300/50"
+                        })
                   }`}
                 />
               )}

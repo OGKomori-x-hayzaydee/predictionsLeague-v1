@@ -11,87 +11,161 @@ import {
   CheckIcon,
   ExclamationTriangleIcon,
   CopyIcon,
-  EyeClosedIcon,
+  DoubleArrowUpIcon,
 } from '@radix-ui/react-icons';
 import { showToast } from '../../services/notificationService';
 import { ThemeContext } from '../../context/ThemeContext';
 import { backgrounds, text, buttons, status } from '../../utils/themeUtils';
+import leagueAPI from '../../services/api/leagueAPI';
 
-const LeagueManagementView = ({ leagueId, onBack }) => {
+const LeagueManagementView = ({ leagueId, league, onBack, onRefreshLeagues }) => {
   const [activeTab, setActiveTab] = useState('members');
   const [isLoading, setIsLoading] = useState(false);
   const [members, setMembers] = useState([]);
   const [nameInput, setNameInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
-  const [typeInput, setTypeInput] = useState('private');
   const [confirmDelete, setConfirmDelete] = useState(false);
   
   // Get theme context
   const { theme } = useContext(ThemeContext);
   
-  // Mock data for development
-  const league = {
-    id: leagueId,
-    name: `Fantasy Premier League 22/23`,
-    description: "Our friendly competition for the 2022/2023 Premier League season. Make your predictions for each match day and climb the leaderboard!",
-    type: 'private',
-    isAdmin: true,
-    members: 12,
-    lastUpdate: new Date(),
-    inviteCode: 'FNPL2223',
-    createdDate: new Date('2022-08-01')
-  };
+  // Use the passed league object, with fallback if not provided
+  if (!league) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex justify-center items-center py-12"
+      >
+        <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
+      </motion.div>
+    );
+  }
 
   useEffect(() => {
     // Initialize form inputs with league data
     setNameInput(league.name);
     setDescriptionInput(league.description);
-    setTypeInput(league.type);
     
-    // Mock fetch league members
-    setMembers([
-      { id: 1, name: 'Jane Cooper', joinedDate: '2022-08-01', isAdmin: true, points: 254, predictions: 15 },
-      { id: 2, name: 'Wade Warren', joinedDate: '2022-08-02', isAdmin: false, points: 198, predictions: 12 },
-      { id: 3, name: 'Esther Howard', joinedDate: '2022-08-03', isAdmin: false, points: 211, predictions: 14 },
-      { id: 4, name: 'Cameron Williamson', joinedDate: '2022-08-05', isAdmin: false, points: 187, predictions: 11 },
-      { id: 5, name: 'Brooklyn Simmons', joinedDate: '2022-08-10', isAdmin: false, points: 176, predictions: 9 },
-    ]);
+    // Fetch league members using standings data (reusing same API as leaderboard)
+    const fetchMembers = async () => {
+      try {
+        setIsLoading(true);
+        console.log('🔍 [MEMBERS DEBUG] Fetching league standings for leagueId:', leagueId);
+        const data = await leagueAPI.getLeagueStandings(leagueId);
+        
+        console.log('📊 [MEMBERS DEBUG] Raw standings response:', data);
+        console.log('📊 [MEMBERS DEBUG] Standings array:', data.standings);
+        
+        // Transform standings data to member format
+        // Backend now includes isAdmin in standings response
+        const membersData = (data.standings || []).map((standing, index) => {
+          console.log(`👤 [MEMBERS DEBUG] Processing member ${index + 1}:`, {
+            id: standing.id,
+            displayName: standing.displayName,
+            isAdmin: standing.isAdmin,
+            isAdminType: typeof standing.isAdmin,
+            rawStanding: standing
+          });
+          
+          return {
+            id: standing.id,
+            name: standing.displayName,
+            username: standing.username,
+            joinedDate: standing.joinedAt,
+            points: standing.points,
+            predictions: standing.predictions,
+            isAdmin: standing.isAdmin, // Now provided by backend
+            email: standing.email || null
+          };
+        });
+        
+        console.log('🎯 [MEMBERS DEBUG] Transformed members data:', membersData);
+        console.log('🎯 [MEMBERS DEBUG] Admin members:', membersData.filter(m => m.isAdmin));
+        console.log('🎯 [MEMBERS DEBUG] Regular members:', membersData.filter(m => !m.isAdmin));
+        
+        setMembers(membersData);
+      } catch (error) {
+        console.error('❌ [MEMBERS DEBUG] Failed to fetch members:', error);
+        showToast('Failed to load members', 'error');
+        // Fall back to empty array on error
+        setMembers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (leagueId) {
+      fetchMembers();
+    }
   }, [leagueId]);
 
   const handleCopyInviteCode = () => {
-    navigator.clipboard.writeText(league.inviteCode);
+    navigator.clipboard.writeText(league.joinCode);
     showToast('Invite code copied to clipboard!', 'success');
   };
 
-  const handleSaveSettings = () => {
-    setIsLoading(true);
-    // Mock API call
-    setTimeout(() => {
-      setIsLoading(false);
+  const handleSaveSettings = async () => {
+    try {
+      setIsLoading(true);
+      await leagueAPI.updateLeague(leagueId, {
+        name: nameInput,
+        description: descriptionInput
+      });
       showToast('League settings updated successfully!', 'success');
-    }, 800);
+      // Refresh leagues list to update the data in parent components
+      if (onRefreshLeagues) {
+        onRefreshLeagues();
+      }
+    } catch (error) {
+      console.error('Failed to update league:', error);
+      showToast(`Failed to update league: ${error.message}`, 'error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRemoveMember = (memberId) => {
-    setMembers(members.filter(member => member.id !== memberId));
-    showToast('Member removed from league', 'success');
+  const handleRemoveMember = async (memberId) => {
+    try {
+      await leagueAPI.removeMember(leagueId, memberId);
+      setMembers(members.filter(member => member.id !== memberId));
+      showToast('Member removed from league', 'success');
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+      showToast(`Failed to remove member: ${error.message}`, 'error');
+    }
   };
 
-  const handlePromoteToAdmin = (memberId) => {
-    setMembers(members.map(member => 
-      member.id === memberId ? {...member, isAdmin: true} : member
-    ));
-    showToast('Member promoted to admin', 'success');
+  const handlePromoteToAdmin = async (memberId) => {
+    try {
+      await leagueAPI.promoteMember(leagueId, memberId);
+      setMembers(members.map(member => 
+        member.id === memberId ? {...member, isAdmin: true} : member
+      ));
+      showToast('Member promoted to admin', 'success');
+    } catch (error) {
+      console.error('Failed to promote member:', error);
+      showToast(`Failed to promote member: ${error.message}`, 'error');
+    }
   };
 
-  const handleDeleteLeague = () => {
+  const handleDeleteLeague = async () => {
     if (confirmDelete) {
       setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
+      try {
+        await leagueAPI.deleteLeague(leagueId);
         showToast('League deleted successfully', 'success');
+        // Refresh the leagues list to remove the deleted league
+        if (onRefreshLeagues) {
+          onRefreshLeagues();
+        }
         onBack();
-      }, 1000);
+      } catch (error) {
+        console.error('Failed to delete league:', error);
+        showToast(`Failed to delete league: ${error.message}`, 'error');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setConfirmDelete(true);
       setTimeout(() => setConfirmDelete(false), 5000);
@@ -142,13 +216,6 @@ const LeagueManagementView = ({ leagueId, onBack }) => {
         }`} />
         <div className="relative p-6">
           <div className="flex items-center gap-4">
-            <div className={`p-3 ${
-              theme === "dark"
-                ? "bg-amber-500/10 border-amber-500/20"
-                : "bg-amber-50 border-amber-200"
-            } rounded-2xl border`}>
-              {/* <Crown1Icon className="w-8 h-8 text-amber-400" /> */}
-            </div>
             <div>
               <h1 className={`text-2xl font-bold ${text.primary[theme]} font-outfit mb-1`}>
                 League Management
@@ -174,8 +241,7 @@ const LeagueManagementView = ({ leagueId, onBack }) => {
       >
         {[
           { id: 'members', label: 'Members', icon: PersonIcon },
-          { id: 'settings', label: 'Settings', icon: GearIcon },
-          { id: 'danger', label: 'Danger Zone', icon: ExclamationTriangleIcon }
+          { id: 'settings', label: 'Settings', icon: GearIcon }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -221,18 +287,10 @@ const LeagueManagementView = ({ leagueId, onBack }) => {
               setNameInput={setNameInput}
               descriptionInput={descriptionInput}
               setDescriptionInput={setDescriptionInput}
-              typeInput={typeInput}
-              setTypeInput={setTypeInput}
               onSave={handleSaveSettings}
               isLoading={isLoading}
-            />
-          )}
-          
-          {activeTab === 'danger' && (
-            <DangerZoneContent
               onDeleteLeague={handleDeleteLeague}
               confirmDelete={confirmDelete}
-              isLoading={isLoading}
             />
           )}
         </AnimatePresence>
@@ -272,7 +330,7 @@ const MembersContent = ({ members, league, onRemoveMember, onPromoteToAdmin, onC
             <span className={`${text.secondary[theme]} text-sm font-outfit`}>Invite Code:</span>
             <span className={`${
               theme === "dark" ? "text-amber-400" : "text-amber-600"
-            } font-mono font-medium text-lg`}>{league.inviteCode}</span>
+            } font-mono font-medium text-lg`}>{league.joinCode}</span>
             <button 
               onClick={onCopyInviteCode} 
               className={`${
@@ -285,16 +343,6 @@ const MembersContent = ({ members, league, onRemoveMember, onPromoteToAdmin, onC
               <CopyIcon className="w-4 h-4" />
             </button>
           </div>
-            <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`${buttons.primary[theme]} px-4 py-2 rounded-xl text-sm font-medium font-outfit flex items-center gap-2 shadow-lg ${
-              theme === "dark" ? "shadow-amber-600/20" : "shadow-amber-600/10"
-            }`}
-          >
-            <PlusIcon className="w-4 h-4" />
-            Invite Member
-          </motion.button>
         </div>
       </div>
     </div>
@@ -339,7 +387,17 @@ const MembersContent = ({ members, league, onRemoveMember, onPromoteToAdmin, onC
                   <span className="font-outfit">{format(new Date(member.joinedDate), 'MMM d, yyyy')}</span>
                 </div>
               </td>              <td className="px-6 py-4">
-                {member.isAdmin ? (
+                {(() => {
+                  console.log(`🎭 [ROLE DEBUG] Member ${member.name}:`, {
+                    id: member.id,
+                    isAdmin: member.isAdmin,
+                    isAdminType: typeof member.isAdmin,
+                    isAdminValue: member.isAdmin,
+                    truthyCheck: !!member.isAdmin,
+                    member: member
+                  });
+                  return member.isAdmin;
+                })() ? (
                   <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium font-outfit ${
                     theme === "dark"
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
@@ -374,7 +432,7 @@ const MembersContent = ({ members, league, onRemoveMember, onPromoteToAdmin, onC
                       } rounded-lg transition-colors`}
                       title="Promote to admin"
                     >
-                      {/* <ShieldIcon className="w-4 h-4" /> */}
+                      <DoubleArrowUpIcon className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => onRemoveMember(member.id)}
@@ -404,10 +462,10 @@ const SettingsContent = ({
   setNameInput, 
   descriptionInput, 
   setDescriptionInput, 
-  typeInput, 
-  setTypeInput, 
   onSave, 
-  isLoading 
+  isLoading,
+  onDeleteLeague,
+  confirmDelete
 }) => {
   const { theme } = useContext(ThemeContext);
   
@@ -459,89 +517,6 @@ const SettingsContent = ({
             placeholder="Describe your league..."
           />
         </div>        
-        <div>
-          <label className={`block text-sm font-medium ${text.secondary[theme]} mb-3 font-outfit`}>
-            League Visibility
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <label className="relative cursor-pointer">
-              <input
-                type="radio"
-                value="private"
-                checked={typeInput === 'private'}
-                onChange={() => setTypeInput('private')}
-                className="sr-only"
-              />
-              <div className={`p-4 rounded-xl border-2 transition-all ${
-                typeInput === 'private'
-                  ? `border-amber-500 ${
-                      theme === "dark" ? "bg-amber-500/10" : "bg-amber-50"
-                    }`
-                  : `${
-                      theme === "dark"
-                        ? "border-slate-600/50 bg-slate-700/30 hover:border-slate-500/50"
-                        : "border-slate-200 bg-slate-50 hover:border-slate-300"
-                    }`
-              }`}>
-                <div className="flex items-center gap-3">
-                  <EyeClosedIcon className={`w-5 h-5 ${
-                    typeInput === 'private' 
-                      ? (theme === "dark" ? 'text-amber-400' : 'text-amber-600')
-                      : text.muted[theme]
-                  }`} />
-                  <div>
-                    <div className={`font-medium font-outfit ${
-                      typeInput === 'private' 
-                        ? (theme === "dark" ? 'text-amber-400' : 'text-amber-600')
-                        : text.primary[theme]
-                    }`}>
-                      Private
-                    </div>
-                    <div className={`text-sm font-outfit ${text.muted[theme]}`}>Invite only</div>
-                  </div>
-                </div>
-              </div>
-            </label>            
-            <label className="relative cursor-pointer">
-              <input
-                type="radio"
-                value="public"
-                checked={typeInput === 'public'}
-                onChange={() => setTypeInput('public')}
-                className="sr-only"
-              />
-              <div className={`p-4 rounded-xl border-2 transition-all ${
-                typeInput === 'public'
-                  ? `border-amber-500 ${
-                      theme === "dark" ? "bg-amber-500/10" : "bg-amber-50"
-                    }`
-                  : `${
-                      theme === "dark"
-                        ? "border-slate-600/50 bg-slate-700/30 hover:border-slate-500/50"
-                        : "border-slate-200 bg-slate-50 hover:border-slate-300"
-                    }`
-              }`}>
-                <div className="flex items-center gap-3">
-                  <PersonIcon className={`w-5 h-5 ${
-                    typeInput === 'public' 
-                      ? (theme === "dark" ? 'text-amber-400' : 'text-amber-600')
-                      : text.muted[theme]
-                  }`} />
-                  <div>
-                    <div className={`font-medium font-outfit ${
-                      typeInput === 'public' 
-                        ? (theme === "dark" ? 'text-amber-400' : 'text-amber-600')
-                        : text.primary[theme]
-                    }`}>
-                      Public
-                    </div>
-                    <div className={`text-sm font-outfit ${text.muted[theme]}`}>Anyone can join</div>
-                  </div>
-                </div>
-              </div>
-            </label>
-          </div>
-        </div>
           <div className="flex justify-end pt-4">
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -564,110 +539,76 @@ const SettingsContent = ({
               </>
             )}          </motion.button>
         </div>
-      </div>
-    </div>
-  </motion.div>
-  );
-};
-
-const DangerZoneContent = ({ onDeleteLeague, confirmDelete, isLoading }) => {
-  const { theme } = useContext(ThemeContext);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className={`${
-        theme === "dark"
-          ? "bg-slate-800/30 border-slate-700/50"
-          : "bg-white border-slate-200"
-      } backdrop-blur-sm border rounded-2xl overflow-hidden shadow-sm`}
-    >    <div className={`bg-gradient-to-r from-red-500/10 to-red-600/10 border-b ${
-      theme === "dark" ? "border-red-500/20" : "border-red-200"
-    } p-6`}>
-      <div className="flex items-center gap-3">
-        <div className={`p-2 ${
-          theme === "dark"
-            ? "bg-red-500/10 border-red-500/20"
-            : "bg-red-50 border-red-200"
-        } rounded-xl border`}>
-          <ExclamationTriangleIcon className={`w-6 h-6 ${
-            theme === "dark" ? "text-red-400" : "text-red-500"
-          }`} />
-        </div>
-        <div>
-          <h2 className={`text-xl font-semibold ${text.primary[theme]} mb-1 font-outfit`}>Danger Zone</h2>
-          <p className={`${text.secondary[theme]} text-sm font-outfit`}>Irreversible and destructive actions</p>
-        </div>
-      </div>
-    </div>    
-    <div className="p-6">
-      <div className="max-w-2xl">
-        <div className={`${
-          theme === "dark"
-            ? "bg-red-500/5 border-red-500/20"
-            : "bg-red-50 border-red-200"
-        } border rounded-xl p-6`}>
-          <div className="flex items-start gap-4">
-            <div className={`p-2 ${
-              theme === "dark"
-                ? "bg-red-500/10"
-                : "bg-red-100"
-            } rounded-lg`}>
-              <TrashIcon className={`w-5 h-5 ${
-                theme === "dark" ? "text-red-400" : "text-red-500"
-              }`} />
-            </div>
-            <div className="flex-1">
-              <h3 className={`text-lg font-semibold ${text.primary[theme]} mb-2 font-outfit`}>Delete League</h3>
-              <p className={`${text.secondary[theme]} text-sm mb-4 font-outfit`}>
-                Once you delete this league, there is no going back. All predictions, member data, 
-                and league history will be permanently removed from our servers.
-              </p>              
-              <div className="flex items-center gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onDeleteLeague}
-                  disabled={isLoading}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium font-outfit transition-all ${
-                    confirmDelete
-                      ? `${status.error[theme]} shadow-lg ${
-                          theme === "dark" ? "shadow-red-600/20" : "shadow-red-600/10"
-                        }`
-                      : `${
-                          theme === "dark"
-                            ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
-                            : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
-                        } border`
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span className="font-outfit">Deleting...</span>
-                    </>
-                  ) : confirmDelete ? (
-                    <>
-                      <CheckIcon className="w-4 h-4" />
-                      <span className="font-outfit">Confirm Delete</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrashIcon className="w-4 h-4" />
-                      <span className="font-outfit">Delete League</span>
-                    </>
-                  )}
-                </motion.button>
+        
+        {/* Danger Zone Section */}
+        <div className="pt-8 mt-8 border-t border-slate-200 dark:border-slate-700">
+          <div className={`${
+            theme === "dark"
+              ? "bg-red-500/5 border-red-500/20"
+              : "bg-red-50 border-red-200"
+          } border rounded-xl p-6`}>
+            <div className="flex items-start gap-4">
+              <div className={`p-2 ${
+                theme === "dark"
+                  ? "bg-red-500/10"
+                  : "bg-red-100"
+              } rounded-lg`}>
+                <TrashIcon className={`w-5 h-5 ${
+                  theme === "dark" ? "text-red-400" : "text-red-500"
+                }`} />
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-lg font-semibold ${text.primary[theme]} mb-2 font-outfit`}>Danger Zone</h3>
+                <p className={`${text.secondary[theme]} text-sm mb-4 font-outfit`}>
+                  Once you delete this league, there is no going back. All predictions, member data, 
+                  and league history will be permanently removed from our servers.
+                </p>
                 
-                {confirmDelete && !isLoading && (
-                  <span className={`${
-                    theme === "dark" ? "text-red-400" : "text-red-500"
-                  } text-sm animate-pulse font-outfit`}>
-                    Click again to confirm deletion
-                  </span>
-                )}              </div>
+                <div className="flex items-center gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={onDeleteLeague}
+                    disabled={isLoading}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium font-outfit transition-all ${
+                      confirmDelete
+                        ? `${status.error[theme]} shadow-lg ${
+                            theme === "dark" ? "shadow-red-600/20" : "shadow-red-600/10"
+                          }`
+                        : `${
+                            theme === "dark"
+                              ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
+                              : "bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
+                          } border`
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="font-outfit">Deleting...</span>
+                      </>
+                    ) : confirmDelete ? (
+                      <>
+                        <CheckIcon className="w-4 h-4" />
+                        <span className="font-outfit">Confirm Delete</span>
+                      </>
+                    ) : (
+                      <>
+                        <TrashIcon className="w-4 h-4" />
+                        <span className="font-outfit">Delete League</span>
+                      </>
+                    )}
+                  </motion.button>
+                  
+                  {confirmDelete && !isLoading && (
+                    <span className={`${
+                      theme === "dark" ? "text-red-400" : "text-red-500"
+                    } text-sm animate-pulse font-outfit`}>
+                      Click again to confirm deletion
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

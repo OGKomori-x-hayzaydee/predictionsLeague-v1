@@ -2,37 +2,19 @@ import { useContext } from "react";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { getThemeStyles } from "../../../utils/themeUtils";
 import { LightningBoltIcon } from "@radix-ui/react-icons";
+import { CHIP_CONFIG } from "../../../utils/chipManager";
 
-const availableChips = [
-  {
-    id: "doubleDown",
-    name: "Double Down",
-    description: "Double all points earned from this match",
-    icon: "2x",
-    color: "emerald"
-  },
-  {
-    id: "wildcard",
-    name: "Wildcard", 
-    description: "Triple all points earned from this match",
-    icon: "3x",
-    color: "purple"
-  },
-  {
-    id: "opportunist",
-    name: "Opportunist",
-    description: "Change predictions up to 30 min before kickoff",
-    icon: "⏱️",
-    color: "amber"
-  },
-  {
-    id: "scorerFocus",
-    name: "Scorer Focus",
-    description: "Double all points from goalscorer predictions",
-    icon: "⚽",
-    color: "sky"
-  },
-];
+// Convert CHIP_CONFIG to availableChips format for display
+// Only show match-scoped chips (doubleDown, wildcard, scorerFocus)
+const availableChips = Object.values(CHIP_CONFIG)
+  .filter(chip => ['doubleDown', 'wildcard', 'scorerFocus'].includes(chip.id))
+  .map(chip => ({
+    id: chip.id,
+    name: chip.name,
+    description: chip.description,
+    icon: chip.icon,
+    color: chip.color === 'teal' ? 'emerald' : chip.color === 'green' ? 'sky' : chip.color
+  }));
 
 export default function ChipsSummary({ selectedChips }) {
   const { theme } = useContext(ThemeContext);

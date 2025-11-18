@@ -2,17 +2,15 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import StatusBar from "../components/layout/StatusBar";
+import StatusBarOption1 from "../components/layout/StatusBarOption1";
+import StatusBarOption2 from "../components/layout/StatusBarOption2";
+import StatusBarOption3 from "../components/layout/StatusBarOption3";
 import VerticalMenu from "../components/layout/VerticalMenu";
 import ContentPane from "../components/layout/ContentPane";
+import BottomTabBar from "../components/layout/BottomTabBar";
 import { Box } from "@radix-ui/themes";
 import { ThemeContext } from "../context/ThemeContext";
-
-// Import from centralized data file
-import {
-  upcomingMatches,
-  recentPredictions,
-  leagues,
-} from "../data/sampleData";
+import useDashboardData from "../hooks/useDashboardData";
 
 import {
   HamburgerMenuIcon,
@@ -26,24 +24,21 @@ export default function Home() {
   const navigate = useNavigate();
 
   const { theme } = useContext(ThemeContext);
-  
-  // Add debugging for OAuth redirect detection
-  useEffect(() => {
-    console.log('🏠 Home page loaded:', {
-      view,
-      currentPath: window.location.pathname,
-      referrer: document.referrer
-    });
-    
-    // Check if this is an inappropriate OAuth redirect
-    if (document.referrer && document.referrer.includes('google')) {
-      console.log('🚨 CRITICAL: OAuth redirected to Home instead of /auth/oauth/callback!');
-      console.log('🚨 This means your backend OAuth success handler is misconfigured');
-      console.log('🚨 Backend should redirect to: http://localhost:5173/auth/oauth/callback');
-      console.log('🚨 But instead redirected to:', window.location.href);
-    }
-  }, [view]);
-  
+
+  // Get dashboard data using the hook - available across all views
+  const {
+    essentialData,
+    essentialLoading,
+    statusBarData,
+    statusBarLoading,
+    upcomingMatches: apiUpcomingMatches,
+    recentPredictions: apiRecentPredictions,
+    leagues: apiLeagues,
+    secondaryLoading,
+    errors,
+    refreshLeagues,
+  } = useDashboardData();
+
   // Valid views
   const validViews = [
     "dashboard",
@@ -61,12 +56,12 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [navigationParams, setNavigationParams] = useState({});
-  
+
   // navigateToSection function to change the active item
   const navigateToSection = (section, params = {}) => {
     // Navigate to the section
     navigate(`/home/${section}`);
-    
+
     // Store additional parameters for the ContentPane to handle
     setNavigationParams(params);
   };
@@ -108,7 +103,7 @@ export default function Home() {
   };
 
   return (
-    <Box className="relative overflow-hidden bg-primary-500 min-h-screen">
+    <Box className="relative overflow-hidden bg-primary-500 h-screen">
       {/* Background elements */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.div
@@ -160,24 +155,15 @@ export default function Home() {
         {/* Content Area*/}
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           {" "}
-          {/* Mobile Menu (only shown on small screens) */}
-          <div className="md:hidden w-full bg-primary-500/90 backdrop-blur-md border-b border-primary-400/20 px-4 py-3">
-            <select
-              value={activeItem}
-              onChange={(e) => navigateToSection(e.target.value)}
-              className="bg-primary-600/60 text-white font-outfit border border-primary-400/30 rounded-md px-3 py-2 w-full"
-            >
-              <option value="dashboard">Dashboard</option>
-              <option value="profile">My Profile</option>
-              <option value="predictions">My Predictions</option>
-              <option value="fixtures">Fixtures</option>
-              <option value="leagues">My Leagues</option>
-              <option value="settings">Settings</option>
-            </select>
-          </div>
+          {/* Status Bar - now full width on mobile */}
           {/* Status Bar moved inside content area */}
-          <StatusBar
-           onMakePredictions={() => navigateToSection("predictions")} 
+          {/* Testing StatusBar Options - Change component to test different designs */}
+          <StatusBarOption3
+            user={statusBarData.user}
+            globalRank={essentialData?.stats?.globalRank}
+            nextMatchData={statusBarData.nextMatchData}
+            loading={statusBarLoading}
+            onMakePredictions={() => navigateToSection("fixtures")}
           />
           {/* Breadcrumb & Search Bar */}
           <div
@@ -208,16 +194,14 @@ export default function Home() {
                 >
                   Home
                 </span>
-                <ChevronRightIcon className={`${
-                    theme === "dark"
-                      ? "text-teal-300"
-                      : " text-teal-700"
-                  } mx-1`}/>
+                <ChevronRightIcon
+                  className={`${
+                    theme === "dark" ? "text-teal-300" : " text-teal-700"
+                  } mx-1`}
+                />
                 <span
                   className={`${
-                    theme === "dark"
-                      ? "text-teal-300"
-                      : " text-teal-700"
+                    theme === "dark" ? "text-teal-300" : " text-teal-700"
                   } font-medium`}
                 >
                   {getBreadcrumbTitle()}
@@ -268,15 +252,34 @@ export default function Home() {
                   <div className="w-3 h-3 bg-teal-400 rounded-full animate-bounce"></div>
                 </div>
               </div>
-            ) : null}            <ContentPane
-              activeItem={activeItem}
-              navigateToSection={navigateToSection}
-              navigationParams={navigationParams}
-              upcomingMatches={upcomingMatches}
-              recentPredictions={recentPredictions}
-              leagues={leagues}
-            />
+            ) : null}{" "}
+            <div className="h-full pb-16 md:pb-0 overflow-hidden">
+              <ContentPane
+                activeItem={activeItem}
+                navigateToSection={navigateToSection}
+                navigationParams={navigationParams}
+                // Pass dashboard data to ContentPane
+                dashboardData={{
+                  essentialData,
+                  essentialLoading,
+                  upcomingMatches: apiUpcomingMatches,
+                  recentPredictions: apiRecentPredictions,
+                  leagues: apiLeagues,
+                  secondaryLoading,
+                  errors,
+                  refreshLeagues,
+                }}
+              />
+            </div>
           </div>
+        </div>
+        
+        {/* Bottom Tab Bar - Mobile Only */}
+        <div className="md:hidden">
+          <BottomTabBar 
+            activeItem={activeItem} 
+            setActiveItem={navigateToSection}
+          />
         </div>
       </div>
     </Box>

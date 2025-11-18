@@ -2,11 +2,11 @@ import React, { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusIcon, MinusIcon } from "@radix-ui/react-icons";
 import { getTeamPredictionStats } from "../../utils/predictionUtils";
-import SimplePredictionCard from "./SimplePredictionCard";
-import { normalizeTeamName, getTeamLogo } from "../../utils/teamUtils";
-import { getLogoUrl } from "../../utils/logoCache";
-import { teamLogos } from "../../data/sampleData";
+import { normalizeTeamName } from "../../utils/teamUtils";
 import { ThemeContext } from "../../context/ThemeContext";
+import TeamLogo from "../ui/TeamLogo";
+import { LOGO_SIZES } from "../../utils/teamLogos";
+import PredictionCard from "./PredictionCard";
 
 const PredictionTeamPanel = ({
   team,
@@ -15,40 +15,13 @@ const PredictionTeamPanel = ({
   onToggle,
   onPredictionSelect,
   onPredictionEdit,
+  cardStyle = "normal"
 }) => {
   const { theme } = useContext(ThemeContext);
   const stats = getTeamPredictionStats(predictions);
 
-  // Handle team logo with better caching and fallbacks
-  const getTeamLogoSrc = (teamName) => {
-    // Use the getLogoUrl helper first to try all variants with context logos
-    if (teamLogos) {
-      const logoUrl = getLogoUrl(teamName, teamLogos, normalizeTeamName);
-
-      // If we got a non-placeholder logo, use it
-      if (!logoUrl.includes("placeholder")) {
-        return logoUrl;
-      }
-    }
-
-    // Fall back to the utility function which uses local assets
-    const logo = getTeamLogo(teamName);
-
-    // Debug logging
-    if (logo.includes("placeholder")) {
-      console.log(
-        `No logo found for ${teamName} in either context or local assets`
-      );
-      if (teamLogos) {
-        console.log(
-          "Available logo team names:",
-          Object.keys(teamLogos).sort().join(", ")
-        );
-      }
-    }
-
-    return logo;
-  };
+  // Team logos now handled by TeamLogo component - no custom function needed
+  const normalizedTeamName = normalizeTeamName(team);
 
   return (
     <div
@@ -58,83 +31,75 @@ const PredictionTeamPanel = ({
           : "bg-white border-gray-200 shadow-sm"
       }`}
     >
-      {/* Team header - clickable */}
+      {/* Team Header */}
       <div
-        className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
-          theme === "dark" ? "bg-slate-900/60" : "hover:bg-gray-50"
+        className={`flex items-center justify-between p-2 sm:p-3 cursor-pointer transition-colors ${
+          theme === "dark" ? "bg-slate-900/60 hover:bg-slate-700/30" : "hover:bg-gray-50"
         }`}
-        onClick={() => onToggle(team)}
+        onClick={() => onToggle && onToggle(team)}
       >
-        <div className="flex items-center">
-          <img
-            src={getTeamLogoSrc(team)}
-            alt={team}
-            className="w-8 h-8 object-contain mr-3"
+        <div className="flex items-center gap-2 sm:gap-3">
+          <TeamLogo 
+            teamName={team} 
+            size={LOGO_SIZES.sm}
+            className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0"
           />
-          <div>
-            <h3
-              className={`font-medium ${
-                theme === "dark" ? "text-white" : "text-gray-900"
-              }`}
-            >
+          <div className="min-w-0">
+            <h3 className={`font-medium text-xs sm:text-sm ${
+              theme === "dark" ? "text-white" : "text-gray-900"
+            }`}>
               {team}
             </h3>
-            <div
-              className={`text-xs ${
-                theme === "dark" ? "text-white/60" : "text-gray-500"
-              }`}
-            >
-              {predictions.length} prediction
-              {predictions.length !== 1 ? "s" : ""}
+            <div className={`text-2xs sm:text-xs ${
+              theme === "dark" ? "text-white/70" : "text-gray-600"
+            }`}>
+              {stats.total} prediction{stats.total !== 1 ? 's' : ''}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          {/* Accuracy Progress Bar */}
-          <div
-            className={`w-20 rounded-full h-1.5 overflow-hidden ${
-              theme === "dark" ? "bg-slate-800/60" : "bg-gray-200"
-            }`}
-          >
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Progress Bar */}
+          <div className={`w-12 sm:w-20 rounded-full h-1 sm:h-1.5 overflow-hidden ${
+            theme === "dark" ? "bg-slate-700/60" : "bg-gray-200"
+          }`}>
             <div
-              className="bg-emerald-500 h-full transition-all duration-300"
-              style={{ width: `${stats.accuracy}%` }}
+              className="bg-teal-500 h-full transition-all duration-300"
+              style={{ width: `${stats.total > 0 ? (stats.completed / stats.total) * 100 : 0}%` }}
             ></div>
           </div>
           
           {/* Stats Display */}
-          <div className="flex flex-col items-end">
-            <div
-              className={`text-xs font-medium ${
-                theme === "dark" ? "text-white/90" : "text-gray-800"
-              }`}
-            >
-              {stats.accuracy}% accuracy
+          <div className="text-right">
+            <div className="flex items-baseline gap-0.5 sm:gap-1">
+              <span className={`text-sm sm:text-lg font-bold ${
+                theme === "dark" ? "text-teal-400" : "text-teal-600"
+              }`}>
+                {stats.totalPoints}
+              </span>
+              <span className={`text-2xs sm:text-sm font-medium ${
+                theme === "dark" ? "text-teal-500" : "text-teal-500"
+              }`}>
+                pts
+              </span>
             </div>
-            <div
-              className={`text-xs ${
-                theme === "dark" ? "text-white/60" : "text-gray-500"
-              }`}
-            >
-              {stats.correct}/{stats.correct + stats.incorrect} correct
+            <div className={`text-2xs sm:text-xs ${
+              theme === "dark" ? "text-white/60" : "text-gray-500"
+            }`}>
+              {stats.completed}/{stats.total} complete
             </div>
           </div>
           
           {/* Expand/Collapse Icon */}
           {isExpanded ? (
-            <MinusIcon
-              className={`w-4 h-4 ${theme === "dark" ? "text-white/60" : "text-gray-400"}`}
-            />
+            <MinusIcon className={`w-3 h-3 sm:w-4 sm:h-4 ${theme === "dark" ? "text-white/60" : "text-gray-400"}`} />
           ) : (
-            <PlusIcon
-              className={`w-4 h-4 ${theme === "dark" ? "text-white/60" : "text-gray-400"}`}
-            />
+            <PlusIcon className={`w-3 h-3 sm:w-4 sm:h-4 ${theme === "dark" ? "text-white/60" : "text-gray-400"}`} />
           )}
         </div>
       </div>
 
-      {/* Team predictions - collapsible */}
+      {/* Team Predictions - Expanded */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -147,78 +112,17 @@ const PredictionTeamPanel = ({
             }`}
           >
             <div className="p-4">
-              {/* Team Stats Overview */}
-              <div className={`mb-4 p-3 rounded-lg ${
-                theme === "dark" ? "bg-slate-800/60" : "bg-gray-50"
-              }`}>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className={`text-sm font-medium ${
-                    theme === "dark" ? "text-white" : "text-gray-900"
-                  }`}>
-                    Team Performance
-                  </h4>
-                </div>
-                <div className="grid grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className={`text-lg font-bold ${
-                      theme === "dark" ? "text-emerald-400" : "text-emerald-600"
-                    }`}>
-                      {stats.correct}
-                    </div>
-                    <div className={`text-xs ${
-                      theme === "dark" ? "text-white/60" : "text-gray-500"
-                    }`}>
-                      Correct
-                    </div>
-                  </div>
-                  <div>
-                    <div className={`text-lg font-bold ${
-                      theme === "dark" ? "text-red-400" : "text-red-600"
-                    }`}>
-                      {stats.incorrect}
-                    </div>
-                    <div className={`text-xs ${
-                      theme === "dark" ? "text-white/60" : "text-gray-500"
-                    }`}>
-                      Incorrect
-                    </div>
-                  </div>
-                  <div>
-                    <div className={`text-lg font-bold ${
-                      theme === "dark" ? "text-amber-400" : "text-amber-600"
-                    }`}>
-                      {stats.pending}
-                    </div>
-                    <div className={`text-xs ${
-                      theme === "dark" ? "text-white/60" : "text-gray-500"
-                    }`}>
-                      Pending
-                    </div>
-                  </div>
-                  <div>
-                    <div className={`text-lg font-bold ${
-                      theme === "dark" ? "text-blue-400" : "text-blue-600"
-                    }`}>
-                      {stats.completionRate}%
-                    </div>
-                    <div className={`text-xs ${
-                      theme === "dark" ? "text-white/60" : "text-gray-500"
-                    }`}>
-                      Complete
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               {/* Predictions Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {predictions.map((prediction) => (
-                  <SimplePredictionCard
+                  <PredictionCard
                     key={prediction.id}
                     prediction={prediction}
+                    mode="personal"
                     onSelect={onPredictionSelect}
                     onEdit={onPredictionEdit}
-                    teamLogos={teamLogos}
+                    isReadonly={false}
+                    size={cardStyle}
                   />
                 ))}
               </div>
@@ -231,3 +135,4 @@ const PredictionTeamPanel = ({
 };
 
 export default PredictionTeamPanel;
+

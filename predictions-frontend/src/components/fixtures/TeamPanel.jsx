@@ -2,7 +2,11 @@ import React, { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusIcon, MinusIcon } from "@radix-ui/react-icons";
 import { getPredictionStats } from "../../utils/fixtureUtils";
-import FixtureCard from "./FixtureCard";
+// Try each one:
+
+import FixtureCard from "./FixtureCardOption2"; // Split panel
+// import FixtureCard3 from "./FixtureCardOption3"; // Compact list
+
 import { normalizeTeamName, getTeamLogo } from "../../utils/teamUtils";
 import { getLogoUrl } from "../../utils/logoCache";
 import { teamLogos } from "../../data/sampleData";

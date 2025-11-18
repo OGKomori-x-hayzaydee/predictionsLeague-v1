@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
-import PredictionList from "./PredictionList";
+import PredictionGrid from "./PredictionGrid";
 import PredictionTable from "./PredictionTable";
 import PredictionCalendar from "./PredictionCalendar";
-import PredictionTimeline from "./PredictionTimeline";
 import PredictionStack from "./PredictionStack";
 import PredictionCarousel from "./PredictionCarousel";
 import PredictionsByTeam from "./PredictionsByTeam";
@@ -13,7 +12,8 @@ const PredictionContentView = ({
   onPredictionSelect, 
   onEditClick,
   teamLogos,
-  searchQuery 
+  searchQuery,
+  cardStyle = 'normal'
 }) => {
   return (
     <AnimatePresence mode="wait">
@@ -25,12 +25,13 @@ const PredictionContentView = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <PredictionList
+          <PredictionGrid
             predictions={predictions}
             onPredictionSelect={onPredictionSelect}
             onEditClick={onEditClick}
             teamLogos={teamLogos}
             searchQuery={searchQuery}
+            cardStyle={cardStyle}
           />
         </motion.div>
       )}
@@ -49,6 +50,7 @@ const PredictionContentView = ({
             onEditClick={onEditClick}
             teamLogos={teamLogos}
             searchQuery={searchQuery}
+            cardStyle={cardStyle}
           />
         </motion.div>
       )}
@@ -67,24 +69,7 @@ const PredictionContentView = ({
             onEditClick={onEditClick}
             teamLogos={teamLogos}
             searchQuery={searchQuery}
-          />
-        </motion.div>
-      )}
-
-      {viewMode === "timeline" && (
-        <motion.div
-          key="timeline"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <PredictionTimeline
-            predictions={predictions}
-            onPredictionSelect={onPredictionSelect}
-            onEditClick={onEditClick}
-            teamLogos={teamLogos}
-            searchQuery={searchQuery}
+            cardStyle={cardStyle}
           />
         </motion.div>
       )}
@@ -103,6 +88,7 @@ const PredictionContentView = ({
             onEditClick={onEditClick}
             teamLogos={teamLogos}
             searchQuery={searchQuery}
+            cardStyle={cardStyle}
           />
         </motion.div>
       )}      {viewMode === "carousel" && (
@@ -114,11 +100,14 @@ const PredictionContentView = ({
           transition={{ duration: 0.2 }}
         >
           <PredictionCarousel
+            mode="personal"
             predictions={predictions}
             onPredictionSelect={onPredictionSelect}
             onEditClick={onEditClick}
             teamLogos={teamLogos}
             searchQuery={searchQuery}
+            isReadOnly={false}
+            cardStyle={cardStyle}
           />
         </motion.div>
       )}
@@ -136,6 +125,7 @@ const PredictionContentView = ({
             onPredictionSelect={onPredictionSelect}
             onPredictionEdit={onEditClick}
             searchQuery={searchQuery}
+            cardStyle={cardStyle}
           />
         </motion.div>
       )}

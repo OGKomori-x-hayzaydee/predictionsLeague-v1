@@ -3,6 +3,8 @@ import { format, parseISO } from "date-fns";
 import { CaretSortIcon, CheckCircledIcon, LightningBoltIcon } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 import EmptyFixtureState from "./EmptyFixtureState";
+import { isPredictionDeadlinePassed } from "../../utils/dateUtils";
+import { showToast } from "../../services/notificationService";
 
 function FixtureTable({ fixtures, onFixtureSelect, searchQuery = "" }) {
   const { theme } = useContext(ThemeContext);
@@ -175,7 +177,13 @@ function FixtureTable({ fixtures, onFixtureSelect, searchQuery = "" }) {
                     ? "hover:bg-slate-800/50 border-slate-700/50"
                     : "hover:bg-slate-50 border-slate-200"
                 }`}
-                onClick={() => onFixtureSelect(fixture)}
+                onClick={() => {
+                  if (isPredictionDeadlinePassed(fixture.date)) {
+                    showToast('Deadline has passed for this match', 'error');
+                    return;
+                  }
+                  onFixtureSelect(fixture);
+                }}
               >
                 <td className="py-3 px-4">
                   <div className={`text-sm font-medium ${theme === "dark" ? "text-white" : "text-slate-800"}`}>

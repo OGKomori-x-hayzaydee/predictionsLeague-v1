@@ -2,12 +2,13 @@ import { useContext } from "react";
 import { motion } from "framer-motion";
 import { format, parseISO } from "date-fns";
 import { ClockIcon } from "@radix-ui/react-icons";
-import { getTeamLogo } from "../../utils/teamUtils";
 import { ThemeContext } from "../../context/ThemeContext";
+import { calculatePoints } from "../../utils/pointsCalculation";
+import TeamLogo from "../ui/TeamLogo";
+import { LOGO_SIZES } from "../../utils/teamLogos";
 
 const SimplePredictionCard = ({
   prediction,
-  teamLogos = {},
   selected = false,
   onClick,
   onEditClick,
@@ -15,10 +16,8 @@ const SimplePredictionCard = ({
   // Get theme context
   const { theme } = useContext(ThemeContext);
 
-  // Use getTeamLogo utility with fallback to context logos
-  const getLogoSrc = (teamName) => {
-    return teamLogos[teamName] || getTeamLogo(teamName);
-  };
+  // Calculate accurate points
+  const calculatedPoints = calculatePoints(prediction);
 
   const isPending = prediction.status === "pending";
   
@@ -53,10 +52,11 @@ const SimplePredictionCard = ({
         </div>
       </div>
       <div className="flex items-center">
-        <img
-          src={getLogoSrc(prediction.homeTeam)}
-          alt={prediction.homeTeam}
-          className="w-10 h-10 object-contain"
+        <TeamLogo
+          teamName={prediction.homeTeam}
+          size={LOGO_SIZES.md}
+          theme={theme}
+          className="flex-shrink-0"
         />
         <div className="mx-2 flex-grow">
           <div className="flex justify-between items-center">
@@ -103,10 +103,11 @@ const SimplePredictionCard = ({
             </span>
           </div>
         </div>
-        <img
-          src={getLogoSrc(prediction.awayTeam)}
-          alt={prediction.awayTeam}
-          className="w-10 h-10 object-contain"
+        <TeamLogo
+          teamName={prediction.awayTeam}
+          size={LOGO_SIZES.md}
+          theme={theme}
+          className="flex-shrink-0"
         />
       </div>
       <div className="mt-2 flex justify-between items-center">
@@ -115,7 +116,7 @@ const SimplePredictionCard = ({
             theme === "dark" ? "text-white/60" : "text-slate-500"
           }`}
         >
-          GW{prediction.gameweek || "36"} • {prediction.points ? `${prediction.points} pts` : "Pending"}
+          GW{prediction.gameweek || "36"} • {calculatedPoints !== null ? `${calculatedPoints} pts` : "Pending"}
         </div>
         <div className="flex items-center gap-2">
           {/* Status chip */}
@@ -137,22 +138,7 @@ const SimplePredictionCard = ({
             {isPending ? "Pending" : prediction.correct ? "Correct" : "Incorrect"}
           </div>
           
-          {/* Edit button for pending predictions */}
-          {isPending && onEditClick && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEditClick(prediction);
-              }}
-              className={`text-xs py-1 px-2 rounded ${
-                theme === "dark"
-                  ? "bg-indigo-900/30 text-indigo-300 hover:bg-indigo-900/50"
-                  : "bg-indigo-100 text-indigo-700 border border-indigo-200 hover:bg-indigo-200"
-              } transition-colors`}
-            >
-              Edit
-            </button>
-          )}
+
         </div>
       </div>
     </motion.div>

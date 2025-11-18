@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusIcon,
@@ -20,10 +20,9 @@ import LoadingState from "../common/LoadingState";
 import ErrorState from "../common/ErrorState";
 import SearchInput from "../common/SearchInput";
 import { ThemeContext } from "../../context/ThemeContext";
-import { text, buttons } from "../../utils/themeUtils";
+import { text, backgrounds, buttons } from "../../utils/themeUtils";
 
 const LeaguesView = ({ onViewLeague, onManageLeague }) => {
-  const [activeTab, setActiveTab] = useState("my-leagues");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joiningLeague, setJoiningLeague] = useState(false);
@@ -36,12 +35,27 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   // Use our custom hook to get league data and functions
   const {
     myLeagues,
-    featuredLeagues,
     isLoading,
     error,
     joinLeague,
-    joinFeaturedLeague,
   } = useLeagues();
+
+  // Component lifecycle logging
+  useEffect(() => {
+    console.log('LeaguesView mounted', { 
+      myLeaguesCount: myLeagues?.length || 0, 
+      isLoading,
+      hasError: !!error 
+    });
+  }, []);
+
+  // Log data changes
+  useEffect(() => {
+    console.log('LeaguesView myLeagues updated', { 
+      count: myLeagues?.length || 0, 
+      isLoading 
+    });
+  }, [myLeagues, isLoading]);
 
   // Filter leagues based on search query
   const filteredMyLeagues = myLeagues.filter(
@@ -50,58 +64,39 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
       league.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredFeaturedLeagues = featuredLeagues.filter(
-    (league) =>
-      league.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      league.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   // Handle joining a league with code
   const handleJoinWithCode = async () => {
     if (!leagueCode.trim()) {
+      console.warn('Join league attempted with empty code');
       showToast("Please enter a league code", "warning");
       return;
     }
 
+    console.log('Starting join league with code', { leagueCode });
     setJoiningLeague(true);
 
-    const result = await joinLeague(leagueCode);
-
-    if (result.success) {
-      showToast(result.message, "success");
+    try {
+      const league = await joinLeague(leagueCode);
+      console.log('Join league successful:', league);
       setLeagueCode("");
       setShowJoinModal(false);
-      setActiveTab("my-leagues");
-    } else {
-      showToast(result.message, "error");
+    } catch (error) {
+      console.error('Join league failed:', error);
+      // Error handling is done in the hook with toast
+    } finally {
+      setJoiningLeague(false);
     }
-
-    setJoiningLeague(false);
-  };
-
-  // Handle joining a featured league
-  const handleJoinFeaturedLeague = async (leagueId) => {
-    setJoiningLeague(true);
-
-    const result = await joinFeaturedLeague(leagueId);
-
-    if (result.success) {
-      showToast(result.message, "success");
-      setActiveTab("my-leagues");
-    } else {
-      showToast(result.message, "warning");
-    }
-
-    setJoiningLeague(false);
   };
 
   // Handle viewing league details
   const handleViewLeague = (leagueId) => {
+    console.log('Navigating to league details', { leagueId });
     onViewLeague(leagueId);
   };
 
   // Handle managing a league
   const handleManageLeague = (league) => {
+    console.log('Navigating to league management', { leagueId: league.id, leagueName: league.name });
     onManageLeague(league.id);
   };
 
@@ -111,12 +106,12 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   };
 
   // Loading state
-  if (isLoading && activeTab === "my-leagues") {
+  if (isLoading) {
     return <LoadingState message="Loading your leagues..." />;
   }
 
   // Error state
-  if (error && activeTab === "my-leagues") {
+  if (error) {
     return (
       <ErrorState error={error} onRetry={() => window.location.reload()} />
     );
@@ -194,73 +189,18 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Tab Navigation */}
-          <div
-            className={`flex ${
-              theme === "dark"
-                ? "bg-slate-800/50 border-slate-700/30"
-                : "bg-slate-100 border-slate-200"
-            } rounded-xl p-1 border`}
-          >
-            <button
-              onClick={() => setActiveTab("my-leagues")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-all duration-200 ${
-                activeTab === "my-leagues"
-                  ? `bg-teal-600 text-white shadow-lg ${
-                      theme === "dark"
-                        ? "shadow-teal-600/20"
-                        : "shadow-teal-600/10"
-                    }`
-                  : `${
-                      theme === "dark"
-                        ? "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
-                    }`
-              }`}
-            >
-              My Leagues
-            </button>
-            <button
-              onClick={() => setActiveTab("discover")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-all duration-200 ${
-                activeTab === "discover"
-                  ? `bg-teal-600 text-white shadow-lg ${
-                      theme === "dark"
-                        ? "shadow-teal-600/20"
-                        : "shadow-teal-600/10"
-                    }`
-                  : `${
-                      theme === "dark"
-                        ? "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
-                    }`
-              }`}
-            >
-              Discover
-            </button>
-          </div>
+          {/* No tabs needed - only My Leagues */}
         </div>
       </motion.div>
       {/* Content Section */}
-      <AnimatePresence mode="wait">
-        {activeTab === "my-leagues" ? (
-          <MyLeaguesContent
-            leagues={filteredMyLeagues}
-            isLoading={isLoading}
-            onViewLeague={handleViewLeague}
-            onManageLeague={handleManageLeague}
-            onCreateLeague={() => setShowCreateModal(true)}
-            onJoinLeague={() => setShowJoinModal(true)}
-          />
-        ) : (
-          <DiscoverContent
-            leagues={filteredFeaturedLeagues}
-            isLoading={isLoading}
-            onJoinLeague={handleJoinFeaturedLeague}
-            isJoining={joiningLeague}
-          />
-        )}
-      </AnimatePresence>{" "}
+      <MyLeaguesContent
+        leagues={filteredMyLeagues}
+        isLoading={isLoading}
+        onViewLeague={handleViewLeague}
+        onManageLeague={handleManageLeague}
+        onCreateLeague={() => setShowCreateModal(true)}
+        onJoinLeague={() => setShowJoinModal(true)}
+      />{" "}
       {/* Create League Modal */}
       <AnimatePresence>
         {showCreateModal && (
@@ -270,7 +210,6 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
               onSuccess={() => {
                 setShowCreateModal(false);
                 showToast("League created successfully!", "success");
-                setActiveTab("my-leagues");
               }}
             />
           </Modal>
@@ -370,32 +309,6 @@ const MyLeaguesContent = ({
           index={index}
           onView={() => onViewLeague(league.id)}
           onManage={() => onManageLeague(league)}
-        />
-      ))}
-    </motion.div>
-  );
-};
-
-// Discover Content Component
-const DiscoverContent = ({ leagues, isLoading, onJoinLeague, isJoining }) => {
-  if (isLoading) {
-    return <LoadingState message="Discovering leagues..." />;
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-    >
-      {leagues.map((league, index) => (
-        <FeaturedLeagueCard
-          key={league.id}
-          league={league}
-          index={index}
-          onJoin={() => onJoinLeague(league.id)}
-          isJoining={isJoining}
         />
       ))}
     </motion.div>
@@ -520,114 +433,6 @@ const LeagueCard = ({ league, index, onView, onManage }) => {
             </button>
           )}
         </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Featured League Card Component
-const FeaturedLeagueCard = ({ league, index, onJoin, isJoining }) => {
-  const { theme } = useContext(ThemeContext);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className={`group relative ${
-        theme === "dark"
-          ? "bg-slate-800/30 border-slate-700/50 hover:border-slate-600/60"
-          : "bg-white border-slate-200 shadow-sm hover:border-slate-300"
-      } backdrop-blur-sm border rounded-2xl p-6 transition-all duration-300 overflow-hidden font-outfit`}
-    >
-      {/* Background gradient */}
-      <div
-        className={`absolute inset-0 ${
-          theme === "dark"
-            ? "bg-gradient-to-br from-indigo-500/5 to-purple-500/5"
-            : "bg-gradient-to-br from-indigo-500/3 to-purple-500/3"
-        } opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-      />
-
-      <div className="relative">
-        {/* League Header */}
-        <div className="mb-4">
-          <h3
-            className={`text-lg font-semibold ${text.primary[theme]} mb-2 line-clamp-1 font-outfit`}
-          >
-            {league.name}
-          </h3>
-          <p
-            className={`text-sm ${text.secondary[theme]} line-clamp-2 font-outfit`}
-          >
-            {league.description}
-          </p>
-        </div>
-
-        {/* League Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <PersonIcon className={`w-4 h-4 ${text.muted[theme]}`} />
-              <span
-                className={`text-sm font-bold ${text.primary[theme]} font-outfit`}
-              >
-                {league.members}
-              </span>
-            </div>
-            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
-              Members
-            </span>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <StarIcon className={`w-4 h-4 ${text.muted[theme]}`} />
-              <span
-                className={`text-sm font-bold ${text.primary[theme]} font-outfit`}
-              >
-                {league.rating || "4.8"}
-              </span>
-            </div>
-            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
-              Rating
-            </span>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <span
-                className={`text-sm font-bold ${text.primary[theme]} font-outfit`}
-              >
-                {league.prize || "Free"}
-              </span>
-            </div>
-            <span className={`text-xs ${text.muted[theme]} font-outfit`}>
-              Prize
-            </span>
-          </div>
-        </div>
-
-        {/* Join Button */}
-        <button
-          onClick={onJoin}
-          disabled={isJoining}
-          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 ${
-            buttons.primary[theme]
-          } disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white text-sm font-medium font-outfit transition-all duration-200 shadow-lg ${
-            theme === "dark" ? "shadow-indigo-600/20" : "shadow-indigo-600/10"
-          }`}
-        >
-          {isJoining ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              Joining...
-            </>
-          ) : (
-            <>
-              <EnterIcon className="w-4 h-4" />
-              Join League
-            </>
-          )}
-        </button>
       </div>
     </motion.div>
   );

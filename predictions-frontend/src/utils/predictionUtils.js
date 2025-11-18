@@ -1,13 +1,30 @@
 import { format, parseISO } from "date-fns";
 
 /**
- * Groups predictions by date
+ * Groups predictions by fixture date
  * @param {Array} predictions - Array of prediction objects with date property
  * @returns {Object} - Object with dates as keys and arrays of predictions as values
  */
 export function groupPredictionsByDate(predictions) {
   return predictions.reduce((groups, prediction) => {
     const dateStr = format(parseISO(prediction.date), "yyyy-MM-dd");
+    if (!groups[dateStr]) {
+      groups[dateStr] = [];
+    }
+    groups[dateStr].push(prediction);
+    return groups;
+  }, {});
+}
+
+/**
+ * Groups predictions by when they were created (predictedAt)
+ * @param {Array} predictions - Array of prediction objects with predictedAt property
+ * @returns {Object} - Object with dates as keys and arrays of predictions as values
+ */
+export function groupPredictionsByPredictedDate(predictions) {
+  return predictions.reduce((groups, prediction) => {
+    // Use predictedAt if available, otherwise fall back to date
+    const dateStr = format(parseISO(prediction.predictedAt || prediction.date), "yyyy-MM-dd");
     if (!groups[dateStr]) {
       groups[dateStr] = [];
     }
@@ -73,12 +90,18 @@ export function getTeamPredictionStats(teamPredictions) {
   const correct = teamPredictions.filter(p => p.status === 'correct').length;
   const incorrect = teamPredictions.filter(p => p.status === 'incorrect').length;
   const pending = teamPredictions.filter(p => p.status === 'pending').length;
+  const completed = teamPredictions.filter(p => p.status !== 'pending').length;
+  const totalPoints = teamPredictions
+    .filter(p => p.points !== null && p.points !== undefined)
+    .reduce((sum, p) => sum + p.points, 0);
   
   return { 
     total,
     correct, 
     incorrect,
     pending,
+    completed,
+    totalPoints,
     accuracy: total > 0 ? Math.round((correct / (correct + incorrect)) * 100) : 0,
     completionRate: total > 0 ? Math.round(((correct + incorrect) / total) * 100) : 0
   };

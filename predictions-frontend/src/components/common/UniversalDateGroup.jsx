@@ -4,7 +4,7 @@ import { CalendarIcon } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 import { hasUnpredictedFixture } from "../../utils/fixtureUtils";
 import { hasPendingPrediction } from "../../utils/predictionUtils";
-import FixtureCard from "../fixtures/FixtureCard";
+import FixtureCard from "../fixtures/FixtureCardOption2";
 import SimplePredictionCard from "../predictions/SimplePredictionCard";
 
 /**

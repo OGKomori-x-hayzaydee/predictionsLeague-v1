@@ -1,25 +1,12 @@
-import arsenalLogo from "../assets/clubs/arsenal.png";
-import chelseaLogo from "../assets/clubs/chelsea.png";
-import liverpoolLogo from "../assets/clubs/liverpool.png";
-import manCityLogo from "../assets/clubs/mancity.png";
-import manUtdLogo from "../assets/clubs/manutd.png";
-import tottenhamLogo from "../assets/clubs/spurs.png";
+// Import the centralized team logo system
+import { getTeamLogo, LOCAL_LOGOS } from "../utils/teamLogos.js";
 
-// Team logos mapping
-export const teamLogos = {
-  Arsenal: arsenalLogo,
-  Chelsea: chelseaLogo,
-  Liverpool: liverpoolLogo,
-  "Man. City": manCityLogo,
-  "Man. United": manUtdLogo,
-  Spurs: tottenhamLogo,
-  "Manchester City": manCityLogo,
-  "Manchester United": manUtdLogo,
-};
+// Re-export for backwards compatibility
+export { getTeamLogo };
 
-export function getTeamLogo(team) {
-  return teamLogos[team] || `https://via.placeholder.com/40?text=${team.substring(0, 3)}`;
-}
+// Legacy teamLogos object for backwards compatibility
+// This uses the centralized logo system but maintains the old interface
+export const teamLogos = LOCAL_LOGOS;
 
 // Teams list for filtering
 export const teams = [
@@ -31,14 +18,14 @@ export const teams = [
   "Spurs"
 ];
 
-// Sample fixtures data - Only future fixtures (after today: May 28, 2025)
+// Sample fixtures data - Updated for current date context (October 12, 2025)
 export const fixtures = [
   {
     id: 1,
     gameweek: 38,
     homeTeam: "Arsenal",
     awayTeam: "Man. City",
-    date: "2025-05-30T16:00:00",
+    date: "2025-10-19T16:00:00",
     venue: "Emirates Stadium",
     competition: "Premier League",
     predicted: false,
@@ -48,7 +35,7 @@ export const fixtures = [
     gameweek: 38,
     homeTeam: "Spurs",
     awayTeam: "Chelsea",
-    date: "2025-05-30T16:00:00",
+    date: "2025-10-19T16:00:00",
     venue: "Tottenham Hotspur Stadium",
     competition: "Premier League",
     predicted: true,
@@ -58,7 +45,7 @@ export const fixtures = [
     gameweek: 38,
     homeTeam: "Liverpool",
     awayTeam: "Man. United",
-    date: "2025-05-30T16:00:00",
+    date: "2025-10-19T16:00:00",
     venue: "Anfield",
     competition: "Premier League",
     predicted: false,
@@ -68,7 +55,7 @@ export const fixtures = [
     gameweek: 39,
     homeTeam: "Chelsea",
     awayTeam: "Arsenal",
-    date: "2025-06-05T20:00:00",
+    date: "2025-10-26T20:00:00",
     venue: "Stamford Bridge",
     competition: "Premier League",
     predicted: false,
@@ -78,7 +65,7 @@ export const fixtures = [
     gameweek: 39,
     homeTeam: "Man. United",
     awayTeam: "Liverpool",
-    date: "2025-06-07T15:00:00",
+    date: "2025-10-26T15:00:00",
     venue: "Old Trafford",
     competition: "Premier League",
     predicted: true,
@@ -88,82 +75,13 @@ export const fixtures = [
     gameweek: 39,
     homeTeam: "Man. City",
     awayTeam: "Spurs",
-    date: "2025-06-08T17:30:00",
+    date: "2025-11-02T17:30:00",
     venue: "Etihad Stadium",
     competition: "Premier League",
     predicted: false,
   }
 ];
 
-// Sample match data for Matches.jsx
-export const matches = [
-  {
-    id: 1,
-    gameweek: 36,
-    homeTeam: "Arsenal",
-    awayTeam: "Spurs",
-    date: "2025-05-12T15:00:00",
-    venue: "Emirates Stadium",
-    predicted: true,
-    result: null, // null means match hasn't happened yet
-    status: "upcoming"
-  },
-  {
-    id: 2,
-    gameweek: 36,
-    homeTeam: "Manchester City",
-    awayTeam: "Manchester United",
-    date: "2025-05-12T17:30:00",
-    venue: "Etihad Stadium",
-    predicted: false,
-    result: null,
-    status: "upcoming"
-  },
-  {
-    id: 3,
-    gameweek: 35,
-    homeTeam: "Liverpool",
-    awayTeam: "Spurs",
-    date: "2025-05-04T16:30:00",
-    venue: "Anfield",
-    predicted: true,
-    result: { homeGoals: 2, awayGoals: 1 },
-    status: "completed"
-  },
-  {
-    id: 4,
-    gameweek: 35,
-    homeTeam: "Chelsea",
-    awayTeam: "Liverpool",
-    date: "2025-04-30T19:45:00",
-    venue: "Stamford Bridge",
-    predicted: false,
-    result: { homeGoals: 1, awayGoals: 3 },
-    status: "completed"
-  },
-  {
-    id: 5,
-    gameweek: 35,
-    homeTeam: "Manchester United",
-    awayTeam: "Arsenal",
-    date: "2025-05-05T20:00:00",
-    venue: "Old Trafford",
-    predicted: true,
-    result: { homeGoals: 1, awayGoals: 2 },
-    status: "completed"
-  },
-  {
-    id: 6,
-    gameweek: 35,
-    homeTeam: "Chelsea",
-    awayTeam: "Manchester City",
-    date: "2025-05-06T19:45:00",
-    venue: "Stamford Bridge",
-    predicted: true,
-    result: { homeGoals: 0, awayGoals: 0 },
-    status: "completed"
-  }
-];
 
 // Sample gameweeks for filters
 export const gameweeks = Array.from({ length: 38 }, (_, i) => i + 1);
@@ -188,7 +106,7 @@ export const predictions = [
     actualHomeScorers: ["Saka", "Martinelli"],
     actualAwayScorers: ["Son"],
     status: "completed",
-    chips: ["defensePlus"]
+    chips: ["defensePlusPlus"]
   },
   {
     id: 2,
@@ -228,7 +146,7 @@ export const predictions = [
     actualHomeScorers: ["Díaz", "Núñez"],
     actualAwayScorers: ["Haaland", "Foden"],
     status: "completed",
-    chips: ["doublePoints"]
+    chips: ["doubleDown"]
   },  {
     id: 4,
     matchId: 104,
@@ -340,6 +258,564 @@ export const recentPredictions = [
   { id: 1, match: "Man United 3-1 Liverpool", points: 12, correct: true },
   { id: 2, match: "Arsenal 2-1 Chelsea", points: 8, correct: true },
   { id: 3, match: "Man City 1-1 Spurs", points: 0, correct: false },
+];
+
+// Extended prediction history for insights analysis
+export const extendedPredictionHistory = [
+  // Gameweek 8 predictions
+  { id: 'p1', home_team: 'Arsenal', away_team: 'Liverpool', predicted_home_goals: 2, predicted_away_goals: 1, actual_home_goals: 2, actual_away_goals: 1, match_date: '2025-10-05T15:00:00Z', gameweek: 8 },
+  { id: 'p2', home_team: 'Manchester City', away_team: 'Chelsea', predicted_home_goals: 3, predicted_away_goals: 0, actual_home_goals: 4, actual_away_goals: 2, match_date: '2025-10-05T17:30:00Z', gameweek: 8 },
+  { id: 'p3', home_team: 'Manchester United', away_team: 'Tottenham', predicted_home_goals: 1, predicted_away_goals: 1, actual_home_goals: 0, actual_away_goals: 3, match_date: '2025-10-06T14:00:00Z', gameweek: 8 },
+  
+  // Gameweek 7 predictions  
+  { id: 'p4', home_team: 'Chelsea', away_team: 'Brighton', predicted_home_goals: 2, predicted_away_goals: 0, actual_home_goals: 2, actual_away_goals: 1, match_date: '2025-09-28T15:00:00Z', gameweek: 7 },
+  { id: 'p5', home_team: 'Liverpool', away_team: 'Wolves', predicted_home_goals: 3, predicted_away_goals: 1, actual_home_goals: 2, actual_away_goals: 1, match_date: '2025-09-28T17:30:00Z', gameweek: 7 },
+  { id: 'p6', home_team: 'Arsenal', away_team: 'Leicester', predicted_home_goals: 4, predicted_away_goals: 0, actual_home_goals: 4, actual_away_goals: 2, match_date: '2025-09-29T14:00:00Z', gameweek: 7 },
+  
+  // Gameweek 6 predictions
+  { id: 'p7', home_team: 'Tottenham', away_team: 'Brentford', predicted_home_goals: 2, predicted_away_goals: 1, actual_home_goals: 3, actual_away_goals: 1, match_date: '2025-09-21T15:00:00Z', gameweek: 6 },
+  { id: 'p8', home_team: 'Manchester City', away_team: 'Arsenal', predicted_home_goals: 1, predicted_away_goals: 2, actual_home_goals: 1, actual_away_goals: 2, match_date: '2025-09-21T17:30:00Z', gameweek: 6 },
+  { id: 'p9', home_team: 'Newcastle', away_team: 'Liverpool', predicted_home_goals: 0, predicted_away_goals: 2, actual_home_goals: 1, actual_away_goals: 0, match_date: '2025-09-22T14:00:00Z', gameweek: 6 },
+  
+  // Gameweek 5 predictions
+  { id: 'p10', home_team: 'Arsenal', away_team: 'Everton', predicted_home_goals: 3, predicted_away_goals: 0, actual_home_goals: 5, actual_away_goals: 1, match_date: '2025-09-14T15:00:00Z', gameweek: 5 },
+  { id: 'p11', home_team: 'Chelsea', away_team: 'West Ham', predicted_home_goals: 2, predicted_away_goals: 1, actual_home_goals: 3, actual_away_goals: 0, match_date: '2025-09-14T17:30:00Z', gameweek: 5 },
+  { id: 'p12', home_team: 'Manchester United', away_team: 'Crystal Palace', predicted_home_goals: 2, predicted_away_goals: 0, actual_home_goals: 0, actual_away_goals: 1, match_date: '2025-09-15T14:00:00Z', gameweek: 5 },
+  
+  // Gameweek 4 predictions 
+  { id: 'p13', home_team: 'Brighton', away_team: 'Manchester City', predicted_home_goals: 1, predicted_away_goals: 3, actual_home_goals: 1, actual_away_goals: 4, match_date: '2025-09-07T15:00:00Z', gameweek: 4 },
+  { id: 'p14', home_team: 'Liverpool', away_team: 'Bournemouth', predicted_home_goals: 3, predicted_away_goals: 0, actual_home_goals: 3, actual_away_goals: 0, match_date: '2025-09-07T17:30:00Z', gameweek: 4 },
+  { id: 'p15', home_team: 'Arsenal', away_team: 'Tottenham', predicted_home_goals: 2, predicted_away_goals: 1, actual_home_goals: 1, actual_away_goals: 0, match_date: '2025-09-08T14:00:00Z', gameweek: 4 },
+  
+  // Gameweek 3 predictions
+  { id: 'p16', home_team: 'Fulham', away_team: 'Arsenal', predicted_home_goals: 0, predicted_away_goals: 2, actual_home_goals: 0, actual_away_goals: 3, match_date: '2025-08-31T15:00:00Z', gameweek: 3 },
+  { id: 'p17', home_team: 'Manchester City', away_team: 'West Ham', predicted_home_goals: 3, predicted_away_goals: 1, actual_home_goals: 3, actual_away_goals: 1, match_date: '2025-08-31T17:30:00Z', gameweek: 3 },
+  { id: 'p18', home_team: 'Chelsea', away_team: 'Crystal Palace', predicted_home_goals: 1, predicted_away_goals: 1, actual_home_goals: 1, actual_away_goals: 1, match_date: '2025-09-01T14:00:00Z', gameweek: 3 },
+  
+  // Additional weekend vs weekday mix
+  { id: 'p19', home_team: 'Aston Villa', away_team: 'Everton', predicted_home_goals: 2, predicted_away_goals: 0, actual_home_goals: 2, actual_away_goals: 1, match_date: '2025-08-20T19:45:00Z', gameweek: 2 }, // Tuesday
+  { id: 'p20', home_team: 'Arsenal', away_team: 'Manchester United', predicted_home_goals: 2, predicted_away_goals: 0, actual_home_goals: 2, actual_away_goals: 0, match_date: '2025-08-17T16:30:00Z', gameweek: 2 }, // Sunday
+];
+
+// Sample league predictions data (for carousel testing)
+export const leaguePredictions = [
+  // Gameweek 15 - Match 1: Arsenal vs Chelsea
+  {
+    id: "lp1",
+    matchId: "m15-1",
+    userId: "user1",
+    userDisplayName: "John Smith",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 2,
+    awayScore: 1,
+    homeScorers: ["Saka", "Martinelli"],
+    awayScorers: ["Palmer"],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 8,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: ["doubleDown"],
+    predictedAt: "2025-09-14T10:30:00Z"
+  },
+  {
+    id: "lp2",
+    matchId: "m15-1",
+    userId: "user2", 
+    userDisplayName: "Sarah Johnson",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 1,
+    awayScore: 1,
+    homeScorers: ["Havertz"],
+    awayScorers: ["Palmer"],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 2,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: [],
+    predictedAt: "2025-09-14T14:15:00Z"
+  },
+  {
+    id: "lp3",
+    matchId: "m15-1",
+    userId: "user3",
+    userDisplayName: "Mike Wilson",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea", 
+    homeScore: 4,
+    awayScore: 2,
+    homeScorers: ["Saka", "Saka", "Martinelli", "Ødegaard"],
+    awayScorers: ["Palmer", "Palmer"],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 6,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed", 
+    chips: ["scorerFocus"],
+    predictedAt: "2025-09-13T18:45:00Z"
+  },
+
+  // Gameweek 15 - Match 2: Liverpool vs Man City
+  {
+    id: "lp4",
+    matchId: "m15-2",
+    userId: "user1",
+    userDisplayName: "John Smith",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 2,
+    awayScore: 2,
+    homeScorers: ["Salah", "Nunez"],
+    awayScorers: ["Haaland", "De Bruyne"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: [],
+    predictedAt: "2025-09-14T09:20:00Z"
+  },
+  {
+    id: "lp5",
+    matchId: "m15-2",
+    userId: "user2",
+    userDisplayName: "Sarah Johnson", 
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 3,
+    awayScore: 4,
+    homeScorers: ["Salah", "Salah", "Salah"],
+    awayScorers: ["Haaland", "Haaland", "Haaland", "Foden"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["wildcard"],
+    predictedAt: "2025-09-14T16:30:00Z"
+  },
+
+  // More predictions for Arsenal vs Chelsea to show carousel
+  {
+    id: "lp30",
+    matchId: "m15-1",
+    userId: "user4",
+    userDisplayName: "Emma Davis",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 2,
+    awayScore: 0,
+    homeScorers: ["Saka", "Martinelli"],
+    awayScorers: [],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: true,
+    points: 15,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: ["doubleDown"],
+    predictedAt: "2025-09-14T12:00:00Z"
+  },
+  {
+    id: "lp31",
+    matchId: "m15-1",
+    userId: "user5",
+    userDisplayName: "Chris Taylor",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 1,
+    awayScore: 0,
+    homeScorers: ["Ødegaard"],
+    awayScorers: [],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 6,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: [],
+    predictedAt: "2025-09-14T11:30:00Z"
+  },
+  {
+    id: "lp32",
+    matchId: "m15-1",
+    userId: "user6",
+    userDisplayName: "Alex Morgan",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 3,
+    awayScore: 1,
+    homeScorers: ["Saka", "Martinelli", "Jesus"],
+    awayScorers: ["Palmer"],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 4,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: ["scorerFocus"],
+    predictedAt: "2025-09-14T08:45:00Z"
+  },
+  {
+    id: "lp33",
+    matchId: "m15-1",
+    userId: "user7",
+    userDisplayName: "Sophie Wilson",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 1,
+    awayScore: 1,
+    homeScorers: ["Rice"],
+    awayScorers: ["Sterling"],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 2,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: [],
+    predictedAt: "2025-09-14T13:20:00Z"
+  },
+  {
+    id: "lp34",
+    matchId: "m15-1",
+    userId: "user8",
+    userDisplayName: "Ryan Clark",
+    homeTeam: "Arsenal",
+    awayTeam: "Chelsea",
+    homeScore: 2,
+    awayScore: 2,
+    homeScorers: ["Saka", "Havertz"],
+    awayScorers: ["Palmer", "Jackson"],
+    actualHomeScore: 2,
+    actualAwayScore: 0,
+    actualHomeScorers: ["Saka", "Martinelli"],
+    actualAwayScorers: [],
+    correct: false,
+    points: 5,
+    date: "2025-09-15T15:00:00Z",
+    gameweek: 15,
+    status: "completed",
+    chips: ["wildcard"],
+    predictedAt: "2025-09-14T15:45:00Z"
+  },
+
+  // More predictions for Liverpool vs Man City to show carousel
+  {
+    id: "lp35",
+    matchId: "m15-2",
+    userId: "user3",
+    userDisplayName: "Mike Wilson",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 3,
+    awayScore: 1,
+    homeScorers: ["Salah", "Nunez", "Gakpo"],
+    awayScorers: ["Haaland"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["doubleDown"],
+    predictedAt: "2025-09-14T10:15:00Z"
+  },
+  {
+    id: "lp36",
+    matchId: "m15-2",
+    userId: "user4",
+    userDisplayName: "Emma Davis",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 0,
+    awayScore: 2,
+    homeScorers: [],
+    awayScorers: ["Haaland", "De Bruyne"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: [],
+    predictedAt: "2025-09-14T14:30:00Z"
+  },
+  {
+    id: "lp37",
+    matchId: "m15-2", 
+    userId: "user5",
+    userDisplayName: "Chris Taylor",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 1,
+    awayScore: 1,
+    homeScorers: ["Salah"],
+    awayScorers: ["Foden"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["scorerFocus"],
+    predictedAt: "2025-09-14T09:00:00Z"
+  },
+  {
+    id: "lp38",
+    matchId: "m15-2",
+    userId: "user6",
+    userDisplayName: "Alex Morgan",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 2,
+    awayScore: 3,
+    homeScorers: ["Salah", "Diaz"],
+    awayScorers: ["Haaland", "Haaland", "Alvarez"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: [],
+    predictedAt: "2025-09-14T11:45:00Z"
+  },
+  {
+    id: "lp39",
+    matchId: "m15-2",
+    userId: "user7",
+    userDisplayName: "Sophie Wilson",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 5,
+    awayScore: 2,
+    homeScorers: ["Salah", "Salah", "Salah", "Nunez", "Gakpo"],
+    awayScorers: ["Haaland", "De Bruyne"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["wildcard"],
+    predictedAt: "2025-09-14T16:00:00Z"
+  },
+  {
+    id: "lp40",
+    matchId: "m15-2",
+    userId: "user8",
+    userDisplayName: "Ryan Clark",
+    homeTeam: "Liverpool",
+    awayTeam: "Man. City",
+    homeScore: 1,
+    awayScore: 0,
+    homeScorers: ["Van Dijk"],
+    awayScorers: [],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-15T17:30:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: [],
+    predictedAt: "2025-09-14T12:30:00Z"
+  },
+
+  // Gameweek 15 - Match 3: Man United vs Spurs with more predictions
+  {
+    id: "lp6",
+    matchId: "m15-3",
+    userId: "user3",
+    userDisplayName: "Mike Wilson",
+    homeTeam: "Man. United",
+    awayTeam: "Spurs",
+    homeScore: 2,
+    awayScore: 1,
+    homeScorers: ["Rashford", "Fernandes"],
+    awayScorers: ["Son"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-16T20:00:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: [],
+    predictedAt: "2025-09-15T11:15:00Z"
+  },
+  {
+    id: "lp41",
+    matchId: "m15-3",
+    userId: "user1",
+    userDisplayName: "John Smith",
+    homeTeam: "Man. United",
+    awayTeam: "Spurs",
+    homeScore: 1,
+    awayScore: 2,
+    homeScorers: ["Garnacho"],
+    awayScorers: ["Son", "Maddison"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-16T20:00:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["doubleDown"],
+    predictedAt: "2025-09-15T09:30:00Z"
+  },
+  {
+    id: "lp42",
+    matchId: "m15-3",
+    userId: "user2",
+    userDisplayName: "Sarah Johnson",
+    homeTeam: "Man. United",
+    awayTeam: "Spurs",
+    homeScore: 3,
+    awayScore: 0,
+    homeScorers: ["Rashford", "Fernandes", "Hojlund"],
+    awayScorers: [],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-16T20:00:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["scorerFocus"],
+    predictedAt: "2025-09-15T10:45:00Z"
+  },
+  {
+    id: "lp43",
+    matchId: "m15-3",
+    userId: "user4",
+    userDisplayName: "Emma Davis",
+    homeTeam: "Man. United",
+    awayTeam: "Spurs",
+    homeScore: 0,
+    awayScore: 1,
+    homeScorers: [],
+    awayScorers: ["Kane"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-16T20:00:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: [],
+    predictedAt: "2025-09-15T13:00:00Z"
+  },
+  {
+    id: "lp44",
+    matchId: "m15-3",
+    userId: "user5",
+    userDisplayName: "Chris Taylor",
+    homeTeam: "Man. United",
+    awayTeam: "Spurs",
+    homeScore: 2,
+    awayScore: 2,
+    homeScorers: ["Rashford", "Casemiro"],
+    awayScorers: ["Son", "Richarlison"],
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualHomeScorers: null,
+    actualAwayScorers: null,
+    correct: null,
+    points: null,
+    date: "2025-09-16T20:00:00Z",
+    gameweek: 15,
+    status: "pending",
+    chips: ["wildcard"],
+    predictedAt: "2025-09-15T14:20:00Z"
+  },
+
+  // Gameweek 14 predictions for comparison
+  {
+    id: "lp7",
+    matchId: "m14-1",
+    userId: "user1",
+    userDisplayName: "John Smith",
+    homeTeam: "Chelsea", 
+    awayTeam: "Liverpool",
+    homeScore: 1,
+    awayScore: 2,
+    homeScorers: ["Palmer"],
+    awayScorers: ["Salah", "Nunez"],
+    actualHomeScore: 1,
+    actualAwayScore: 2,
+    actualHomeScorers: ["Palmer"],
+    actualAwayScorers: ["Salah", "Nunez"],
+    correct: true,
+    points: 15,
+    date: "2025-09-08T15:00:00Z",
+    gameweek: 14,
+    status: "completed",
+    chips: ["doubleDown", "scorerFocus"],
+    predictedAt: "2025-09-07T10:00:00Z"
+  }
 ];
 
 // Sample leagues

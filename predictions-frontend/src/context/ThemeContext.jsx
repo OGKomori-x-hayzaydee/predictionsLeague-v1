@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
+import { notificationManager } from "../services/notificationService.js";
 
 export const ThemeContext = createContext();
 
@@ -19,7 +20,12 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(getInitialTheme);
   
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === "dark" ? "light" : "dark");
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === "dark" ? "light" : "dark";
+      // Show theme change notification
+      notificationManager.settings.themeChanged(newTheme);
+      return newTheme;
+    });
   };
   
   // Update local storage and document class when theme changes

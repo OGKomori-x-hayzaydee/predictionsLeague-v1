@@ -5,7 +5,6 @@ import {
   PersonIcon,
   StackIcon,
   CalendarIcon,
-  ClockIcon,
   TableIcon,
   ListBulletIcon,
 } from "@radix-ui/react-icons";
@@ -34,8 +33,8 @@ const ViewToggleBar = ({ viewMode, setViewMode }) => {
           icon={<ListBulletIcon />}
           active={viewMode === "list"}
           onClick={() => setViewMode("list")}
-          tooltip="List View"
-          label="List"
+          tooltip="Grid View"
+          label="Grid"
         />
         <ViewToggleButton
           icon={<StackIcon />}
@@ -50,13 +49,6 @@ const ViewToggleBar = ({ viewMode, setViewMode }) => {
           onClick={() => setViewMode("calendar")}
           tooltip="Calendar View"
           label="Calendar"
-        />
-        <ViewToggleButton
-          icon={<ClockIcon />}
-          active={viewMode === "timeline"}
-          onClick={() => setViewMode("timeline")}
-          tooltip="Timeline"
-          label="Timeline"
         />
         <ViewToggleButton
           icon={<TableIcon />}

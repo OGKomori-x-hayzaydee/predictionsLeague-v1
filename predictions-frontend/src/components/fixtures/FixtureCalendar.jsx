@@ -17,6 +17,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
 import EmptyFixtureState from "./EmptyFixtureState";
 import { ThemeContext } from "../../context/ThemeContext";
+import { isPredictionDeadlinePassed } from "../../utils/dateUtils";
+import { showToast } from "../../services/notificationService";
 
 function FixtureCalendar({ fixtures, onFixtureSelect, searchQuery = "" }) {
   const { theme } = useContext(ThemeContext);
@@ -188,7 +190,13 @@ function FixtureCalendar({ fixtures, onFixtureSelect, searchQuery = "" }) {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    onClick={() => onFixtureSelect(fixture)}
+                    onClick={() => {
+                      if (isPredictionDeadlinePassed(fixture.date)) {
+                        showToast('Deadline has passed for this match', 'error');
+                        return;
+                      }
+                      onFixtureSelect(fixture);
+                    }}
                     className={`p-3 rounded-lg border transition-all cursor-pointer ${
                       theme === "dark"
                         ? "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-700/70"

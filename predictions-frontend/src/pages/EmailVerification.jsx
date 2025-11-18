@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Box, Container, Button } from '@radix-ui/themes';
@@ -14,16 +14,30 @@ export default function EmailVerification() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   
+  // Prevent multiple OTP sends
+  const hasInitialized = useRef(false);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   
-  // Determine flow type (signup or oauth) and email
-  const flowType = searchParams.get('flow') || 'signup'; // 'signup' or 'oauth'
+  // Determine flow type and email (only for regular signup now)
+  const flowType = searchParams.get('flow') || 'signup';
   const email = searchParams.get('email') || location.state?.email || '';
-  const redirectTo = searchParams.get('redirect') || (flowType === 'oauth' ? '/auth/oauth/complete' : '/home/dashboard');
+  const redirectTo = searchParams.get('redirect') || '/home/dashboard';
 
   useEffect(() => {
+    // Prevent multiple initializations
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
+    // OAuth users don't need email verification - redirect them away
+    if (flowType === 'oauth') {
+      console.log('OAuth user detected in email verification - redirecting to finish onboarding');
+      navigate('/auth/finish-onboarding', { replace: true });
+      return;
+    }
+
     if (!email) {
       console.error('No email provided for verification');
       navigate('/signup', { replace: true });
@@ -32,20 +46,11 @@ export default function EmailVerification() {
 
     setUserEmail(email);
 
-    // Auto-send OTP when component mounts
+    // Auto-send OTP when component mounts (only once)
     sendOtp();
-  }, [email, navigate]);
+  }, [email, navigate, flowType]); // Keep dependencies but use ref guard
 
   const sendOtp = async () => {
-    // Development bypass
-    const isDevelopment = import.meta.env.DEV || import.meta.env.VITE_API_BASE_URL?.includes('localhost');
-    
-    if (isDevelopment) {
-      console.log('🚧 Development mode: Simulating OTP send');
-      setIsOtpSent(true);
-      return;
-    }
-
     try {
       console.log('📧 Sending OTP to:', email);
       setIsOtpSent(false);
@@ -56,15 +61,14 @@ export default function EmailVerification() {
       });
       
       setIsOtpSent(true);
-      console.log('✅ OTP sent successfully');
     } catch (error) {
-      console.error('❌ Failed to send OTP:', error);
       setErrors({ submit: 'Failed to send verification code. Please try again.' });
     }
   };
 
   const handleChange = (e) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6); // Only allow 6 digits
+    console.log('EmailVerification - OTP input changed:', value);
     setOtp(value);
     
     // Clear errors when user starts typing
@@ -89,36 +93,32 @@ export default function EmailVerification() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('EmailVerification - Submit triggered');
+    console.log('EmailVerification - OTP state:', otp);
+    console.log('EmailVerification - OTP length:', otp.length);
+    console.log('EmailVerification - Email:', email);
+    
     if (!validateOtp()) return;
 
     setIsVerifying(true);
     
-    // Development bypass
-    const isDevelopment = import.meta.env.DEV || import.meta.env.VITE_API_BASE_URL?.includes('localhost');
-    
-    if (isDevelopment) {
-      console.log('🚧 Development mode: Accepting any 6-digit code');
-      setIsVerifying(false);
-      navigate(redirectTo, { replace: true });
-      return;
-    }
-
     try {
-      console.log('🔍 Verifying OTP:', otp);
-      
-      await authAPI.verifyOtp({
+      const verifyData = {
         email: email,
         otp: otp,
         type: 'email_verification'
-      });
+      };
       
-      console.log('✅ OTP verified successfully');
+      console.log('EmailVerification - Sending verify request with data:', verifyData);
+      
+      await authAPI.verifyOtp(verifyData);
+      
       setIsVerifying(false);
       
       // Navigate to appropriate destination
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      console.error('❌ OTP verification failed:', error);
+      console.error('EmailVerification - Verify error:', error);
       setIsVerifying(false);
       setErrors({ otp: 'Invalid verification code. Please try again.' });
     }
@@ -236,15 +236,18 @@ export default function EmailVerification() {
               </div>
 
               {/* Submit button */}
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
+              <motion.div 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }}
+                className="w-full"
+              >
+                <button
                   type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-md transition-colors"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-outfit"
                   disabled={isVerifying || !otp}
-                  size="4"
                 >
                   {isVerifying ? "verifying..." : "verify email"}
-                </Button>
+                </button>
               </motion.div>
 
               {/* Resend link */}
@@ -263,12 +266,6 @@ export default function EmailVerification() {
               </div>
             </form>
 
-            {/* Flow indicator */}
-            <div className="mt-6 text-center">
-              <p className="text-white/50 font-outfit text-xs">
-                {flowType === 'oauth' ? 'OAuth signup flow' : 'Regular signup flow'}
-              </p>
-            </div>
           </motion.div>
         </Container>
       </Box>

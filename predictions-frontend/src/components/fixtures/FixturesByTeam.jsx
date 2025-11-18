@@ -21,8 +21,8 @@ function FixturesByTeam({ fixtures = [], onFixtureSelect, searchQuery = "" }) {
     "Arsenal",
     "Chelsea",
     "Liverpool",
-    "Man. City",
-    "Man. United",
+    "Man City",
+    "Man United",
     "Spurs",
   ];
 

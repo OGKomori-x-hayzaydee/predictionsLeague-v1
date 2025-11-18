@@ -1,7 +1,8 @@
 import { useContext } from "react";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { getThemeStyles } from "../../../utils/themeUtils";
-import { getTeamLogo } from "../../../data/sampleData";
+import TeamLogo from "../../ui/TeamLogo";
+import { LOGO_SIZES } from "../../../utils/teamLogos";
 
 export default function ScoreDisplay({ 
   fixture, 
@@ -16,17 +17,41 @@ export default function ScoreDisplay({
     switch (variant) {
       case "review":
         return {
-          container: "bg-purple-500/20 border border-purple-500/30 rounded-lg px-3",
-          scoreBox: theme === "dark" ? "bg-slate-800/60" : "bg-slate-100/60",
-          homeColor: "text-purple-300",
-          awayColor: "text-purple-300"
+          container: getThemeStyles(theme, {
+            dark: "bg-purple-500/20 border border-purple-500/30",
+            light: "bg-purple-100 border border-purple-200"
+          }) + " rounded-lg px-3",
+          scoreBox: getThemeStyles(theme, {
+            dark: "bg-slate-800/60",
+            light: "bg-white/60"
+          }),
+          homeColor: getThemeStyles(theme, {
+            dark: "text-purple-300",
+            light: "text-purple-700"
+          }),
+          awayColor: getThemeStyles(theme, {
+            dark: "text-purple-300",
+            light: "text-purple-700"
+          })
         };
       default: // "summary"
         return {
-          container: "bg-blue-500/20 border border-blue-500/30 rounded-lg px-3",
-          scoreBox: theme === "dark" ? "bg-slate-800/60" : "bg-slate-200/60",
-          homeColor: theme === "dark" ? "text-emerald-300" : "text-emerald-700",
-          awayColor: theme === "dark" ? "text-blue-300" : "text-blue-700"
+          container: getThemeStyles(theme, {
+            dark: "bg-blue-500/20 border border-blue-500/30",
+            light: "bg-blue-100 border border-blue-200"
+          }) + " rounded-lg px-3",
+          scoreBox: getThemeStyles(theme, {
+            dark: "bg-slate-800/60",
+            light: "bg-white/60"
+          }),
+          homeColor: getThemeStyles(theme, {
+            dark: "text-emerald-300",
+            light: "text-emerald-700"
+          }),
+          awayColor: getThemeStyles(theme, {
+            dark: "text-blue-300",
+            light: "text-blue-700"
+          })
         };
     }
   };
@@ -36,11 +61,12 @@ export default function ScoreDisplay({
   return (
     <div className={`flex justify-center items-center ${className}`}>
       <div className="flex items-center">
-        <div className="w-8 h-8 rounded-full bg-slate-700/30 border border-slate-600/50 flex items-center justify-center mr-2">
-          <img
-            src={getTeamLogo(fixture.homeTeam)}
-            alt={fixture.homeTeam}
-            className="w-6 h-6 object-contain"
+        <div className="mr-2">
+          <TeamLogo
+            teamName={fixture.homeTeam}
+            size={LOGO_SIZES.sm}
+            theme={theme}
+            className="flex-shrink-0"
           />
         </div>
         <span
@@ -79,11 +105,12 @@ export default function ScoreDisplay({
         >
           {fixture.awayTeam}
         </span>
-        <div className="w-8 h-8 rounded-full bg-slate-700/30 border border-slate-600/50 flex items-center justify-center">
-          <img
-            src={getTeamLogo(fixture.awayTeam)}
-            alt={fixture.awayTeam}
-            className="w-6 h-6 object-contain"
+        <div className="ml-2">
+          <TeamLogo
+            teamName={fixture.awayTeam}
+            size={LOGO_SIZES.sm}
+            theme={theme}
+            className="flex-shrink-0"
           />
         </div>
       </div>

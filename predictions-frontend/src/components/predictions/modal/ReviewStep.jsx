@@ -28,56 +28,53 @@ export default function ReviewStep({
       transition={{ duration: 0.3 }}
       className="pb-4"
     >
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+      <div className={`${getThemeStyles(theme, {
+        dark: "bg-slate-800/50 border border-slate-700/60",
+        light: "bg-slate-50/50 border border-slate-200/60",
+      })} rounded-xl p-6 mb-6`}>
+        <div className="flex items-center space-x-2 mb-4">
           <CheckIcon className="w-5 h-5 text-purple-400" />
+          <h3 className={`text-lg font-semibold font-outfit ${getThemeStyles(theme, {
+            dark: "text-slate-200",
+            light: "text-slate-800",
+          })}`}>
+            Review Your Prediction
+          </h3>
         </div>
-        <h3
-          className={`${getThemeStyles(theme, {
-            dark: "text-slate-100",
-            light: "text-slate-900",
-          })} text-xl font-bold font-outfit`}
-        >
-          Review & Submit
-        </h3>
-      </div>
 
-      {/* Score summary */}
-      <div
-        className={`${getThemeStyles(theme, {
-          dark: "bg-slate-800/50 border-slate-700/60",
-          light: "bg-slate-50/50 border-slate-200/60",
-        })} border rounded-xl p-4 mb-4 font-outfit`}
-      >
-        <div
-          className={`${getThemeStyles(theme, {
-            dark: "text-slate-300",
-            light: "text-slate-700",
-          })} text-sm font-medium mb-3 text-center`}
-        >
-          Your predicted score
+        {/* Score summary */}
+        <div className={`${getThemeStyles(theme, {
+          dark: "bg-slate-900/50 border border-slate-700/30",
+          light: "bg-slate-100/50 border border-slate-200/30",
+        })} rounded-lg p-4 mb-4`}>
+          <div className={`text-xs font-medium mb-3 font-outfit text-center ${getThemeStyles(theme, {
+            dark: "text-slate-400",
+            light: "text-slate-600",
+          })}`}>
+            Your Predicted Score
+          </div>
+          <ScoreDisplay 
+            fixture={fixture} 
+            homeScore={homeScore} 
+            awayScore={awayScore} 
+            variant="review" 
+          />
         </div>
-        <ScoreDisplay 
-          fixture={fixture} 
-          homeScore={homeScore} 
-          awayScore={awayScore} 
-          variant="review" 
-        />
+
+        {/* Goalscorers summary */}
+        {(homeScore > 0 || awayScore > 0) && (
+          <GoalscorerSummary
+            fixture={fixture}
+            homeScore={homeScore}
+            awayScore={awayScore}
+            homeScorers={homeScorers}
+            awayScorers={awayScorers}
+          />
+        )}
+
+        {/* Selected chips summary */}
+        <ChipsSummary selectedChips={selectedChips} />
       </div>
-
-      {/* Goalscorers summary */}
-      {(homeScore > 0 || awayScore > 0) && (
-        <GoalscorerSummary
-          fixture={fixture}
-          homeScore={homeScore}
-          awayScore={awayScore}
-          homeScorers={homeScorers}
-          awayScorers={awayScorers}
-        />
-      )}
-
-      {/* Selected chips summary */}
-      <ChipsSummary selectedChips={selectedChips} />
 
       {/* Active gameweek chips */}
       {activeGameweekChips.length > 0 && (
@@ -160,6 +157,7 @@ export default function ReviewStep({
 
       {/* Points potential */}
       <PointsPotential
+        fixture={fixture}
         homeScore={homeScore}
         awayScore={awayScore}
         selectedChips={selectedChips}

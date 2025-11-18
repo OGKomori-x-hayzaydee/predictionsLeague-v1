@@ -3,6 +3,13 @@ import { motion } from "framer-motion";
 import { LightningBoltIcon } from "@radix-ui/react-icons";
 
 const ActiveChipsBanner = ({ activeGameweekChips, currentGameweek }) => {
+  console.log('🎗️ ActiveChipsBanner render:', {
+    activeGameweekChips,
+    activeGameweekChipsCount: activeGameweekChips?.length || 0,
+    currentGameweek,
+    shouldShow: activeGameweekChips?.length > 0
+  });
+  
   if (activeGameweekChips.length === 0) return null;
   
   return (

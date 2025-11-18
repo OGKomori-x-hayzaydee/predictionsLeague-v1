@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 
 export const UserPreferencesContext = createContext();
 
@@ -11,34 +11,21 @@ export const useUserPreferences = () => {
   return context;
 };
 
-export const UserPreferencesProvider = ({ children }) => {  // Default preferences
+export const UserPreferencesProvider = ({ children }) => {
+  // Simplified default preferences - only what's actually used
   const defaultPreferences = {
+    // Interface preferences
     defaultDashboardView: 'fixtures',
     defaultFixturesView: 'list',
-    defaultPredictionsView: 'stack',
-    language: 'english',
-    timezone: 'UTC',
-    textSize: 'medium',
-    highContrast: false,
-    reduceMotion: false,
+    defaultPredictionsView: 'list',
+    defaultLeaguePredictionsView: 'teams',
     showButtonTitles: true,
+    
+    // Notification preferences
     notifications: {
       emailAlerts: true,
-      fixtureUpdates: true,
       predictionReminders: true,
-      weeklyDigest: false,
-      marketingEmails: false,
-      pushNotifications: true,
-      liveScoreUpdates: true,
-      leagueInvitations: true
-    },
-    privacy: {
-      profileVisibility: 'public',
-      activityVisibility: 'friends',
-      allowDirectMessages: true,
-      showInLeaderboard: true,
-      shareStats: false,
-      allowFriendRequests: true
+      leagueInvitations: true,
     }
   };
 

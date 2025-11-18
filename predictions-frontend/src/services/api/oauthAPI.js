@@ -8,31 +8,38 @@ class OAuthAPI {
    * Initiate OAuth login through your proxy
    */
   initiateLogin(provider = 'google', redirectPath = '/home/dashboard') {
-    console.log(`🔄 Starting OAuth login with ${provider} via proxy`);
+    // Preserve existing flow type if already set (e.g., from signup page)
+    const existingFlowType = sessionStorage.getItem('oauth_flow_type');
+    const flowType = existingFlowType || 'login';
     
-    // Store intended destination
+    // Store intended destination and OAuth details
     sessionStorage.setItem('oauth_redirect_path', redirectPath);
-    sessionStorage.setItem('oauth_flow_type', 'login');
+    sessionStorage.setItem('oauth_flow_type', flowType);
     sessionStorage.setItem('oauth_provider', provider);
     sessionStorage.setItem('oauth_timestamp', Date.now().toString());
     
-    // Build OAuth proxy URL
-    const callbackUrl = `${this.frontendBaseUrl}/auth/callback`;
-    const oauthUrl = `${this.oauthBaseUrl}/oauth2/start?rd=${encodeURIComponent(callbackUrl)}`;
-    
-    console.log('🔗 OAuth URL:', oauthUrl);
-    console.log('🔙 Callback URL:', callbackUrl);
+    // Build OAuth proxy URL - same endpoint for both login and signup
+    const oauthUrl = `${this.oauthBaseUrl}/oauth2/start?rd=/oauth2/login`;
     
     // Redirect to your OAuth2 proxy
     window.location.href = oauthUrl;
   }
 
   /**
+   * Initiate OAuth signup specifically - sets flow type to signup
+   */
+  initiateSignup(provider = 'google') {
+    // Explicitly set flow type to signup
+    sessionStorage.setItem('oauth_flow_type', 'signup');
+    
+    // Use the login method but with signup context
+    this.initiateLogin(provider, '/auth/oauth/complete');
+  }
+
+  /**
    * Handle OAuth callback - user returns from OAuth proxy
    */
   async handleCallback() {
-    console.log('🔄 Handling OAuth callback');
-    
     const redirectPath = sessionStorage.getItem('oauth_redirect_path') || '/home/dashboard';
     const flowType = sessionStorage.getItem('oauth_flow_type') || 'login';
     const provider = sessionStorage.getItem('oauth_provider') || 'google';

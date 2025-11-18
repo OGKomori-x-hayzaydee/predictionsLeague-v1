@@ -1,68 +1,40 @@
-import arsenalLogo from "../assets/clubs/arsenal.png";
-import chelseaLogo from "../assets/clubs/chelsea.png";
-import liverpoolLogo from "../assets/clubs/liverpool.png";
-import manCityLogo from "../assets/clubs/mancity.png";
-import manUtdLogo from "../assets/clubs/manutd.png";
-import tottenhamLogo from "../assets/clubs/spurs.png";
-
-// Map team names to their logo files
-export const teamLogos = {
-  // Arsenal variations
-  "Arsenal": arsenalLogo,
-  "Arsenal FC": arsenalLogo,
-  
-  // Chelsea variations
-  "Chelsea": chelseaLogo,
-  "Chelsea FC": chelseaLogo,
-  
-  // Liverpool variations
-  "Liverpool": liverpoolLogo,
-  "Liverpool FC": liverpoolLogo,
-  
-  // Manchester City variations
-  "Man. City": manCityLogo,
-  "Manchester City": manCityLogo,
-  "Manchester City FC": manCityLogo,
-  
-  // Manchester United variations
-  "Man. United": manUtdLogo,
-  "Manchester United": manUtdLogo,
-  "Manchester United FC": manUtdLogo,
-  
-  // Spurs variations
-  "Spurs": tottenhamLogo,
-  "Tottenham Hotspur": tottenhamLogo,
-  "Tottenham Hotspur FC": tottenhamLogo,
-};
+// Import centralized team logo system
+import { getTeamLogo as getTeamLogoFromCentral } from './teamLogos.js';
 
 // Comprehensive team name mapping
 export const teamNameMappings = {
   // Arsenal variations
   "Arsenal FC": "Arsenal",
   "Arsenal": "Arsenal",
+  "ARSENAL": "Arsenal",
   
   // Chelsea variations
   "Chelsea FC": "Chelsea",
   "Chelsea": "Chelsea",
+  "CHELSEA": "Chelsea",
   
   // Liverpool variations
   "Liverpool FC": "Liverpool",
   "Liverpool": "Liverpool",
+  "LIVERPOOL": "Liverpool",
   
   // Manchester City variations
-  "Manchester City FC": "Man. City",
-  "Manchester City": "Man. City",
-  "Man. City": "Man. City",
+  "Manchester City FC": "Man City",
+  "Manchester City": "Man City", 
+  "Man. City": "Man City",
+  "MANCITY": "Man City",
   
   // Manchester United variations
-  "Manchester United FC": "Man. United",
-  "Manchester United": "Man. United",
-  "Man. United": "Man. United",
+  "Manchester United FC": "Man United",
+  "Manchester United": "Man United",
+  "Man. United": "Man United", 
+  "MANUTD": "Man United",
   
-  // spurs variations
+  // Spurs variations
   "Tottenham Hotspur FC": "Spurs",
   "Tottenham Hotspur": "Spurs",
   "Tottenham": "Spurs",
+  "SPURS": "Spurs",
 };
 
 /**
@@ -94,19 +66,27 @@ export const normalizeTeamName = (teamName) => {
  * @returns {string} URL to the team logo
  */
 export const getTeamLogo = (teamName) => {
-  // Try with the original name first
-  if (teamLogos[teamName]) {
-    return teamLogos[teamName];
-  }
+  // Use the centralized team logo system
+  return getTeamLogoFromCentral(teamName);
+};
+
+/**
+ * Map team display names to backend format
+ * @param {string} teamName - The display team name
+ * @returns {string} Backend formatted team name
+ */
+export const mapTeamToBackendFormat = (teamName) => {
+  const teamMapping = {
+    "Arsenal": "ARSENAL",
+    "Chelsea": "CHELSEA", 
+    "Liverpool": "LIVERPOOL",
+    "Manchester City": "MANCITY",
+    "Manchester United": "MANUTD",
+    "Tottenham Hotspur": "SPURS",
+    // Add any other teams as needed
+  };
   
-  // Try with normalized name
-  const normalizedName = normalizeTeamName(teamName);
-  if (teamLogos[normalizedName]) {
-    return teamLogos[normalizedName];
-  }
-  
-  // Return placeholder as fallback
-  return `https://via.placeholder.com/40?text=${teamName.substring(0, 3)}`;
+  return teamMapping[teamName] || teamName.toUpperCase();
 };
 
 /**

@@ -1,62 +1,52 @@
 import React, { useContext } from "react";
-import { MagnifyingGlassIcon, BarChartIcon } from "@radix-ui/react-icons";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 
-const EmptyPredictionState = ({ searchQuery }) => {
+const EmptyPredictionState = ({ searchQuery, activeFilter, message }) => {
   const { theme } = useContext(ThemeContext);
-
+  
+  // Generate contextual message based on filters
+  const getEmptyMessage = () => {
+    if (message) return message;
+    
+    if (searchQuery) {
+      return `No predictions match your search for "${searchQuery}". Try adjusting your search terms.`;
+    }
+    
+    if (activeFilter === "pending") {
+      return "You don't have any pending predictions. All your predictions have been completed!";
+    }
+    
+    if (activeFilter === "completed") {
+      return "You don't have any completed predictions yet. Make some predictions and check back after matches finish.";
+    }
+    
+    return "You haven't made any predictions yet. Head to the Fixtures tab to start predicting!";
+  };
+  
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
-      <div
-        className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-          theme === "dark" ? "bg-primary-800/30" : "bg-gray-100"
-        }`}
-      >
-        {searchQuery ? (
-          <MagnifyingGlassIcon
-            className={`w-8 h-8 ${
-              theme === "dark" ? "text-white/40" : "text-gray-400"
-            }`}
-          />
-        ) : (
-          <BarChartIcon
-            className={`w-8 h-8 ${
-              theme === "dark" ? "text-white/40" : "text-gray-400"
-            }`}
-          />
-        )}
+    <div className={`border rounded-lg p-6 text-center max-w-lg mx-auto ${
+      theme === 'dark'
+        ? 'bg-primary-700/30 border-primary-600/30'
+        : 'bg-white border-gray-200 shadow-sm'
+    }`}>
+      <div className={`rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center ${
+        theme === 'dark'
+          ? 'bg-primary-600/30'
+          : 'bg-gray-100'
+      }`}>
+        <MagnifyingGlassIcon className={`w-6 h-6 ${
+          theme === 'dark' ? 'text-teal-300/60' : 'text-gray-400'
+        }`} />
       </div>
-      
-      <h3
-        className={`text-lg font-medium mb-2 ${
-          theme === "dark" ? "text-white" : "text-gray-900"
-        }`}
-      >
-        {searchQuery ? "No predictions found" : "No predictions available"}
-      </h3>
-      
-      <p
-        className={`text-sm text-center max-w-md ${
-          theme === "dark" ? "text-white/60" : "text-gray-500"
-        }`}
-      >
-        {searchQuery
-          ? `No predictions match "${searchQuery}". Try adjusting your search terms.`
-          : "Predictions for Big Six teams will appear here once you start making predictions for their fixtures."}
+      <h3 className={`text-lg mb-2 ${
+        theme === 'dark' ? 'text-teal-100' : 'text-gray-900'
+      }`}>No predictions found</h3>
+      <p className={`text-sm ${
+        theme === 'dark' ? 'text-white/60' : 'text-gray-600'
+      }`}>
+        {getEmptyMessage()}
       </p>
-      
-      {searchQuery && (
-        <button
-          onClick={() => window.location.reload()}
-          className={`mt-4 px-4 py-2 text-sm rounded-lg transition-colors ${
-            theme === "dark"
-              ? "bg-primary-700 hover:bg-primary-600 text-white"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
-          }`}
-        >
-          Clear search
-        </button>
-      )}
     </div>
   );
 };

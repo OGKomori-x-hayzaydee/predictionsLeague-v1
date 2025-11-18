@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   EyeOpenIcon,
   EyeClosedIcon,
+  PersonIcon,
   CheckIcon,
 } from "@radix-ui/react-icons";
 import { useAuth } from "../context/AuthContext";
@@ -21,7 +22,6 @@ export default function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
-    otp: "",
     username: "",
     favouriteTeam: "",
   });
@@ -32,17 +32,14 @@ export default function Signup() {
     email: null,
     password: null,
     confirmPassword: null,
-    otp: null,
     username: null,
     favouriteTeam: null,
     submit: null
   });
   const [formStep, setFormStep] = useState(1);
   const [oauthError, setOauthError] = useState(null);
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
-  const { register, isLoading, error } = useAuth();
+  const { register, isLoading, error, dispatch, AUTH_ACTIONS } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,6 +48,7 @@ export default function Signup() {
     const urlParams = new URLSearchParams(location.search);
     const errorParam = urlParams.get('error');
     const stepParam = urlParams.get('step');
+    const emailParam = urlParams.get('email');
     
     if (errorParam) {
       setOauthError(decodeURIComponent(errorParam));
@@ -60,35 +58,41 @@ export default function Signup() {
 
     // Handle returning from email verification
     if (stepParam === '3') {
-      const savedData = sessionStorage.getItem('signup_data');
-      if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-          setFormData(prev => ({ ...prev, ...parsedData }));
-          setFormStep(3);
-          // Clean up URL and session storage
-          sessionStorage.removeItem('signup_data');
-          navigate(location.pathname, { replace: true });
-        } catch (error) {
-          console.error('Failed to restore signup data:', error);
-          // If data is corrupted, start over
-          navigate('/signup', { replace: true });
-        }
+      // User account already exists, just proceed to complete profile
+      setFormStep(3);
+      
+      // Restore email from URL parameter OR sessionStorage
+      let userEmail = null;
+      
+      if (emailParam) {
+        userEmail = decodeURIComponent(emailParam);
+        console.log('Signup - Restoring email from URL:', userEmail);
+        // Store in sessionStorage for future use
+        sessionStorage.setItem('signup_email', userEmail);
+      } else {
+        // Try to get from sessionStorage
+        userEmail = sessionStorage.getItem('signup_email');
+        console.log('Signup - Restoring email from sessionStorage:', userEmail);
       }
+      
+      if (userEmail) {
+        setFormData(prev => ({ 
+          ...prev, 
+          email: userEmail
+        }));
+      } else {
+        console.log('Signup - No email found in URL or sessionStorage');
+      }
+      
+      navigate(location.pathname, { replace: true });
     }
   }, [location.search, navigate, location.pathname]);
 
   const handleOAuthSignup = (providerId) => {
     try {
-      console.log(`🔄 Starting OAuth signup with ${providerId}`);
-      
-      // Store that this is a signup flow (not login)
-      sessionStorage.setItem('oauth_flow_type', 'signup');
-      
-      // For signup, always redirect to onboarding even if user exists
-      oauthAPI.initiateLogin(providerId, '/onboarding/select-team');
+      // Use the dedicated signup method which handles flow type automatically
+      oauthAPI.initiateSignup(providerId);
     } catch (error) {
-      console.error('❌ OAuth signup error:', error);
       setOauthError(error.message);
     }
   };
@@ -131,6 +135,11 @@ export default function Signup() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value || "" }));
+
+    // Store email in sessionStorage as soon as it's entered
+    if (name === 'email' && value) {
+      sessionStorage.setItem('signup_email', value);
+    }
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -195,36 +204,50 @@ export default function Signup() {
   const handleNextStep = async (e) => {
     // Prevent form submission when clicking Continue
     e.preventDefault();
-    console.log(`➡️ handleNextStep called - Current step: ${formStep}`);
 
     if (!validateStep(formStep)) {
-      console.log(`❌ Step ${formStep} validation failed`);
       return;
     }
 
-    console.log(`✅ Step ${formStep} validation passed`);
-
-    // If moving from step 1 to step 2, redirect to shared email verification
+    // If moving from step 1 to step 2, create incomplete user account
     if (formStep === 1) {
-      console.log('📧 Redirecting to email verification page');
-      
-      // Store signup data in sessionStorage for after verification
-      sessionStorage.setItem('signup_data', JSON.stringify({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword
-      }));
-      
-      // Redirect to shared email verification
-      navigate(`/verify-email?flow=signup&email=${encodeURIComponent(formData.email)}&redirect=${encodeURIComponent('/signup?step=3')}`, { 
-        replace: true 
-      });
-      return;
+      try {
+        // Register user with incomplete data (no username/team yet)
+        const result = await register({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          // username and favouriteTeam will be added later
+        });
+        
+        if (result.success) {
+          console.log('Registration successful, navigating to email verification...');
+          // User is created but incomplete - redirect to email verification
+          const redirectUrl = `/signup?step=3`; // Email will come from sessionStorage
+          
+          // Small delay to ensure loading state is cleared
+          setTimeout(() => {
+            navigate(`/verify-email?flow=signup&email=${encodeURIComponent(formData.email)}&redirect=${encodeURIComponent(redirectUrl)}`, { 
+              replace: true 
+            });
+          }, 100);
+          return;
+        } else {
+          throw new Error(result.error || 'Failed to create account');
+        }
+      } catch (error) {
+        const fieldErrors = getValidationErrors(error);
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(prev => ({ ...prev, ...fieldErrors }));
+        } else {
+          setErrors(prev => ({ ...prev, submit: 'Failed to create account. Please try again.' }));
+        }
+        return;
+      }
     }
 
-    console.log(`Moving to step ${formStep + 1}`);
     setFormStep((prev) => prev + 1);
   };
 
@@ -234,71 +257,59 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("🚀 Form submitted");
 
     if (!validateStep(formStep)) {
-      console.log("❌ Form validation failed");
       return;
     }
-
-    console.log("✅ Form validation passed");
 
     // Clear submit errors but keep field errors initialized
     setErrors(prev => ({ ...prev, submit: null }));
     clearError();
 
-    console.log("📋 Form data being sent:", {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      username: formData.username,
-      email: formData.email,
-      password: formData.password ? "[HIDDEN]" : "empty",
-      confirmPassword: formData.confirmPassword ? "[HIDDEN]" : "empty",
-      favouriteTeam: formData.favouriteTeam.toUpperCase(),
-    });
-
     try {
-      console.log("🔄 Calling register function...");
-      const result = await register({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+      // Complete user profile with username and favourite team
+      const result = await authAPI.completeProfile({
         username: formData.username,
+        favouriteTeam: formData.favouriteTeam, // Remove .toUpperCase() - let mapping function handle it
         email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        favouriteTeam: formData.favouriteTeam.toUpperCase(),
       });
 
-      console.log("📥 Registration result:", result);
-
       if (result.success) {
-        console.log("✅ Registration successful, redirecting to dashboard");
-        // Redirect to dashboard after successful registration
-        navigate("/home/dashboard", { replace: true });
-      } else {
-        console.log("❌ Registration failed:", result);
+        console.log('Signup - CompleteProfile succeeded, result:', result);
+        console.log('Signup - About to dispatch LOGIN_SUCCESS with user:', result.user);
+        
+        // Update auth context with the completed user data
+        dispatch({
+          type: AUTH_ACTIONS.LOGIN_SUCCESS,
+          payload: { user: result.user },
+        });
+        
+        console.log('Signup - LOGIN_SUCCESS dispatched');
+        
+        // Cleanup sessionStorage since signup is complete
+        sessionStorage.removeItem('signup_email');
+        console.log('Signup - SessionStorage cleaned up');
+        
+        // Small delay to ensure auth state is updated before navigation
+        console.log('Signup - Waiting 100ms before navigation...');
+        setTimeout(() => {
+          console.log('Signup - Navigating to dashboard...');
+          navigate("/home/dashboard", { replace: true });
+        }, 100);
       }
     } catch (registrationError) {
-      console.log("💥 Registration error caught:", registrationError);
-      console.log("💥 Error message:", registrationError.message);
-      console.log("💥 Error stack:", registrationError.stack);
-      
       // Extract validation errors if any
       const fieldErrors = getValidationErrors(registrationError);
-      console.log("🔍 Extracted field errors:", fieldErrors);
       
       if (Object.keys(fieldErrors).length > 0) {
         setErrors(prev => ({ ...prev, ...fieldErrors }));
         // Go back to the step with errors
         if (fieldErrors.firstName || fieldErrors.lastName || fieldErrors.email || fieldErrors.password || fieldErrors.confirmPassword) {
-          console.log("↩️ Going back to step 1 due to field errors");
           setFormStep(1);
         } else if (fieldErrors.username || fieldErrors.favouriteTeam) {
-          console.log("↩️ Going back to step 3 due to preference errors");
           setFormStep(3);
         }
       } else {
-        console.log("⚠️ Setting general submit error");
         setErrors(prev => ({ ...prev, submit: "Failed to create account. Please try again." }));
       }
     }
@@ -364,9 +375,9 @@ export default function Signup() {
             </div>
 
             <div className="mb-8">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-center">
                 {[1, 3].map((step, index) => (
-                  <div key={step} className="flex flex-col items-center">
+                  <div key={step} className="flex flex-col items-center mx-auto">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium font-outfit 
                           ${
@@ -384,6 +395,14 @@ export default function Signup() {
                     </div>
                   </div>
                 ))}
+                <div className="relative h-1 bg-primary-600/80 mt-4">
+                <motion.div
+                  className="absolute left-0 top-0 h-full bg-teal-500"
+                  initial={{ width: "0%" }}
+                  animate={{ width: formStep === 3 ? "100%" : "0%" }}
+                  transition={{ duration: 0.4 }}
+                />
+              </div>
               </div>
               <div className="relative h-1 bg-primary-600/80 mt-4">
                 <motion.div
@@ -751,14 +770,6 @@ export default function Signup() {
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-md transition-colors"
                     disabled={isLoading}
                     size="4"
-                    onClick={(e) => {
-                      console.log(`🖱️ Button clicked - Step ${formStep}, Type: ${formStep === 3 ? "submit" : "continue"}`);
-                      console.log("🖱️ isLoading:", isLoading);
-                      console.log("🖱️ Event type:", e.type);
-                      if (formStep === 3) {
-                        console.log("🎯 This should trigger form submission");
-                      }
-                    }}
                   >
                     {isLoading
                       ? "creating account..."

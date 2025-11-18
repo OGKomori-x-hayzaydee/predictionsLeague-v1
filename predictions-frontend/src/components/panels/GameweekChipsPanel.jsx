@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckIcon,
@@ -10,125 +10,240 @@ import {
   StarIcon,
   TargetIcon,
   InfoCircledIcon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
+import { useChipManagement } from "../../context/ChipManagementContext";
 import {
   getThemeStyles,
   backgrounds,
   text,
   buttons,
 } from "../../utils/themeUtils";
+import { padding, textScale } from "../../utils/mobileScaleUtils";
+import { userPredictionsAPI } from "../../services/api/userPredictionsAPI";
+import { showToast } from "../../services/notificationService";
+import { isGameweekChip } from "../../utils/chipManager";
+import { getChipInfo } from "../../utils/chipUtils";
+import { isChipApplicableToPrediction } from "../../utils/chipValidation";
+import { CHIP_MAPPING } from "../../utils/backendMappings";
 
 const GameweekChipsPanel = ({
   currentGameweek,
   onApplyChip,
   activeMatchChips = [],
   toggleChipInfoModal,
+  userPredictions = [], // Array of user's predictions for retroactive application
+  refetchPredictions, // Function to refetch fresh prediction data before applying chips
 }) => {
-  const [activeChips, setActiveChips] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedChip, setSelectedChip] = useState(null);
   const [selectedTab, setSelectedTab] = useState("gameweek");
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(true);
+  const [isApplying, setIsApplying] = useState(false);
+  const [applyProgress, setApplyProgress] = useState({ current: 0, total: 0 });
 
   // Get theme context
   const { theme } = useContext(ThemeContext);
 
-  // In a real app, you'd fetch these from an API
-  const gameweekChips = [
-    {
-      id: "defensePlusPlus",
-      name: "Defense++",
-      description:
-        "Earn +10 bonus points for each match where you correctly predict a clean sheet.",
-      icon: "🛡️",
-      color: "blue",
-      cooldown: 5,
-      cooldownRemaining: 0,
-      available: true,
-      type: "gameweek",
-    },
-    {
-      id: "allInWeek",
-      name: "All-In Week",
-      description:
-        "Doubles all points earned this gameweek (including deductions).",
-      icon: "🎯",
-      color: "red",
-      seasonLimit: 2,
-      remainingUses: 2,
-      available: true,
-      type: "gameweek",
-    },
-  ];
+  // Get chip management context
+  const {
+    availableChips,
+    getMatchChips,
+    getGameweekChips,
+    currentGameweek: contextGameweek,
+    activeGameweekChips, // Get active gameweek chips from backend
+    refreshChips,
+  } = useChipManagement();
 
-  const matchChips = [
-    {
-      id: "doubleDown",
-      name: "Double Down",
-      description: "Double points for a single match prediction.",
-      icon: "2x",
-      color: "teal",
-      cooldown: 2,
-      cooldownRemaining: 0,
-      available: true,
-      type: "match",
-      strategyTip:
-        "Best used on matches where you have high confidence in your prediction, especially if you've predicted goalscorers correctly.",
-    },
-    {
-      id: "wildcard",
-      name: "Wildcard",
-      description: "Triple points for a single match prediction.",
-      icon: "3x",
-      color: "indigo",
-      cooldown: 7,
-      cooldownRemaining: 0,
-      available: true,
-      type: "match",
-      strategyTip:
-        "Save this for matches where you're extremely confident, or for derby matches where the points multiplier is already in effect.",
-    },
-    {
-      id: "scorerFocus",
-      name: "Scorer Focus",
-      description: "Double points for correct goalscorer predictions.",
-      icon: "⚽",
-      color: "cyan",
-      cooldown: 3,
-      cooldownRemaining: 0,
-      available: true,
-      type: "match",
-      strategyTip:
-        "Best used in high-scoring matches where you're confident about multiple goalscorers.",
-    },
-    {
-      id: "opportunist",
-      name: "Opportunist",
-      description:
-        "Score points even if goalscorer prediction is partially correct.",
-      icon: "🎭",
-      color: "yellow",
-      cooldown: 2,
-      cooldownRemaining: 0,
-      available: true,
-      type: "match",
-      strategyTip:
-        "Use when late team news significantly impacts your predictions, such as key players being injured or rested.",
-    },
-  ];
+  // Use context gameweek if currentGameweek prop not provided
+  const activeGameweek = currentGameweek || contextGameweek;
+
+  // Get chips from context
+  const gameweekChips = getGameweekChips().map((chip) => ({
+    ...chip,
+    // Map display properties
+    cooldownRemaining: chip.remainingGameweeks || 0,
+    // Calculate remaining uses: seasonLimit - usageCount
+    remainingUses: chip.seasonLimit
+      ? chip.seasonLimit - (chip.usageCount || 0)
+      : null,
+  }));
+
+  const matchChips = getMatchChips().map((chip) => ({
+    ...chip,
+    // Map display properties
+    cooldownRemaining: chip.remainingGameweeks || 0,
+    // Calculate remaining uses: seasonLimit - usageCount
+    remainingUses: chip.seasonLimit
+      ? chip.seasonLimit - (chip.usageCount || 0)
+      : null,
+  }));
 
   // Combined chips for display
   const allChips = [...gameweekChips, ...matchChips];
 
+  // Apply gameweek chip with retroactive application to all pending predictions
+  const handleApplyGameweekChip = async (chipId) => {
+    setIsApplying(true);
+    setApplyProgress({ current: 0, total: 0 });
+
+    try {
+      // Refetch predictions to ensure we have the latest chip data
+      let freshPredictions = userPredictions;
+      
+      if (refetchPredictions) {
+        const refetchResult = await refetchPredictions();
+        freshPredictions = refetchResult.data || userPredictions;
+      }
+
+      // Filter pending predictions in current gameweek using fresh data
+      const pendingPredictions = freshPredictions.filter(pred => {
+        const gameweekMatch = pred.gameweek === activeGameweek;
+        const isPending = pred.status === 'pending';
+        return gameweekMatch && isPending;
+      });
+
+      // CHIP-SPECIFIC FILTERING: Use centralized isChipApplicableToPrediction()
+      const applicablePredictions = pendingPredictions.filter(pred =>
+        isChipApplicableToPrediction(chipId, pred).applicable
+      );
+
+      if (applicablePredictions.length === 0) {
+        const chipName = getChipInfo(chipId)?.name || chipId;
+        showToast(`No eligible predictions for ${chipName}`, 'info');
+        setIsApplying(false);
+        return;
+      }
+
+      setApplyProgress({ current: 0, total: applicablePredictions.length });
+
+      // Update each prediction with the new chip
+      const results = [];
+      for (let i = 0; i < applicablePredictions.length; i++) {
+        const prediction = applicablePredictions[i];
+
+        // 🔧 DEFENSIVE: Ensure chips are in frontend format (camelCase)
+        // Backend should send camelCase, but add transformation as safety net
+        const existingChips = (prediction.chips || []).map(chip => {
+          // If already camelCase (starts with lowercase), return as-is
+          if (chip && chip[0] === chip[0].toLowerCase()) {
+            return chip;
+          }
+          // If UPPER_CASE, try to transform (defensive coding)
+          const transformed = Object.keys(CHIP_MAPPING).find(
+            key => CHIP_MAPPING[key] === chip
+          );
+          if (transformed) {
+            console.warn('⚠️ [CHIP FORMAT] Found backend-format chip, transforming:', {
+              original: chip,
+              transformed,
+              match: `${prediction.homeTeam} vs ${prediction.awayTeam}`
+            });
+            return transformed;
+          }
+          return chip; // Fallback to original
+        });
+
+        console.log('🔍 [CHIP MERGE] Before merge:', {
+          matchId: prediction.matchId,
+          match: `${prediction.homeTeam} vs ${prediction.awayTeam}`,
+          existingChips,
+          chipToAdd: chipId
+        });
+
+        const updatedChips = [...existingChips];
+
+        if (!updatedChips.includes(chipId)) {
+          updatedChips.push(chipId);
+        }
+
+        console.log('🔍 [CHIP MERGE] After merge:', {
+          matchId: prediction.matchId,
+          updatedChips,
+          count: updatedChips.length
+        });
+
+        // Create updated prediction payload
+        const updatedPrediction = {
+          homeScore: prediction.homeScore,
+          awayScore: prediction.awayScore,
+          homeScorers: prediction.homeScorers || [],
+          awayScorers: prediction.awayScorers || [],
+          chips: updatedChips
+        };
+
+        // Create fixture object for API call
+        const fixture = {
+          id: prediction.matchId,
+          homeTeam: prediction.homeTeam,
+          awayTeam: prediction.awayTeam,
+          date: prediction.matchDate,
+          gameweek: prediction.gameweek
+        };
+
+        try {
+          const result = await userPredictionsAPI.makePrediction(
+            updatedPrediction,
+            fixture,
+            true // isEditing = true
+          );
+
+          results.push({ success: result.success, match: `${prediction.homeTeam} vs ${prediction.awayTeam}` });
+          setApplyProgress({ current: i + 1, total: pendingPredictions.length });
+        } catch (error) {
+          console.error(`❌ Failed to update prediction:`, error);
+          results.push({ success: false, match: `${prediction.homeTeam} vs ${prediction.awayTeam}`, error: error.message });
+        }
+      }
+
+      // Count successes and failures
+      const successes = results.filter(r => r.success).length;
+      const failures = results.filter(r => !r.success).length;
+      const chipName = getChipInfo(chipId)?.name || chipId;
+
+      if (successes > 0) {
+        showToast(
+          `${chipName} applied to ${successes} prediction${successes > 1 ? 's' : ''}${failures > 0 ? ` (${failures} failed)` : ''}`,
+          failures > 0 ? 'warning' : 'success'
+        );
+      } else {
+        showToast(`Failed to apply ${chipName} to predictions`, 'error');
+      }
+
+      // Refresh chip status from backend
+      await refreshChips();
+
+      // Call parent callback if provided
+      if (onApplyChip) {
+        onApplyChip(chipId, activeGameweek);
+      }
+
+    } catch (error) {
+      console.error('❌ Error applying gameweek chip:', error);
+      showToast(`Failed to apply chip: ${error.message}`, 'error');
+    } finally {
+      setIsApplying(false);
+      setApplyProgress({ current: 0, total: 0 });
+      setShowConfirmModal(false);
+      setSelectedChip(null);
+    }
+  };
+
   // Toggle chip selection
   const selectChipForConfirmation = (chipId) => {
-    // Check if trying to remove or apply
-    const alreadyActive = activeChips.some((c) => c.id === chipId);
+    // Check if this is a gameweek chip
+    if (!isGameweekChip(chipId)) {
+      console.warn('⚠️ Only gameweek chips can be applied from this panel');
+      return;
+    }
+
+    // Check if already active (from backend)
+    const alreadyActive = activeGameweekChips?.includes(chipId);
 
     if (alreadyActive) {
-      // Directly remove if already active (no confirmation needed)
-      removeChip(chipId);
+      // Cannot remove gameweek chips once applied (immutability)
+      showToast('Gameweek chips cannot be removed once applied', 'error');
       return;
     }
 
@@ -142,31 +257,7 @@ const GameweekChipsPanel = ({
   // Handle chip application after confirmation
   const confirmChipApplication = () => {
     if (!selectedChip) return;
-
-    // Add to active chips
-    setActiveChips((prev) => {
-      // Only allow one of each type
-      if (prev.find((c) => c.id === selectedChip.id)) return prev;
-      return [...prev, selectedChip];
-    });
-
-    // Call parent handler
-    if (onApplyChip) {
-      onApplyChip(selectedChip.id, currentGameweek);
-    }
-
-    setShowConfirmModal(false);
-    setSelectedChip(null);
-  };
-
-  // Remove an applied chip
-  const removeChip = (chipId) => {
-    setActiveChips((prev) => prev.filter((chip) => chip.id !== chipId));
-
-    // Call parent handler to remove the chip
-    if (onApplyChip) {
-      onApplyChip(chipId, currentGameweek, true); // true indicates removal
-    }
+    handleApplyGameweekChip(selectedChip.id);
   };
 
   // Format fixture name helper
@@ -178,7 +269,7 @@ const GameweekChipsPanel = ({
   };
 
   // Get count of active chips (for the header)
-  const activeChipsCount = activeChips.length + activeMatchChips.length;
+  const activeChipsCount = (activeGameweekChips?.length || 0) + activeMatchChips.length;
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -194,63 +285,87 @@ const GameweekChipsPanel = ({
     >
       {/* Status indicator bar */}
       <div className="h-0.5 bg-gradient-to-r from-teal-500 via-blue-500 to-purple-500"></div>
-      {/* Header*/}
+      {/* Header - OPTIMIZED FOR MOBILE */}
       <div
-        className={`px-5 py-3 border-b ${getThemeStyles(theme, {
+        className={`px-4 sm:px-5 py-3 sm:py-4 border-b ${getThemeStyles(theme, {
           dark: "border-slate-700/50",
           light: "border-slate-200",
         })}`}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center">
-              <LightningBoltIcon className="w-4 h-4 text-teal-400" />
-            </div>{" "}
-            <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+              <LightningBoltIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400" />
+            </div>
+            <div className="min-w-0 flex-1">
               <h3
-                className={`text-base font-semibold ${getThemeStyles(
+                className={`text-base sm:text-lg font-semibold ${getThemeStyles(
                   theme,
                   text.primary
                 )}`}
               >
                 Chip Strategy
               </h3>
-              <p className={`text-sm ${getThemeStyles(theme, text.secondary)}`}>
+              {/* Subtitle hidden on mobile */}
+              <p
+                className={`hidden sm:block text-xs sm:text-sm ${getThemeStyles(
+                  theme,
+                  text.secondary
+                )}`}
+              >
                 Enhance your predictions with strategic chip usage
               </p>
             </div>
-          </div>          <div className="flex items-center gap-3">
+          </div>
+          {/* Right: Badges + Collapse button */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Active chips count - show on all screens */}
             {activeChipsCount > 0 && (
-              <div className={`rounded-full px-3 py-1 flex items-center font-outfit border ${getThemeStyles(
-                theme,
-                {
-                  dark: "bg-teal-900/40 border-teal-700/30 text-teal-300",
-                  light: "bg-teal-100 border-teal-200 text-teal-700",
-                }
-              )}`}>
-                <span className="text-xs">
-                  <span className="font-medium">{activeChipsCount}</span> active
+              <div
+                className={`rounded-full px-2.5 sm:px-3 py-1 flex items-center font-outfit border ${getThemeStyles(
+                  theme,
+                  {
+                    dark: "bg-teal-900/40 border-teal-700/30 text-teal-300",
+                    light: "bg-teal-100 border-teal-200 text-teal-700",
+                  }
+                )}`}
+              >
+                <span className="text-xs sm:text-sm font-medium">
+                  {activeChipsCount}
                 </span>
+                <span className="text-xs sm:text-sm ml-0.5"> active</span>
               </div>
             )}
-            <div className={`rounded-full px-3 py-1 flex items-center font-outfit border ${getThemeStyles(
-              theme,
-              {
-                dark: "bg-blue-900/40 border-blue-700/30 text-blue-300",
-                light: "bg-blue-100 border-blue-200 text-blue-700",
-              }
-            )}`}>
-              <span className={`text-sm mr-1 ${getThemeStyles(theme, {
-                dark: "text-blue-200/70",
-                light: "text-blue-600/70",
-              })}`}>GW:</span>
-              <span className="font-medium text-sm">{currentGameweek}</span>
-            </div>{" "}
+
+            {/* Gameweek badge - consistent sizing */}
+            <div
+              className={`rounded-full px-2.5 sm:px-3 py-1 flex items-center font-outfit border ${getThemeStyles(
+                theme,
+                {
+                  dark: "bg-blue-900/40 border-blue-700/30 text-blue-300",
+                  light: "bg-blue-100 border-blue-200 text-blue-700",
+                }
+              )}`}
+            >
+              <span
+                className={`text-xs sm:text-sm ${getThemeStyles(theme, {
+                  dark: "text-blue-200/70",
+                  light: "text-blue-600/70",
+                })}`}
+              >
+                GW
+              </span>
+              <span className="font-medium text-xs sm:text-sm ml-0.5 sm:ml-1">
+                {activeGameweek}
+              </span>
+            </div>
+
+            {/* Collapse button - increased mobile size */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
-              className={`p-2 rounded-lg transition-all duration-200 border ${getThemeStyles(
+              className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 border ${getThemeStyles(
                 theme,
                 {
                   dark: "bg-slate-700/50 hover:bg-slate-700/70 text-slate-300 hover:text-slate-200 border-slate-600/50 hover:border-slate-500/50",
@@ -288,7 +403,8 @@ const GameweekChipsPanel = ({
                 })}`}
               >
                 <div className="flex">
-                  {" "}                  <button
+                  {" "}
+                  <button
                     onClick={() => setSelectedTab("gameweek")}
                     className={`py-2 px-4 text-sm relative transition-colors ${
                       selectedTab === "gameweek"
@@ -312,7 +428,8 @@ const GameweekChipsPanel = ({
                         layoutId="tabIndicator"
                       />
                     )}
-                  </button>{" "}                  <button
+                  </button>{" "}
+                  <button
                     onClick={() => setSelectedTab("match")}
                     className={`py-2 px-4 text-sm relative transition-colors ${
                       selectedTab === "match"
@@ -354,9 +471,7 @@ const GameweekChipsPanel = ({
                       <div className="p-2">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
                           {gameweekChips.map((chip) => {
-                            const isActive = activeChips.some(
-                              (c) => c.id === chip.id
-                            );
+                            const isActive = activeGameweekChips?.includes(chip.id);
                             const isAvailable = chip.available && !isActive;
 
                             return (
@@ -416,14 +531,18 @@ const GameweekChipsPanel = ({
                                         )}`}
                                       >
                                         {chip.name}
-                                      </div>{" "}                                      {isActive && (
-                                        <div className={`flex items-center text-2xs px-1.5 py-0.5 rounded ${getThemeStyles(
-                                          theme,
-                                          {
-                                            dark: "bg-teal-700/30 text-teal-300",
-                                            light: "bg-teal-100 text-teal-700",
-                                          }
-                                        )}`}>
+                                      </div>{" "}
+                                      {isActive && (
+                                        <div
+                                          className={`flex items-center text-2xs px-1.5 py-0.5 rounded ${getThemeStyles(
+                                            theme,
+                                            {
+                                              dark: "bg-teal-700/30 text-teal-300",
+                                              light:
+                                                "bg-teal-100 text-teal-700",
+                                            }
+                                          )}`}
+                                        >
                                           <CheckIcon className="w-2.5 h-2.5 mr-0.5" />
                                           <span>Active</span>
                                         </div>
@@ -436,7 +555,9 @@ const GameweekChipsPanel = ({
                                   {" "}
                                   <div className="flex items-center justify-between text-xs">
                                     <div className="flex gap-1">
-                                      {chip.cooldown && (
+                                      {(chip.cooldown > 0 ||
+                                        (chip.cooldown === 0 &&
+                                          !chip.seasonLimit)) && (
                                         <div
                                           className={`px-1.5 py-0.5 rounded ${getThemeStyles(
                                             theme,
@@ -447,7 +568,10 @@ const GameweekChipsPanel = ({
                                             }
                                           )}`}
                                         >
-                                          {chip.cooldown} GW{" "}
+                                          {chip.cooldown === 0 &&
+                                          !chip.seasonLimit
+                                            ? "Always available"
+                                            : `${chip.cooldown} GW`}
                                         </div>
                                       )}
                                       {chip.seasonLimit && (
@@ -465,7 +589,7 @@ const GameweekChipsPanel = ({
                                           {chip.seasonLimit} left
                                         </div>
                                       )}
-                                    </div>{" "}
+                                    </div>
                                     {!isActive &&
                                       chip.cooldownRemaining > 0 && (
                                         <div className="bg-red-900/30 text-red-300 px-1.5 py-0.5 rounded">
@@ -474,7 +598,7 @@ const GameweekChipsPanel = ({
                                       )}
                                   </div>
                                 </div>{" "}
-                                {/* Apply/Remove button */}{" "}
+                                {/* Apply/Locked button */}{" "}
                                 <div
                                   className={`mt-auto border-t ${getThemeStyles(
                                     theme,
@@ -485,22 +609,18 @@ const GameweekChipsPanel = ({
                                   )}`}
                                 >
                                   {isActive ? (
-                                    <motion.button
-                                      whileHover={{ scale: 1.02 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      onClick={() => removeChip(chip.id)}
+                                    <div
                                       className={`w-full text-xs py-1.5 transition-all duration-200 flex items-center justify-center ${getThemeStyles(
                                         theme,
                                         {
-                                          dark: "text-slate-300 hover:text-slate-100 hover:bg-slate-700/40",
-                                          light:
-                                            "text-slate-600 hover:text-slate-800 hover:bg-slate-100",
+                                          dark: "text-teal-300 bg-teal-900/20",
+                                          light: "text-teal-700 bg-teal-100",
                                         }
                                       )}`}
+                                      title="Gameweek chips cannot be removed once applied"
                                     >
-                                      <Cross2Icon className="w-3 h-3 mr-1" />
-                                      Remove
-                                    </motion.button>
+                                      🔒 Active (Locked)
+                                    </div>
                                   ) : isAvailable ? (
                                     <motion.button
                                       whileHover={{ scale: 1.02 }}
@@ -508,9 +628,10 @@ const GameweekChipsPanel = ({
                                       onClick={() =>
                                         selectChipForConfirmation(chip.id)
                                       }
-                                      className="w-full bg-indigo-600/60 hover:bg-indigo-600/80 text-white text-xs py-1.5 transition-all duration-200"
+                                      disabled={isApplying}
+                                      className="w-full bg-indigo-600/60 hover:bg-indigo-600/80 text-white text-xs py-1.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                      Apply
+                                      {isApplying ? 'Applying...' : 'Apply'}
                                     </motion.button>
                                   ) : (
                                     <div
@@ -786,7 +907,7 @@ const GameweekChipsPanel = ({
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal with Progress */}
       <AnimatePresence>
         {showConfirmModal && selectedChip && (
           <motion.div
@@ -800,14 +921,14 @@ const GameweekChipsPanel = ({
                 light: "bg-white/85",
               }
             )}`}
-            onClick={() => setShowConfirmModal(false)}
+            onClick={() => !isApplying && setShowConfirmModal(false)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 15 }}
-              className={`rounded-xl p-4 max-w-[281px] w-full font-outfit shadow-xl border ${getThemeStyles(
+              className={`rounded-xl p-4 max-w-[320px] w-full font-outfit shadow-xl border ${getThemeStyles(
                 theme,
                 {
                   dark: "bg-gradient-to-b from-slate-800 to-slate-900 border-slate-600/50",
@@ -838,10 +959,11 @@ const GameweekChipsPanel = ({
                       text.secondary
                     )}`}
                   >
-                    Gameweek {currentGameweek}
+                    Gameweek {activeGameweek}
                   </p>
                 </div>
               </div>{" "}
+              
               {/* Description */}
               <div
                 className={`rounded-lg p-3 mb-3 border ${getThemeStyles(theme, {
@@ -853,24 +975,79 @@ const GameweekChipsPanel = ({
                   className={`text-sm leading-relaxed mb-1.5 ${getThemeStyles(
                     theme,
                     text.secondary
-                  )}`}                >
-                  This chip affects{" "}
-                  <span className={`font-medium ${getThemeStyles(theme, {
-                    dark: "text-teal-300",
-                    light: "text-teal-600",
-                  })}`}>
-                    all predictions
+                  )}`}
+                >
+                  This will apply to{" "}
+                  <span
+                    className={`font-medium ${getThemeStyles(theme, {
+                      dark: "text-teal-300",
+                      light: "text-teal-600",
+                    })}`}
+                  >
+                    all pending predictions
                   </span>{" "}
-                  for this gameweek.
+                  in this gameweek.
+                </p>
+                <p
+                  className={`text-xs ${getThemeStyles(theme, {
+                    dark: "text-amber-400",
+                    light: "text-amber-700",
+                  })}`}
+                >
+                  ⚠️ Cannot be removed once applied
                 </p>
               </div>{" "}
+              
+              {/* Progress indicator */}
+              {isApplying && (
+                <div
+                  className={`rounded-lg p-3 mb-3 border ${getThemeStyles(theme, {
+                    dark: "bg-blue-900/20 border-blue-700/30",
+                    light: "bg-blue-50 border-blue-200",
+                  })}`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <UpdateIcon className="w-4 h-4 animate-spin text-blue-400" />
+                    <span
+                      className={`text-sm font-medium ${getThemeStyles(theme, {
+                        dark: "text-blue-300",
+                        light: "text-blue-700",
+                      })}`}
+                    >
+                      Applying chip...
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-700/30 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-blue-500"
+                      initial={{ width: '0%' }}
+                      animate={{ 
+                        width: applyProgress.total > 0 
+                          ? `${(applyProgress.current / applyProgress.total) * 100}%` 
+                          : '0%' 
+                      }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                  <p
+                    className={`text-xs mt-1 text-center ${getThemeStyles(theme, {
+                      dark: "text-blue-400",
+                      light: "text-blue-600",
+                    })}`}
+                  >
+                    {applyProgress.current} / {applyProgress.total} predictions
+                  </p>
+                </div>
+              )}
+              
               {/* Actions */}
               <div className="flex gap-2">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowConfirmModal(false)}
-                  className={`flex-1 px-3 py-2 border rounded-lg transition-all duration-200 text-sm ${getThemeStyles(
+                  disabled={isApplying}
+                  className={`flex-1 px-3 py-2 border rounded-lg transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed ${getThemeStyles(
                     theme,
                     {
                       dark: "border-slate-600/50 text-slate-300 hover:text-slate-100 hover:bg-slate-700/30 hover:border-slate-500/50",
@@ -885,10 +1062,20 @@ const GameweekChipsPanel = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={confirmChipApplication}
-                  className="flex-1 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-all duration-200 text-sm flex items-center justify-center font-medium border border-teal-500/50 hover:border-teal-400/50"
+                  disabled={isApplying}
+                  className="flex-1 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-all duration-200 text-sm flex items-center justify-center font-medium border border-teal-500/50 hover:border-teal-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CheckIcon className="mr-1.5 w-4 h-4" />
-                  Apply
+                  {isApplying ? (
+                    <>
+                      <UpdateIcon className="mr-1.5 w-4 h-4 animate-spin" />
+                      Applying...
+                    </>
+                  ) : (
+                    <>
+                      <CheckIcon className="mr-1.5 w-4 h-4" />
+                      Apply
+                    </>
+                  )}
                 </motion.button>
               </div>
             </motion.div>

@@ -4,7 +4,6 @@ import {
   LayoutIcon,
   StackIcon,
   CalendarIcon,
-  ClockIcon,
   TableIcon,
   ListBulletIcon,
   PersonIcon,
@@ -33,8 +32,8 @@ const PredictionViewToggleBar = ({ viewMode, setViewMode }) => {
           icon={<ListBulletIcon />}
           active={viewMode === "list"}
           onClick={() => setViewMode("list")}
-          tooltip="List View"
-          label="List"
+          tooltip="Grid View"
+          label="Grid"
         />
         <ViewToggleButton
           icon={<TableIcon />}
@@ -56,13 +55,6 @@ const PredictionViewToggleBar = ({ viewMode, setViewMode }) => {
           onClick={() => setViewMode("calendar")}
           tooltip="Calendar View"
           label="Calendar"
-        />
-        <ViewToggleButton
-          icon={<ClockIcon />}
-          active={viewMode === "timeline"}
-          onClick={() => setViewMode("timeline")}
-          tooltip="Timeline"
-          label="Timeline"
         />
         <ViewToggleButton
           icon={<LayoutIcon />}

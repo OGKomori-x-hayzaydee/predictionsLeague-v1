@@ -1,5 +1,6 @@
 import baseAPI, { apiCall, setTokens, clearTokens } from './baseAPI.js';
 import { handleApiError } from '../../utils/apiErrorHandler.js';
+import { mapTeamToBackendFormat } from '../../utils/teamUtils.js';
 
 /**
  * Authentication API service
@@ -44,43 +45,136 @@ export const authAPI = {
   },
 
   /**
-   * Register new user
+   * Complete user profile (for regular signup flow)
+   * @param {Object} profileData - Profile completion data
+   * @param {string} profileData.username - Chosen username
+   * @param {string} profileData.favouriteTeam - Selected favorite team
+   * @param {string} [profileData.email] - User's email address (optional - backend can identify from session)
+   * @returns {Promise<Object>} Profile completion response
+   */
+  async completeProfile(profileData) {
+    try {
+      console.log('CompleteProfile - Input data:', profileData);
+      console.log('CompleteProfile - Email present?', !!profileData.email);
+      console.log('CompleteProfile - Email value:', profileData.email);
+      
+      const mappedTeam = mapTeamToBackendFormat(profileData.favouriteTeam);
+      console.log('CompleteProfile - Team mapping:', {
+        original: profileData.favouriteTeam,
+        mapped: mappedTeam
+      });
+      
+      const requestData = {
+        username: profileData.username,
+        favouriteTeam: mappedTeam,
+      };
+      
+      // Include email only if provided (backend can identify user from session if not provided)
+      if (profileData.email) {
+        requestData.email = profileData.email;
+        console.log('CompleteProfile - Email added to request:', requestData.email);
+      } else {
+        console.log('CompleteProfile - No email provided, backend will identify from session');
+      }
+      
+      console.log('CompleteProfile - Final request data:', requestData);
+      
+      const response = await apiCall({
+        method: 'POST',
+        url: '/auth/finish-registration',
+        data: requestData,
+      });
+
+      console.log('CompleteProfile - API response received:', response);
+
+      if (response.success) {
+        console.log('CompleteProfile - Success! Setting tokens and returning user data');
+        console.log('CompleteProfile - Response data:', response.data);
+        
+        // Profile completion successful - user is now fully authenticated
+        setTokens('http-only', 'http-only'); // Mark as authenticated
+        console.log('CompleteProfile - Tokens set to http-only');
+        
+        // Handle case where backend doesn't return user object
+        let userData = response.data.user;
+        if (!userData) {
+          console.log('CompleteProfile - No user data in response, constructing from request');
+          // Construct user data from what we know
+          userData = {
+            username: requestData.username,
+            email: requestData.email,
+            favouriteTeam: requestData.favouriteTeam,
+          };
+        }
+        console.log('CompleteProfile - Final user data:', userData);
+        
+        return {
+          success: true,
+          user: userData,
+          message: response.data.message || response.data || 'Profile completed successfully'
+        };
+      } else {
+        console.error('CompleteProfile - API returned success: false', response.error);
+        throw new Error(response.error?.message || 'Profile completion failed');
+      }
+    } catch (error) {
+      console.error('CompleteProfile - Error caught:', error);
+      handleApiError(error, { customMessage: 'Failed to complete profile. Please try again.' });
+      throw error;
+    }
+  },
+
+  /**
+   * Register new user (initial incomplete registration)
    */
   async register(userData) {
     try {
+      console.log('AuthAPI.register - Starting registration with data:', {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        hasPassword: !!userData.password
+      });
+
       // Frontend validation: Check if passwords match
       if (userData.password !== userData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
 
-      // Only send necessary data to backend (no confirmPassword)
+      // Only send basic user data to backend (no username/favouriteTeam yet)
+      const requestData = {
+        email: userData.email,
+        password: userData.password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        // username and favouriteTeam will be added later via completeProfile
+      };
+
+      console.log('AuthAPI.register - Making API call to /auth/register');
+      
       const response = await apiCall({
         method: 'POST',
         url: '/auth/register',
-        data: {
-          username: userData.username,
-          email: userData.email,
-          password: userData.password,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          favouriteTeam: userData.favouriteTeam,
-        },
+        data: requestData,
       });
 
+      console.log('AuthAPI.register - API response:', response);
+
       if (response.success) {
-        // With HTTP-only cookies, tokens are automatically stored by browser
-        // We only need to handle user data and auth state
-        const { user } = response.data;
-        setTokens('http-only', 'http-only'); // Mark as authenticated
-        
+        console.log('AuthAPI.register - Registration successful');
+        // For incomplete registration, don't set tokens yet
+        // User needs to verify email and complete profile first
         return {
           success: true,
-          user,
+          message: response.data.message || 'Registration initiated. Please verify your email.',
+          // Don't return user data yet since registration is incomplete
         };
       } else {
+        console.error('AuthAPI.register - Registration failed:', response.error);
         throw new Error(response.error?.message || 'Registration failed');
       }
     } catch (error) {
+      console.error('AuthAPI.register - Error caught:', error);
       handleApiError(error, { customMessage: 'Registration failed. Please try again.' });
       throw error;
     }
@@ -91,29 +185,21 @@ export const authAPI = {
    */
   async logout() {
     try {
-      console.log("🔄 authAPI.logout: Starting logout process...");
-      
       const response = await apiCall({
         method: 'POST',
         url: '/auth/logout',
       });
 
-      console.log("📥 authAPI.logout: Backend response:", response);
-
       // Clear tokens regardless of response
       clearTokens();
-      console.log("🧹 authAPI.logout: Tokens cleared");
 
       return {
         success: true,
         message: 'Logged out successfully',
       };
     } catch (error) {
-      console.error("❌ authAPI.logout: Error during logout:", error);
-      
       // Clear tokens even if logout API call fails
       clearTokens();
-      console.log("🧹 authAPI.logout: Tokens cleared despite error");
       
       handleApiError(error, { silent: true });
       
@@ -193,13 +279,12 @@ export const authAPI = {
 
   /**
    * Get current user information
-   * Uses existing protected endpoint since /auth/me doesn't exist
+   * Uses the /dashboard/me endpoint
    * @returns {Promise<Object>} Current user data
    */
   async getCurrentUser() {
     try {
-      // Use existing protected endpoint to verify authentication
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/profile/home`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/dashboard/me`, {
         method: 'GET',
         credentials: 'include', // Include HTTP-only cookies
         headers: {
@@ -208,88 +293,28 @@ export const authAPI = {
       });
 
       if (response.ok) {
-        const responseText = await response.text();
-        console.log('Auth check response:', responseText);
+        const responseData = await response.json();
         
-        // Extract email from response text "Viewing the HomePage of {email}"
-        const emailMatch = responseText.match(/of (.+)$/);
-        const email = emailMatch ? emailMatch[1].trim() : null;
+        // Extract the user object from the response structure
+        const user = responseData.user || responseData;
         
-        if (email) {
-          return {
-            success: true,
-            user: {
-              email: email,
-              authenticated: true,
-              source: 'profile-endpoint'
-            },
-          };
-        } else {
-          throw new Error('Could not extract user info from response');
-        }
+        // Update localStorage to reflect successful authentication
+        setTokens('http-only', 'http-only');
+        
+        // Return the extracted user object
+        return {
+          success: true,
+          user: user,
+        };
       } else {
         throw new Error(`Authentication check failed: ${response.status}`);
       }
     } catch (error) {
-      // Don't show error notifications for auth checks
-      console.error('getCurrentUser error:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * ADDED: Get user info compatible with OAuth flow
-   * Provides better structure for OAuth users during onboarding
-   * @returns {Promise<Object>} OAuth-compatible user data
-   */
-  async getOAuthUserInfo() {
-    try {
-      console.log('🔄 Getting OAuth-compatible user info');
-      
-      // First check if user is authenticated using existing endpoint
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/profile/home`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const responseText = await response.text();
-        
-        // Extract email from response text
-        const emailMatch = responseText.match(/of (.+)$/);
-        const email = emailMatch ? emailMatch[1].trim() : null;
-        
-        if (email) {
-          // TODO: When your backend provides a proper user info endpoint, use it here
-          // For now, provide OAuth-compatible structure with what we have
-          return {
-            success: true,
-            user: {
-              email: email,
-              authenticated: true,
-              source: 'oauth-compatible',
-              // Placeholder fields for OAuth users
-              // These will be properly populated by your backend
-              userID: null, // Will be filled by backend
-              username: null, // Will be filled during onboarding  
-              firstName: null, // Will be filled by backend
-              lastName: null, // Will be filled by backend
-              favouriteTeam: null, // Will be filled during onboarding
-              profilePicture: null, // Will be filled by backend
-              isOAuthUser: true, // Mark as OAuth user
-            },
-          };
-        } else {
-          throw new Error('Could not extract user info from response');
-        }
-      } else {
-        throw new Error(`OAuth user info check failed: ${response.status}`);
+      // Don't log 401 errors - they're expected for OAuth users during onboarding
+      if (!error.message?.includes('401') && !error.message?.includes('Authentication check failed: 401')) {
+        console.error('AuthAPI.getCurrentUser - Unexpected error:', error);
       }
-    } catch (error) {
-      console.error('getOAuthUserInfo error:', error);
+      // Still throw the error so AuthContext can handle it appropriately
       throw error;
     }
   },
@@ -299,87 +324,48 @@ export const authAPI = {
    * @param {Object} profileData - Profile completion data
    * @param {string} profileData.username - Chosen username
    * @param {string} profileData.favouriteTeam - Selected favorite team
+   * @param {string} [profileData.email] - User's email address (optional - from OAuth callback)
    * @returns {Promise<Object>} Profile completion response
    */
   async completeOAuthProfile(profileData) {
     try {
-      console.log('🔄 Completing OAuth profile');
+      console.log('CompleteOAuthProfile - Input data:', profileData);
       
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/oauth2/complete-profile`, {
+      const requestData = {
+        username: profileData.username,
+        favouriteTeam: mapTeamToBackendFormat(profileData.favouriteTeam) // Convert to backend format
+      };
+      
+      // Include email if provided from OAuth callback
+      if (profileData.email) {
+        requestData.email = profileData.email;
+        console.log('CompleteOAuthProfile - Email included:', profileData.email);
+      } else {
+        console.log('CompleteOAuthProfile - No email provided, backend will identify from session');
+      }
+      
+      console.log('CompleteOAuthProfile - Final request data:', requestData);
+      
+      const response = await apiCall({
         method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: profileData.username,
-          favouriteTeam: profileData.favouriteTeam
-        })
+        url: '/auth/finish-registration',
+        data: requestData
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        
-        if (result.success) {
-          // Mark as authenticated with complete profile
-          setTokens('http-only', 'http-only');
-          
-          return {
-            success: true,
-            user: result.user,
-            message: result.message || 'Profile completed successfully'
-          };
-        } else {
-          throw new Error(result.error || 'Profile completion failed');
-        }
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        
-        if (response.status === 409) {
-          throw new Error(errorData.error || 'Username already taken');
-        } else if (response.status === 400) {
-          throw new Error(errorData.error || 'Invalid profile data');
-        } else if (response.status === 401) {
-          throw new Error('Not authenticated - please sign in again');
-        } else {
-          throw new Error(errorData.error || 'Failed to complete profile');
-        }
-      }
-    } catch (error) {
-      console.error('OAuth profile completion error:', error);
-      handleApiError(error, { customMessage: 'Failed to complete profile. Please try again.' });
-      throw error;
-    }
-  },
-
-  /**
-   * ADDED: Check if current user needs to complete OAuth onboarding
-   * Useful for determining redirect logic
-   * @returns {Promise<Object>} Onboarding status
-   */
-  async checkOAuthOnboardingStatus() {
-    try {
-      // This would ideally call a dedicated endpoint, but for now we use profile check
-      const userInfo = await this.getOAuthUserInfo();
-      
-      if (userInfo.success && userInfo.user) {
-        const user = userInfo.user;
-        const needsOnboarding = !user.username || !user.favouriteTeam;
+      if (response.success) {
+        // Mark as authenticated with complete profile
+        setTokens('http-only', 'http-only');
         
         return {
           success: true,
-          needsOnboarding,
-          user: user,
-          missingFields: {
-            username: !user.username,
-            favouriteTeam: !user.favouriteTeam,
-          }
+          user: response.data.user,
+          message: response.data.message || 'Profile completed successfully'
         };
       } else {
-        throw new Error('Could not determine onboarding status');
+        throw new Error(response.error?.message || 'Profile completion failed');
       }
     } catch (error) {
-      console.error('OAuth onboarding status check error:', error);
+      handleApiError(error, { customMessage: 'Failed to complete profile. Please try again.' });
       throw error;
     }
   },

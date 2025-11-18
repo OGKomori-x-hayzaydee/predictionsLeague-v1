@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 import { hasUnpredictedFixture } from "../../utils/fixtureUtils";
-import FixtureCard from "./FixtureCard";
+import FixtureCard from "./FixtureCardOption2";
 
 const DateGroup = ({ date, fixtures, selectedFixture, onFixtureClick, teamLogos }) => {
   const { theme } = useContext(ThemeContext);

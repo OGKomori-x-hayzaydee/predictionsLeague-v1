@@ -5,9 +5,11 @@ import UniversalDateGroup from "../common/UniversalDateGroup";
 import useCarouselScroll from "../../hooks/useCarouselScroll";
 import { groupFixturesByDate, filterFixturesByQuery } from "../../utils/fixtureUtils";
 import { normalizeTeamName } from "../../utils/teamUtils";
-import { teamLogos } from "../../data/sampleData";
+import { getTeamLogo } from "../../utils/teamLogos";
 import EmptyFixtureState from "./EmptyFixtureState";
 import { ThemeContext } from "../../context/ThemeContext";
+import { isPredictionDeadlinePassed } from "../../utils/dateUtils";
+import { showToast } from "../../services/notificationService";
 
 export default function FixtureCarousel({
   fixtures,
@@ -29,8 +31,8 @@ export default function FixtureCarousel({
     "Arsenal",
     "Chelsea",
     "Liverpool",
-    "Man. City",
-    "Man. United",
+    "Man City",
+    "Man United",
     "Tottenham",
   ];
 
@@ -46,6 +48,12 @@ export default function FixtureCarousel({
 
   // Handle selection
   const handleFixtureClick = (fixture) => {
+    // Check if deadline has passed
+    if (isPredictionDeadlinePassed(fixture.date)) {
+      showToast('Deadline has passed for this match', 'error');
+      return;
+    }
+    
     setSelectedFixture(fixture);
     if (onFixtureSelect) {
       onFixtureSelect(fixture);
@@ -163,7 +171,6 @@ export default function FixtureCarousel({
                     type="fixtures"
                     selectedItem={selectedFixture}
                     onItemClick={handleFixtureClick}
-                    teamLogos={teamLogos}
                   />
                 </motion.div>
               ))}

@@ -8,9 +8,11 @@ import {
 } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 import { text, buttons } from "../../utils/themeUtils";
+import useLeagues from "../../hooks/useLeagues";
 
 const CreateLeagueForm = ({ onCancel, onSuccess }) => {
   const { theme } = useContext(ThemeContext);
+  const { createLeague } = useLeagues();
   const [leagueData, setLeagueData] = useState({
     name: "",
     type: "private",
@@ -32,11 +34,17 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Here you would call your API to create the league
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      onSuccess();
+      // Transform form data to match API expectations
+      const apiData = {
+        name: leagueData.name,
+        description: leagueData.description,
+        isPrivate: leagueData.type === "private"
+      };
+      
+      const league = await createLeague(apiData);
+      console.log('League creation completed:', league);
+      onSuccess(); // This will close the modal and the state should already be updated
     } catch (error) {
       console.error("Error creating league:", error);
     } finally {

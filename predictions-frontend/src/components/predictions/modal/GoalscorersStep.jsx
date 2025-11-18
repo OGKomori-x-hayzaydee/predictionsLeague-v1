@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { motion } from "framer-motion";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { getThemeStyles } from "../../../utils/themeUtils";
-import { TargetIcon } from "@radix-ui/react-icons";
+import { TargetIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import ScoreDisplay from "./ScoreDisplay";
 import GoalscorerSelector from "./GoalscorerSelector";
 import ChipSelector from "./ChipSelector";
@@ -17,8 +17,13 @@ export default function GoalscorersStep({
   onAwayScorerChange, 
   selectedChips, 
   onToggleChip, 
-  toggleChipInfoModal, 
-  errors 
+  toggleChipInfoModal,
+  gameweek,
+  chipWarning,
+  errors,
+  isEditing = false,
+  lockedChips = [], // Array of chips that cannot be removed (already applied)
+  userPredictions = [] // For validating gameweek-limited chips
 }) {
   const { theme } = useContext(ThemeContext);
 
@@ -31,19 +36,15 @@ export default function GoalscorersStep({
       transition={{ duration: 0.3 }}
     >
       {/* Score summary */}
-      <div
-        className={`${getThemeStyles(theme, {
-          dark: "bg-slate-800/50 border-slate-700/60",
-          light: "bg-slate-50/50 border-slate-200/60",
-        })} border rounded-xl p-4 mb-6 font-outfit`}
-      >
-        <div
-          className={`${getThemeStyles(theme, {
-            dark: "text-slate-300",
-            light: "text-slate-700",
-          })} text-sm font-medium mb-3 text-center`}
-        >
-          Your predicted score
+      <div className={`rounded-xl p-6 mb-6 ${getThemeStyles(theme, {
+        dark: 'bg-slate-800/50 border border-slate-700/60',
+        light: 'bg-slate-50 border border-slate-200'
+      })}`}>
+        <div className={`text-xs font-medium mb-3 font-outfit text-center ${getThemeStyles(theme, {
+          dark: 'text-slate-400',
+          light: 'text-slate-600'
+        })}`}>
+          Your Predicted Score
         </div>
         <ScoreDisplay 
           fixture={fixture} 
@@ -54,18 +55,20 @@ export default function GoalscorersStep({
       </div>
 
       {/* Goalscorers section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-            <TargetIcon className="w-5 h-5 text-blue-400" />
-          </div>
-          <h3
-            className={`${getThemeStyles(theme, {
-              dark: "text-slate-100",
-              light: "text-slate-900",
-            })} text-xl font-bold font-outfit`}
-          >
-            Goalscorers
+      <div className={`rounded-xl p-6 mb-6 ${getThemeStyles(theme, {
+        dark: 'bg-slate-800/50 border border-slate-700/60',
+        light: 'bg-slate-50 border border-slate-200'
+      })}`}>
+        <div className="flex items-center space-x-2 mb-4">
+          <TargetIcon className={`w-5 h-5 ${getThemeStyles(theme, {
+            dark: 'text-blue-400',
+            light: 'text-blue-600'
+          })}`} />
+          <h3 className={`text-lg font-semibold font-outfit ${getThemeStyles(theme, {
+            dark: 'text-slate-200',
+            light: 'text-slate-800'
+          })}`}>
+            Select Goalscorers
           </h3>
         </div>
 
@@ -80,6 +83,7 @@ export default function GoalscorersStep({
                   score={homeScore}
                   scorers={homeScorers}
                   onScorerChange={onHomeScorerChange}
+                  players={fixture.homePlayers || []}
                   error={errors.homeScorers}
                 />
               )}
@@ -92,6 +96,7 @@ export default function GoalscorersStep({
                   score={awayScore}
                   scorers={awayScorers}
                   onScorerChange={onAwayScorerChange}
+                  players={fixture.awayPlayers || []}
                   error={errors.awayScorers}
                 />
               )}
@@ -129,7 +134,39 @@ export default function GoalscorersStep({
         selectedChips={selectedChips}
         onToggleChip={onToggleChip}
         toggleChipInfoModal={toggleChipInfoModal}
+        gameweek={gameweek}
+        lockedChips={lockedChips}
+        userPredictions={userPredictions}
+        currentMatchId={fixture?.id}
       />
+
+      {/* Chip warning banner */}
+      {chipWarning && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mt-4 rounded-xl p-4 border flex items-start gap-3 ${getThemeStyles(theme, {
+            dark: 'bg-amber-500/10 border-amber-500/30',
+            light: 'bg-amber-50 border-amber-300'
+          })}`}
+        >
+          <ExclamationTriangleIcon className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className={`text-sm font-medium font-outfit ${getThemeStyles(theme, {
+              dark: 'text-amber-300',
+              light: 'text-amber-700'
+            })}`}>
+              Chip Availability Warning
+            </p>
+            <p className={`text-xs mt-1 ${getThemeStyles(theme, {
+              dark: 'text-amber-200/80',
+              light: 'text-amber-600'
+            })}`}>
+              {chipWarning}
+            </p>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

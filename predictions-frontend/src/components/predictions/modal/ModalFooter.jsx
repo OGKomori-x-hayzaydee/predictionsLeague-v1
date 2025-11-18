@@ -9,7 +9,8 @@ export default function ModalFooter({
   onPrevStep, 
   onNextStep, 
   onSubmit, 
-  submitting = false 
+  submitting = false,
+  disableNext = false
 }) {
   const { theme } = useContext(ThemeContext);
 
@@ -42,18 +43,27 @@ export default function ModalFooter({
         </motion.button>
 
         {currentStep < totalSteps ? (
-          <motion.button
-            type="button"
-            onClick={onNextStep}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium font-outfit shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40"
-          >
-            <div className="flex items-center">
-              Continue
-              <ChevronRightIcon className="w-4 h-4 ml-1" />
+          disableNext ? (
+            <div className="invisible px-6 py-2.5">
+              <div className="flex items-center">
+                Continue
+                <ChevronRightIcon className="w-4 h-4 ml-1" />
+              </div>
             </div>
-          </motion.button>
+          ) : (
+            <motion.button
+              type="button"
+              onClick={onNextStep}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium font-outfit shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40"
+            >
+              <div className="flex items-center">
+                Continue
+                <ChevronRightIcon className="w-4 h-4 ml-1" />
+              </div>
+            </motion.button>
+          )
         ) : (
           <motion.button
             type="button"

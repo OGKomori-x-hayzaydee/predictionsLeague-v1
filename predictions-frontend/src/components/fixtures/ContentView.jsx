@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import FixtureCarousel from "./FixtureCarousel";
-import FixtureList from "./FixtureList";
+import FixtureGrid from "./FixtureGrid";
 import FixtureCalendar from "./FixtureCalendar";
-import FixtureTimeline from "./FixtureTimeline";
 import FixturesByTeam from "./FixturesByTeam";
 import FixtureTable from "./FixtureTable";
 import FixtureStack from "./FixtureStack";
@@ -81,22 +80,6 @@ const ContentView = ({
         </motion.div>
       )}
 
-      {viewMode === "timeline" && (
-        <motion.div
-          key="timeline"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <FixtureTimeline
-            fixtures={fixtures}
-            onFixtureSelect={onFixtureSelect}
-            searchQuery={searchQuery}
-          />
-        </motion.div>
-      )}
-
       {viewMode === "table" && (
         <motion.div
           key="table"
@@ -121,7 +104,7 @@ const ContentView = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <FixtureList
+          <FixtureGrid
             fixtures={fixtures}
             onFixtureSelect={onFixtureSelect}
             activeGameweekChips={activeGameweekChips}

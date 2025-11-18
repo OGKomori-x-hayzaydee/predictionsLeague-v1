@@ -3,7 +3,6 @@
  * Eliminates duplicate API calls and provides single source of truth for auth checks
  */
 import authAPI from '../api/authAPI.js';
-import oauthSecurity from '../security/OAuthSecurityConfig.js'; // FIXED: Added missing import
 
 class AuthService {
   constructor() {
@@ -53,11 +52,8 @@ class AuthService {
    * Uses cache to prevent duplicate API calls
    */
   async checkAuth({ force = false, source = 'unknown' } = {}) {
-    console.log(`🔍 Auth check requested from: ${source}`);
-
     // Return cached result if still valid and not forced
     if (!force && this.isCacheValid()) {
-      console.log('📋 Returning cached auth state');
       return {
         success: true,
         isAuthenticated: this.authCache.isAuthenticated,
@@ -68,7 +64,6 @@ class AuthService {
 
     // If already checking, return the existing promise
     if (this.authCache.isChecking && this.authCache.promise) {
-      console.log('⏳ Auth check already in progress, waiting...');
       return this.authCache.promise;
     }
 
@@ -87,45 +82,20 @@ class AuthService {
 
   /**
    * Perform actual authentication check
-   * FIXED: Better OAuth compatibility and error handling
    */
   async _performAuthCheck(source) {
     try {
-      console.log(`🔄 Performing secure auth check (source: ${source})`);
-      
-      // Add security validation for OAuth sources
-      if (source.includes('oauth')) {
-        try {
-          // Validate origin for OAuth-related auth checks
-          if (!oauthSecurity.validateOrigin(window.location.origin)) {
-            throw new Error('Authentication check from unauthorized origin');
-          }
-          
-          // Check rate limiting for OAuth auth checks
-          if (!oauthSecurity.checkRateLimit(`auth_check_${source}`)) {
-            throw new Error('Too many authentication attempts');
-          }
-        } catch (securityError) {
-          console.warn('OAuth security validation failed:', securityError.message);
-          // Continue with auth check but log the security concern
-        }
-      }
-      
-      // Use OAuth-compatible method if available, otherwise fallback
-      const response = source.includes('oauth') && authAPI.getOAuthUserInfo 
-        ? await authAPI.getOAuthUserInfo() 
-        : await authAPI.getCurrentUser();
+      // Always use getCurrentUser for authentication verification
+      const response = await authAPI.getCurrentUser();
       
       if (response.success && response.user) {
-        // Use OAuth-compatible validation
-        if (!this.validateUserData(response.user, source.includes('oauth'))) {
+        if (!this.validateUserData(response.user)) {
           throw new Error('Invalid user data received');
         }
         
         this.updateCache(true, response.user);
         this.emit('authenticated', { user: response.user, source });
         
-        console.log('✅ Auth check successful (security validated)');
         return {
           success: true,
           isAuthenticated: true,
@@ -136,7 +106,6 @@ class AuthService {
         this.updateCache(false, null);
         this.emit('unauthenticated', { source });
         
-        console.log('❌ Auth check failed - no valid session');
         return {
           success: true,
           isAuthenticated: false,
@@ -148,7 +117,6 @@ class AuthService {
       this.updateCache(false, null);
       this.emit('error', { error: error.message, source });
       
-      console.error(`❌ Auth check error (source: ${source}):`, error);
       return {
         success: false,
         error: error.message,
@@ -156,35 +124,6 @@ class AuthService {
         user: null,
         source: 'api',
       };
-    }
-  }
-
-  /**
-   * OAuth-specific authentication check
-   * Used during OAuth callback processing
-   */
-  async checkOAuthAuth() {
-    console.log('🔄 OAuth-specific auth check');
-    
-    try {
-      // Always force check during OAuth (no cache)
-      const result = await this.checkAuth({ 
-        force: true, 
-        source: 'oauth-callback' 
-      });
-      
-      if (result.isAuthenticated) {
-        this.emit('oauth-authenticated', { user: result.user });
-        return {
-          success: true,
-          user: result.user,
-        };
-      } else {
-        throw new Error('OAuth authentication failed - no valid session');
-      }
-    } catch (error) {
-      this.emit('oauth-error', { error: error.message });
-      throw error;
     }
   }
 
@@ -203,7 +142,6 @@ class AuthService {
    * Clear authentication cache
    */
   clearAuth() {
-    console.log('🧹 Clearing auth cache');
     this.authCache = {
       user: null,
       isAuthenticated: false,
@@ -241,66 +179,57 @@ class AuthService {
     this.authCache.isAuthenticated = isAuthenticated;
     this.authCache.user = user;
     this.authCache.lastCheck = Date.now();
-    
-    console.log('📋 Auth cache updated:', {
-      isAuthenticated,
-      user: user ? user.username || user.email : null,
-      timestamp: this.authCache.lastCheck,
-    });
   }
 
   /**
    * Manual cache invalidation
    */
   invalidateCache() {
-    console.log('🗑️ Auth cache invalidated');
     this.authCache.lastCheck = null;
   }
 
   /**
    * Validate user data for security
-   * FIXED: OAuth-compatible validation with relaxed requirements
    */
-  validateUserData(user, isOAuthUser = false) {
+  validateUserData(user) {
     if (!user || typeof user !== 'object') {
       console.warn('🔒 Invalid user data type');
       return false;
     }
 
-    // Check for email (always required)
-    if (!user.email || typeof user.email !== 'string') {
-      console.warn('🔒 User data missing required email field');
-      return false;
+    // For dashboard/me endpoint, username is sufficient to confirm valid user
+    // Email is not required for all user data sources
+    if (user.username && typeof user.username === 'string') {
+      
+      // Basic security check for XSS attempts
+      const suspiciousPatterns = /<script|javascript:|onload=|onerror=/i;
+      for (const [key, value] of Object.entries(user)) {
+        if (typeof value === 'string' && suspiciousPatterns.test(value)) {
+          console.warn(`🔒 Suspicious content detected in user field: ${key}`);
+          return false;
+        }
+      }
+      
+      return true;
     }
 
-    // For OAuth users, be more flexible with ID requirements
-    if (!isOAuthUser) {
-      // Traditional users need either 'id' or 'userID'
-      const hasId = user.id || user.userID;
-      if (!hasId) {
-        console.warn('🔒 User data missing required ID field');
+    // Fallback: check for email if username is not available (OAuth scenarios)
+    const email = user.email || user.emailAddress || user.userEmail;
+    if (email && typeof email === 'string') {
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        console.warn('🔒 Invalid email format in user data');
         return false;
       }
-    } else {
-      // OAuth users might not have all fields during onboarding
-      console.log('🔒 Using relaxed validation for OAuth user');
+      
+      return true;
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(user.email)) {
-      console.warn('🔒 Invalid email format in user data');
-      return false;
-    }
-
-    // Check for suspicious fields or XSS attempts
-    const suspiciousPatterns = /<script|javascript:|onload=|onerror=/i;
-    for (const [key, value] of Object.entries(user)) {
-      if (typeof value === 'string' && suspiciousPatterns.test(value)) {
-        console.warn(`🔒 Suspicious content detected in user field: ${key}`);
-        return false;
-      }
-    }
+    console.warn('🔒 User data missing both username and email');
+    console.warn('🔒 Available user fields:', Object.keys(user));
+    return false;
 
     return true;
   }

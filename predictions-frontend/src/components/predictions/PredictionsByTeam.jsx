@@ -8,7 +8,7 @@ import EmptyState from "../common/EmptyState";
 import { normalizeTeamName } from "../../utils/teamUtils";
 import { ThemeContext } from "../../context/ThemeContext";
 
-function PredictionsByTeam({ predictions = [], onPredictionSelect, onPredictionEdit, searchQuery = "" }) {
+function PredictionsByTeam({ predictions = [], onPredictionSelect, onPredictionEdit, searchQuery = "", cardStyle = "normal" }) {
   const { theme } = useContext(ThemeContext);
   const [expandedTeam, setExpandedTeam] = useState(null);
 
@@ -20,9 +20,10 @@ function PredictionsByTeam({ predictions = [], onPredictionSelect, onPredictionE
     "Arsenal",
     "Chelsea",
     "Liverpool",
-    "Man. City",
-    "Man. United",
-    "Spurs",  ];
+    "Man City",
+    "Man United",
+    "Spurs",
+  ];
 
   // Filter predictions based on search query - using common utility function
   const filteredPredictions = filterPredictionsByQuery(predictionsToUse, searchQuery);
@@ -69,6 +70,7 @@ function PredictionsByTeam({ predictions = [], onPredictionSelect, onPredictionE
                   onToggle={toggleTeam}
                   onPredictionSelect={onPredictionSelect}
                   onPredictionEdit={onPredictionEdit}
+                  cardStyle={cardStyle}
                 />
               );
             }

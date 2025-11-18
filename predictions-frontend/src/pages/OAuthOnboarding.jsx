@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { Box, Container, Button } from '@radix-ui/themes';
-import authService from '../services/auth/AuthService';
 
 export default function OAuthOnboarding() {
   const [formData, setFormData] = useState({
@@ -12,41 +11,39 @@ export default function OAuthOnboarding() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
   
-  const { login } = useAuth();
+  const { completeOAuthProfile, authState, oauthData } = useAuth();
   const navigate = useNavigate();
 
   const teams = [
     "Arsenal", "Chelsea", "Liverpool", 
     "Manchester City", "Manchester United", "Tottenham Hotspur",
-    "Brighton & Hove Albion", "Newcastle United", "West Ham United",
-    "Aston Villa", "Crystal Palace", "Fulham"
   ];
+
+  // Handle navigation based on AuthContext state
+  useEffect(() => {
+    // If user becomes authenticated, redirect to dashboard
+    if (authState === 'authenticated') {
+      console.log('OAuth Onboarding - User authenticated, redirecting to dashboard');
+      navigate('/home/dashboard', { replace: true });
+    }
+  }, [authState, navigate]);
 
   // Get user info on component mount
   useEffect(() => {
-    const getUserInfo = async () => {
-      try {
-        const authResult = await authService.checkAuth({ 
-          force: true, 
-          source: 'oauth-onboarding' 
-        });
-        
-        if (authResult.isAuthenticated) {
-          setUserInfo(authResult.user);
-        } else {
-          // Not authenticated, redirect to login
-          navigate('/login?error=session_expired', { replace: true });
-        }
-      } catch (error) {
-        console.error('Failed to get user info:', error);
-        navigate('/login?error=session_expired', { replace: true });
+    // OAuth data should be available from AuthContext
+    if (oauthData.email) {
+      console.log('OAuth Onboarding - Email available from AuthContext:', oauthData.email);
+    } else {
+      // Fallback to session storage for backward compatibility
+      const storedEmail = sessionStorage.getItem('oauth_user_email');
+      if (storedEmail) {
+        console.log('OAuth Onboarding - Email retrieved from session storage:', storedEmail);
+      } else {
+        console.log('OAuth Onboarding - No email found in AuthContext or session storage');
       }
-    };
-
-    getUserInfo();
-  }, [navigate]);
+    }
+  }, [oauthData.email]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,59 +80,34 @@ export default function OAuthOnboarding() {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setErrors({});
+    
     try {
-      // Complete OAuth profile
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/oauth2/complete-profile`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          favouriteTeam: formData.favouriteTeam
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 409) {
-          setErrors({ username: 'Username already taken' });
-          return;
-        }
-        throw new Error(errorData.error || 'Failed to complete profile');
-      }
-
-      const result = await response.json();
+      // Use AuthContext method instead of direct API call
+      console.log('OAuth Onboarding - Using AuthContext completeOAuthProfile method');
       
-      // Update auth context with complete user info
-      await login({
-        skipApiCall: true,
-        userData: {
-          ...userInfo,
-          username: result.user.username,
-          favouriteTeam: result.user.favouriteTeam
-        }
+      await completeOAuthProfile({
+        username: formData.username,
+        favouriteTeam: formData.favouriteTeam
+        // Email automatically included by AuthContext from oauthData or sessionStorage
       });
-
-      // Redirect to dashboard
-      navigate('/home/dashboard', { replace: true });
+      
+      // AuthContext handles auth state update and navigation will happen via useEffect
+      console.log('OAuth Onboarding - Profile completion successful');
 
     } catch (error) {
-      console.error('Profile completion error:', error);
-      setErrors({ submit: error.message });
+      console.error('OAuth Onboarding - Profile completion error:', error);
+      
+      // Handle specific error cases
+      if (error.message.includes('Username already taken')) {
+        setErrors({ username: 'Username already taken' });
+      } else {
+        setErrors({ submit: error.message });
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (!userInfo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-primary-500">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-300"></div>
-      </div>
-    );
-  }
 
   return (
     <Box className="relative overflow-hidden bg-primary-500 min-h-screen">
@@ -177,7 +149,7 @@ export default function OAuthOnboarding() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              welcome {userInfo.firstName}! just a couple more details to get started
+              welcome! just a couple more details to get started
             </motion.p>
           </div>
 
@@ -266,6 +238,11 @@ export default function OAuthOnboarding() {
             <p className="text-white/50 text-sm font-outfit">
               your google account is already verified ✓
             </p>
+            {(oauthData.email || sessionStorage.getItem('oauth_user_email')) && (
+              <p className="text-teal-300/70 text-xs font-outfit mt-1">
+                signed in as: {oauthData.email || sessionStorage.getItem('oauth_user_email')}
+              </p>
+            )}
           </div>
         </motion.div>
       </Container>

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import leagueAPI from '../services/api/leagueAPI.js';
-import { showToast } from '../services/notificationService.js';
+import { notificationManager } from '../services/notificationService.js';
 
 const useLeagues = () => {
   const [myLeagues, setMyLeagues] = useState([]);
-  const [featuredLeagues, setFeaturedLeagues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -13,111 +12,72 @@ const useLeagues = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await leagueAPI.getUserLeagues();
-      if (response.success) {
-        setMyLeagues(response.leagues);
-      } else {
-        throw new Error(response.error || 'Failed to fetch leagues');
-      }
+      console.log('Fetching user leagues...');
+      const leagues = await leagueAPI.getUserLeagues();
+      console.log('User leagues fetched:', leagues?.length || 0, 'leagues');
+      setMyLeagues(leagues);
     } catch (err) {
+      console.error('Error fetching leagues:', err.message);
       setError(err.message);
-      console.error('Error fetching leagues:', err);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Fetch featured leagues (with fallback to mock data)
-  const fetchFeaturedLeagues = async () => {
-    try {
-      const response = await leagueAPI.getFeaturedLeagues();
-      if (response.success) {
-        setFeaturedLeagues(response.leagues);
-      } else {
-        throw new Error(response.error || 'Failed to fetch featured leagues');
-      }
-    } catch (err) {
-      console.error('Error fetching featured leagues:', err);
-      // The leagueAPI already handles fallback to mock data
     }
   };
 
   // Join a league by code
   const joinLeague = async (joinCode) => {
     try {
-      const response = await leagueAPI.joinLeague(joinCode);
-      if (response.success) {
-        showToast('Successfully joined league!', 'success');
-        // Refresh user leagues to include the newly joined league
-        await fetchMyLeagues();
-        return { success: true };
-      } else {
-        showToast(response.error || 'Failed to join league', 'error');
-        return { success: false, error: response.error };
-      }
+      console.log('Attempting to join league:', joinCode);
+      const league = await leagueAPI.joinLeague(joinCode);
+      console.log('League joined successfully:', league?.name);
+      notificationManager.leagues.joinSuccess(league?.name || 'League');
+      await fetchMyLeagues(); // This should update the state
+      return league; // Return the league directly
     } catch (err) {
-      showToast('Error joining league', 'error');
-      console.error('Error joining league:', err);
-      return { success: false, error: err.message };
-    }
-  };
-
-  // Join a featured league
-  const joinFeaturedLeague = async (leagueId) => {
-    try {
-      // For featured leagues, we use a special code format
-      const response = await leagueAPI.joinLeague(`FEATURED_${leagueId}`);
-      if (response.success) {
-        showToast('Successfully joined featured league!', 'success');
-        await fetchMyLeagues();
-        return { success: true };
-      } else {
-        showToast(response.error || 'Failed to join featured league', 'error');
-        return { success: false, error: response.error };
-      }
-    } catch (err) {
-      showToast('Error joining featured league', 'error');
-      console.error('Error joining featured league:', err);
-      return { success: false, error: err.message };
+      console.error('Error joining league:', err.message);
+      notificationManager.notify({
+        type: 'error',
+        message: err.message || 'Failed to join league',
+        icon: 'users',
+        trackAsActivity: false
+      });
+      throw err; // Let component handle the error
     }
   };
 
   // Create a new league
   const createLeague = async (leagueData) => {
     try {
-      const response = await leagueAPI.createLeague(leagueData);
-      if (response.success) {
-        showToast('League created successfully!', 'success');
-        // Refresh user leagues to include the newly created league
-        await fetchMyLeagues();
-        return { success: true, league: response.league };
-      } else {
-        showToast(response.error || 'Failed to create league', 'error');
-        return { success: false, error: response.error };
-      }
+      console.log('Creating league:', leagueData.name);
+      const league = await leagueAPI.createLeague(leagueData);
+      console.log('League created successfully:', league?.name);
+      notificationManager.leagues.createSuccess(league?.name || leagueData.name);
+      await fetchMyLeagues(); // This should update the state
+      return league; // Return the league directly
     } catch (err) {
-      showToast('Error creating league', 'error');
-      console.error('Error creating league:', err);
-      return { success: false, error: err.message };
+      console.error('Error creating league:', err.message);
+      notificationManager.notify({
+        type: 'error',
+        message: err.message || 'Failed to create league',
+        icon: 'users',
+        trackAsActivity: false
+      });
+      throw err; // Let component handle the error
     }
   };
 
   // Load data on component mount
   useEffect(() => {
     fetchMyLeagues();
-    fetchFeaturedLeagues();
   }, []);
 
   return { 
     myLeagues, 
-    featuredLeagues, 
     isLoading, 
     error, 
     joinLeague,
-    joinFeaturedLeague,
     createLeague,
-    refreshMyLeagues: fetchMyLeagues,
-    refreshFeaturedLeagues: fetchFeaturedLeagues
+    refreshMyLeagues: fetchMyLeagues
   };
 };
 

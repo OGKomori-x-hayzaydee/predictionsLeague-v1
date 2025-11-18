@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, memo } from "react";
 import { motion } from "framer-motion";
 import {
   CalendarIcon,
@@ -6,10 +6,14 @@ import {
   PlusIcon,
   ClockIcon,
   ChevronRightIcon,
+  EyeOpenIcon,
 } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
+import { normalizeTeamName } from "../../utils/teamUtils";
+import TeamLogo from "../ui/TeamLogo";
+import { LOGO_SIZES } from "../../utils/teamLogos";
 
-const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
+const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch, onViewPrediction }) => {
   const { theme } = useContext(ThemeContext);
 
   return (
@@ -18,20 +22,20 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
         theme === "dark"
           ? "bg-slate-800/40 border-slate-700/50 hover:border-slate-600/50"
           : "bg-white border-slate-200 shadow-sm hover:border-slate-300"
-      } backdrop-blur-sm rounded-xl p-5 border transition-all duration-200`}
+      } backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border transition-all duration-200`}
     >
       {" "}
-      <div className="flex justify-between items-center mb-5">
-        <div className="flex items-center gap-2">
+      <div className="flex justify-between items-center mb-2 sm:mb-3 md:mb-5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div
-            className={`p-1.5 rounded-lg border ${
+            className={`p-1 sm:p-1.5 rounded border ${
               theme === "dark"
                 ? "bg-teal-500/10 border-teal-500/20"
                 : "bg-teal-50 border-teal-200"
             }`}
           >
             <CalendarIcon
-              className={`w-4 h-4 ${
+              className={`w-3 h-3 sm:w-4 sm:h-4 ${
                 theme === "dark" ? "text-teal-400" : "text-teal-600"
               }`}
             />
@@ -40,14 +44,14 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
             <h3
               className={`${
                 theme === "dark" ? "text-teal-200" : "text-teal-700"
-              } font-outfit font-semibold text-base`}
+              } font-outfit font-semibold text-sm sm:text-base`}
             >
               Upcoming Matches
             </h3>
             <p
               className={`${
                 theme === "dark" ? "text-slate-400" : "text-slate-500"
-              } text-xs font-outfit`}
+              } text-2xs sm:text-xs font-outfit hidden sm:block`}
             >
               Make your predictions before deadline
             </p>
@@ -57,17 +61,18 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onViewAll}
-          className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs transition-all duration-200 ${
+          className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 border rounded text-2xs sm:text-xs transition-all duration-200 ${
             theme === "dark"
               ? "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/30 text-slate-300 hover:text-white"
               : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-800"
           }`}
         >
-          View all
-          <ChevronRightIcon className="w-3 h-3" />
+          <span className="hidden sm:inline">View all</span>
+          <span className="sm:hidden">All</span>
+          <ChevronRightIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
         </motion.button>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1.5 sm:space-y-2">
         {matches.map((match, index) => {
           const matchDate = new Date(match.date);
           const formattedDate = `${matchDate.toLocaleDateString("en-GB", {
@@ -83,13 +88,17 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
             })
             .toLowerCase();
 
+          // Normalize team names from API format
+          const homeTeam = normalizeTeamName(match.homeTeam || match.home);
+          const awayTeam = normalizeTeamName(match.awayTeam || match.away);
+
           return (
             <motion.div
               key={match.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`group relative rounded-lg p-3 border transition-all duration-200 ${
+              className={`group relative rounded p-2 sm:p-3 border transition-all duration-200 ${
                 theme === "dark"
                   ? "bg-slate-700/20 hover:bg-slate-700/40 border-slate-600/20 hover:border-slate-500/40"
                   : "bg-slate-50/50 hover:bg-slate-100/50 border-slate-200/50 hover:border-slate-300/50"
@@ -98,42 +107,73 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
               {" "}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div
-                      className={`${
-                        theme === "dark" ? "text-white" : "text-slate-800"
-                      } font-outfit font-medium text-sm`}
-                    >
-                      {match.home} vs {match.away}
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <TeamLogo
+                        teamName={homeTeam}
+                        size={LOGO_SIZES.xs}
+                        className="flex-shrink-0"
+                      />
+                      <span
+                        className={`${
+                          theme === "dark" ? "text-white" : "text-slate-800"
+                        } font-outfit font-medium text-xs sm:text-sm`}
+                      >
+                        {homeTeam}
+                      </span>
+                      <span
+                        className={`${
+                          theme === "dark" ? "text-slate-400" : "text-slate-500"
+                        } text-xs sm:text-sm font-outfit`}
+                      >
+                        vs
+                      </span>
+                      <span
+                        className={`${
+                          theme === "dark" ? "text-white" : "text-slate-800"
+                        } font-outfit font-medium text-xs sm:text-sm`}
+                      >
+                        {awayTeam}
+                      </span>
+                      <TeamLogo
+                        teamName={awayTeam}
+                        size={LOGO_SIZES.xs}
+                        className="flex-shrink-0"
+                      />
                     </div>
                     {match.predicted && (
                       <div
-                        className={`flex items-center gap-1 text-xs font-medium py-0.5 px-1.5 rounded-full border ${
+                        className={`flex items-center gap-0.5 sm:gap-1 text-2xs sm:text-xs font-medium py-0.5 px-1 sm:px-1.5 rounded-full border ${
                           theme === "dark"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "bg-emerald-50 text-emerald-600 border-emerald-200"
                         }`}
                       >
-                        <LightningBoltIcon className="w-2.5 h-2.5" />
-                        Predicted
+                        <LightningBoltIcon className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                        <span className="hidden sm:inline">Predicted</span>
+                        <span className="sm:hidden">✓</span>
                       </div>
                     )}
                   </div>
                   <div
-                    className={`flex items-center gap-3 text-xs ${
+                    className={`flex items-center gap-2 sm:gap-3 text-2xs sm:text-xs ${
                       theme === "dark" ? "text-slate-400" : "text-slate-500"
                     } font-outfit`}
                   >
-                    <div className="flex items-center gap-1">
-                      <CalendarIcon className="w-3 h-3" />
-                      <span>{formattedDate}</span>
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      <CalendarIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      <span className="hidden sm:inline">{formattedDate}</span>
+                      <span className="sm:hidden">{matchDate.toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <ClockIcon className="w-3 h-3" />
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      <ClockIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       <span>{formattedTime}</span>
                     </div>
                     <div
-                      className={`text-xs px-1.5 py-0.5 rounded ${
+                      className={`text-2xs sm:text-xs px-1 sm:px-1.5 py-0.5 rounded ${
                         theme === "dark" ? "bg-slate-600/30" : "bg-slate-200/70"
                       }`}
                     >
@@ -141,35 +181,34 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
                     </div>
                   </div>
                 </div>
-                {!match.predicted ? (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => onPredictMatch(match)}
-                    className={`flex items-center gap-1.5 border rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 opacity-70 hover:opacity-100 ${
-                      theme === "dark"
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => match.predicted ? onViewPrediction(match) : onPredictMatch(match)}
+                  className={`flex items-center gap-1 sm:gap-1.5 border rounded px-2 sm:px-3 py-1 sm:py-1.5 text-2xs sm:text-xs font-medium transition-all duration-200 opacity-70 hover:opacity-100 ${
+                    !match.predicted
+                      ? theme === "dark"
                         ? "bg-teal-600/20 hover:bg-teal-600/30 text-emerald-200 hover:text-emerald-200 border-emerald-500/30"
                         : "bg-teal-50 hover:bg-teal-100 text-teal-600 hover:text-teal-700 border-teal-200"
-                    }`}
-                  >
-                    <PlusIcon className="w-3 h-3" />
-                    Predict
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => onPredictMatch(match)}
-                    className={`flex items-center gap-1.5 border rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 opacity-70 hover:opacity-100 ${
-                      theme === "dark"
-                        ? "bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-200 hover:text-indigo-200 border-indigo-500/30"
-                        : "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 border-indigo-200"
-                    }`}
-                  >
-                    <LightningBoltIcon className="w-3 h-3" />
-                    Edit
-                  </motion.button>
-                )}
+                      : theme === "dark"
+                      ? "bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-200 hover:text-indigo-200 border-indigo-500/30"
+                      : "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 border-indigo-200"
+                  }`}
+                >
+                  {!match.predicted ? (
+                    <>
+                      <PlusIcon className="w-3 h-3 hidden sm:block" />
+                      <span className="hidden sm:inline">Predict</span>
+                      <span className="sm:hidden">+</span>
+                    </>
+                  ) : (
+                    <>
+                      <EyeOpenIcon className="w-3 h-3 hidden sm:block" />
+                      <span className="hidden sm:inline">View</span>
+                      <span className="sm:hidden">👁</span>
+                    </>
+                  )}
+                </motion.button>
               </div>
             </motion.div>
           );
@@ -202,4 +241,18 @@ const UpcomingMatchesPanel = ({ matches, onViewAll, onPredictMatch }) => {
   );
 };
 
-export default UpcomingMatchesPanel;
+// Memoize component to prevent unnecessary re-renders
+const MemoizedUpcomingMatchesPanel = memo(
+  UpcomingMatchesPanel,
+  (prevProps, nextProps) => {
+    // Custom comparison function for better performance
+    return (
+      prevProps.matches?.length === nextProps.matches?.length &&
+      prevProps.matches?.every(
+        (match, index) => match.id === nextProps.matches[index]?.id
+      )
+    );
+  }
+);
+
+export default MemoizedUpcomingMatchesPanel;

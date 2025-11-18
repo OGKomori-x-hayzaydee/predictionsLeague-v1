@@ -14,7 +14,7 @@ import {
   subMonths
 } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import SimplePredictionCard from "./SimplePredictionCard";
+import PredictionCard from "./PredictionCard";
 import EmptyState from "../common/EmptyState";
 import { ThemeContext } from "../../context/ThemeContext";
 
@@ -24,6 +24,7 @@ const PredictionCalendar = ({
   onEditClick,
   teamLogos,
   searchQuery,
+  cardStyle = "normal"
 }) => {
   const { theme } = useContext(ThemeContext);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -192,11 +193,13 @@ const PredictionCalendar = ({
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
-                    <SimplePredictionCard
+                    <PredictionCard
                       prediction={prediction}
-                      teamLogos={teamLogos}
-                      onClick={onPredictionSelect}
-                      onEditClick={onEditClick}
+                      mode="personal"
+                      onSelect={onPredictionSelect}
+                      onEdit={onEditClick}
+                      isReadonly={false}
+                      size={cardStyle}
                     />
                   </motion.div>
                 ))}

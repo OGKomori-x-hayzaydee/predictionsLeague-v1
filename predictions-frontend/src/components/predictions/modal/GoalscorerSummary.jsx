@@ -1,7 +1,8 @@
 import { useContext } from "react";
-import { ThemeContext } from "../../../context/ThemeContext";
+import { ThemeContext } from "../../../context/ThemeContext";  
 import { getThemeStyles } from "../../../utils/themeUtils";
-import { getTeamLogo } from "../../../data/sampleData";
+import TeamLogo from "../../ui/TeamLogo";
+import { LOGO_SIZES } from "../../../utils/teamLogos";
 import { TargetIcon } from "@radix-ui/react-icons";
 
 export default function GoalscorerSummary({ 
@@ -39,11 +40,12 @@ export default function GoalscorerSummary({
                 light: "text-emerald-700",
               })}`}
             >
-              <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/30 p-0.5 flex items-center justify-center mr-1.5">
-                <img
-                  src={getTeamLogo(fixture.homeTeam)}
-                  alt={fixture.homeTeam}
-                  className="w-2.5 h-2.5 object-contain"
+              <div className="mr-1.5">
+                <TeamLogo
+                  teamName={fixture.homeTeam}
+                  size={LOGO_SIZES.xs}
+                  theme={theme}
+                  className="flex-shrink-0"
                 />
               </div>
               {fixture.homeTeam}
@@ -85,11 +87,12 @@ export default function GoalscorerSummary({
                 light: "text-blue-700",
               })}`}
             >
-              <div className="w-4 h-4 rounded-full bg-blue-500/20 border border-blue-500/30 p-0.5 flex items-center justify-center mr-1.5">
-                <img
-                  src={getTeamLogo(fixture.awayTeam)}
-                  alt={fixture.awayTeam}
-                  className="w-2.5 h-2.5 object-contain"
+              <div className="mr-1.5">
+                <TeamLogo
+                  teamName={fixture.awayTeam}
+                  size={LOGO_SIZES.xs}
+                  theme={theme}
+                  className="flex-shrink-0"
                 />
               </div>
               {fixture.awayTeam}

@@ -64,34 +64,62 @@ select {
   width: 100%;
   height: 450px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fixture-stack-swiper {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  height: 100%;
+  height: 420px;
 }
 
 .fixture-stack-slide {
   background-color: transparent;
   border-radius: 12px;
-  overflow: hidden;
-  max-height: 450px;
-  overflow-y: auto;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.fixture-stack-slide::-webkit-scrollbar {
-  width: 4px;
+/* Fix opacity for stacked cards - STRONG overrides to combat Swiper's cards effect */
+.fixture-stack-swiper .swiper-slide,
+.fixture-stack-swiper .swiper-slide-active,
+.fixture-stack-swiper .swiper-slide-next,
+.fixture-stack-swiper .swiper-slide-prev {
+  opacity: 1 !important;
 }
 
-.fixture-stack-slide::-webkit-scrollbar-track {
-  background: transparent;
+/* Override Swiper's cards effect opacity transforms */
+.fixture-stack-swiper .swiper-slide > * {
+  opacity: 1 !important;
 }
 
-.fixture-stack-slide::-webkit-scrollbar-thumb {
-  background-color: rgba(56, 189, 248, 0.3);
-  border-radius: 2px;
+/* Target all cards regardless of their state */
+.fixture-stack-swiper .swiper-slide[data-swiper-slide-index] {
+  opacity: 1 !important;
+}
+
+/* Override any inline opacity styles */
+.fixture-stack-swiper .swiper-slide[style*="opacity"] {
+  opacity: 1 !important;
+}
+
+/* Remove any shadow overlays that Swiper adds */
+.fixture-stack-swiper .swiper-slide-shadow,
+.fixture-stack-swiper .swiper-slide-shadow-left,
+.fixture-stack-swiper .swiper-slide-shadow-right {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Ensure card content is always visible */
+.fixture-stack-swiper .swiper-slide .fixture-card,
+.fixture-stack-swiper .swiper-slide > div {
+  opacity: 1 !important;
 }
 
 /* Add these styles to your CSS file */
@@ -113,34 +141,8 @@ select {
   border-radius: 20px;
 }
 
-/* PredictionStack styles to match FixtureStack dimensions */
-.prediction-stack-swiper {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  height: 100%;
-}
-
-.prediction-stack-slide {
-  background-color: transparent;
-  border-radius: 12px;
-  overflow: hidden;
-  max-height: 450px;
-  overflow-y: auto;
-}
-
-.prediction-stack-slide::-webkit-scrollbar {
-  width: 4px;
-}
-
-.prediction-stack-slide::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.prediction-stack-slide::-webkit-scrollbar-thumb {
-  background-color: rgba(139, 92, 246, 0.3);
-  border-radius: 2px;
-}
+/* PredictionStack styles - now matches FixtureStack architecture (no date groups) */
+/* Predictions use the same fixture-stack-swiper class for consistency */
 
 .predictions-container {
   scrollbar-width: thin;

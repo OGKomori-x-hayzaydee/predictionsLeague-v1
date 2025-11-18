@@ -59,35 +59,17 @@ export const TempAuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    console.log("🔧 TempAuth register called with:", {
-      username: userData.username,
-      email: userData.email,
-      password: userData.password ? "[HIDDEN]" : "empty",
-      favoriteTeam: userData.favoriteTeam,
-    });
-    
     setIsLoading(true);
-    console.log("⏳ Setting loading state to true");
     
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("⏰ Simulated API delay completed");
     
     const newUser = { ...mockUser, ...userData };
-    console.log("👤 Created new user object:", {
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-      favoriteTeam: newUser.favoriteTeam,
-    });
     
     setUser(newUser);
-    console.log("✅ User set in context");
     
     setIsLoading(false);
-    console.log("✅ Loading state set to false");
     
     const result = { success: true, user: newUser };
-    console.log("📤 Returning registration result:", result);
     
     return result;
   };

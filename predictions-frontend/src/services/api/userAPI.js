@@ -14,7 +14,7 @@ export const userAPI = {
     try {
       const response = await apiCall({
         method: 'GET',
-        url: '/users/profile',
+        url: '/profile',
       });
 
       if (response.success) {
@@ -46,7 +46,7 @@ export const userAPI = {
     try {
       const response = await apiCall({
         method: 'PUT',
-        url: '/users/profile',
+        url: '/profile',
         data: {
           username: userData.username,
           email: userData.email,
@@ -83,7 +83,7 @@ export const userAPI = {
 
       const response = await apiCall({
         method: 'POST',
-        url: '/users/profile/picture',
+        url: '/profile/picture',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -163,7 +163,6 @@ export const userAPI = {
    * @param {boolean} preferences.pushNotifications - Push notification preference
    * @param {string} preferences.language - Language preference
    * @param {string} preferences.timezone - Timezone preference
-   * @param {boolean} preferences.privatePredictions - Private predictions setting
    * @returns {Promise<Object>} Updated preferences
    */
   async updatePreferences(preferences) {
@@ -336,6 +335,63 @@ export const userAPI = {
       }
     } catch (error) {
       handleApiError(error, { customMessage: 'Failed to load your leagues.' });
+      throw error;
+    }
+  },
+
+  /**
+   * Get user performance highlights
+   * @returns {Promise<Object>} Performance highlights data
+   */
+  async getStatisticsHighlights() {
+    try {
+      const response = await apiCall({
+        method: 'GET',
+        url: '/profile/statistics/highlights',
+      });
+
+      // Return apiCall response directly - it already has the right structure
+      return response;
+    } catch (error) {
+      handleApiError(error, { customMessage: 'Failed to load performance highlights.' });
+      throw error;
+    }
+  },
+
+  /**
+   * Get user team performance statistics
+   * @returns {Promise<Object>} Team performance data
+   */
+  async getTeamPerformance() {
+    try {
+      const response = await apiCall({
+        method: 'GET',
+        url: '/profile/statistics/team-performance',
+      });
+
+      // Return apiCall response directly - it already has the right structure
+      return response;
+    } catch (error) {
+      handleApiError(error, { customMessage: 'Failed to load team performance statistics.' });
+      throw error;
+    }
+  },
+
+  /**
+   * Get user monthly performance statistics
+   * @returns {Promise<Object>} Monthly performance data
+   */
+  async getMonthlyPerformance() {
+    try {
+      const response = await apiCall({
+        method: 'GET',
+        url: '/profile/statistics/monthly-performance',
+      });
+
+      // Return apiCall response directly - it already has the right structure
+      return response;
+    } catch (error) {
+      handleApiError(error, { customMessage: 'Failed to load monthly performance statistics.' });
       throw error;
     }
   },

@@ -1,41 +1,75 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { StarIcon } from '@radix-ui/react-icons';
 import { ThemeContext } from '../../../context/ThemeContext';
 import { getThemeStyles } from '../../../utils/themeUtils';
 
-export default function PointsPotential({ 
-  homeScore, 
-  awayScore, 
-  selectedChips, 
-  activeGameweekChips 
+export default function PointsPotential({
+  homeScore,
+  awayScore,
+  selectedChips,
+  activeGameweekChips,
+  fixture // For team logos/crests
 }) {
   const { theme } = useContext(ThemeContext);
 
-  // Calculate maximum potential points
-  const calculateMaxPotential = () => {
-    // Base points calculation
-    let max = 10 + (homeScore + awayScore) * 2;
 
-    // Apply match chip effects
-    if (selectedChips.includes("opportunist")) max += 15;
-    if (selectedChips.includes("scorerFocus")) max += (homeScore + awayScore) * 2;
-    if (selectedChips.includes("doubleDown")) max *= 2;
-    if (selectedChips.includes("wildcard")) max *= 3;
+  // References: chipUtils.js:72-150, RulesAndPointsModal.jsx:47-54
+  const calculateMaxPotential = useMemo(() => {
+    // STEP 1: Base Points - Assume best case (exact scoreline + all scorers correct)
+    // From Rules: "Exact scoreline with scorers" = 15 points (not additive)
+    const basePoints = 15;
 
-    // Apply gameweek-wide chip effects
-    if (
-      activeGameweekChips.includes("defensePlusPlus") &&
-      (homeScore === 0 || awayScore === 0)
-    ) {
-      max += 10; // Potential clean sheet bonus
+    // STEP 2: Goalscorer Points (2 points each)
+    const totalScorers = homeScore + awayScore;
+    let goalscorerPoints = totalScorers * 2;
+
+    // 🔧 FIXED: Scorer Focus DOUBLES goalscorer points (not adds)
+    if (selectedChips.includes("scorerFocus")) {
+      goalscorerPoints *= 2;
     }
 
+    // STEP 3: Subtotal before match chip multipliers
+    let subtotal = basePoints + goalscorerPoints;
+
+    // STEP 4: Apply Match-Level Chip Multipliers (only one applies, in priority order)
+    let matchPoints = subtotal;
+    if (selectedChips.includes("wildcard")) {
+      matchPoints *= 3; // Wildcard: 3x
+    } else if (selectedChips.includes("doubleDown")) {
+      matchPoints *= 2; // Double Down: 2x
+    }
+    // Note: Scorer Focus is NOT a match multiplier, it's applied to scorers only (above)
+
+    // STEP 5: Defense++ Bonus (if clean sheet predicted)
+    let defenseBonusPoints = 0;
+    if (activeGameweekChips.includes("defensePlusPlus") &&
+        (homeScore === 0 || awayScore === 0)) {
+      defenseBonusPoints = 10;
+    }
+
+    // STEP 6: Total before All-In Week
+    let total = matchPoints + defenseBonusPoints;
+
+    // STEP 7: All-In Week multiplier (doubles EVERYTHING including Defense++)
     if (activeGameweekChips.includes("allInWeek")) {
-      max *= 2; // Double all points
+      total *= 2;
     }
 
-    return `${max} points`;
-  };
+    return {
+      total: Math.round(total),
+      breakdown: {
+        basePoints,
+        goalscorerPoints,
+        scorerFocusApplied: selectedChips.includes("scorerFocus"),
+        subtotal,
+        matchMultiplier: selectedChips.includes("wildcard") ? 3 :
+                        selectedChips.includes("doubleDown") ? 2 : 1,
+        matchPoints,
+        defenseBonusPoints,
+        allInWeekApplied: activeGameweekChips.includes("allInWeek")
+      }
+    };
+  }, [homeScore, awayScore, selectedChips, activeGameweekChips]);
 
   return (
     <div
@@ -55,7 +89,7 @@ export default function PointsPotential({
       </h4>
 
       <div className="space-y-3">
-        {/* Base points */}
+        {/* Base points - exact scoreline with all scorers */}
         <div className="flex justify-between items-center text-sm">
           <span
             className={`${getThemeStyles(theme, {
@@ -63,8 +97,8 @@ export default function PointsPotential({
               light: "text-slate-700",
             })} flex items-center`}
           >
-            <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-            Correct outcome
+            <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
+            Exact scoreline + all scorers
           </span>
           <span
             className={`${getThemeStyles(theme, {
@@ -72,73 +106,57 @@ export default function PointsPotential({
               light: "text-slate-800",
             })} font-medium`}
           >
-            5 points
+            {calculateMaxPotential.breakdown.basePoints} points
           </span>
         </div>
 
-        <div className="flex justify-between items-center text-sm">
-          <span
-            className={`${getThemeStyles(theme, {
-              dark: "text-slate-300",
-              light: "text-slate-700",
-            })} flex items-center`}
-          >
-            <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-            Exact scoreline
-          </span>
-          <span
-            className={`${getThemeStyles(theme, {
-              dark: "text-slate-200",
-              light: "text-slate-800",
-            })} font-medium`}
-          >
-            10 points
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center text-sm">
-          <span
-            className={`${getThemeStyles(theme, {
-              dark: "text-slate-300",
-              light: "text-slate-700",
-            })} flex items-center`}
-          >
-            <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-            Correct goalscorers
-          </span>
-          <span
-            className={`${getThemeStyles(theme, {
-              dark: "text-slate-200",
-              light: "text-slate-800",
-            })} font-medium`}
-          >
-            Up to {(homeScore + awayScore) * 2} points
-          </span>
-        </div>
-
-        {/* Match chip bonuses */}
-        {selectedChips.includes("doubleDown") && (
+        {/* Goalscorer points */}
+        {(homeScore + awayScore) > 0 && (
           <div className="flex justify-between items-center text-sm">
             <span
-              className={`flex items-center ${getThemeStyles(theme, {
-                dark: "text-emerald-300",
-                light: "text-emerald-700",
-              })}`}
+              className={`${getThemeStyles(theme, {
+                dark: "text-slate-300",
+                light: "text-slate-700",
+              })} flex items-center`}
             >
-              <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-              <span className="mr-1">2x</span> Double Down bonus
+              <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+              Goalscorer predictions ({homeScore + awayScore} × 2)
             </span>
             <span
-              className={`font-medium ${getThemeStyles(theme, {
-                dark: "text-emerald-300",
-                light: "text-emerald-700",
-              })}`}
+              className={`${getThemeStyles(theme, {
+                dark: "text-slate-200",
+                light: "text-slate-800",
+              })} font-medium`}
             >
-              2x points
+              {(homeScore + awayScore) * 2} points
             </span>
           </div>
         )}
 
+        {/* Scorer Focus chip - shows effect on scorer points */}
+        {selectedChips.includes("scorerFocus") && (homeScore + awayScore) > 0 && (
+          <div className="flex justify-between items-center text-sm">
+            <span
+              className={`flex items-center ${getThemeStyles(theme, {
+                dark: "text-cyan-300",
+                light: "text-cyan-700",
+              })}`}
+            >
+              <div className="w-2 h-2 bg-cyan-500 rounded-full mr-2"></div>
+              <span className="mr-1">⚽</span> Scorer Focus (2x scorer pts)
+            </span>
+            <span
+              className={`font-medium ${getThemeStyles(theme, {
+                dark: "text-cyan-300",
+                light: "text-cyan-700",
+              })}`}
+            >
+              +{(homeScore + awayScore) * 2} points
+            </span>
+          </div>
+        )}
+
+        {/* Match chip multipliers - only one applies */}
         {selectedChips.includes("wildcard") && (
           <div className="flex justify-between items-center text-sm">
             <span
@@ -148,7 +166,7 @@ export default function PointsPotential({
               })}`}
             >
               <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-              <span className="mr-1">3x</span> Wildcard bonus
+              Wildcard (3x match)
             </span>
             <span
               className={`font-medium ${getThemeStyles(theme, {
@@ -156,51 +174,29 @@ export default function PointsPotential({
                 light: "text-purple-700",
               })}`}
             >
-              3x points
+              ×3 multiplier
             </span>
           </div>
         )}
 
-        {selectedChips.includes("opportunist") && (
+        {selectedChips.includes("doubleDown") && !selectedChips.includes("wildcard") && (
           <div className="flex justify-between items-center text-sm">
             <span
               className={`flex items-center ${getThemeStyles(theme, {
-                dark: "text-amber-300",
-                light: "text-amber-700",
+                dark: "text-emerald-300",
+                light: "text-emerald-700",
               })}`}
             >
-              <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
-              <span className="mr-1">💰</span> Opportunist bonus
+              <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+              Double Down (2x match)
             </span>
             <span
               className={`font-medium ${getThemeStyles(theme, {
-                dark: "text-amber-300",
-                light: "text-amber-700",
+                dark: "text-emerald-300",
+                light: "text-emerald-700",
               })}`}
             >
-              +15 points
-            </span>
-          </div>
-        )}
-
-        {selectedChips.includes("scorerFocus") && (
-          <div className="flex justify-between items-center text-sm">
-            <span
-              className={`flex items-center ${getThemeStyles(theme, {
-                dark: "text-green-300",
-                light: "text-green-700",
-              })}`}
-            >
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              <span className="mr-1">⚽</span> Scorer Focus bonus
-            </span>
-            <span
-              className={`font-medium ${getThemeStyles(theme, {
-                dark: "text-green-300",
-                light: "text-green-700",
-              })}`}
-            >
-              2x scorer points
+              ×2 multiplier
             </span>
           </div>
         )}
@@ -216,7 +212,7 @@ export default function PointsPotential({
                 })}`}
               >
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                <span className="mr-1">🛡️</span> Defense++ bonus (potential)
+                <span className="mr-1">🛡️</span> Defense++ (clean sheet)
               </span>
               <span
                 className={`font-medium ${getThemeStyles(theme, {
@@ -238,7 +234,7 @@ export default function PointsPotential({
               })}`}
             >
               <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-              <span className="mr-1">🎯</span> All-In Week bonus
+              <span className="mr-1">🎯</span> All-In Week (gameweek-wide)
             </span>
             <span
               className={`font-medium ${getThemeStyles(theme, {
@@ -246,7 +242,7 @@ export default function PointsPotential({
                 light: "text-red-700",
               })}`}
             >
-              2x all points
+              ×2 final total
             </span>
           </div>
         )}
@@ -258,24 +254,37 @@ export default function PointsPotential({
             light: "border-slate-300/50",
           })} pt-3 mt-4`}
         >
-          <div className="flex justify-between items-center text-sm">
+          <div className="flex justify-between items-center">
             <span
               className={`${getThemeStyles(theme, {
                 dark: "text-slate-100",
                 light: "text-slate-900",
-              })} font-medium`}
+              })} font-semibold text-sm`}
             >
               Maximum potential
             </span>
             <span
               className={`${getThemeStyles(theme, {
-                dark: "text-slate-100",
-                light: "text-slate-900",
-              })} font-bold text-base`}
+                dark: "text-amber-400",
+                light: "text-amber-600",
+              })} font-bold text-xl`}
             >
-              {calculateMaxPotential()}
+              {calculateMaxPotential.total} pts
             </span>
           </div>
+          {/* Show subtotal before All-In Week if applied */}
+          {activeGameweekChips.includes("allInWeek") && (
+            <div className="flex justify-between items-center mt-1">
+              <span
+                className={`${getThemeStyles(theme, {
+                  dark: "text-slate-400",
+                  light: "text-slate-600",
+                })} text-xs`}
+              >
+                (Before All-In Week: {Math.round(calculateMaxPotential.total / 2)} pts)
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
