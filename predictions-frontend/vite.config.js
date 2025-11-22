@@ -16,7 +16,8 @@ export default defineConfig({
         name: 'predictionsLeague',
         short_name: 'predictionsLeague',
         description: 'The ultimate Premier League prediction game',
-        theme_color: '#ffffff',
+        theme_color: '#021526',
+        background_color: '#021526',
         icons: [
           {
             src: 'pwa-192x192.png',
