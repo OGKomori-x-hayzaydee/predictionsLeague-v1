@@ -51,7 +51,7 @@ const BottomTabBar = ({ activeItem, setActiveItem }) => {
     <div
       className={`fixed bottom-0 left-0 right-0 z-40 ${
         theme === "dark"
-          ? "bg-primary-500/95 border-primary-400/30"
+          ? "bg-primary-500/95 border-white/5"
           : "bg-white/95 border-slate-200"
       } backdrop-blur-md border-t`}
     >
