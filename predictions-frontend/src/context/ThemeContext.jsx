@@ -28,14 +28,28 @@ export const ThemeProvider = ({ children }) => {
     });
   };
   
-  // Update local storage and document class when theme changes
+  // Update local storage, document class, and meta tag when theme changes
   useEffect(() => {
     localStorage.setItem("theme", theme);
     
+    // Update HTML class
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
+    }
+
+    // Update theme-color meta tag for mobile status bars
+    const metaThemeColor = document.querySelector("meta[name='theme-color']");
+    const themeColor = theme === "dark" ? "#021526" : "#ffffff";
+
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute("content", themeColor);
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = themeColor;
+      document.head.appendChild(meta);
     }
   }, [theme]);
   
