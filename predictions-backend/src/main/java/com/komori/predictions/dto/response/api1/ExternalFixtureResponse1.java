@@ -15,24 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalFixtureResponse1 {
-    // Used to get upcoming fixtures
-    private Competition competition;
     private List<Match> matches;
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Competition {
-        private Integer id;
-        private String name;
-        private String code;
-        private String type;
-        private String emblem;
-    }
-
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Match {
-        private Competition competition;
         private Integer id;
         private OffsetDateTime utcDate;
         private String status;
