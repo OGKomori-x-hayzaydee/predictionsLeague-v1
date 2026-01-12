@@ -1,7 +1,5 @@
 package com.komori.predictions.dto.response;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import lombok.AllArgsConstructor;
@@ -37,14 +35,6 @@ public class Fixture {
     private Integer externalFixtureId;
 
     public Fixture(ExternalFixtureResponse1.Match match) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            log.info(objectMapper.writeValueAsString(match));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-
         this.id = match.getId();
         this.homeTeam = match.getHomeTeam().getShortName();
         this.homeId = FixtureDetails.TEAM_IDS.get(homeTeam);
