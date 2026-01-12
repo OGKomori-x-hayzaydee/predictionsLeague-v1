@@ -23,6 +23,7 @@ public class ExternalFixtureResponse2 {
     @Data
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class FixtureDetails {
         private Integer matchId;
         private Integer matchHometeamId;
@@ -34,6 +35,7 @@ public class ExternalFixtureResponse2 {
         @Data
         @AllArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
+        @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
         public static class Goalscorer {
             private String homeScorer;
             private String awayScorer;
