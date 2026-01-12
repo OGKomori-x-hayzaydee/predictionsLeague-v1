@@ -30,13 +30,14 @@ public class Fixture {
     private Integer awayScore;
     private List<Player> homePlayers;
     private List<Player> awayPlayers;
+    private Integer externalFixtureId;
 
     public Fixture(ExternalFixtureResponse1.Match match) {
         this.id = match.getId();
-        this.homeId = match.getHomeTeam().getId();
         this.homeTeam = match.getHomeTeam().getShortName();
-        this.awayId = match.getAwayTeam().getId();
+        this.homeId = FixtureDetails.TEAM_IDS.get(homeTeam);
         this.awayTeam = match.getAwayTeam().getShortName();
+        this.awayId = FixtureDetails.TEAM_IDS.get(awayTeam);
         this.date = match.getUtcDate();
         this.competition = "Premier League";
         this.status = match.getStatus();

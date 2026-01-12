@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -16,37 +15,25 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalFixtureResponse2 {
     // Used to get the second fixture ID
-    private List<FixtureDetails> response;
+    private List<FixtureDetails> details;
 
     @Data
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FixtureDetails {
-        private Fixture fixture;
-        private Teams teams;
+        private Integer matchId;
+        private Integer matchHometeamId;
+        private String matchHometeamName;
+        private Integer matchAwayteamId;
+        private String matchAwayteamName;
+        private List<Goalscorer> goalscorer;
 
         @Data
         @AllArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Fixture {
-            private Long id;
-            private OffsetDateTime date;
-        }
-
-        @Data
-        @AllArgsConstructor
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Teams {
-            private HomeAndAway home;
-            private HomeAndAway away;
-
-            @Data
-            @AllArgsConstructor
-            @JsonIgnoreProperties(ignoreUnknown = true)
-            public static class HomeAndAway {
-                private Integer id;
-                private String name;
-            }
+        public static class Goalscorer {
+            private String homeScorer;
+            private String awayScorer;
         }
     }
 }

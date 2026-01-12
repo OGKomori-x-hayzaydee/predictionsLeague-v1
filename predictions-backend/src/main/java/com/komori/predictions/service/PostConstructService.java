@@ -28,9 +28,4 @@ public class PostConstructService {
         log.info("Scheduling matches for the day...");
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }
-
-    @PostConstruct
-    public void loadPlayersOnStartup() {
-        new Thread(apiService::loadMissingPlayers).start();
-    }
 }

@@ -4,6 +4,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     url: ${SPRING_DATASOURCE_URL}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
   jpa:
     hibernate:
       ddl-auto: none
@@ -14,6 +20,8 @@ spring:
   data:
     redis:
       url: ${REDIS_URL}
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 aws:
   s3:
     bucket: ${S3_BUCKET_NAME}
@@ -34,12 +42,10 @@ app:
   frontend-url: ${FRONTEND_URL}
   first-api-key: ${FIRST_API_KEY}
   second-api-key: ${SECOND_API_KEY}
-  squad-list-base-url: ${SQUAD_LIST_BASE_URL}
   fixture-list-base-url: ${FIXTURE_LIST_BASE_URL}
   competition-base-url: ${COMPETITION_BASE_URL}
   fixture-base-url: ${FIXTURE_BASE_URL}
-  events-base-url: ${EVENTS_BASE_URL}
-  live-fixture-base-url: ${LIVE_FIXTURE_BASE_URL}
+  external-fixture-base-url: ${EXTERNAL_FIXTURE_BASE_URL}
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}

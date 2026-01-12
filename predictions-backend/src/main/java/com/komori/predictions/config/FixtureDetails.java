@@ -41,26 +41,26 @@ public class FixtureDetails {
             Map.entry("EVE","Hill Dickinson Stadium")
     );
     public static final Map<String, Integer> TEAM_IDS = Map.ofEntries(
-            Map.entry("Liverpool", 40),
-            Map.entry("Bournemouth", 35),
-            Map.entry("Aston Villa", 66),
-            Map.entry("Newcastle", 34),
-            Map.entry("Brighton Hove", 51),
-            Map.entry("Fulham", 36),
-            Map.entry("Sunderland", 746),
-            Map.entry("West Ham", 48),
-            Map.entry("Tottenham", 47),
-            Map.entry("Burnley", 44),
-            Map.entry("Wolverhampton", 39),
-            Map.entry("Man City", 50),
-            Map.entry("Nottingham", 65),
-            Map.entry("Brentford", 55),
-            Map.entry("Chelsea", 49),
-            Map.entry("Crystal Palace", 52),
-            Map.entry("Man United", 33),
-            Map.entry("Arsenal", 42),
-            Map.entry("Leeds", 63),
-            Map.entry("Everton", 45)
+            Map.entry("Liverpool", 84),
+            Map.entry("Bournemouth", 3071),
+            Map.entry("Aston Villa", 3088),
+            Map.entry("Newcastle", 3100),
+            Map.entry("Brighton Hove", 3079),
+            Map.entry("Fulham", 3085),
+            Map.entry("Sunderland", 3111),
+            Map.entry("West Ham", 3081),
+            Map.entry("Tottenham", 164),
+            Map.entry("Burnley", 3075),
+            Map.entry("Wolverhampton", 3077),
+            Map.entry("Man City", 80),
+            Map.entry("Nottingham", 3089),
+            Map.entry("Brentford", 3086),
+            Map.entry("Chelsea", 88),
+            Map.entry("Crystal Palace", 3429),
+            Map.entry("Man United", 102),
+            Map.entry("Arsenal", 141),
+            Map.entry("Leeds", 3103),
+            Map.entry("Everton", 3073)
     );
 
     public FixtureDetails(RedisTemplate<String, Object> redisGeneralTemplate, APIService apiService) {

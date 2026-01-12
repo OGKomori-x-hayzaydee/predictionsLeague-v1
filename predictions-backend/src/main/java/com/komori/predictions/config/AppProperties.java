@@ -15,10 +15,8 @@ public class AppProperties {
     private String frontendUrl;
     private String firstApiKey;
     private String secondApiKey;
-    private String squadListBaseUrl;
     private String fixtureListBaseUrl;
     private String competitionBaseUrl;
     private String fixtureBaseUrl;
-    private String eventsBaseUrl;
-    private String liveFixtureBaseUrl;
+    private String externalFixtureBaseUrl;
 }

@@ -33,8 +33,6 @@ import java.util.List;
 public class SecurityConfig {
     @Value("${app.first-api-key}")
     private String firstApiKey;
-    @Value("${app.second-api-key}")
-    private String secondApiKey;
     @Value("${app.frontend-url}")
     private String frontendUrl;
     private final CustomUserDetailsService userDetailsService;
@@ -90,14 +88,6 @@ public class SecurityConfig {
     public HttpHeaders firstApiHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Auth-Token", firstApiKey);
-        return headers;
-    }
-
-    @Bean
-    public HttpHeaders secondApiHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-host", "v3.football.api1-sports.io");
-        headers.set("x-rapidapi-key", secondApiKey);
         return headers;
     }
 }

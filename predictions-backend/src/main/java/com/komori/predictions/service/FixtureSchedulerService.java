@@ -34,6 +34,7 @@ public class FixtureSchedulerService {
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
         if (!fixtures.isEmpty()) {
+            fixtures = apiService.addSecondFixtureIds(fixtures);
             for (Fixture fixture : fixtures) {
                 Instant fixtureInstant = fixture.getDate().toInstant();
                 long delayMillis = Duration.between(Instant.now(), fixtureInstant).toMillis();
@@ -67,22 +68,16 @@ public class FixtureSchedulerService {
         watcherHolder[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
             ExternalFixtureResponse1.Match currentMatch = apiService.getGameStatus(fixture);
             if (currentMatch.getStatus().equalsIgnoreCase("IN_PLAY")) {
-                log.info("Match is now live! Fetching second fixture ID...");
-                Long secondFixtureId = apiService.getSecondFixtureId(fixture);
-                log.info("Second fixtureId retrieved: {}", secondFixtureId);
-                if (secondFixtureId == -1) {
-                    log.info("Second fixture ID not found for {}, skipping this iteration", fixture.getId());
-                    return;
-                }
-                startGoalPolling(fixture, secondFixtureId);
+                log.info("Match is now live!");
+                startGoalPolling(fixture);
 
                 watcherHolder[0].cancel(false);
             }
         }, 0, 1, TimeUnit.MINUTES);
     }
 
-    private void startGoalPolling(Fixture fixture, Long secondFixtureId) {
-        log.info("Starting goal polling for fixture {}", fixture.getId());
+    private void startGoalPolling(Fixture fixture) {
+        log.info("Starting goal polling for fixture {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
         final ScheduledFuture<?>[] pollingTask = new ScheduledFuture<?>[1];
 
         pollingTask[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
@@ -105,16 +100,16 @@ public class FixtureSchedulerService {
                     }
                 }
                 redisFixtureTemplate.delete("fixtures");
-                fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixtures",f));
+                fixtures.forEach(fix -> redisFixtureTemplate.opsForList().rightPush("fixtures",fix));
 
                 // Retrieve goalscorers
                 log.info("Retrieving goalscorers...");
-                HomeAndAwayScorers scorers = apiService.getGoalScorers(fixture, secondFixtureId);
+                HomeAndAwayScorers scorers = apiService.getGoalScorers(fixture);
 
                 // Save match to DB
                 log.info("Saving match to DB...");
                 MatchEntity matchEntity = MatchEntity.builder()
-                        .matchId(secondFixtureId)
+                        .matchId(fixture.getExternalFixtureId().longValue())
                         .oldFixtureId(fixture.getId().longValue())
                         .gameweek(FixtureDetails.currentMatchday)
                         .homeScore(currentMatch.getScore().getFullTime().getHome())
