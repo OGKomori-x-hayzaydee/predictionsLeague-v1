@@ -1,6 +1,5 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.projection.AccuracyStatsProjection;
 import com.komori.predictions.dto.response.DashboardEssentials;
 import com.komori.predictions.dto.response.DashboardLeagueSummary;
@@ -23,6 +22,7 @@ import java.util.stream.Collectors;
 public class DashboardService {
     private final UserRepository userRepository;
     private final PredictionRepository predictionRepository;
+    private final MatchdayService matchdayService;
 
     public DashboardEssentials getDashboardDetails(String email) {
         UserEntity user = userRepository.findByEmail(email)
@@ -66,7 +66,7 @@ public class DashboardService {
                         user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), predictionRepository.countByUser(user), 0
                 ))
                 .season(new DashboardEssentials.Season(
-                        FixtureDetails.currentMatchday, 38, "Fri 18:00"
+                        matchdayService.getCurrentMatchday(), 38, "Fri 18:00"
                 ))
                 .stats(new DashboardEssentials.Stats(
                         new DashboardEssentials.Stats.WeeklyPoints(

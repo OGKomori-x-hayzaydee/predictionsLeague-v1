@@ -1,6 +1,5 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import com.komori.predictions.dto.response.Fixture;
@@ -29,7 +28,7 @@ public class FixtureSchedulerService {
     private final PredictionService predictionService;
     private final MatchRepository matchRepository;
     private final ChipService chipService;
-    private final RedisTemplate<String, Object> redisGeneralTemplate;
+    private final MatchdayService matchdayService;
 
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
@@ -111,14 +110,14 @@ public class FixtureSchedulerService {
                 MatchEntity matchEntity = MatchEntity.builder()
                         .matchId(fixture.getExternalFixtureId().longValue())
                         .oldFixtureId(fixture.getId().longValue())
-                        .gameweek(FixtureDetails.currentMatchday)
+                        .gameweek(fixture.getGameweek())
                         .homeScore(currentMatch.getScore().getFullTime().getHome())
                         .awayScore(currentMatch.getScore().getFullTime().getAway())
                         .homeTeam(fixture.getHomeTeam())
                         .awayTeam(fixture.getAwayTeam())
                         .homeScorers(scorers.homeScorers())
                         .awayScorers(scorers.awayScorers())
-                        .venue(FixtureDetails.VENUES.get(currentMatch.getHomeTeam().getTla()))
+                        .venue(fixture.getVenue())
                         .build();
                 matchEntity = matchRepository.saveAndFlush(matchEntity);
 
@@ -137,8 +136,8 @@ public class FixtureSchedulerService {
                                 // tie-breaker by ID
                         || ((f.getDate().isEqual(fixture.getDate())) && f.getId() > fixture.getId()));
                 if (isLastFixture) {
-                    FixtureDetails.currentMatchday++;
-                    redisGeneralTemplate.opsForValue().set("currentMatchday", FixtureDetails.currentMatchday);
+                    int newMatchday = matchdayService.getCurrentMatchday() + 1;
+                    matchdayService.setCurrentMatchday(newMatchday);
                     chipService.updateAllGameweekCooldowns();
                     apiService.updateUpcomingFixtures();
                 }

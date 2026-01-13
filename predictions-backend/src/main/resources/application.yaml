@@ -41,7 +41,6 @@ app:
   first-api-key: ${FIRST_API_KEY}
   second-api-key: ${SECOND_API_KEY}
   fixture-list-base-url: ${FIXTURE_LIST_BASE_URL}
-  competition-base-url: ${COMPETITION_BASE_URL}
   fixture-base-url: ${FIXTURE_BASE_URL}
   external-fixture-base-url: ${EXTERNAL_FIXTURE_BASE_URL}
 brevo:

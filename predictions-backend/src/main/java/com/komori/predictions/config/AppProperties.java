@@ -16,7 +16,6 @@ public class AppProperties {
     private String firstApiKey;
     private String secondApiKey;
     private String fixtureListBaseUrl;
-    private String competitionBaseUrl;
     private String fixtureBaseUrl;
     private String externalFixtureBaseUrl;
 }

@@ -1,15 +1,12 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.*;
-import com.komori.predictions.dto.response.api1.ExternalCompetitionResponse;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import com.komori.predictions.dto.response.api2.ExternalFixtureResponse2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,8 +22,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class APIService {
-    @Value("${app.competition-base-url}")
-    private String competitionBaseUrl;
     @Value("${app.fixture-list-base-url}")
     private String fixtureListBaseUrl;
     @Value("${app.fixture-base-url}")
@@ -37,13 +32,13 @@ public class APIService {
     private String secondApiKey;
     private final HttpHeaders firstApiHeaders;
     private final RestTemplate restTemplate;
-    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
-    private final RedisTemplate<String, Object> redisGeneralTemplate;
+    private final FixtureService fixtureService;
+    private final MatchdayService matchdayService;
 
     public void updateUpcomingFixtures() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
         ResponseEntity<ExternalFixtureResponse1> responseEntity = restTemplate.exchange(
-                fixtureListBaseUrl + FixtureDetails.currentMatchday,
+                fixtureListBaseUrl + matchdayService.getCurrentMatchday(),
                 HttpMethod.GET,
                 httpEntity,
                 ExternalFixtureResponse1.class
@@ -54,33 +49,7 @@ public class APIService {
             throw new RuntimeException("Error fetching API data for fixtures.");
         }
 
-        List<Fixture> fixtures = response.getMatches().stream().map(Fixture::new).toList();
-        redisFixtureTemplate.delete("fixtures");
-        for (Fixture fixture : fixtures) {
-            if (FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getHomeTeam()) || FixtureDetails.BIG_SIX_TEAMS.contains(fixture.getAwayTeam())) {
-                redisFixtureTemplate.opsForList().rightPush("fixtures", fixture);
-            }
-        }
-    }
-
-    public void setCurrentMatchday() {
-        HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
-        ResponseEntity<ExternalCompetitionResponse> responseEntity = restTemplate.exchange(
-                competitionBaseUrl + "PL",
-                HttpMethod.GET,
-                httpEntity,
-                ExternalCompetitionResponse.class
-        );
-
-        ExternalCompetitionResponse response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError()) {
-            throw new RuntimeException("Error setting current matchday");
-        }
-
-        Integer matchday = response.getCurrentSeason().getCurrentMatchday();
-        FixtureDetails.currentMatchday = matchday;
-        redisGeneralTemplate.opsForValue().set("currentMatchday", matchday);
-        log.info("Set current matchday to GW{}", FixtureDetails.currentMatchday);
+        fixtureService.updateFixtureData(response.getMatches());
     }
 
     public ExternalFixtureResponse1.Match getGameStatus(Fixture fixture) {
