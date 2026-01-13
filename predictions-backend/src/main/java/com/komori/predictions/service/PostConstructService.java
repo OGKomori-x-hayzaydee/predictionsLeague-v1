@@ -44,13 +44,15 @@ public class PostConstructService {
             List<Player> playerList = redisPlayerTemplate.opsForList().range(key, 0, -1);
             assert playerList != null;
             playerList.forEach(player -> {
-                PlayerEntity playerEntity = PlayerEntity.builder()
-                        .team(teamEntity)
-                        .name(player.getName())
-                        .position(player.getPosition())
-                        .build();
+                if (player != null) {
+                    PlayerEntity playerEntity = PlayerEntity.builder()
+                            .team(teamEntity)
+                            .name(player.getName())
+                            .position(player.getPosition())
+                            .build();
 
-                players.add(playerEntity);
+                    players.add(playerEntity);
+                }
             });
         });
         playerRepository.saveAll(players);
