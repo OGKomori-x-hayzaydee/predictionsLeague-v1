@@ -7,6 +7,7 @@ import com.komori.predictions.entity.TeamEntity;
 import com.komori.predictions.repository.PlayerRepository;
 import com.komori.predictions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FixtureService {
@@ -43,8 +45,10 @@ public class FixtureService {
         List<Fixture> fixtures = new ArrayList<>();
 
         matchList.forEach(match -> {
+            log.info("API Data received: {}", fixtures);
             String homeTeamName = match.getHomeTeam().getShortName();
             String awayTeamName = match.getAwayTeam().getShortName();
+            log.info("Home and Away: {} and {}", homeTeamName, awayTeamName);
 
             TeamEntity homeTeamEntity = teamRepository.findByName(homeTeamName);
             TeamEntity awayTeamEntity = teamRepository.findByName(awayTeamName);
