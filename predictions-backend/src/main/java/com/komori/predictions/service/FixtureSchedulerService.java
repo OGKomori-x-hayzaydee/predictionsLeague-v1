@@ -33,7 +33,7 @@ public class FixtureSchedulerService {
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
         if (!fixtures.isEmpty()) {
-            fixtures = apiService.addSecondFixtureIds(fixtures);
+            apiService.addSecondFixtureIds(fixtures);
             for (Fixture fixture : fixtures) {
                 Instant fixtureInstant = fixture.getDate().toInstant();
                 long delayMillis = Duration.between(Instant.now(), fixtureInstant).toMillis();

@@ -3,10 +3,11 @@ package com.komori.predictions.service;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.*;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
-import com.komori.predictions.dto.response.api2.ExternalFixtureResponse2;
+import com.komori.predictions.dto.response.api2.FixtureDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -69,19 +70,19 @@ public class APIService {
         return response;
     }
 
-    public List<Fixture> addSecondFixtureIds(List<Fixture> fixtures) {
+    public void addSecondFixtureIds(List<Fixture> fixtures) {
         LocalDate today = LocalDate.now();
         String date = today.toString();
 
-        ResponseEntity<ExternalFixtureResponse2> responseEntity = restTemplate.exchange(
+        ResponseEntity<List<FixtureDetails>> responseEntity = restTemplate.exchange(
                 externalFixtureBaseUrl + date + "&to=" + date + "&league_id=152&APIkey=" + secondApiKey,
                 HttpMethod.GET,
                 null,
-                ExternalFixtureResponse2.class
+                new ParameterizedTypeReference<>() {}
         );
 
-        ExternalFixtureResponse2 response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError() || response.getDetails().isEmpty()) {
+        List<FixtureDetails> response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError() || response.isEmpty()) {
             throw new RuntimeException("Error getting second fixture IDs");
         }
 
@@ -89,37 +90,35 @@ public class APIService {
             int homeId = fixture.getHomeId();
             int awayId = fixture.getAwayId();
 
-            for (ExternalFixtureResponse2.FixtureDetails details : response.getDetails()) {
+            for (FixtureDetails details : response) {
                 if (details.getMatchHometeamId() == homeId && details.getMatchAwayteamId() == awayId) {
                     fixture.setExternalFixtureId(details.getMatchId());
                     break;
                 }
             }
         });
-
-        return fixtures;
     }
 
     public HomeAndAwayScorers getGoalScorers(Fixture fixture) {
         String date = fixture.getDate().toLocalDate().toString();
 
-        ResponseEntity<ExternalFixtureResponse2> responseEntity = restTemplate.exchange(
+        ResponseEntity<List<FixtureDetails>> responseEntity = restTemplate.exchange(
                 externalFixtureBaseUrl + date + "&to=" + date + "&match_id=" + fixture.getExternalFixtureId() + "&APIkey=" + secondApiKey,
                 HttpMethod.GET,
                 null,
-                ExternalFixtureResponse2.class
+                new ParameterizedTypeReference<>() {}
         );
 
-        ExternalFixtureResponse2 response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError() || response.getDetails().isEmpty()) {
+        List<FixtureDetails> response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError() || response.isEmpty()) {
             throw new RuntimeException("Error getting goalscorers for " + fixture.getHomeTeam() + " vs " + fixture.getAwayTeam());
         }
 
-        ExternalFixtureResponse2.FixtureDetails fixtureDetails = response.getDetails().getFirst();
+        FixtureDetails fixtureDetails = response.getFirst();
         List<String> homeScorers = new ArrayList<>();
         List<String> awayScorers = new ArrayList<>();
 
-        for (ExternalFixtureResponse2.FixtureDetails.Goalscorer goalscorer : fixtureDetails.getGoalscorer()) {
+        for (FixtureDetails.Goalscorer goalscorer : fixtureDetails.getGoalscorer()) {
             if (goalscorer.getHomeScorer().isEmpty()) {
                 awayScorers.add(goalscorer.getAwayScorer());
             } else {

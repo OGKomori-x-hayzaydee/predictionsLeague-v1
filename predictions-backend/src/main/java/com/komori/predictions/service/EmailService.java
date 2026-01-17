@@ -12,6 +12,7 @@ import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -120,6 +121,15 @@ public class EmailService {
         sendEmail("✅ Your password has been changed", htmlContent, name, toEmail);
     }
 
+    public void sendErrorEmail(Exception e) {
+        String subject = "Predictions League Error";
+        String content = "An error has occurred in the Predictions League app that you need to address: " + Arrays.toString(e.getStackTrace());
+        String name = "Tega";
+        String toEmail = "majorogkomori@gmail.com";
+
+        sendEmail(subject, content, name, toEmail);
+    }
+
     private void sendEmail(String subject, String htmlContent, String name, String toEmail) {
         EmailRequest request = EmailRequest.builder()
                 .to(List.of(new EmailRequest.NameAndEmail(name, toEmail)))
@@ -141,7 +151,7 @@ public class EmailService {
         );
 
         if (response.getStatusCode().isError()) {
-            throw new MailSendException("Welcome mail not sent: " + response.getBody());
+            throw new MailSendException("Email not sent: " + response.getBody());
         }
     }
 }
