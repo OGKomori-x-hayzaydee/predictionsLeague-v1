@@ -35,12 +35,20 @@ public class FixtureSchedulerService {
         if (!fixtures.isEmpty()) {
             apiService.addSecondFixtureIds(fixtures);
             for (Fixture fixture : fixtures) {
-                Instant fixtureInstant = fixture.getDate().toInstant();
-                long delayMillis = Duration.between(Instant.now(), fixtureInstant).toMillis();
-                if (delayMillis < 0) continue;
+                ExternalFixtureResponse1.Match status = apiService.getGameStatus(fixture);
 
-                log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
-                scheduledExecutorService.schedule(() -> watchFixture(fixture), delayMillis, TimeUnit.MILLISECONDS);
+                if ("IN_PLAY".equalsIgnoreCase(status.getStatus())) {
+                    startGoalPolling(fixture);
+                }
+                else if ("TIMED".equalsIgnoreCase(status.getStatus())) {
+                    long delayMillis = Duration.between(Instant.now(),
+                            fixture.getDate().toInstant()).toMillis();
+
+                    if (delayMillis > 0) {
+                        scheduledExecutorService.schedule(() -> watchFixture(fixture), delayMillis, TimeUnit.MILLISECONDS);
+                        log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
+                    }
+                }
             }
         }
     }
