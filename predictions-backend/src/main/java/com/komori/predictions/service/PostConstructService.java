@@ -23,8 +23,6 @@ public class PostConstructService {
 
     @PostConstruct
     public void setCurrentMatchdayOnStartup() {
-        log.info("Updating upcoming fixtures...");
-        apiService.updateUpcomingFixtures();
         log.info("Scheduling matches for the day...");
         fixtureSchedulerService.scheduleFixturesForTheDay();
     }

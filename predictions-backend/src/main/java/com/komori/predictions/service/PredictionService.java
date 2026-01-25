@@ -10,6 +10,7 @@ import com.komori.predictions.entity.UserEntity;
 import com.komori.predictions.repository.MatchRepository;
 import com.komori.predictions.repository.PredictionRepository;
 import com.komori.predictions.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class PredictionService {
         chipService.updateChipStatusAfterNewPrediction(email, request);
     }
 
+    @Transactional
     public void updateDatabaseAfterGame(MatchEntity match) {
         // Updating DB:
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getOldFixtureId());
@@ -74,8 +76,8 @@ public class PredictionService {
             prediction.setCorrect(correct);
             prediction.setStatus(PredictionStatus.COMPLETED);
             user.setTotalPoints(user.getTotalPoints() + points);
-            userRepository.save(user);
         }
+
         predictionRepository.saveAll(predictions);
     }
 
