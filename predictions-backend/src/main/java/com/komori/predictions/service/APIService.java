@@ -4,10 +4,13 @@ import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.*;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import com.komori.predictions.dto.response.api2.FixtureDetails;
+import com.komori.predictions.entity.TeamEntity;
+import com.komori.predictions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -33,8 +37,9 @@ public class APIService {
     private String secondApiKey;
     private final HttpHeaders firstApiHeaders;
     private final RestTemplate restTemplate;
-    private final FixtureService fixtureService;
+    private final TeamRepository teamRepository;
     private final MatchdayService matchdayService;
+    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
 
     public void updateUpcomingFixtures() {
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
@@ -50,7 +55,25 @@ public class APIService {
             throw new RuntimeException("Error fetching API data for fixtures.");
         }
 
-        fixtureService.updateFixtureData(response.getMatches());
+        List<ExternalFixtureResponse1.Match> matchList = response.getMatches();
+        List<Fixture> newFixtures = matchList.stream()
+                .map(match -> {
+                    TeamEntity home = teamRepository.findByName(match.getHomeTeam().getShortName());
+                    TeamEntity away = teamRepository.findByName(match.getAwayTeam().getShortName());
+                    if (home.getIsBigSixTeam() || away.getIsBigSixTeam()) {
+                        return new Fixture(match, home, away);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        List<Fixture> existingFixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
+
+        if (!newFixtures.equals(existingFixtures)) {
+            redisFixtureTemplate.delete("fixtures");
+            redisFixtureTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+        }
     }
 
     public ExternalFixtureResponse1.Match getGameStatus(Fixture fixture) {

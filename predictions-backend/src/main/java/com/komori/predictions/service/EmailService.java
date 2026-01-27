@@ -12,7 +12,8 @@ import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 @Slf4j
@@ -38,7 +39,7 @@ public class EmailService {
         </html>
        """.formatted(name);
 
-        sendEmail("👋🏾 Welcome to the Predictions League!", htmlContent, name, toEmail);
+        sendEmail("👋🏾 Welcome to the Predictions League!", htmlContent, List.of(new EmailRequest.NameAndEmail(name, toEmail)));
     }
 
     public void sendVerifyOtpEmail(String toEmail, String name, String otp) {
@@ -56,7 +57,7 @@ public class EmailService {
         </html>
         """.formatted(name, otp);
 
-        sendEmail("🔒 Verify your Account", htmlContent, name, toEmail);
+        sendEmail("🔒 Verify your Account", htmlContent, List.of(new EmailRequest.NameAndEmail(name, toEmail)));
     }
 
     public void sendAccountVerifiedEmail(String toEmail, String name) {
@@ -65,14 +66,14 @@ public class EmailService {
           <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
             <p>Hello <b>%s</b>,</p>
             <p>Your account has been <b style="color: #27ae60;">verified successfully</b>!
-            That was fast btw.</p>
+            </p>
             <p>Regards,<br>
             Tega from the Predictions Team</p>
           </body>
         </html>
         """.formatted(name);
 
-        sendEmail("🔓 Account Verified Successfully!", htmlContent, name, toEmail);
+        sendEmail("🔓 Account Verified Successfully!", htmlContent, List.of(new EmailRequest.NameAndEmail(name, toEmail)));
     }
 
     public void sendResetPasswordEmail(String toEmail, String name) {
@@ -93,15 +94,13 @@ public class EmailService {
     <p>If you didn't request this, you can safely ignore this email. Or archive it. Or delete it.
     The choice is yours tbh.</p>
 
-    <p>You should be more concerned that someone's trying to reset your password anyway so...</p>
-
     <p>Regards,<br>
     Tega from the Predictions Team</p>
   </body>
 </html>
 """.formatted(name);
 
-        sendEmail("🗝️ Reset your password", htmlContent, name, toEmail);
+        sendEmail("🗝️ Reset your password", htmlContent, List.of(new EmailRequest.NameAndEmail(name, toEmail)));
     }
 
     public void sendChangedPasswordEmail(String toEmail, String name) {
@@ -118,21 +117,26 @@ public class EmailService {
 </html>
 """.formatted(name);
 
-        sendEmail("✅ Your password has been changed", htmlContent, name, toEmail);
+        sendEmail("✅ Your password has been changed", htmlContent, List.of(new EmailRequest.NameAndEmail(name, toEmail)));
     }
 
     public void sendErrorEmail(Exception e) {
-        String subject = "Predictions League Error";
-        String content = "An error has occurred in the Predictions League app that you need to address: " + Arrays.toString(e.getStackTrace());
-        String name = "Tega";
-        String toEmail = "majorogkomori@gmail.com";
+        String subject = "Predictions League Server Error";
+        StringWriter stringWriter = new StringWriter();
+        e.printStackTrace(new PrintWriter(stringWriter));
+        String stackTrace = stringWriter.toString();
 
-        sendEmail(subject, content, name, toEmail);
+        String content = "An error has occurred in the Predictions League app that needs to be addressed: \n\n" + stackTrace;
+
+        sendEmail(subject, content, List.of(
+                new EmailRequest.NameAndEmail("Tega", "majorogkomori@gmail.com"),
+                new EmailRequest.NameAndEmail("Divine", "hayzaydeee@gmail.com")
+        ));
     }
 
-    private void sendEmail(String subject, String htmlContent, String name, String toEmail) {
+    private void sendEmail(String subject, String htmlContent, List<EmailRequest.NameAndEmail> nameAndEmails) {
         EmailRequest request = EmailRequest.builder()
-                .to(List.of(new EmailRequest.NameAndEmail(name, toEmail)))
+                .to(nameAndEmails)
                 .sender(new EmailRequest.NameAndEmail("The Predictions League", fromEmail))
                 .subject(subject)
                 .htmlContent(htmlContent)
