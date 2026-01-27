@@ -42,7 +42,6 @@ public class APIService {
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
 
     public void updateUpcomingFixtures() {
-        System.out.println("updateUpcomingFixtures CALLED");
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
         ResponseEntity<ExternalFixtureResponse1> responseEntity = restTemplate.exchange(
                 fixtureListBaseUrl + matchdayService.getCurrentMatchday(),
@@ -69,7 +68,6 @@ public class APIService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        System.out.println("newFixtures size = " + newFixtures.size());
         List<Fixture> existingFixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
 
         if (!newFixtures.equals(existingFixtures)) {
