@@ -68,6 +68,7 @@ public class APIService {
                 .filter(Objects::nonNull)
                 .toList();
 
+        System.out.println("newFixtures size = " + newFixtures.size());
         List<Fixture> existingFixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
 
         if (!newFixtures.equals(existingFixtures)) {
