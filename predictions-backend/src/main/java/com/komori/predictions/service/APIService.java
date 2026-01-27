@@ -42,6 +42,7 @@ public class APIService {
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
 
     public void updateUpcomingFixtures() {
+        System.out.println("updateUpcomingFixtures CALLED");
         HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
         ResponseEntity<ExternalFixtureResponse1> responseEntity = restTemplate.exchange(
                 fixtureListBaseUrl + matchdayService.getCurrentMatchday(),

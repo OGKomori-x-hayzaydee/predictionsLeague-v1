@@ -20,12 +20,12 @@ public class FixtureService {
 
     public List<Fixture> getFixtures() {
         List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
-        if (fixtures == null) {
+        if (fixtures == null || fixtures.isEmpty()) {
             apiService.updateUpcomingFixtures();
             fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         }
 
-        if (fixtures == null) {
+        if (fixtures == null || fixtures.isEmpty()) {
             throw new RuntimeException("Fixtures not available in redis after API refresh");
         }
 
