@@ -3,6 +3,8 @@ package com.komori.predictions.service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -25,5 +27,12 @@ public class PostConstructService {
     public void setCurrentMatchdayOnStartup() {
         log.info("Scheduling matches for the day...");
         fixtureSchedulerService.scheduleFixturesForTheDay();
+    }
+
+    // induce exception
+    @EventListener(ApplicationReadyEvent.class)
+    public void causeException() throws InterruptedException {
+        Thread.sleep(5 * 60 * 1000);
+        throw new RuntimeException("Intentional failure to test the email feature");
     }
 }
