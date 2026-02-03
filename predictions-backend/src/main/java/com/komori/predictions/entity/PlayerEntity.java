@@ -14,6 +14,7 @@ import lombok.*;
 public class PlayerEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long playerId;
     private String name;
     @ManyToOne @JoinColumn(name = "team_id", nullable = false)
     private TeamEntity team;
