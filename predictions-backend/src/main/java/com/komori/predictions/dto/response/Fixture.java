@@ -32,7 +32,7 @@ public class Fixture {
     private Integer awayScore;
     private List<Player> homePlayers;
     private List<Player> awayPlayers;
-    private Integer externalFixtureId;
+    private Long externalFixtureId;
 
     public Fixture(ExternalFixtureResponse1.Match match, TeamEntity homeTeamEntity, TeamEntity awayTeamEntity) {
         this.id = match.getId();

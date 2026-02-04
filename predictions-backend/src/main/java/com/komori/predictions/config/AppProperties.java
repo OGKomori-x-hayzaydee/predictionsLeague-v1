@@ -18,4 +18,6 @@ public class AppProperties {
     private String fixtureListBaseUrl;
     private String fixtureBaseUrl;
     private String externalFixtureBaseUrl;
+    private String squadListBaseUrl;
+    private String eventsBaseUrl;
 }

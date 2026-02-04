@@ -116,7 +116,7 @@ public class FixtureSchedulerService {
                 // Save match to DB
                 log.info("Saving match to DB...");
                 MatchEntity matchEntity = MatchEntity.builder()
-                        .matchId(fixture.getExternalFixtureId().longValue())
+                        .matchId(fixture.getExternalFixtureId())
                         .oldFixtureId(fixture.getId().longValue())
                         .gameweek(fixture.getGameweek())
                         .homeScore(currentMatch.getScore().getFullTime().getHome())

@@ -4,12 +4,17 @@ import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.*;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import com.komori.predictions.dto.response.api2.FixtureDetails;
+import com.komori.predictions.dto.response.api2.MatchEvents;
+import com.komori.predictions.dto.response.api2.Squad;
+import com.komori.predictions.entity.PlayerEntity;
 import com.komori.predictions.entity.TeamEntity;
+import com.komori.predictions.repository.PlayerRepository;
 import com.komori.predictions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,11 +22,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,11 +45,15 @@ public class APIService {
     private String fixtureBaseUrl;
     @Value("${app.external-fixture-base-url}")
     private String externalFixtureBaseUrl;
-    @Value("${app.second-api-key}")
-    private String secondApiKey;
+    @Value("${app.squad-list-base-url}")
+    private String squadListBaseUrl;
+    @Value("${app.events-base-url}")
+    private String eventsBaseUrl;
     private final HttpHeaders firstApiHeaders;
+    private final HttpHeaders secondApiHeaders;
     private final RestTemplate restTemplate;
     private final TeamRepository teamRepository;
+    private final PlayerRepository playerRepository;
     private final MatchdayService matchdayService;
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
 
@@ -95,27 +111,40 @@ public class APIService {
 
     public void addSecondFixtureIds(List<Fixture> fixtures) {
         LocalDate today = LocalDate.now();
-        String date = today.toString();
+        String date = today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String encodedDate = URLEncoder.encode(date, StandardCharsets.UTF_8);
+        String url = UriComponentsBuilder.fromUriString(externalFixtureBaseUrl)
+                .queryParam("startDate", encodedDate)
+                .queryParam("endDate", encodedDate)
+                .queryParam("sports", 1)
+                .queryParam("showOdds", false)
+                .queryParam("onlyMajorGames", true)
+                .toUriString();
 
-        ResponseEntity<List<FixtureDetails>> responseEntity = restTemplate.exchange(
-                externalFixtureBaseUrl + date + "&to=" + date + "&league_id=152&APIkey=" + secondApiKey,
+        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
+        ResponseEntity<FixtureDetails> responseEntity = restTemplate.exchange(
+                url,
                 HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
+                httpEntity,
+                FixtureDetails.class
         );
 
-        List<FixtureDetails> response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError() || response.isEmpty()) {
-            throw new RuntimeException("Error getting second fixture IDs");
+        FixtureDetails response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError() || response.getGames().isEmpty()) {
+            throw new RuntimeException("Error getting list of second fixture IDs");
         }
+
+        List<FixtureDetails.Game> premGames = response.getGames().stream()
+                .filter(game -> game.getCompetitionId() == 7)
+                .toList();
 
         fixtures.forEach(fixture -> {
             int homeId = fixture.getHomeId();
             int awayId = fixture.getAwayId();
 
-            for (FixtureDetails details : response) {
-                if (details.getMatchHometeamId() == homeId && details.getMatchAwayteamId() == awayId) {
-                    fixture.setExternalFixtureId(details.getMatchId());
+            for (FixtureDetails.Game game : premGames) {
+                if (game.getHomeCompetitor().getId() == homeId && game.getAwayCompetitor().getId() == awayId) {
+                    fixture.setExternalFixtureId(game.getId());
                     break;
                 }
             }
@@ -123,32 +152,85 @@ public class APIService {
     }
 
     public HomeAndAwayScorers getGoalScorers(Fixture fixture) {
-        String date = fixture.getDate().toLocalDate().toString();
+        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
+        String url = UriComponentsBuilder.fromUriString(eventsBaseUrl)
+                .queryParam("gameId", fixture.getExternalFixtureId())
+                .queryParam("matchupId", fixture.getHomeId() + "-" + fixture.getAwayId() + "-7")
+                .toUriString();
 
-        ResponseEntity<List<FixtureDetails>> responseEntity = restTemplate.exchange(
-                externalFixtureBaseUrl + date + "&to=" + date + "&match_id=" + fixture.getExternalFixtureId() + "&APIkey=" + secondApiKey,
+        ResponseEntity<MatchEvents> responseEntity = restTemplate.exchange(
+                url,
                 HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
+                httpEntity,
+                MatchEvents.class
         );
 
-        List<FixtureDetails> response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError() || response.isEmpty()) {
+        MatchEvents response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError()) {
             throw new RuntimeException("Error getting goalscorers for " + fixture.getHomeTeam() + " vs " + fixture.getAwayTeam());
         }
 
-        FixtureDetails fixtureDetails = response.getFirst();
+        List<PlayerEntity> playerEntities = playerRepository.findAllByTeam_TeamIdIn(List.of(fixture.getHomeId(), fixture.getAwayId()));
+        Map<Long, String> playerNames = playerEntities.stream()
+                .collect(Collectors.toMap(PlayerEntity::getPlayerId, PlayerEntity::getName));
+
         List<String> homeScorers = new ArrayList<>();
         List<String> awayScorers = new ArrayList<>();
 
-        for (FixtureDetails.Goalscorer goalscorer : fixtureDetails.getGoalscorer()) {
-            if (goalscorer.getHomeScorer().isEmpty()) {
-                awayScorers.add(goalscorer.getAwayScorer());
+        for (MatchEvents.Game.Event event : response.getGame().getEvents()) {
+            String type = event.getEventType().getName();
+            if (!type.equals("Goal") && !type.equals("Own Goal")) continue;
+
+            String playerName = playerNames.get(event.getPlayerId());
+            if (type.equals("Own Goal")) playerName += " (OG)";
+
+            if (event.getCompetitorId() == fixture.getHomeId().longValue()) {
+                homeScorers.add(playerName);
             } else {
-                homeScorers.add(goalscorer.getHomeScorer());
+                awayScorers.add(playerName);
             }
         }
 
         return new HomeAndAwayScorers(homeScorers, awayScorers);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void loadPlayersIntoDatabase() {
+        List<TeamEntity> teams = teamRepository.findAll();
+        for (TeamEntity teamEntity : teams) {
+            int teamId = teamEntity.getTeamId();
+            String url = UriComponentsBuilder.fromUriString(squadListBaseUrl)
+                    .queryParam("competitors", teamId)
+                    .toUriString();
+
+            HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
+            ResponseEntity<Squad> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    httpEntity,
+                    Squad.class
+            );
+
+            Squad response = responseEntity.getBody();
+            if (response == null || responseEntity.getStatusCode().isError() || response.getSquads().isEmpty()) {
+                throw new RuntimeException("Error loading players for " + teamEntity.getName());
+            }
+
+            List<Squad.SquadList.Athlete> athletes = response.getSquads().getFirst().getAthletes();
+            List<PlayerEntity> playerEntities = athletes.stream()
+                    .filter(athlete -> !"Goalkeeper".equals(athlete.getPosition().getName()))
+                    .map(athlete -> new PlayerEntity(athlete, teamEntity))
+                    .toList();
+
+            playerRepository.saveAll(playerEntities);
+            log.info("Successfully loaded all {} players", teamEntity.getName());
+
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
 }

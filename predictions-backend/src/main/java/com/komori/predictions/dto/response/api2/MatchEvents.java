@@ -9,23 +9,30 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FixtureDetails {
-    private List<Game> games;
+public class MatchEvents {
+    private Game game;
 
     @Data
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Game {
-        private Long id;
-        private Competitor homeCompetitor;
-        private Competitor awayCompetitor;
-        private Integer competitionId;
+        private List<Event> events;
 
         @Data
         @AllArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Competitor {
-            private Long id;
+        public static class Event {
+            private Long competitorId;
+            private Long playerId;
+            private EventType eventType;
+
+            @Data
+            @AllArgsConstructor
+            @JsonIgnoreProperties(ignoreUnknown = true)
+            public static class EventType {
+                private Integer id;
+                private String name;
+            }
         }
     }
 }
