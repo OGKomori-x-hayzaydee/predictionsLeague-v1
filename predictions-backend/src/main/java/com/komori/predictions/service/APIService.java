@@ -218,7 +218,7 @@ public class APIService {
 
             List<Squad.SquadList.Athlete> athletes = response.getSquads().getFirst().getAthletes();
             List<PlayerEntity> playerEntities = athletes.stream()
-                    .filter(athlete -> !"Goalkeeper".equals(athlete.getPosition().getName()))
+                    .filter(athlete -> (athlete.getPosition().getId() != 0) && (athlete.getPosition().getId() != 1)) // filter out Manager and Keeper
                     .map(athlete -> new PlayerEntity(athlete, teamEntity))
                     .toList();
 

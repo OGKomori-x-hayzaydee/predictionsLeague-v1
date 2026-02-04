@@ -26,7 +26,7 @@ public class PlayerEntity {
         this.playerId = athlete.getId();
         this.name = athlete.getName();
         this.team = teamEntity;
-        String pos = athlete.getPosition().toString();
+        String pos = athlete.getPosition().getName();
         if (pos.equals("Defender")) {
             this.position = Position.DEFENDER;
         } else if (pos.equals("Midfielder")) {

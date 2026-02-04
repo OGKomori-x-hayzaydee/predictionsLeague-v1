@@ -31,6 +31,7 @@ public class Squad {
             @AllArgsConstructor
             @JsonIgnoreProperties(ignoreUnknown = true)
             public static class Position {
+                private Integer id;
                 private String name; // Defender, Midfielder, Attacker
             }
         }
