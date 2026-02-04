@@ -194,7 +194,7 @@ public class APIService {
         return new HomeAndAwayScorers(homeScorers, awayScorers);
     }
 
-    @EventListener(ApplicationReadyEvent.class)
+//    @EventListener(ApplicationReadyEvent.class)
     public void loadPlayersIntoDatabase() {
         List<TeamEntity> teams = teamRepository.findAll();
         for (TeamEntity teamEntity : teams) {
