@@ -12,6 +12,7 @@ import com.komori.predictions.repository.PredictionRepository;
 import com.komori.predictions.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PredictionService {
@@ -66,7 +68,7 @@ public class PredictionService {
 
     @Transactional
     public void updateDatabaseAfterGame(MatchEntity match) {
-        // Updating DB:
+        log.info("DB transaction started...");
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getOldFixtureId());
         for (PredictionEntity prediction : predictions) {
             UserEntity user = prediction.getUser();
@@ -79,6 +81,7 @@ public class PredictionService {
         }
 
         predictionRepository.saveAll(predictions);
+        log.info("Database updated");
     }
 
     // Scoring System

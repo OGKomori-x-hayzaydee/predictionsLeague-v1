@@ -13,8 +13,6 @@ import com.komori.predictions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -68,7 +66,8 @@ public class APIService {
 
         ExternalFixtureResponse1 response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
-            throw new RuntimeException("Error fetching API data for fixtures.");
+            log.error("Error fetching API data for fixtures.");
+            return;
         }
 
         List<ExternalFixtureResponse1.Match> matchList = response.getMatches();
@@ -103,7 +102,7 @@ public class APIService {
 
         ExternalFixtureResponse1.Match response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
-            throw new RuntimeException("Error checking match status for " + fixture.getHomeTeam() + " vs " + fixture.getAwayTeam());
+            log.error("Error checking match status for {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
         }
 
         return response;
@@ -131,7 +130,8 @@ public class APIService {
 
         FixtureDetails response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError() || response.getGames().isEmpty()) {
-            throw new RuntimeException("Error getting list of second fixture IDs");
+            log.error("Error getting list of second fixture IDs");
+            return;
         }
 
         List<FixtureDetails.Game> premGames = response.getGames().stream()
@@ -167,10 +167,11 @@ public class APIService {
 
         MatchEvents response = responseEntity.getBody();
         if (response == null || responseEntity.getStatusCode().isError()) {
-            throw new RuntimeException("Error getting goalscorers for " + fixture.getHomeTeam() + " vs " + fixture.getAwayTeam());
+            log.error("Error getting goalscorers for {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
+            return new HomeAndAwayScorers(new ArrayList<>(), new ArrayList<>());
         }
 
-        List<PlayerEntity> playerEntities = playerRepository.findAllByTeam_TeamIdIn(List.of(fixture.getHomeId(), fixture.getAwayId()));
+        List<PlayerEntity> playerEntities = playerRepository.findAllByTeamIds(List.of(fixture.getHomeId(), fixture.getAwayId()));
         Map<Long, String> playerNames = playerEntities.stream()
                 .collect(Collectors.toMap(PlayerEntity::getPlayerId, PlayerEntity::getName));
 
@@ -194,7 +195,6 @@ public class APIService {
         return new HomeAndAwayScorers(homeScorers, awayScorers);
     }
 
-//    @EventListener(ApplicationReadyEvent.class)
     public void loadPlayersIntoDatabase() {
         List<TeamEntity> teams = teamRepository.findAll();
         for (TeamEntity teamEntity : teams) {
@@ -213,7 +213,8 @@ public class APIService {
 
             Squad response = responseEntity.getBody();
             if (response == null || responseEntity.getStatusCode().isError() || response.getSquads().isEmpty()) {
-                throw new RuntimeException("Error loading players for " + teamEntity.getName());
+                log.error("Error loading players for {}", teamEntity.getName());
+                return;
             }
 
             List<Squad.SquadList.Athlete> athletes = response.getSquads().getFirst().getAthletes();

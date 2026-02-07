@@ -4,12 +4,15 @@ import com.komori.predictions.dto.response.Fixture;
 import com.komori.predictions.dto.response.Player;
 import com.komori.predictions.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FixtureService {
@@ -26,7 +29,8 @@ public class FixtureService {
         }
 
         if (fixtures == null || fixtures.isEmpty()) {
-            throw new RuntimeException("Fixtures not available in redis after API refresh");
+            log.error("Fixtures not available in redis after API refresh");
+            return new ArrayList<>();
         }
 
         fixtures.forEach(fixture -> {

@@ -134,7 +134,7 @@ public class FixtureSchedulerService {
                 try {
                     predictionService.updateDatabaseAfterGame(matchEntity);
                 } catch (Exception e) {
-                    throw new RuntimeException("Error in updating database", e);
+                    log.error("Error in updating database", e);
                 }
 
                 // Increment current Matchday if appropriate

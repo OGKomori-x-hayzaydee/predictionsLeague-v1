@@ -1,9 +1,11 @@
 package com.komori.predictions.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchdayService {
@@ -16,6 +18,7 @@ public class MatchdayService {
         } else if (value instanceof String) {
             return Integer.parseInt((String) value);
         } else {
+            log.error("Current matchday not set in Redis");
             throw new RuntimeException("Current matchday not set in Redis");
         }
     }
