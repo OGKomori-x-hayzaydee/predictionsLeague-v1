@@ -35,14 +35,14 @@ public class PostConstructService {
 
         // Testing the getGoalscorers method for the Arsenal vs Sunderland game
         Fixture fixture = Fixture.builder()
-                .id(538027)
-                .externalFixtureId(4452867L)
+                .id(538034)
+                .externalFixtureId(4452654L)
                 .gameweek(25)
-                .homeId(104)
-                .awayId(117)
-                .homeTeam("Arsenal")
-                .awayTeam("Sunderland")
-                .venue("Emirates Stadium")
+                .homeId(15)
+                .awayId(106)
+                .homeTeam("Wolverhampton")
+                .awayTeam("Chelsea")
+                .venue("Molineux Stadium")
                 .build();
 
         log.info("Retrieving goalscorers...");
@@ -54,8 +54,8 @@ public class PostConstructService {
                 .matchId(fixture.getExternalFixtureId())
                 .oldFixtureId(fixture.getId().longValue())
                 .gameweek(fixture.getGameweek())
-                .homeScore(3)
-                .awayScore(0)
+                .homeScore(1)
+                .awayScore(3)
                 .homeTeam(fixture.getHomeTeam())
                 .awayTeam(fixture.getAwayTeam())
                 .homeScorers(scorers.homeScorers())
