@@ -171,9 +171,13 @@ public class APIService {
             return new HomeAndAwayScorers(new ArrayList<>(), new ArrayList<>());
         }
 
-        List<PlayerEntity> playerEntities = playerRepository.findAllByTeamIds(List.of(fixture.getHomeId(), fixture.getAwayId()));
+        List<PlayerEntity> playerEntities = playerRepository.findAllByTeam_TeamId(fixture.getHomeId());
+        playerEntities.addAll(playerRepository.findAllByTeam_TeamId(fixture.getAwayId()));
         Map<Long, String> playerNames = playerEntities.stream()
                 .collect(Collectors.toMap(PlayerEntity::getPlayerId, PlayerEntity::getName));
+
+        log.info("Players retrieved:");
+        playerNames.forEach((id, name) -> log.info("{} -> {}", id, name));
 
         List<String> homeScorers = new ArrayList<>();
         List<String> awayScorers = new ArrayList<>();
@@ -183,7 +187,7 @@ public class APIService {
             if (!type.equals("Goal") && !type.equals("Own Goal")) continue;
 
             String playerName = playerNames.get(event.getPlayerId());
-            if (type.equals("Own Goal")) playerName += " (OG)";
+            if (type.equals("Own Goal")) playerName += " (o.g.)";
 
             if (event.getCompetitorId() == fixture.getHomeId().longValue()) {
                 homeScorers.add(playerName);

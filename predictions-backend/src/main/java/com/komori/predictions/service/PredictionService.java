@@ -81,7 +81,7 @@ public class PredictionService {
         }
 
         predictionRepository.saveAll(predictions);
-        log.info("Database updated");
+        log.info("Database updated for {} vs {}", match.getHomeTeam(), match.getAwayTeam());
     }
 
     // Scoring System
