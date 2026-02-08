@@ -176,14 +176,13 @@ public class APIService {
         Map<Long, String> playerNames = playerEntities.stream()
                 .collect(Collectors.toMap(PlayerEntity::getPlayerId, PlayerEntity::getName));
 
-        log.info("Players retrieved:");
-        playerNames.forEach((id, name) -> log.info("{} -> {}", id, name));
-
         List<String> homeScorers = new ArrayList<>();
         List<String> awayScorers = new ArrayList<>();
 
         for (MatchEvents.Game.Event event : response.getGame().getEvents()) {
             String type = event.getEventType().getName();
+
+            log.info("Event type: {}, Player involved: {}, Competitor ID: {}", type, playerNames.get(event.getPlayerId()), event.getCompetitorId());
             if (!type.equals("Goal") && !type.equals("Own Goal")) continue;
 
             String playerName = playerNames.get(event.getPlayerId());
