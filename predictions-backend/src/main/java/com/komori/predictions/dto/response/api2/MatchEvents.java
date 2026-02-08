@@ -17,6 +17,7 @@ public class MatchEvents {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Game {
         private List<Event> events;
+        private List<Member> members;
 
         @Data
         @AllArgsConstructor
@@ -33,6 +34,14 @@ public class MatchEvents {
                 private Integer id;
                 private String name;
             }
+        }
+
+        @Data
+        @AllArgsConstructor
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Member {
+            private Long id;
+            private String name;
         }
     }
 }
