@@ -165,6 +165,7 @@ public class EmailService {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("api-key", apiKey);
+        headers.set("User-Agent", "Java/RestTemplate");
         HttpEntity<EmailRequest> httpEntity = new HttpEntity<>(request, headers);
 
         ResponseEntity<?> response = restTemplate.postForEntity(

@@ -8,9 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -35,10 +34,10 @@ public class UserEntity {
     @Enumerated(value = EnumType.STRING)
     private Team favouriteTeam;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY) @JsonIgnore @Builder.Default
-    private Set<UserLeagueEntity> leagues = new HashSet<>();
+    private List<UserLeagueEntity> leagues = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY) @JsonIgnore @Builder.Default
-    private Set<PredictionEntity> predictions = new HashSet<>();
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PredictionEntity> predictions = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ChipEntity> chips;
     @CreationTimestamp @Column(updatable = false)
     private Timestamp createdAt;
