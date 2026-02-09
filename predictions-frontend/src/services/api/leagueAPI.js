@@ -21,6 +21,7 @@ const leagueAPI = {
         isAdmin: league.isAdmin,
         type: league.type, // Publicity enum
         createdAt: league.createdAt,
+        firstGameweek: league.firstGameweek,
         // Backward compatibility aliases
         userPosition: league.position,
         numberOfMembers: league.members
@@ -136,7 +137,8 @@ const leagueAPI = {
       const requestBody = {
         id: leagueId,
         name: updates.name,
-        description: updates.description
+        description: updates.description,
+        firstGameweek: updates.firstGameweek
       };
       
       const response = await api.put('/leagues/update', requestBody);

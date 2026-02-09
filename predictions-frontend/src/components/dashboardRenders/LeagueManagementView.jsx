@@ -24,6 +24,7 @@ const LeagueManagementView = ({ leagueId, league, onBack, onRefreshLeagues }) =>
   const [members, setMembers] = useState([]);
   const [nameInput, setNameInput] = useState('');
   const [descriptionInput, setDescriptionInput] = useState('');
+  const [firstGameweekInput, setFirstGameweekInput] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(false);
   
   // Get theme context
@@ -46,6 +47,7 @@ const LeagueManagementView = ({ leagueId, league, onBack, onRefreshLeagues }) =>
     // Initialize form inputs with league data
     setNameInput(league.name);
     setDescriptionInput(league.description);
+    setFirstGameweekInput(league.firstGameweek || 1);
     
     // Fetch league members using standings data (reusing same API as leaderboard)
     const fetchMembers = async () => {
@@ -110,7 +112,8 @@ const LeagueManagementView = ({ leagueId, league, onBack, onRefreshLeagues }) =>
       setIsLoading(true);
       await leagueAPI.updateLeague(leagueId, {
         name: nameInput,
-        description: descriptionInput
+        description: descriptionInput,
+        firstGameweek: Number(firstGameweekInput)
       });
       showToast('League settings updated successfully!', 'success');
       // Refresh leagues list to update the data in parent components
@@ -287,6 +290,8 @@ const LeagueManagementView = ({ leagueId, league, onBack, onRefreshLeagues }) =>
               setNameInput={setNameInput}
               descriptionInput={descriptionInput}
               setDescriptionInput={setDescriptionInput}
+              firstGameweekInput={firstGameweekInput}
+              setFirstGameweekInput={setFirstGameweekInput}
               onSave={handleSaveSettings}
               isLoading={isLoading}
               onDeleteLeague={handleDeleteLeague}
@@ -456,12 +461,16 @@ const MembersContent = ({ members, league, onRemoveMember, onPromoteToAdmin, onC
   );
 };
 
+const TOTAL_GAMEWEEKS = 38;
+
 const SettingsContent = ({ 
   league, 
   nameInput, 
   setNameInput, 
   descriptionInput, 
   setDescriptionInput, 
+  firstGameweekInput,
+  setFirstGameweekInput,
   onSave, 
   isLoading,
   onDeleteLeague,
@@ -516,7 +525,32 @@ const SettingsContent = ({
             } border rounded-xl px-4 py-3 font-outfit focus:outline-none focus:ring-2 transition-colors resize-none`}
             placeholder="Describe your league..."
           />
-        </div>        
+        </div>
+
+        <div>
+          <label className={`block text-sm font-medium ${text.secondary[theme]} mb-2 font-outfit`}>
+            Count Points From
+          </label>
+          <select
+            value={firstGameweekInput}
+            onChange={(e) => setFirstGameweekInput(e.target.value)}
+            className={`w-full ${
+              theme === "dark"
+                ? "bg-slate-700/50 border-slate-600/50 text-white focus:ring-amber-500/50 focus:border-amber-500/50"
+                : "bg-slate-50 border-slate-200 text-slate-900 focus:ring-amber-500/50 focus:border-amber-500/50"
+            } border rounded-xl px-4 py-3 font-outfit focus:outline-none focus:ring-2 transition-colors`}
+          >
+            {Array.from({ length: TOTAL_GAMEWEEKS }, (_, i) => i + 1).map((gw) => (
+              <option key={gw} value={gw}>
+                Gameweek {gw}
+              </option>
+            ))}
+          </select>
+          <p className={`${text.muted[theme]} text-xs mt-1.5 font-outfit`}>
+            Points will only count from this gameweek onwards
+          </p>
+        </div>
+        
           <div className="flex justify-end pt-4">
           <motion.button
             whileHover={{ scale: 1.02 }}
