@@ -25,6 +25,7 @@ public class LeagueService {
     private final UserLeagueRepository userLeagueRepository;
     private final PredictionRepository predictionRepository;
     private final MatchRepository matchRepository;
+    private final MatchdayService matchdayService;
 
     public void createLeague(String email, CreateLeagueRequest request) {
         UserEntity currentUser = userRepository.findByEmail(email)
@@ -44,10 +45,12 @@ public class LeagueService {
                 .leagueCode(leagueCode)
                 .UUID(UUID.randomUUID().toString())
                 .status("Active")
+                .firstGameweek(request.getFirstGameweek())
                 .build();
         leagueRepository.save(newLeague);
 
-        UserLeagueEntity userLeague = new UserLeagueEntity(currentUser, newLeague, true, true);
+        int points = predictionRepository.getPointsSinceGameweek(email, request.getFirstGameweek(), matchdayService.getCurrentMatchday());
+        UserLeagueEntity userLeague = new UserLeagueEntity(currentUser, newLeague, points, true, true);
         userLeagueRepository.save(userLeague);
     }
 
@@ -93,7 +96,8 @@ public class LeagueService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        UserLeagueEntity newEntity = new UserLeagueEntity(user, league, false, false);
+        int points = predictionRepository.getPointsSinceGameweek(email, league.getFirstGameweek(), matchdayService.getCurrentMatchday());
+        UserLeagueEntity newEntity = new UserLeagueEntity(user, league, points, false, false);
         userLeagueRepository.save(newEntity);
     }
 
@@ -145,13 +149,19 @@ public class LeagueService {
     }
 
     private LeagueOverview leagueEntityToCard(LeagueEntity league, UserEntity user) {
+        int points = user.getLeagues().stream()
+                .filter(ul -> Objects.equals(ul.getLeague().getId(), league.getId()))
+                .findFirst()
+                .map(UserLeagueEntity::getPoints)
+                .orElse(0);
+
         return LeagueOverview.builder()
                 .id(league.getUUID())
                 .name(league.getName())
                 .description(league.getDescription())
                 .members(league.getUsers().size())
                 .position(userRepository.findUserRankInLeague(user.getId(), league.getId()))
-                .points(user.getTotalPoints())
+                .points(points)
                 .joinCode(league.getLeagueCode())
                 .isAdmin(userLeagueRepository.isUserAdmin(league.getId(), user.getId()))
                 .type(league.getPublicity())
@@ -162,19 +172,19 @@ public class LeagueService {
     protected LeagueStanding leagueEntityToStanding(LeagueEntity league, UserEntity currentUser) {
         List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague(league);
         Set<LeagueStanding.LeagueMember> members = new HashSet<>();
-        userLeagueEntities.forEach(entity -> {
-            LeagueEntity leagueEntity = entity.getLeague();
-            UserEntity userEntity = entity.getUser();
+        userLeagueEntities.forEach(userLeagueEntity -> {
+            LeagueEntity leagueEntity = userLeagueEntity.getLeague();
+            UserEntity userEntity = userLeagueEntity.getUser();
             LeagueStanding.LeagueMember member = LeagueStanding.LeagueMember.builder()
                     .id(userEntity.getUUID())
                     .username(userEntity.getUsername())
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
-                    .points(userEntity.getTotalPoints())
+                    .points(userLeagueEntity.getPoints())
                     .predictions(predictionRepository.countByUser(userEntity))
-                    .joinedAt(entity.getJoinedAt().toInstant())
+                    .joinedAt(userLeagueEntity.getJoinedAt().toInstant())
                     .isCurrentUser(Objects.equals(userEntity.getId(), currentUser.getId()))
-                    .isAdmin(entity.getIsAdmin())
+                    .isAdmin(userLeagueEntity.getIsAdmin())
                     .build();
             members.add(member);
         });

@@ -23,6 +23,7 @@ public class LeagueEntity {
     private String description;
     private String leagueCode;
     private String status;
+    private Integer firstGameweek;
     @Enumerated(value = EnumType.STRING)
     private Publicity publicity;
     @OneToMany(mappedBy = "league") @Builder.Default

@@ -7,8 +7,10 @@ import com.komori.predictions.dto.response.UserPrediction;
 import com.komori.predictions.entity.MatchEntity;
 import com.komori.predictions.entity.PredictionEntity;
 import com.komori.predictions.entity.UserEntity;
+import com.komori.predictions.entity.UserLeagueEntity;
 import com.komori.predictions.repository.MatchRepository;
 import com.komori.predictions.repository.PredictionRepository;
+import com.komori.predictions.repository.UserLeagueRepository;
 import com.komori.predictions.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class PredictionService {
     private final PredictionRepository predictionRepository;
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
+    private final UserLeagueRepository userLeagueRepository;
     private final ChipService chipService;
 
     public List<UserPrediction> getPredictionsForUser(String email) {
@@ -74,10 +77,21 @@ public class PredictionService {
             UserEntity user = prediction.getUser();
             int points = getPredictionScore(user.getEmail(), match.getOldFixtureId().intValue());
             boolean correct = isPredictionCorrect(prediction, match);
+
+            // Update prediction
             prediction.setPoints(points);
             prediction.setCorrect(correct);
             prediction.setStatus(PredictionStatus.COMPLETED);
+
+            // Update user total
             user.setTotalPoints(user.getTotalPoints() + points);
+
+            // Update league entries
+            List<UserLeagueEntity> userLeagueEntities = user.getLeagues();
+            for (UserLeagueEntity entity : userLeagueEntities) {
+                entity.setPoints(entity.getPoints() + points);
+            }
+            userLeagueRepository.saveAll(userLeagueEntities);
         }
 
         predictionRepository.saveAll(predictions);

@@ -23,6 +23,8 @@ public class ChipEntity {
     private Chip type;
     private Integer remainingGameweeks;
     private Integer seasonLimit;
-    private Integer seasonUsageCount;
-    private Integer lastUsedGameweek;
+    @Builder.Default
+    private Integer seasonUsageCount = 0;
+    @Builder.Default
+    private Integer lastUsedGameweek = 0;
 }

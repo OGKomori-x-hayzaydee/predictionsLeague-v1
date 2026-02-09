@@ -24,18 +24,20 @@ public class ChipService {
                 .toList();
     }
 
+    @Transactional
     public void createChipsForNewUser(UserEntity newUser) {
         List<ChipEntity> chips = List.of(
-                ChipEntity.builder().user(newUser).type(Chip.WILDCARD).seasonUsageCount(0).remainingGameweeks(0).build(),
-                ChipEntity.builder().user(newUser).type(Chip.DEFENSE_PLUS_PLUS).seasonUsageCount(0).remainingGameweeks(0).build(),
-                ChipEntity.builder().user(newUser).type(Chip.ALL_IN_WEEK).seasonLimit(4).seasonUsageCount(0).build(),
-                ChipEntity.builder().user(newUser).type(Chip.SCORER_FOCUS).seasonUsageCount(0).remainingGameweeks(0).build(),
-                ChipEntity.builder().user(newUser).type(Chip.DOUBLE_DOWN).seasonUsageCount(0).remainingGameweeks(0).build()
+                ChipEntity.builder().user(newUser).type(Chip.WILDCARD).build(),
+                ChipEntity.builder().user(newUser).type(Chip.DEFENSE_PLUS_PLUS).build(),
+                ChipEntity.builder().user(newUser).type(Chip.ALL_IN_WEEK).seasonLimit(4).build(),
+                ChipEntity.builder().user(newUser).type(Chip.SCORER_FOCUS).build(),
+                ChipEntity.builder().user(newUser).type(Chip.DOUBLE_DOWN).build()
         );
 
-        chipRepository.saveAllAndFlush(chips);
+        chipRepository.saveAll(chips);
     }
 
+    @Transactional
     public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
         for (Chip chip : prediction.getChips()) {
             ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);

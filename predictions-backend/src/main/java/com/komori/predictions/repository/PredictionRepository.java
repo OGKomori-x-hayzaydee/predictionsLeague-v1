@@ -16,6 +16,13 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
 
     Integer countByUser(UserEntity user);
 
+    @Query("""
+    select coalesce(sum(p.points), 0)
+    from PredictionEntity p
+    where p.user.email = :email and p.gameweek between :startGw and :endGw
+    """)
+    Integer getPointsSinceGameweek(@Param("email") String email, @Param("startGw") Integer startGw, @Param("endGw") Integer endGw);
+
     @Query(value = """
     SELECT
             COUNT(*) AS total,
