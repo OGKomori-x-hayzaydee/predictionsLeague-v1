@@ -87,6 +87,37 @@ export const userPredictionsAPI = {
 
       console.log('✅ Data normalized - points set to null for pending predictions');
 
+      // 🔍 GW25 DEBUG: Compare backend points vs frontend recalculation
+      const gw25Predictions = normalizedData.filter(p => p.gameweek === 25 && p.status === 'completed');
+      if (gw25Predictions.length > 0) {
+        const { calculatePoints } = await import('../../utils/pointsCalculation.js');
+        console.group('🔍 [GW25 DEBUG] Backend vs Frontend Points Comparison');
+        console.log(`Found ${gw25Predictions.length} completed GW25 predictions`);
+        gw25Predictions.forEach(p => {
+          const frontendPoints = calculatePoints(p);
+          const match = p.points === frontendPoints;
+          console.log(
+            `${match ? '✅' : '❌'} ${p.homeTeam} vs ${p.awayTeam}`,
+            `| Backend: ${p.points} | Frontend: ${frontendPoints} | ${match ? 'MATCH' : 'MISMATCH'}`
+          );
+          if (!match) {
+            console.log('  📋 Raw prediction data:', {
+              predicted: `${p.homeScore}-${p.awayScore}`,
+              actual: `${p.actualHomeScore}-${p.actualAwayScore}`,
+              homeScorers: p.homeScorers,
+              awayScorers: p.awayScorers,
+              actualHomeScorers: p.actualHomeScorers,
+              actualAwayScorers: p.actualAwayScorers,
+              chips: p.chips,
+              backendPoints: p.points,
+              frontendPoints,
+              diff: p.points - frontendPoints
+            });
+          }
+        });
+        console.groupEnd();
+      }
+
       return {
         success: true,
         data: normalizedData,

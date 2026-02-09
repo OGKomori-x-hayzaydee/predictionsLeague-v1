@@ -76,6 +76,8 @@ export const useChipStatus = (options = {}) => {
             ...backendChip,
             id: chipId,
             chipId,
+            // Map backend field name to frontend convention
+            usageCount: backendChip.seasonUsageCount || 0,
             // Ensure critical fields from config aren't overwritten
             scope: config.scope,
             name: config.name,

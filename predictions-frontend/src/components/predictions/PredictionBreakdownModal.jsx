@@ -38,33 +38,87 @@ const PredictionBreakdownModal = ({
   const calculatedPoints = calculatePoints(prediction);
   const pointsBreakdownData = getPointsBreakdown(prediction);
 
-  // Calculate base points (without chip multipliers) for mathematics section
+  // 🔍 DEBUG: Log full breakdown comparison when modal opens
+  if (prediction.actualHomeScore !== null && prediction.actualHomeScore !== undefined) {
+    const match = prediction.points === calculatedPoints;
+    console.group(`🔍 [BREAKDOWN DEBUG] ${prediction.homeTeam} vs ${prediction.awayTeam} (GW${prediction.gameweek})`);
+    console.log(`${match ? '✅ MATCH' : '❌ MISMATCH'} — Backend: ${prediction.points} | Frontend: ${calculatedPoints}`);
+    console.log('📊 Scores:', {
+      predicted: `${prediction.homeScore}-${prediction.awayScore}`,
+      actual: `${prediction.actualHomeScore}-${prediction.actualAwayScore}`
+    });
+    console.log('⚽ Scorers:', {
+      predictedHome: prediction.homeScorers,
+      actualHome: prediction.actualHomeScorers,
+      predictedAway: prediction.awayScorers,
+      actualAway: prediction.actualAwayScorers
+    });
+    console.log('🎰 Chips:', prediction.chips);
+    console.log('📐 Breakdown:', pointsBreakdownData);
+    console.groupEnd();
+  }
+
+  // Calculate base points (before chip multipliers) for mathematics section
+  // Mirrors backend PredictionService.getPredictionScore() logic
   const calculateBasePoints = () => {
     if (prediction.actualHomeScore === null || prediction.actualHomeScore === undefined ||
         prediction.actualAwayScore === null || prediction.actualAwayScore === undefined) {
       return 0;
     }
 
+    const predHome = prediction.homeScore;
+    const predAway = prediction.awayScore;
+    const actualHome = prediction.actualHomeScore;
+    const actualAway = prediction.actualAwayScore;
+    const chips = prediction.chips || [];
+
     let basePoints = 0;
     
     // Score prediction points
-    if (prediction.homeScore === prediction.actualHomeScore && 
-        prediction.awayScore === prediction.actualAwayScore) {
-      basePoints += 10;
-    } else if ((prediction.homeScore > prediction.awayScore && prediction.actualHomeScore > prediction.actualAwayScore) ||
-               (prediction.homeScore < prediction.awayScore && prediction.actualHomeScore < prediction.actualAwayScore) ||
-               (prediction.homeScore === prediction.awayScore && prediction.actualHomeScore === prediction.actualAwayScore)) {
-      basePoints += 5;
+    const correctScoreline = (actualHome === predHome) && (actualAway === predAway);
+    const correctDraw = (actualHome === actualAway) && (predHome === predAway);
+    const correctWinner = Math.sign(actualHome - actualAway) === Math.sign(predHome - predAway);
+
+    // Check for perfect prediction (exact score + exact scorers)
+    const allPredScorers = [...(prediction.homeScorers || []), ...(prediction.awayScorers || [])];
+    const allActualScorers = [...(prediction.actualHomeScorers || []), ...(prediction.actualAwayScorers || [])];
+    const scorersExact = (() => {
+      if ((prediction.homeScorers || []).length !== (prediction.actualHomeScorers || []).length ||
+          (prediction.awayScorers || []).length !== (prediction.actualAwayScorers || []).length) return false;
+      const toMap = (arr) => { const m = {}; arr.forEach(s => m[s] = (m[s] || 0) + 1); return m; };
+      const eq = (a, b) => { const ka = Object.keys(a); return ka.length === Object.keys(b).length && ka.every(k => a[k] === b[k]); };
+      return eq(toMap(prediction.homeScorers || []), toMap(prediction.actualHomeScorers || [])) &&
+             eq(toMap(prediction.awayScorers || []), toMap(prediction.actualAwayScorers || []));
+    })();
+
+    if (correctScoreline && scorersExact) {
+      basePoints = 15;
+    } else if (correctScoreline) {
+      basePoints = 10;
+    } else if (correctDraw) {
+      basePoints = 7;
+    } else if (correctWinner) {
+      basePoints = 5;
     }
     
-    // Goalscorer points
-    const homeCorrect = prediction.homeScorers?.filter(scorer => 
-      prediction.actualHomeScorers?.includes(scorer)
-    ).length || 0;
-    const awayCorrect = prediction.awayScorers?.filter(scorer => 
-      prediction.actualAwayScorers?.includes(scorer)
-    ).length || 0;
-    basePoints += (homeCorrect + awayCorrect) * 2;
+    // Goalscorer points (multiset matching)
+    const actualMap = {};
+    allActualScorers.forEach(s => { actualMap[s] = (actualMap[s] || 0) + 1; });
+    let correctCount = 0;
+    allPredScorers.forEach(scorer => {
+      if (actualMap[scorer] && actualMap[scorer] > 0) {
+        correctCount++;
+        actualMap[scorer]--;
+      }
+    });
+    const perScorer = chips.includes('scorerFocus') ? 4 : 2;
+    basePoints += perScorer * correctCount;
+
+    // Goal difference penalty
+    const goalDiff = Math.abs((actualHome + actualAway) - (predHome + predAway));
+    if (goalDiff > 2) {
+      basePoints -= (goalDiff - 2);
+    }
     
     return basePoints;
   };
@@ -424,8 +478,8 @@ const PredictionBreakdownModal = ({
                         <div className={`text-sm font-semibold font-outfit ${getThemeStyles(theme, text.primary)}`}>
                           {chip === 'doubleDown' && '×2'}
                           {chip === 'wildcard' && '×3'}
-                          {chip === 'scorerFocus' && '×2'}
-                          {chip === 'defensePlusPlus' && '+10'}
+                          {chip === 'scorerFocus' && '×2 per scorer'}
+                          {chip === 'defensePlusPlus' && '+5 per clean sheet'}
                           {chip === 'allInWeek' && '×2'}
                         </div>
                       </div>
@@ -448,16 +502,20 @@ const PredictionBreakdownModal = ({
                         light: 'border-slate-200'
                       })}`}>
                         <span className={`text-sm font-outfit capitalize ${getThemeStyles(theme, text.secondary)}`}>
+                          {category === 'perfectPrediction' && 'Perfect Prediction'}
                           {category === 'exactScore' && 'Exact Score'}
+                          {category === 'correctDraw' && 'Correct Draw'}
                           {category === 'correctOutcome' && 'Correct Outcome'}
                           {category === 'goalscorers' && 'Goalscorers'}
+                          {category === 'goalDiffPenalty' && 'Goal Difference Penalty'}
                           {category === 'wildcard' && 'Wildcard Multiplier'}
                           {category === 'doubleDown' && 'Double Down Multiplier'}
-                          {category === 'scorerFocus' && 'Scorer Focus Multiplier'}
+                          {category === 'scorerFocus' && 'Scorer Focus Bonus'}
+                          {category === 'allInWeek' && 'All-In Week Multiplier'}
                           {category === 'defensePlusPlus' && 'Defense++ Bonus'}
                         </span>
-                        <span className={`font-semibold font-outfit ${getThemeStyles(theme, text.primary)}`}>
-                          {typeof points === 'number' ? `+${points}` : points}
+                        <span className={`font-semibold font-outfit ${typeof points === 'number' && points < 0 ? 'text-red-400' : getThemeStyles(theme, text.primary)}`}>
+                          {typeof points === 'number' ? `${points >= 0 ? '+' : ''}${points}` : points}
                         </span>
                       </div>
                     ))}
@@ -627,64 +685,90 @@ const PredictionBreakdownModal = ({
                         Base Points Breakdown
                       </h4>
                       <div className="space-y-2">
-                        {/* Exact Score Points */}
-                        <div className="flex items-center justify-between">
-                          <span className={`text-sm font-outfit ${getThemeStyles(theme, text.secondary)}`}>
-                            Exact Scoreline ({prediction.homeScore}-{prediction.awayScore})
-                          </span>
-                          <span className={`text-sm font-semibold font-outfit ${
-                            prediction.homeScore === prediction.actualHomeScore && 
-                            prediction.awayScore === prediction.actualAwayScore
-                              ? 'text-emerald-400' 
-                              : 'text-slate-400'
-                          }`}>
-                            {prediction.homeScore === prediction.actualHomeScore && 
-                             prediction.awayScore === prediction.actualAwayScore ? '+10' : '+0'}
-                          </span>
-                        </div>
+                        {/* Score Prediction Points - matches backend tiers */}
+                        {(() => {
+                          const predH = prediction.homeScore, predA = prediction.awayScore;
+                          const actH = prediction.actualHomeScore, actA = prediction.actualAwayScore;
+                          const exactScore = (predH === actH && predA === actA);
+                          const correctDraw = (actH === actA && predH === predA);
+                          const correctWinner = Math.sign(actH - actA) === Math.sign(predH - predA);
+                          
+                          // Check perfect prediction (exact score + exact scorers)
+                          const scorersExact = (() => {
+                            const pH = prediction.homeScorers || [], pA = prediction.awayScorers || [];
+                            const aH = prediction.actualHomeScorers || [], aA = prediction.actualAwayScorers || [];
+                            if (pH.length !== aH.length || pA.length !== aA.length) return false;
+                            const toMap = (arr) => { const m = {}; arr.forEach(s => m[s] = (m[s]||0)+1); return m; };
+                            const eq = (a,b) => { const ka = Object.keys(a); return ka.length === Object.keys(b).length && ka.every(k => a[k]===b[k]); };
+                            return eq(toMap(pH), toMap(aH)) && eq(toMap(pA), toMap(aA));
+                          })();
 
-                        {/* Correct Result Points (only if not exact score) */}
-                        {!(prediction.homeScore === prediction.actualHomeScore && 
-                           prediction.awayScore === prediction.actualAwayScore) && (
-                          <div className="flex items-center justify-between">
-                            <span className={`text-sm font-outfit ${getThemeStyles(theme, text.secondary)}`}>
-                              Correct Outcome
-                            </span>
-                            <span className={`text-sm font-semibold font-outfit ${
-                              ((prediction.homeScore > prediction.awayScore && prediction.actualHomeScore > prediction.actualAwayScore) ||
-                               (prediction.homeScore < prediction.awayScore && prediction.actualHomeScore < prediction.actualAwayScore) ||
-                               (prediction.homeScore === prediction.awayScore && prediction.actualHomeScore === prediction.actualAwayScore))
-                                ? 'text-emerald-400' 
-                                : 'text-slate-400'
-                            }`}>
-                              {((prediction.homeScore > prediction.awayScore && prediction.actualHomeScore > prediction.actualAwayScore) ||
-                                (prediction.homeScore < prediction.awayScore && prediction.actualHomeScore < prediction.actualAwayScore) ||
-                                (prediction.homeScore === prediction.awayScore && prediction.actualHomeScore === prediction.actualAwayScore))
-                                ? '+5' : '+0'}
-                            </span>
-                          </div>
-                        )}
+                          let label, pts, active;
+                          if (exactScore && scorersExact) {
+                            label = `Perfect Prediction (${predH}-${predA} + all scorers)`;
+                            pts = '+15'; active = true;
+                          } else if (exactScore) {
+                            label = `Exact Scoreline (${predH}-${predA})`;
+                            pts = '+10'; active = true;
+                          } else if (correctDraw) {
+                            label = 'Correct Draw';
+                            pts = '+7'; active = true;
+                          } else if (correctWinner) {
+                            label = 'Correct Outcome';
+                            pts = '+5'; active = true;
+                          } else {
+                            label = 'Incorrect Outcome';
+                            pts = '+0'; active = false;
+                          }
+
+                          return (
+                            <div className="flex items-center justify-between">
+                              <span className={`text-sm font-outfit ${getThemeStyles(theme, text.secondary)}`}>{label}</span>
+                              <span className={`text-sm font-semibold font-outfit ${active ? 'text-emerald-400' : 'text-slate-400'}`}>{pts}</span>
+                            </div>
+                          );
+                        })()}
 
                         {/* Goalscorer Points */}
                         {(prediction.homeScorers?.length > 0 || prediction.awayScorers?.length > 0) && (
                           <div className="flex items-center justify-between">
                             <span className={`text-sm font-outfit ${getThemeStyles(theme, text.secondary)}`}>
-                              Goalscorer Predictions
+                              Goalscorer Predictions{(prediction.chips || []).includes('scorerFocus') ? ' (Scorer Focus ×2)' : ''}
                             </span>
                             <span className={`text-sm font-semibold font-outfit text-blue-400`}>
                               {(() => {
-                                const homeCorrect = prediction.homeScorers?.filter(scorer => 
-                                  prediction.actualHomeScorers?.includes(scorer)
-                                ).length || 0;
-                                const awayCorrect = prediction.awayScorers?.filter(scorer => 
-                                  prediction.actualAwayScorers?.includes(scorer)
-                                ).length || 0;
-                                const totalCorrect = homeCorrect + awayCorrect;
-                                return `+${totalCorrect * 2}`;
+                                const allPred = [...(prediction.homeScorers || []), ...(prediction.awayScorers || [])];
+                                const allActual = [...(prediction.actualHomeScorers || []), ...(prediction.actualAwayScorers || [])];
+                                const actualMap = {};
+                                allActual.forEach(s => { actualMap[s] = (actualMap[s] || 0) + 1; });
+                                let count = 0;
+                                allPred.forEach(s => { if (actualMap[s] > 0) { count++; actualMap[s]--; } });
+                                const perScorer = (prediction.chips || []).includes('scorerFocus') ? 4 : 2;
+                                return `+${perScorer * count}`;
                               })()}
                             </span>
                           </div>
                         )}
+
+                        {/* Goal Difference Penalty */}
+                        {(() => {
+                          const goalDiff = Math.abs(
+                            (prediction.actualHomeScore + prediction.actualAwayScore) -
+                            (prediction.homeScore + prediction.awayScore)
+                          );
+                          if (goalDiff > 2) {
+                            const penalty = goalDiff - 2;
+                            return (
+                              <div className="flex items-center justify-between">
+                                <span className={`text-sm font-outfit ${getThemeStyles(theme, text.secondary)}`}>
+                                  Goal Diff Penalty (off by {goalDiff} goals)
+                                </span>
+                                <span className="text-sm font-semibold font-outfit text-red-400">−{penalty}</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
 
                         {/* Base Points Subtotal */}
                         <div className={`flex items-center justify-between pt-2 border-t ${getThemeStyles(theme, {
@@ -727,8 +811,8 @@ const PredictionBreakdownModal = ({
                               <span className={`text-sm font-semibold font-outfit text-purple-400`}>
                                 {chip === 'doubleDown' && '×2'}
                                 {chip === 'wildcard' && '×3'}
-                                {chip === 'scorerFocus' && '×2 (scorers)'}
-                                {chip === 'defensePlusPlus' && '+10'}
+                                {chip === 'scorerFocus' && '×2 per scorer'}
+                                {chip === 'defensePlusPlus' && '+5 per clean sheet'}
                                 {chip === 'allInWeek' && '×2 (all)'}
                               </span>
                             </div>
