@@ -119,28 +119,16 @@ export const transformChipsToBackend = (frontendChips = []) => {
  * @returns {string[]} Array of frontend chip IDs
  */
 export const transformChipsFromBackend = (backendChips = []) => {
-  console.log('🔄 transformChipsFromBackend INPUT:', {
-    backendChips,
-    isArray: Array.isArray(backendChips),
-    length: backendChips?.length
-  });
-
   const transformed = backendChips
     .map(chip => {
       const frontendChip = REVERSE_CHIP_MAPPING[chip];
       if (!frontendChip) {
         console.warn(`⚠️ [CHIP MAPPING] Unknown backend chip: "${chip}" - may already be in frontend format`);
       }
-      console.log(`  → Mapping: ${chip} → ${frontendChip || chip || 'UNMAPPED'}`);
       // If no mapping found, try to use as-is (defensive - might already be frontend format)
       return frontendChip || chip;
     })
     .filter(Boolean); // Remove any null/undefined chips
-
-  console.log('🔄 transformChipsFromBackend OUTPUT:', {
-    transformed,
-    count: transformed.length
-  });
 
   return transformed;
 };

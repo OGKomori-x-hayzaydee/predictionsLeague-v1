@@ -41,13 +41,7 @@ export const userPredictionsAPI = {
 
         // 🔄 TRANSFORM CHIPS: Backend sends UPPER_CASE, frontend expects camelCase
         if (normalized.chips && Array.isArray(normalized.chips)) {
-          const originalChips = normalized.chips;
           normalized.chips = transformChipsFromBackend(normalized.chips);
-          console.log('🔄 [CHIP TRANSFORM] Transformed chips from backend:', {
-            before: originalChips,
-            after: normalized.chips,
-            match: `${normalized.homeTeam} vs ${normalized.awayTeam}`
-          });
         }
 
         // Normalize date fields to prevent confusion between fixture date and prediction timestamp
