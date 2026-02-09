@@ -185,7 +185,7 @@ public class LeagueService {
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
                     .points(userLeagueEntity.getPoints())
-                    .predictions(predictionRepository.countByUser(userEntity))
+                    .predictions(predictionRepository.countPredictionsSinceGameweek(userEntity.getEmail(), leagueEntity.getFirstGameweek(), matchdayService.getCurrentMatchday()))
                     .joinedAt(userLeagueEntity.getJoinedAt().toInstant())
                     .isCurrentUser(Objects.equals(userEntity.getId(), currentUser.getId()))
                     .isAdmin(userLeagueEntity.getIsAdmin())
