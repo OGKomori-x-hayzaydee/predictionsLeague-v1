@@ -149,11 +149,14 @@ public class LeagueService {
     }
 
     private LeagueOverview leagueEntityToCard(LeagueEntity league, UserEntity user) {
-        int points = user.getLeagues().stream()
+        int points = 0;
+        Optional<UserLeagueEntity> userLeagueEntityOptional = user.getLeagues().stream()
                 .filter(ul -> Objects.equals(ul.getLeague().getId(), league.getId()))
-                .findFirst()
-                .map(UserLeagueEntity::getPoints)
-                .orElse(0);
+                .findFirst();
+
+        if (userLeagueEntityOptional.isPresent()) {
+            points = userLeagueEntityOptional.get().getPoints();
+        }
 
         return LeagueOverview.builder()
                 .id(league.getUUID())
@@ -162,6 +165,7 @@ public class LeagueService {
                 .members(league.getUsers().size())
                 .position(userRepository.findUserRankInLeague(user.getId(), league.getId()))
                 .points(points)
+                .firstGameweek(league.getFirstGameweek())
                 .joinCode(league.getLeagueCode())
                 .isAdmin(userLeagueRepository.isUserAdmin(league.getId(), user.getId()))
                 .type(league.getPublicity())
