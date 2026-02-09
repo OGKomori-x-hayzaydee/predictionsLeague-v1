@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useMemo } from "react";
 import { motion } from "framer-motion";
 import { 
   Cross2Icon, 
@@ -9,18 +9,31 @@ import {
 import { ThemeContext } from "../../context/ThemeContext";
 import { text, buttons } from "../../utils/themeUtils";
 import useLeagues from "../../hooks/useLeagues";
+import { useChipManagement } from "../../context/ChipManagementContext";
+
+const TOTAL_GAMEWEEKS = 38;
 
 const CreateLeagueForm = ({ onCancel, onSuccess }) => {
   const { theme } = useContext(ThemeContext);
   const { createLeague } = useLeagues();
+  const { currentGameweek } = useChipManagement();
   const [leagueData, setLeagueData] = useState({
     name: "",
     type: "private",
     description: "",
+    firstGameweek: null,
     customizeScoring: false,
     selectFixtures: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Derive the effective value: user's explicit pick, or fall back to the live currentGameweek
+  const selectedFirstGameweek = leagueData.firstGameweek ?? currentGameweek;
+
+  const gameweekOptions = useMemo(() => 
+    Array.from({ length: TOTAL_GAMEWEEKS }, (_, i) => i + 1),
+    []
+  );
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -39,7 +52,8 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
       const apiData = {
         name: leagueData.name,
         description: leagueData.description,
-        isPrivate: leagueData.type === "private"
+        isPrivate: leagueData.type === "private",
+        firstGameweek: Number(selectedFirstGameweek)
       };
       
       const league = await createLeague(apiData);
@@ -139,6 +153,30 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
                 : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-teal-500/50"
             } border rounded-md py-2 px-3 focus:outline-none focus:ring-2 transition-colors resize-none h-20 font-outfit`}
           ></textarea>
+        </div>
+
+        <div>
+          <label htmlFor="first-gameweek" className={`block ${text.secondary[theme]} text-sm mb-1 font-outfit`}>Count Points From</label>
+          <select
+            id="first-gameweek"
+            name="firstGameweek"
+            value={selectedFirstGameweek}
+            onChange={handleChange}
+            className={`w-full ${
+              theme === "dark"
+                ? "bg-slate-800/40 border-slate-600/30 text-white focus:ring-teal-500/50"
+                : "bg-white border-slate-200 text-slate-900 focus:ring-teal-500/50"
+            } border rounded-md py-2 px-3 focus:outline-none focus:ring-2 transition-colors font-outfit`}
+          >
+            {gameweekOptions.map((gw) => (
+              <option key={gw} value={gw}>
+                Gameweek {gw}{gw === currentGameweek ? ' (Current)' : ''}
+              </option>
+            ))}
+          </select>
+          <p className={`${text.muted[theme]} text-xs mt-1 font-outfit`}>
+            Points will only count from this gameweek onwards
+          </p>
         </div>
         
         <div className="space-y-2">
