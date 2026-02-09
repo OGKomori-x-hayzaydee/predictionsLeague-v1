@@ -41,15 +41,25 @@ public class ChipService {
     public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
         for (Chip chip : prediction.getChips()) {
             ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
-            chipEntity.setLastUsedGameweek(prediction.getGameweek());
-            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
-            if (chipEntity.getType() == Chip.WILDCARD) {
-                chipEntity.setRemainingGameweeks(8);
-            } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                chipEntity.setRemainingGameweeks(6);
-            } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
-                chipEntity.setRemainingGameweeks(1);
+
+            if (chipEntity.getType() == Chip.ALL_IN_WEEK) {
+                Integer lastUsed = chipEntity.getLastUsedGameweek();
+                if (lastUsed == null || !lastUsed.equals(prediction.getGameweek())) {
+                    chipEntity.setLastUsedGameweek(prediction.getGameweek());
+                    chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+                }
+            } else {
+                chipEntity.setLastUsedGameweek(prediction.getGameweek());
+                chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+                if (chipEntity.getType() == Chip.WILDCARD) {
+                    chipEntity.setRemainingGameweeks(8);
+                } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
+                    chipEntity.setRemainingGameweeks(6);
+                } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
+                    chipEntity.setRemainingGameweeks(1);
+                }
             }
+
             chipRepository.save(chipEntity);
         }
     }
