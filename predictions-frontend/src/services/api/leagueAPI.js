@@ -44,7 +44,8 @@ const leagueAPI = {
       const requestBody = {
         name: leagueData.name,
         description: leagueData.description,
-        publicity: leagueData.isPrivate ? 'PRIVATE' : 'PUBLIC'
+        publicity: leagueData.isPrivate ? 'PRIVATE' : 'PUBLIC',
+        firstGameweek: leagueData.firstGameweek
       };
       
       console.log('Creating league:', requestBody);
