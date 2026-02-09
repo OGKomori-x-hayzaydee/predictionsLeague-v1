@@ -38,6 +38,26 @@ const PredictionBreakdownModal = ({
   const calculatedPoints = calculatePoints(prediction);
   const pointsBreakdownData = getPointsBreakdown(prediction);
 
+  // 🔍 DEBUG: Log full breakdown comparison when modal opens
+  if (prediction.actualHomeScore !== null && prediction.actualHomeScore !== undefined) {
+    const match = prediction.points === calculatedPoints;
+    console.group(`🔍 [BREAKDOWN DEBUG] ${prediction.homeTeam} vs ${prediction.awayTeam} (GW${prediction.gameweek})`);
+    console.log(`${match ? '✅ MATCH' : '❌ MISMATCH'} — Backend: ${prediction.points} | Frontend: ${calculatedPoints}`);
+    console.log('📊 Scores:', {
+      predicted: `${prediction.homeScore}-${prediction.awayScore}`,
+      actual: `${prediction.actualHomeScore}-${prediction.actualAwayScore}`
+    });
+    console.log('⚽ Scorers:', {
+      predictedHome: prediction.homeScorers,
+      actualHome: prediction.actualHomeScorers,
+      predictedAway: prediction.awayScorers,
+      actualAway: prediction.actualAwayScorers
+    });
+    console.log('🎰 Chips:', prediction.chips);
+    console.log('📐 Breakdown:', pointsBreakdownData);
+    console.groupEnd();
+  }
+
   // Calculate base points (without chip multipliers) for mathematics section
   const calculateBasePoints = () => {
     if (prediction.actualHomeScore === null || prediction.actualHomeScore === undefined ||
