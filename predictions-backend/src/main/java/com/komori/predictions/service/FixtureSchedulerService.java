@@ -1,6 +1,5 @@
 package com.komori.predictions.service;
 
-import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
 import com.komori.predictions.dto.response.Fixture;
@@ -29,18 +28,27 @@ public class FixtureSchedulerService {
     private final PredictionService predictionService;
     private final MatchRepository matchRepository;
     private final ChipService chipService;
-    private final RedisTemplate<String, Object> redisGeneralTemplate;
+    private final MatchdayService matchdayService;
 
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
         if (!fixtures.isEmpty()) {
+            apiService.addSecondFixtureIds(fixtures);
             for (Fixture fixture : fixtures) {
-                Instant fixtureInstant = fixture.getDate().toInstant();
-                long delayMillis = Duration.between(Instant.now(), fixtureInstant).toMillis();
-                if (delayMillis < 0) continue;
+                ExternalFixtureResponse1.Match status = apiService.getGameStatus(fixture);
 
-                log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
-                scheduledExecutorService.schedule(() -> watchFixture(fixture), delayMillis, TimeUnit.MILLISECONDS);
+                if ("IN_PLAY".equalsIgnoreCase(status.getStatus())) {
+                    startGoalPolling(fixture);
+                }
+                else if ("TIMED".equalsIgnoreCase(status.getStatus())) {
+                    long delayMillis = Duration.between(Instant.now(),
+                            fixture.getDate().toInstant()).toMillis();
+
+                    if (delayMillis > 0) {
+                        scheduledExecutorService.schedule(() -> watchFixture(fixture), delayMillis, TimeUnit.MILLISECONDS);
+                        log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
+                    }
+                }
             }
         }
     }
@@ -67,22 +75,16 @@ public class FixtureSchedulerService {
         watcherHolder[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
             ExternalFixtureResponse1.Match currentMatch = apiService.getGameStatus(fixture);
             if (currentMatch.getStatus().equalsIgnoreCase("IN_PLAY")) {
-                log.info("Match is now live! Fetching second fixture ID...");
-                Long secondFixtureId = apiService.getSecondFixtureId(fixture);
-                log.info("Second fixtureId retrieved: {}", secondFixtureId);
-                if (secondFixtureId == -1) {
-                    log.info("Second fixture ID not found for {}, skipping this iteration", fixture.getId());
-                    return;
-                }
-                startGoalPolling(fixture, secondFixtureId);
+                log.info("Match is now live!");
+                startGoalPolling(fixture);
 
                 watcherHolder[0].cancel(false);
             }
         }, 0, 1, TimeUnit.MINUTES);
     }
 
-    private void startGoalPolling(Fixture fixture, Long secondFixtureId) {
-        log.info("Starting goal polling for fixture {}", fixture.getId());
+    private void startGoalPolling(Fixture fixture) {
+        log.info("Starting goal polling for fixture {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
         final ScheduledFuture<?>[] pollingTask = new ScheduledFuture<?>[1];
 
         pollingTask[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
@@ -105,25 +107,25 @@ public class FixtureSchedulerService {
                     }
                 }
                 redisFixtureTemplate.delete("fixtures");
-                fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixtures",f));
+                fixtures.forEach(fix -> redisFixtureTemplate.opsForList().rightPush("fixtures",fix));
 
                 // Retrieve goalscorers
                 log.info("Retrieving goalscorers...");
-                HomeAndAwayScorers scorers = apiService.getGoalScorers(fixture, secondFixtureId);
+                HomeAndAwayScorers scorers = apiService.getGoalScorers(fixture);
 
                 // Save match to DB
                 log.info("Saving match to DB...");
                 MatchEntity matchEntity = MatchEntity.builder()
-                        .matchId(secondFixtureId)
+                        .matchId(fixture.getExternalFixtureId())
                         .oldFixtureId(fixture.getId().longValue())
-                        .gameweek(FixtureDetails.currentMatchday)
+                        .gameweek(fixture.getGameweek())
                         .homeScore(currentMatch.getScore().getFullTime().getHome())
                         .awayScore(currentMatch.getScore().getFullTime().getAway())
                         .homeTeam(fixture.getHomeTeam())
                         .awayTeam(fixture.getAwayTeam())
                         .homeScorers(scorers.homeScorers())
                         .awayScorers(scorers.awayScorers())
-                        .venue(FixtureDetails.VENUES.get(currentMatch.getHomeTeam().getTla()))
+                        .venue(fixture.getVenue())
                         .build();
                 matchEntity = matchRepository.saveAndFlush(matchEntity);
 
@@ -132,7 +134,7 @@ public class FixtureSchedulerService {
                 try {
                     predictionService.updateDatabaseAfterGame(matchEntity);
                 } catch (Exception e) {
-                    throw new RuntimeException("Error in updating database", e);
+                    log.error("Error in updating database", e);
                 }
 
                 // Increment current Matchday if appropriate
@@ -142,8 +144,8 @@ public class FixtureSchedulerService {
                                 // tie-breaker by ID
                         || ((f.getDate().isEqual(fixture.getDate())) && f.getId() > fixture.getId()));
                 if (isLastFixture) {
-                    FixtureDetails.currentMatchday++;
-                    redisGeneralTemplate.opsForValue().set("currentMatchday", FixtureDetails.currentMatchday);
+                    int newMatchday = matchdayService.getCurrentMatchday() + 1;
+                    matchdayService.setCurrentMatchday(newMatchday);
                     chipService.updateAllGameweekCooldowns();
                     apiService.updateUpcomingFixtures();
                 }

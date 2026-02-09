@@ -1,16 +1,18 @@
 package com.komori.predictions.dto.response;
 
-import com.komori.predictions.config.FixtureDetails;
 import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
+import com.komori.predictions.entity.TeamEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Data
 @Builder
 @AllArgsConstructor
@@ -30,20 +32,19 @@ public class Fixture {
     private Integer awayScore;
     private List<Player> homePlayers;
     private List<Player> awayPlayers;
+    private Long externalFixtureId;
 
-    public Fixture(ExternalFixtureResponse1.Match match) {
+    public Fixture(ExternalFixtureResponse1.Match match, TeamEntity homeTeamEntity, TeamEntity awayTeamEntity) {
         this.id = match.getId();
-        this.homeId = match.getHomeTeam().getId();
-        this.homeTeam = match.getHomeTeam().getShortName();
-        this.awayId = match.getAwayTeam().getId();
-        this.awayTeam = match.getAwayTeam().getShortName();
+        this.homeId = homeTeamEntity.getTeamId();
+        this.homeTeam = homeTeamEntity.getName();
+        this.awayId = awayTeamEntity.getTeamId();
+        this.awayTeam = awayTeamEntity.getName();
         this.date = match.getUtcDate();
         this.competition = "Premier League";
         this.status = match.getStatus();
-        this.venue = FixtureDetails.VENUES.get(match.getHomeTeam().getTla());
+        this.venue = homeTeamEntity.getVenue();
         this.gameweek = match.getMatchday();
-        this.homeScore = match.getScore().getFullTime().getHome();
-        this.awayScore = match.getScore().getFullTime().getAway();
         this.homePlayers = new ArrayList<>();
         this.awayPlayers = new ArrayList<>();
     }

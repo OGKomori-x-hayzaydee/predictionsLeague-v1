@@ -14,4 +14,5 @@ public class CreateLeagueRequest {
     private String name;
     private String description;
     private Publicity publicity;
+    private Integer firstGameweek;
 }

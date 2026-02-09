@@ -19,14 +19,16 @@ public class UserLeagueEntity {
     private UserEntity user;
     @ManyToOne @MapsId("leagueId") @JoinColumn(name = "league_id")
     private LeagueEntity league;
+    private Integer points;
     private Boolean isOwner;
     private Boolean isAdmin;
     @CreationTimestamp
     private Timestamp joinedAt;
 
-    public UserLeagueEntity(UserEntity user, LeagueEntity league, Boolean isOwner, Boolean isAdmin) {
+    public UserLeagueEntity(UserEntity user, LeagueEntity league, int points, boolean isOwner, boolean isAdmin) {
         this.user = user;
         this.league = league;
+        this.points = points;
         this.isOwner = isOwner;
         this.isAdmin = isAdmin;
         this.id = new UserLeagueId(user.getId(), league.getId());
