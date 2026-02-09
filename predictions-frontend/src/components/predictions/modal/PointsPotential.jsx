@@ -16,44 +16,44 @@ export default function PointsPotential({
   // References: chipUtils.js:72-150, RulesAndPointsModal.jsx:47-54
   const calculateMaxPotential = useMemo(() => {
     // STEP 1: Base Points - Assume best case (exact scoreline + all scorers correct)
-    // From Rules: "Exact scoreline with scorers" = 15 points (not additive)
+    // From Rules: "Perfect prediction" = 15 points (not additive)
     const basePoints = 15;
 
-    // STEP 2: Goalscorer Points (2 points each)
+    // STEP 2: Goalscorer Points
     const totalScorers = homeScore + awayScore;
-    let goalscorerPoints = totalScorers * 2;
-
-    // 🔧 FIXED: Scorer Focus DOUBLES goalscorer points (not adds)
+    let goalscorerPoints;
     if (selectedChips.includes("scorerFocus")) {
-      goalscorerPoints *= 2;
+      goalscorerPoints = totalScorers * 4; // Scorer Focus: +4 per scorer
+    } else {
+      goalscorerPoints = totalScorers * 2; // Normal: +2 per scorer
     }
 
-    // STEP 3: Subtotal before match chip multipliers
+    // STEP 3: Subtotal before multiplier chips
     let subtotal = basePoints + goalscorerPoints;
 
-    // STEP 4: Apply Match-Level Chip Multipliers (only one applies, in priority order)
+    // STEP 4: Apply multiplier chips (all stack sequentially, matching backend)
     let matchPoints = subtotal;
     if (selectedChips.includes("wildcard")) {
       matchPoints *= 3; // Wildcard: 3x
-    } else if (selectedChips.includes("doubleDown")) {
-      matchPoints *= 2; // Double Down: 2x
     }
-    // Note: Scorer Focus is NOT a match multiplier, it's applied to scorers only (above)
-
-    // STEP 5: Defense++ Bonus (if clean sheet predicted)
-    let defenseBonusPoints = 0;
-    if (activeGameweekChips.includes("defensePlusPlus") &&
-        (homeScore === 0 || awayScore === 0)) {
-      defenseBonusPoints = 10;
+    if (selectedChips.includes("doubleDown")) {
+      matchPoints *= 2; // Double Down: 2x (stacks with wildcard)
     }
-
-    // STEP 6: Total before All-In Week
-    let total = matchPoints + defenseBonusPoints;
-
-    // STEP 7: All-In Week multiplier (doubles EVERYTHING including Defense++)
     if (activeGameweekChips.includes("allInWeek")) {
-      total *= 2;
+      matchPoints *= 2; // All-In Week: 2x (stacks with other multipliers)
     }
+
+    // STEP 5: Defense++ Bonus (+5 per correctly predicted clean sheet, AFTER multipliers)
+    let defenseBonusPoints = 0;
+    if (activeGameweekChips.includes("defensePlusPlus")) {
+      let cleanSheets = 0;
+      if (awayScore === 0) cleanSheets++; // Home team clean sheet (away scored 0)
+      if (homeScore === 0) cleanSheets++; // Away team clean sheet (home scored 0)
+      defenseBonusPoints = 5 * cleanSheets;
+    }
+
+    // STEP 6: Final total
+    let total = matchPoints + defenseBonusPoints;
 
     return {
       total: Math.round(total),
@@ -62,8 +62,8 @@ export default function PointsPotential({
         goalscorerPoints,
         scorerFocusApplied: selectedChips.includes("scorerFocus"),
         subtotal,
-        matchMultiplier: selectedChips.includes("wildcard") ? 3 :
-                        selectedChips.includes("doubleDown") ? 2 : 1,
+        wildcardApplied: selectedChips.includes("wildcard"),
+        doubleDownApplied: selectedChips.includes("doubleDown"),
         matchPoints,
         defenseBonusPoints,
         allInWeekApplied: activeGameweekChips.includes("allInWeek")
@@ -120,7 +120,7 @@ export default function PointsPotential({
               })} flex items-center`}
             >
               <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-              Goalscorer predictions ({homeScore + awayScore} × 2)
+              Goalscorer predictions ({homeScore + awayScore} × {selectedChips.includes("scorerFocus") ? 4 : 2})
             </span>
             <span
               className={`${getThemeStyles(theme, {
@@ -128,12 +128,12 @@ export default function PointsPotential({
                 light: "text-slate-800",
               })} font-medium`}
             >
-              {(homeScore + awayScore) * 2} points
+              {calculateMaxPotential.breakdown.goalscorerPoints} points
             </span>
           </div>
         )}
 
-        {/* Scorer Focus chip - shows effect on scorer points */}
+        {/* Scorer Focus chip indicator */}
         {selectedChips.includes("scorerFocus") && (homeScore + awayScore) > 0 && (
           <div className="flex justify-between items-center text-sm">
             <span
@@ -143,7 +143,7 @@ export default function PointsPotential({
               })}`}
             >
               <div className="w-2 h-2 bg-cyan-500 rounded-full mr-2"></div>
-              <span className="mr-1">⚽</span> Scorer Focus (2x scorer pts)
+              <span className="mr-1">⚽</span> Scorer Focus (+4 per scorer)
             </span>
             <span
               className={`font-medium ${getThemeStyles(theme, {
@@ -151,7 +151,7 @@ export default function PointsPotential({
                 light: "text-cyan-700",
               })}`}
             >
-              +{(homeScore + awayScore) * 2} points
+              included above
             </span>
           </div>
         )}
@@ -179,7 +179,7 @@ export default function PointsPotential({
           </div>
         )}
 
-        {selectedChips.includes("doubleDown") && !selectedChips.includes("wildcard") && (
+        {selectedChips.includes("doubleDown") && (
           <div className="flex justify-between items-center text-sm">
             <span
               className={`flex items-center ${getThemeStyles(theme, {
@@ -212,7 +212,7 @@ export default function PointsPotential({
                 })}`}
               >
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                <span className="mr-1">🛡️</span> Defense++ (clean sheet)
+                <span className="mr-1">🛡️</span> Defense++ (+5/clean sheet)
               </span>
               <span
                 className={`font-medium ${getThemeStyles(theme, {
@@ -220,7 +220,7 @@ export default function PointsPotential({
                   light: "text-blue-700",
                 })}`}
               >
-                +10 points
+                +{calculateMaxPotential.breakdown.defenseBonusPoints} points
               </span>
             </div>
           )}
@@ -242,7 +242,7 @@ export default function PointsPotential({
                 light: "text-red-700",
               })}`}
             >
-              ×2 final total
+              ×2 multiplier
             </span>
           </div>
         )}
@@ -281,7 +281,7 @@ export default function PointsPotential({
                   light: "text-slate-600",
                 })} text-xs`}
               >
-                (Before All-In Week: {Math.round(calculateMaxPotential.total / 2)} pts)
+                (Before All-In Week: {Math.round((calculateMaxPotential.total - calculateMaxPotential.breakdown.defenseBonusPoints) / 2 + calculateMaxPotential.breakdown.defenseBonusPoints)} pts)
               </span>
             </div>
           )}

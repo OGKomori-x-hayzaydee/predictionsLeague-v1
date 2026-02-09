@@ -45,17 +45,15 @@ const RulesAndPointsModal = memo(({ isOpen, onClose }) => {
   // Memoized scoring data
   const scoringData = useMemo(() => ({
     basicPoints: [
-      { points: 5, name: 'Correct winner', description: 'Predict the right match winner (home win, away win, or draw).', icon: StarIcon, color: 'emerald' },
-      { points: 7, name: 'Correct draw prediction', description: 'Successfully predict that the match will end in a draw.', icon: CheckIcon, color: 'blue' },
+      { points: 5, name: 'Correct winner', description: 'Predict the right match winner (home win or away win).', icon: StarIcon, color: 'emerald' },
+      { points: 7, name: 'Correct draw prediction', description: 'Successfully predict that the match will end in a draw (even if the exact score is wrong).', icon: CheckIcon, color: 'blue' },
       { points: 10, name: 'Exact scoreline', description: 'Predict the precise final score of the match.', icon: StarIcon, color: 'purple' },
-      { points: 15, name: 'Exact scoreline with scorers', description: 'Predict both the correct score and all goalscorers correctly - the ultimate prediction!', icon: StarIcon, color: 'amber' },
-      { points: 2, name: 'Correct goalscorer', description: 'Each correctly predicted player who scores in the match.', icon: CheckIcon, color: 'green' },
-      { points: 4, name: 'Correct own goal prediction', description: 'Successfully predict an own goal occurrence in the match.', icon: ExclamationTriangleIcon, color: 'orange' },
-      { points: -1, name: 'Incorrect prediction (2+ goal difference)', description: 'Penalty applied when your prediction is significantly off target.', icon: ExclamationTriangleIcon, color: 'red' }
+      { points: 15, name: 'Perfect prediction', description: 'Predict both the correct score and all goalscorers exactly - the ultimate prediction!', icon: StarIcon, color: 'amber' },
+      { points: 2, name: 'Correct goalscorer', description: 'Each correctly predicted player who scores in the match (+2 per scorer, or +4 with Scorer Focus chip).', icon: CheckIcon, color: 'green' },
+      { points: '-X', name: 'Goal difference penalty', description: 'If your predicted total goals are 3+ away from the actual total, you lose (difference − 2) points. E.g. 3 goals off = −1, 4 off = −2, etc.', icon: ExclamationTriangleIcon, color: 'red' }
     ],
     bonusPoints: [
-      { points: '1.5x', name: 'Derby match multiplier', description: 'All points are multiplied by 1.5x for predictions involving traditional rivalries and high-profile matches.', icon: StarIcon, color: 'amber' },
-      { points: '+10', name: 'Clean sheet bonus', description: 'Additional 10 points when you correctly predict a team will keep a clean sheet (not concede any goals).', icon: StarIcon, color: 'blue' }
+      { points: '+5', name: 'Defense++ clean sheet', description: '+5 bonus points per correctly predicted clean sheet when the Defense++ chip is active. Applied after multiplier chips.', icon: StarIcon, color: 'blue' }
     ],
     gameRules: [
       { 
@@ -371,15 +369,15 @@ const RulesAndPointsModal = memo(({ isOpen, onClose }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                       <div>
                         <h6 className={`${themeStyles.titleText} font-bold font-outfit text-sm mb-1 uppercase tracking-wider`}>Scenario</h6>
-                        <p className={`${themeStyles.secondaryText} text-sm font-outfit`}>Manchester United vs Liverpool (Derby Match)</p>
+                        <p className={`${themeStyles.secondaryText} text-sm font-outfit`}>Arsenal vs Chelsea</p>
                       </div>
                       <div>
                         <h6 className={`${themeStyles.titleText} font-bold font-outfit text-sm mb-1 uppercase tracking-wider`}>Your Prediction</h6>
-                        <p className={`${themeStyles.secondaryText} text-sm font-outfit`}>Man United 2-1, Rashford scoring</p>
+                        <p className={`${themeStyles.secondaryText} text-sm font-outfit`}>Arsenal 2-1, Saka & Havertz scoring</p>
                       </div>
                       <div>
                         <h6 className={`${themeStyles.titleText} font-bold font-outfit text-sm mb-1 uppercase tracking-wider`}>Actual Result</h6>
-                        <p className={`${themeStyles.secondaryText} text-sm font-outfit`}>Man United 2-1, Rashford scores</p>
+                        <p className={`${themeStyles.secondaryText} text-sm font-outfit`}>Arsenal 2-1, Saka & Havertz score</p>
                       </div>
                     </div>
                     
@@ -388,30 +386,23 @@ const RulesAndPointsModal = memo(({ isOpen, onClose }) => {
                         <div className="flex justify-between items-center text-sm">
                           <span className={`${themeStyles.secondaryText} flex items-center gap-2 font-outfit`}>
                             <CheckIcon className="w-4 h-4" />
-                            Exact scoreline prediction
+                            Perfect prediction (score + all scorers)
                           </span>
-                          <span className={`${themeStyles.titleText} font-semibold font-outfit`}>+10 points</span>
+                          <span className={`${themeStyles.titleText} font-semibold font-outfit`}>+15 points</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           <span className={`${themeStyles.secondaryText} flex items-center gap-2 font-outfit`}>
                             <CheckIcon className="w-4 h-4" />
-                            Correct goalscorer (Rashford)
+                            Correct goalscorers (Saka + Havertz)
                           </span>
-                          <span className={`${themeStyles.titleText} font-semibold font-outfit`}>+2 points</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className={`${themeStyles.secondaryText} flex items-center gap-2 font-outfit`}>
-                            <StarIcon className="w-4 h-4" />
-                            Derby match multiplier
-                          </span>
-                          <span className={`${themeStyles.titleText} font-semibold font-outfit`}>12 × 1.5x</span>
+                          <span className={`${themeStyles.titleText} font-semibold font-outfit`}>+4 points</span>
                         </div>
                         <div className={`flex justify-between items-center pt-3 border-t ${getThemeStyles(theme, { dark: 'border-green-700/30', light: 'border-green-200/60' })}`}>
                           <span className={`${themeStyles.titleText} font-bold text-base flex items-center gap-2 font-outfit`}>
                             <StarIcon className="w-5 h-5" />
                             Final Total
                           </span>
-                          <span className={`font-bold text-lg font-outfit ${getThemeStyles(theme, { dark: 'text-green-300', light: 'text-green-600' })}`}>18 points</span>
+                          <span className={`font-bold text-lg font-outfit ${getThemeStyles(theme, { dark: 'text-green-300', light: 'text-green-600' })}`}>19 points</span>
                         </div>
                       </div>
                     </div>

@@ -68,7 +68,7 @@ export const CHIP_CONFIG = {
     id: "defensePlusPlus",
     name: "Defense++",
     type: "gameweek",
-    description: "Earn 10 bonus points if you correctly predict clean sheets across all matches where you predicted them",
+    description: "Earn +5 bonus points per correctly predicted clean sheet across your predictions (applied after multipliers)",
     icon: "🛡️",
     color: "blue",
     cooldown: 5, // Can't use for 5 gameweeks after usage

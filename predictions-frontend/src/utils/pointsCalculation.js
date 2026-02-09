@@ -1,93 +1,141 @@
 /**
  * Utility functions for calculating prediction points
+ * 
+ * Mirrors backend PredictionService.getPredictionScore() exactly.
  */
 
 /**
- * Calculate points for a prediction based on actual results
+ * Count correct scorers using multiset intersection (matches backend logic).
+ * Each predicted scorer is consumed once against the actual pool.
+ */
+function countCorrectScorers(predHome = [], predAway = [], actualHome = [], actualAway = []) {
+  const allPredicted = [...predHome, ...predAway];
+  const allActual = [...actualHome, ...actualAway];
+
+  // Build a frequency map of actual scorers
+  const actualMap = {};
+  allActual.forEach(s => { actualMap[s] = (actualMap[s] || 0) + 1; });
+
+  let count = 0;
+  allPredicted.forEach(scorer => {
+    if (actualMap[scorer] && actualMap[scorer] > 0) {
+      count++;
+      actualMap[scorer]--;
+    }
+  });
+  return count;
+}
+
+/**
+ * Check if predicted scorers match actual scorers exactly (order-independent multiset equality).
+ */
+function scorersMatchExactly(predHome = [], predAway = [], actualHome = [], actualAway = []) {
+  if (predHome.length !== actualHome.length || predAway.length !== actualAway.length) return false;
+
+  const toFreqMap = (arr) => {
+    const m = {};
+    arr.forEach(s => { m[s] = (m[s] || 0) + 1; });
+    return m;
+  };
+  const mapsEqual = (a, b) => {
+    const keysA = Object.keys(a);
+    if (keysA.length !== Object.keys(b).length) return false;
+    return keysA.every(k => a[k] === b[k]);
+  };
+
+  return mapsEqual(toFreqMap(predHome), toFreqMap(actualHome)) &&
+         mapsEqual(toFreqMap(predAway), toFreqMap(actualAway));
+}
+
+/**
+ * Count clean sheets correctly predicted.
+ * "Home clean sheet" = predicted away scored 0 AND actual away scored 0.
+ * "Away clean sheet" = predicted home scored 0 AND actual home scored 0.
+ */
+function countCleanSheets(predHome, actualHome, predAway, actualAway) {
+  let cs = 0;
+  if (predHome === 0 && actualHome === 0) cs++;
+  if (predAway === 0 && actualAway === 0) cs++;
+  return cs;
+}
+
+/**
+ * Calculate points for a prediction based on actual results.
+ * Mirrors backend PredictionService.getPredictionScore() exactly.
  * @param {Object} prediction - The prediction object
- * @returns {number} - Total points earned
+ * @returns {number|null} - Total points earned, or null if pending
  */
 export function calculatePoints(prediction) {
-  // If no actual results yet, return null for pending predictions
   if (prediction.actualHomeScore === null || prediction.actualHomeScore === undefined ||
       prediction.actualAwayScore === null || prediction.actualAwayScore === undefined) {
     return null;
   }
 
-  let basePoints = 0;
+  const predHome = prediction.homeScore;
+  const predAway = prediction.awayScore;
+  const actualHome = prediction.actualHomeScore;
+  const actualAway = prediction.actualAwayScore;
+  const predHomeScorers = prediction.homeScorers || [];
+  const predAwayScorers = prediction.awayScorers || [];
+  const actualHomeScorers = prediction.actualHomeScorers || [];
+  const actualAwayScorers = prediction.actualAwayScorers || [];
+  const chips = prediction.chips || [];
 
-  // 1. Score Prediction Points
-  if (prediction.homeScore === prediction.actualHomeScore && 
-      prediction.awayScore === prediction.actualAwayScore) {
-    // Exact scoreline: +10 points
-    basePoints += 10;
-  } else if (
-    // Correct outcome: +5 points (only if not exact score)
-    (prediction.homeScore > prediction.awayScore && prediction.actualHomeScore > prediction.actualAwayScore) ||
-    (prediction.homeScore < prediction.awayScore && prediction.actualHomeScore < prediction.actualAwayScore) ||
-    (prediction.homeScore === prediction.awayScore && prediction.actualHomeScore === prediction.actualAwayScore)
-  ) {
-    basePoints += 5;
-  }
-  // Otherwise: 0 points for incorrect outcome
+  let points = 0;
 
-  // 2. Goalscorer Points (+2 per correct prediction)
-  if (prediction.homeScorers && prediction.actualHomeScorers) {
-    const homeCorrect = prediction.homeScorers.filter(scorer => 
-      prediction.actualHomeScorers.includes(scorer)
-    ).length;
-    basePoints += homeCorrect * 2;
-  }
+  // --- Base score points ---
+  const correctScoreline = (actualHome === predHome) && (actualAway === predAway);
+  const correctDraw = (actualHome === actualAway) && (predHome === predAway);
+  const correctWinner = Math.sign(actualHome - actualAway) === Math.sign(predHome - predAway);
 
-  if (prediction.awayScorers && prediction.actualAwayScorers) {
-    const awayCorrect = prediction.awayScorers.filter(scorer => 
-      prediction.actualAwayScorers.includes(scorer)
-    ).length;
-    basePoints += awayCorrect * 2;
+  if (correctScoreline && scorersMatchExactly(predHomeScorers, predAwayScorers, actualHomeScorers, actualAwayScorers)) {
+    points = 15; // Perfect prediction
+  } else if (correctScoreline) {
+    points = 10;
+  } else if (correctDraw) {
+    points = 7;
+  } else if (correctWinner) {
+    points = 5;
   }
 
-  // 3. Apply Chip Effects
-  let finalPoints = basePoints;
-  
-  if (prediction.chips && prediction.chips.length > 0) {
-    // Check for multiplier chips (applied in order of priority)
-    if (prediction.chips.includes("wildcard")) {
-      finalPoints = basePoints * 3;
-    } else if (prediction.chips.includes("doubleDown")) {
-      finalPoints = basePoints * 2;
-    } else if (prediction.chips.includes("scorerFocus")) {
-      // Double only the goalscorer points, not the score points
-      const homeCorrect = prediction.homeScorers?.filter(scorer => 
-        prediction.actualHomeScorers?.includes(scorer)
-      ).length || 0;
-      const awayCorrect = prediction.awayScorers?.filter(scorer => 
-        prediction.actualAwayScorers?.includes(scorer)
-      ).length || 0;
-      const scorerPoints = (homeCorrect + awayCorrect) * 2;
-      const scorePoints = basePoints - scorerPoints; // Score points (exact/outcome)
-      finalPoints = scorePoints + (scorerPoints * 2); // Normal score points + doubled scorer points
-    }
-
-    // Add bonus chips (these add to the total, don't multiply)
-    if (prediction.chips.includes("defensePlusPlus")) {
-      // +10 bonus for correct clean sheet predictions
-      const homeCleanSheet = prediction.awayScore === 0 && prediction.actualAwayScore === 0;
-      const awayCleanSheet = prediction.homeScore === 0 && prediction.actualHomeScore === 0;
-      if (homeCleanSheet || awayCleanSheet) {
-        finalPoints += 10;
-      }
-    }
-
-    // Note: allInWeek is applied at gameweek level, not individual match level
+  // --- Goalscorer points ---
+  const correctScorers = countCorrectScorers(predHomeScorers, predAwayScorers, actualHomeScorers, actualAwayScorers);
+  if (chips.includes("scorerFocus")) {
+    points += 4 * correctScorers; // Scorer Focus: +4 per correct scorer
+  } else {
+    points += 2 * correctScorers; // Normal: +2 per correct scorer
   }
 
-  return Math.max(0, finalPoints); // Ensure non-negative points
+  // --- Goal difference penalty ---
+  const goalDifference = Math.abs((actualHome + actualAway) - (predHome + predAway));
+  if (goalDifference > 2) {
+    points -= (goalDifference - 2);
+  }
+
+  // --- Multiplier chips (sequential, all stack) ---
+  if (chips.includes("wildcard")) {
+    points *= 3;
+  }
+  if (chips.includes("doubleDown")) {
+    points *= 2;
+  }
+  if (chips.includes("allInWeek")) {
+    points *= 2;
+  }
+
+  // --- Defense++ (flat bonus, applied after multipliers) ---
+  if (chips.includes("defensePlusPlus")) {
+    points += 5 * countCleanSheets(predHome, actualHome, predAway, actualAway);
+  }
+
+  return points;
 }
 
 /**
- * Get breakdown of points calculation for display purposes
+ * Get breakdown of points calculation for display purposes.
+ * Mirrors backend logic for accurate step-by-step display.
  * @param {Object} prediction - The prediction object
- * @returns {Object} - Breakdown of points by category
+ * @returns {Object|null} - Breakdown of points by category
  */
 export function getPointsBreakdown(prediction) {
   if (prediction.actualHomeScore === null || prediction.actualHomeScore === undefined ||
@@ -95,59 +143,78 @@ export function getPointsBreakdown(prediction) {
     return null;
   }
 
+  const predHome = prediction.homeScore;
+  const predAway = prediction.awayScore;
+  const actualHome = prediction.actualHomeScore;
+  const actualAway = prediction.actualAwayScore;
+  const predHomeScorers = prediction.homeScorers || [];
+  const predAwayScorers = prediction.awayScorers || [];
+  const actualHomeScorers = prediction.actualHomeScorers || [];
+  const actualAwayScorers = prediction.actualAwayScorers || [];
+  const chips = prediction.chips || [];
+
   const breakdown = {};
-  let basePoints = 0;
+  let runningPoints = 0;
 
-  // Score prediction
-  if (prediction.homeScore === prediction.actualHomeScore && 
-      prediction.awayScore === prediction.actualAwayScore) {
+  // --- Base score ---
+  const correctScoreline = (actualHome === predHome) && (actualAway === predAway);
+  const correctDraw = (actualHome === actualAway) && (predHome === predAway);
+  const correctWinner = Math.sign(actualHome - actualAway) === Math.sign(predHome - predAway);
+
+  if (correctScoreline && scorersMatchExactly(predHomeScorers, predAwayScorers, actualHomeScorers, actualAwayScorers)) {
+    breakdown.perfectPrediction = 15;
+    runningPoints = 15;
+  } else if (correctScoreline) {
     breakdown.exactScore = 10;
-    basePoints += 10;
-  } else if (
-    (prediction.homeScore > prediction.awayScore && prediction.actualHomeScore > prediction.actualAwayScore) ||
-    (prediction.homeScore < prediction.awayScore && prediction.actualHomeScore < prediction.actualAwayScore) ||
-    (prediction.homeScore === prediction.awayScore && prediction.actualHomeScore === prediction.actualAwayScore)
-  ) {
+    runningPoints = 10;
+  } else if (correctDraw) {
+    breakdown.correctDraw = 7;
+    runningPoints = 7;
+  } else if (correctWinner) {
     breakdown.correctOutcome = 5;
-    basePoints += 5;
+    runningPoints = 5;
   }
 
-  // Goalscorer points
-  const homeCorrect = prediction.homeScorers?.filter(scorer => 
-    prediction.actualHomeScorers?.includes(scorer)
-  ).length || 0;
-  const awayCorrect = prediction.awayScorers?.filter(scorer => 
-    prediction.actualAwayScorers?.includes(scorer)
-  ).length || 0;
-  const totalScorerPoints = (homeCorrect + awayCorrect) * 2;
-  
-  if (totalScorerPoints > 0) {
-    breakdown.goalscorers = totalScorerPoints;
-    basePoints += totalScorerPoints;
+  // --- Goalscorer points ---
+  const correctScorers = countCorrectScorers(predHomeScorers, predAwayScorers, actualHomeScorers, actualAwayScorers);
+  if (correctScorers > 0) {
+    const perScorer = chips.includes("scorerFocus") ? 4 : 2;
+    const scorerPoints = perScorer * correctScorers;
+    breakdown.goalscorers = scorerPoints;
+    if (chips.includes("scorerFocus")) {
+      breakdown.scorerFocus = `×2 scorer pts (${correctScorers} × 4 = ${scorerPoints})`;
+    }
+    runningPoints += scorerPoints;
   }
 
-  // Chip effects
-  if (prediction.chips && prediction.chips.length > 0) {
-    prediction.chips.forEach(chip => {
-      switch (chip) {
-        case "wildcard":
-          breakdown.wildcard = `×3 (${basePoints} × 3 = ${basePoints * 3})`;
-          break;
-        case "doubleDown":
-          breakdown.doubleDown = `×2 (${basePoints} × 2 = ${basePoints * 2})`;
-          break;
-        case "scorerFocus":
-          breakdown.scorerFocus = `×2 scorers (${totalScorerPoints} × 2 = ${totalScorerPoints * 2})`;
-          break;
-        case "defensePlusPlus":
-          const homeCleanSheet = prediction.awayScore === 0 && prediction.actualAwayScore === 0;
-          const awayCleanSheet = prediction.homeScore === 0 && prediction.actualHomeScore === 0;
-          if (homeCleanSheet || awayCleanSheet) {
-            breakdown.defensePlusPlus = 10;
-          }
-          break;
-      }
-    });
+  // --- Goal difference penalty ---
+  const goalDifference = Math.abs((actualHome + actualAway) - (predHome + predAway));
+  if (goalDifference > 2) {
+    const penalty = goalDifference - 2;
+    breakdown.goalDiffPenalty = -penalty;
+    runningPoints -= penalty;
+  }
+
+  // --- Multiplier chips ---
+  if (chips.includes("wildcard")) {
+    breakdown.wildcard = `×3 (${runningPoints} × 3 = ${runningPoints * 3})`;
+    runningPoints *= 3;
+  }
+  if (chips.includes("doubleDown")) {
+    breakdown.doubleDown = `×2 (${runningPoints} × 2 = ${runningPoints * 2})`;
+    runningPoints *= 2;
+  }
+  if (chips.includes("allInWeek")) {
+    breakdown.allInWeek = `×2 (${runningPoints} × 2 = ${runningPoints * 2})`;
+    runningPoints *= 2;
+  }
+
+  // --- Defense++ (after multipliers) ---
+  if (chips.includes("defensePlusPlus")) {
+    const cs = countCleanSheets(predHome, actualHome, predAway, actualAway);
+    if (cs > 0) {
+      breakdown.defensePlusPlus = 5 * cs;
+    }
   }
 
   return breakdown;

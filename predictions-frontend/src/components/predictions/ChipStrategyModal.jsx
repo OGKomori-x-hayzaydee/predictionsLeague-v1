@@ -50,7 +50,7 @@ const ChipStrategyModal = memo(({ isOpen, onClose }) => {
       doubleDown: 'Ideal for high-confidence predictions, especially exact scorelines or when you\'ve predicted multiple correct goalscorers. Use freely - available every gameweek!',
       wildcard: 'Reserve for your most confident predictions. Use strategically - 7 gameweek cooldown means you can only use it a few times per season!',
       scorerFocus: 'Perfect for matches featuring prolific goalscorers or games expected to be high-scoring. Research team news and recent form to maximize effectiveness.',
-      defensePlusPlus: 'Analyze defensive statistics and upcoming fixtures. Best used when strong defensive teams face weaker attacking sides. Must get ALL clean sheet predictions correct to earn the bonus.',
+      defensePlusPlus: 'Analyze defensive statistics and upcoming fixtures. Best used when strong defensive teams face weaker attacking sides. You earn +5 per correctly predicted clean sheet, so predicting multiple 0-goal sides maximizes the bonus.',
       allInWeek: 'Use when extremely confident across all matches in the gameweek. Ideal for gameweeks with many predictable fixtures. Be careful - negative points are also doubled!'
     };
 
