@@ -100,7 +100,7 @@ const LeagueManagementView = ({ leagueId, league, onBack, onRefreshLeagues }) =>
     if (leagueId) {
       fetchMembers();
     }
-  }, [leagueId]);
+  }, [leagueId, league.name, league.description, league.firstGameweek]);
 
   const handleCopyInviteCode = () => {
     navigator.clipboard.writeText(league.joinCode);
