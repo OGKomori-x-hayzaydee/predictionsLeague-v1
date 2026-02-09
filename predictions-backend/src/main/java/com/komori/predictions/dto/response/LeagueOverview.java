@@ -16,6 +16,7 @@ public class LeagueOverview {
     private String id;
     private String name;
     private String description;
+    private Integer firstGameweek;
     private Integer members;
     private Integer position;
     private Integer points;
