@@ -59,14 +59,26 @@ const GameweekChipsPanel = ({
   // Use context gameweek if currentGameweek prop not provided
   const activeGameweek = currentGameweek || contextGameweek;
 
+  // Count actual unique gameweek activations from prediction data
+  // Backend seasonUsageCount over-counts for gameweek chips (increments per-prediction, not per-activation)
+  const getActualUsageCount = (chipId) => {
+    if (!userPredictions?.length) return 0;
+    const uniqueGameweeks = new Set(
+      userPredictions
+        .filter(p => p.chips?.includes(chipId))
+        .map(p => p.gameweek)
+    );
+    return uniqueGameweeks.size;
+  };
+
   // Get chips from context
   const gameweekChips = getGameweekChips().map((chip) => ({
     ...chip,
     // Map display properties
     cooldownRemaining: chip.remainingGameweeks || 0,
-    // Calculate remaining uses: seasonLimit - usageCount
+    // For season-limited chips, derive usage from predictions (not backend seasonUsageCount)
     remainingUses: chip.seasonLimit
-      ? chip.seasonLimit - (chip.usageCount || 0)
+      ? chip.seasonLimit - getActualUsageCount(chip.id)
       : null,
   }));
 
@@ -74,9 +86,8 @@ const GameweekChipsPanel = ({
     ...chip,
     // Map display properties
     cooldownRemaining: chip.remainingGameweeks || 0,
-    // Calculate remaining uses: seasonLimit - usageCount
     remainingUses: chip.seasonLimit
-      ? chip.seasonLimit - (chip.usageCount || 0)
+      ? chip.seasonLimit - getActualUsageCount(chip.id)
       : null,
   }));
 
