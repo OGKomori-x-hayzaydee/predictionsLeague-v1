@@ -21,11 +21,14 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
     name: "",
     type: "private",
     description: "",
-    firstGameweek: currentGameweek,
+    firstGameweek: null,
     customizeScoring: false,
     selectFixtures: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Derive the effective value: user's explicit pick, or fall back to the live currentGameweek
+  const selectedFirstGameweek = leagueData.firstGameweek ?? currentGameweek;
 
   const gameweekOptions = useMemo(() => 
     Array.from({ length: TOTAL_GAMEWEEKS }, (_, i) => i + 1),
@@ -50,7 +53,7 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
         name: leagueData.name,
         description: leagueData.description,
         isPrivate: leagueData.type === "private",
-        firstGameweek: Number(leagueData.firstGameweek)
+        firstGameweek: Number(selectedFirstGameweek)
       };
       
       const league = await createLeague(apiData);
@@ -157,7 +160,7 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
           <select
             id="first-gameweek"
             name="firstGameweek"
-            value={leagueData.firstGameweek}
+            value={selectedFirstGameweek}
             onChange={handleChange}
             className={`w-full ${
               theme === "dark"
