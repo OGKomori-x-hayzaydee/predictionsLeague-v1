@@ -381,7 +381,7 @@ export default function ContentPane({
           />
         );
       case "settings":
-        return <SettingsView />;
+        return <SettingsView navigateToSection={navigateToSection} />;
       default:
         return (
           <DashboardView
