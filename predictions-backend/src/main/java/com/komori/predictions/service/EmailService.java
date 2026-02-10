@@ -1,27 +1,30 @@
 package com.komori.predictions.service;
 
+import brevo.ApiClient;
+import brevo.ApiException;
+import brevo.Configuration;
+import brevo.auth.ApiKeyAuth;
+import brevoApi.TransactionalEmailsApi;
+import brevoModel.CreateSmtpEmail;
+import brevoModel.SendSmtpEmail;
+import brevoModel.SendSmtpEmailSender;
+import brevoModel.SendSmtpEmailTo;
 import com.komori.predictions.dto.request.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    private final RestTemplate restTemplate;
     @Value("${brevo.from-email}")
     private String fromEmail;
     @Value("${brevo.api-key}")
@@ -154,28 +157,30 @@ public class EmailService {
     }
 
     private void sendEmail(String subject, String htmlContent, List<EmailRequest.NameAndEmail> nameAndEmails) {
-        EmailRequest request = EmailRequest.builder()
-                .to(nameAndEmails)
-                .sender(new EmailRequest.NameAndEmail("The Predictions League", fromEmail))
-                .subject(subject)
-                .htmlContent(htmlContent)
-                .build();
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        ApiKeyAuth apiKeyAuth = (ApiKeyAuth) defaultClient.getAuthentication("api-key");
+        apiKeyAuth.setApiKey(apiKey);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", apiKey);
-        headers.set("User-Agent", "Java/RestTemplate");
-        HttpEntity<EmailRequest> httpEntity = new HttpEntity<>(request, headers);
+        TransactionalEmailsApi apiInstance = new TransactionalEmailsApi();
+        SendSmtpEmailSender sender = new SendSmtpEmailSender().name("The Predictions League").email(fromEmail);
 
-        ResponseEntity<?> response = restTemplate.postForEntity(
-                "https://api.brevo.com/v3/smtp/email",
-                httpEntity,
-                Object.class
-        );
+        List<SendSmtpEmailTo> recipients = new ArrayList<>();
+        for (EmailRequest.NameAndEmail nameAndEmail : nameAndEmails) {
+            SendSmtpEmailTo to = new SendSmtpEmailTo().name(nameAndEmail.getName()).email(nameAndEmail.getEmail());
+            recipients.add(to);
+        }
 
-        if (response.getStatusCode().isError()) {
-            throw new MailSendException("Email not sent: " + response.getBody());
+        SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
+        sendSmtpEmail.sender(sender);
+        sendSmtpEmail.to(recipients);
+        sendSmtpEmail.subject(subject);
+        sendSmtpEmail.htmlContent(htmlContent);
+
+        try {
+            CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
+            log.info("Result of email sending: {}", result);
+        } catch (ApiException e) {
+            log.error("Exception when sending email: {}", e.getResponseBody());
         }
     }
 }
