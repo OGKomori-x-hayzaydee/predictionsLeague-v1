@@ -74,9 +74,9 @@ const getCheckIconStyles = (color) => {
   return styles[color] || styles.emerald;
 };
 
-export default function ChipSelector({ 
-  selectedChips, 
-  onToggleChip, 
+export default function ChipSelector({
+  selectedChips,
+  onToggleChip,
   toggleChipInfoModal,
   gameweek,
   maxChips = 2,
@@ -89,52 +89,50 @@ export default function ChipSelector({
 
   // Get match-scoped chips with availability info
   const matchChips = getMatchChips();
-  
+
   // Check if a chip is locked (cannot be removed)
   const isChipLocked = (chipId) => lockedChips.includes(chipId);
-  
+
   // Check if a MATCH-SCOPED chip with gameweek limit is already used
-  // (e.g., Double Down can only be used on one match per gameweek)
-  // Gameweek-scoped chips should NOT be blocked by this check
   const isGameweekLimitReached = (chipId) => {
     const chipInfo = getChipInfo(chipId);
     const isMatchScopedWithLimit = chipInfo?.scope === 'match' && chipInfo?.gameweekLimit;
-    
+
     if (!isMatchScopedWithLimit) {
-      return false; // Gameweek-scoped chips are never "limit reached"
+      return false;
     }
-    
+
     return isChipUsedInGameweek(chipId, gameweek, userPredictions, currentMatchId);
   };
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
-          <LightningBoltIcon className="w-5 h-5 text-purple-400" />
+    <div className="mb-4 sm:mb-6">
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+          <LightningBoltIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
         </div>
         <div className="flex items-center justify-between w-full">
           <h3
             className={`${
               theme === "dark" ? "text-slate-100" : "text-slate-900"
-            } text-xl font-bold font-outfit`}
+            } text-lg sm:text-xl font-bold font-outfit`}
           >
             Match Chips
           </h3>
-          <span className="text-purple-300 text-xs bg-purple-500/20 border border-purple-500/30 rounded-full px-3 py-1 font-medium">
+          <span className="text-purple-300 text-2xs sm:text-xs bg-purple-500/20 border border-purple-500/30 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 font-medium">
             {selectedChips.length}/{maxChips}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-3 sm:mb-4">
         {matchChips.map((chip) => {
           const isSelected = selectedChips.includes(chip.id);
           const isLocked = isChipLocked(chip.id);
           const chipAvailable = chip.available;
           const gameweekLimitReached = !isSelected && !isLocked && isGameweekLimitReached(chip.id);
-          const isDisabled = (!isSelected && selectedChips.length >= maxChips) || 
-                            (!chipAvailable && !isLocked) || 
+          const isDisabled = (!isSelected && selectedChips.length >= maxChips) ||
+                            (!chipAvailable && !isLocked) ||
                             gameweekLimitReached;
           const cooldownDisplay = formatCooldownDisplay(chip);
           const seasonLimitDisplay = formatSeasonLimitDisplay(chip.id, chip.usageCount || 0);
@@ -144,9 +142,8 @@ export default function ChipSelector({
               key={chip.id}
               type="button"
               onClick={() => {
-                // Don't allow removing locked chips
                 if (isLocked && isSelected) {
-                  onToggleChip(chip.id); // This will show toast error
+                  onToggleChip(chip.id);
                   return;
                 }
                 if (chipAvailable || isSelected) {
@@ -156,7 +153,7 @@ export default function ChipSelector({
               disabled={isDisabled && !isSelected && !isLocked}
               whileHover={{ scale: isDisabled && !isSelected ? 1 : 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`relative flex items-center rounded-xl border p-3 transition-all duration-200 ${
+              className={`relative flex items-center rounded-lg sm:rounded-xl border p-2.5 sm:p-3 transition-all duration-200 ${
                 isSelected
                   ? getSelectedStyles(chip.color)
                   : isDisabled
@@ -164,41 +161,41 @@ export default function ChipSelector({
                   : getDefaultStyles(theme)
               }`}
               title={
-                isLocked 
+                isLocked
                   ? 'This chip cannot be removed once applied'
                   : gameweekLimitReached
                   ? 'This chip has already been used in this gameweek'
-                  : !chipAvailable 
-                  ? chip.reason 
+                  : !chipAvailable
+                  ? chip.reason
                   : chip.description
               }
             >
               <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 border ${getChipIconStyles(chip.color, isSelected, theme)}`}
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 border flex-shrink-0 ${getChipIconStyles(chip.color, isSelected, theme)}`}
               >
                 {isLocked ? (
                   <div className="relative">
-                    <span className="text-lg opacity-50">{chip.icon}</span>
-                    <LockClosedIcon className="w-4 h-4 absolute -bottom-1 -right-1 text-amber-400" />
+                    <span className="text-base sm:text-lg opacity-50">{chip.icon}</span>
+                    <LockClosedIcon className="w-3 h-3 sm:w-4 sm:h-4 absolute -bottom-1 -right-1 text-amber-400" />
                   </div>
                 ) : !chipAvailable && !isSelected ? (
-                  <LockClosedIcon className="w-5 h-5" />
+                  <LockClosedIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 ) : (
-                  <span className="text-lg">{chip.icon}</span>
+                  <span className="text-base sm:text-lg">{chip.icon}</span>
                 )}
               </div>
 
-              <div className="flex-1 text-left">
-                <div className="flex items-center gap-1.5">
+              <div className="flex-1 text-left min-w-0">
+                <div className="flex items-center gap-1 sm:gap-1.5">
                   <div
-                    className={`text-sm font-medium transition-colors ${getChipTextStyles(chip.color, isSelected, theme)}`}
+                    className={`text-xs sm:text-sm font-medium transition-colors truncate ${getChipTextStyles(chip.color, isSelected, theme)}`}
                   >
                     {chip.name}
                   </div>
                   {isLocked && (
-                    <div className={`text-2xs px-1.5 py-0.5 rounded font-medium ${
-                      theme === 'dark' 
-                        ? 'bg-amber-900/30 text-amber-400 border border-amber-700/30' 
+                    <div className={`text-2xs px-1 sm:px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
+                      theme === 'dark'
+                        ? 'bg-amber-900/30 text-amber-400 border border-amber-700/30'
                         : 'bg-amber-100 text-amber-700 border border-amber-300'
                     }`}>
                       Locked
@@ -206,17 +203,17 @@ export default function ChipSelector({
                   )}
                 </div>
                 {!chipAvailable && !isSelected && !isLocked && !gameweekLimitReached && (
-                  <div className="text-xs text-red-400 mt-0.5">
+                  <div className="text-2xs sm:text-xs text-red-400 mt-0.5 truncate">
                     {cooldownDisplay || seasonLimitDisplay || 'Unavailable'}
                   </div>
                 )}
                 {gameweekLimitReached && !isSelected && !isLocked && (
-                  <div className="text-xs text-amber-400 mt-0.5">
+                  <div className="text-2xs sm:text-xs text-amber-400 mt-0.5 truncate">
                     Already used this gameweek
                   </div>
                 )}
                 {chipAvailable && seasonLimitDisplay && !isSelected && (
-                  <div className="text-xs text-slate-400 mt-0.5">
+                  <div className="text-2xs sm:text-xs text-slate-400 mt-0.5 truncate">
                     {seasonLimitDisplay}
                   </div>
                 )}
@@ -224,18 +221,18 @@ export default function ChipSelector({
 
               {isSelected && !isLocked && (
                 <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center ml-2 ${getCheckIconStyles(chip.color)}`}
+                  className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ml-1.5 sm:ml-2 flex-shrink-0 ${getCheckIconStyles(chip.color)}`}
                 >
-                  <CheckIcon className="w-3 h-3" />
+                  <CheckIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 </div>
               )}
               {isSelected && isLocked && (
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ml-2 ${
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ml-1.5 sm:ml-2 flex-shrink-0 ${
                   theme === 'dark'
                     ? 'bg-amber-500/20 border border-amber-500/30'
                     : 'bg-amber-200 border border-amber-300'
                 }`}>
-                  <LockClosedIcon className="w-3 h-3 text-amber-400" />
+                  <LockClosedIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400" />
                 </div>
               )}
             </motion.button>
@@ -253,9 +250,9 @@ export default function ChipSelector({
             theme === "dark"
               ? "text-purple-300 hover:text-purple-200"
               : "text-purple-600 hover:text-purple-700"
-          } text-sm flex items-center transition-colors font-medium`}
+          } text-xs sm:text-sm flex items-center transition-colors font-medium py-1`}
         >
-          <InfoCircledIcon className="mr-2 w-4 h-4" />
+          <InfoCircledIcon className="mr-1.5 sm:mr-2 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Learn more about all available chips
         </button>
       </div>
