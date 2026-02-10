@@ -339,6 +339,8 @@ export default function ContentPane({
                 awayPlayers: match.awayPlayers || [],
               })
             }
+            handleEditPrediction={handleEditPrediction}
+            handleFixtureSelect={handleFixtureSelect}
             navigateToSection={navigateToSection}
             toggleChipInfoModal={toggleChipInfoModal}
           />
