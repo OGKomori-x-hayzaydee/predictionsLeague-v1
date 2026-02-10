@@ -170,6 +170,6 @@ public class FixtureSchedulerService {
                 redisFixtureTemplate.delete("fixtures");
                 fixtures.forEach(f -> redisFixtureTemplate.opsForList().rightPush("fixtures",f));
             }
-        }, 0, 3, TimeUnit.MINUTES);
+        }, 0, 5, TimeUnit.MINUTES);
     }
 }
