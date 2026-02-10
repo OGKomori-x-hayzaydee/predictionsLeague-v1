@@ -37,7 +37,7 @@ public class FixtureSchedulerService {
             for (Fixture fixture : fixtures) {
                 ExternalFixtureResponse1.Match status = apiService.getGameStatus(fixture);
 
-                if ("IN_PLAY".equalsIgnoreCase(status.getStatus())) {
+                if ("IN_PLAY".equalsIgnoreCase(status.getStatus()) || "PAUSED".equalsIgnoreCase(status.getStatus())) {
                     startGoalPolling(fixture);
                 }
                 else if ("TIMED".equalsIgnoreCase(status.getStatus())) {
