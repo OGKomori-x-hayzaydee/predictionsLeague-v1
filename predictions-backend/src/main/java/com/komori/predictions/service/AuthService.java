@@ -97,6 +97,13 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    public void deleteUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+
+        userRepository.delete(user);
+    }
+
     public void checkVerifiedStatus(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));

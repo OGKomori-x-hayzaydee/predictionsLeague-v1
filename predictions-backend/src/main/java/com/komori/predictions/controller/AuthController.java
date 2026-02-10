@@ -11,6 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -58,6 +59,12 @@ public class AuthController {
         return ResponseEntity.ok()
                 .headers(cookieHeaders)
                 .body("Registration successful");
+    }
+
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<String> deleteUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
+        authService.deleteUser(email);
+        return ResponseEntity.ok("Account deleted successfully");
     }
 
     @PostMapping("/logout")
