@@ -353,7 +353,7 @@ export default function ContentPane({
           />
         );
       case "profile":
-        return <ProfileView />;
+        return <ProfileView navigateToSection={navigateToSection} />;
       case "predictions":
         return (
           <PredictionsView
