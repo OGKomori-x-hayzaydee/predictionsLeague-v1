@@ -512,7 +512,7 @@ const ProfileView = ({ navigateToSection }) => {
           value={
             essentialLoading
               ? "..."
-              : `${stats?.accuracyRate?.percentage ?? "—"}%`
+              : `${stats?.accuracyRate?.percentage != null ? Number(stats.accuracyRate.percentage).toFixed(2) : "—"}%`
           }
           subtitle={
             essentialLoading
