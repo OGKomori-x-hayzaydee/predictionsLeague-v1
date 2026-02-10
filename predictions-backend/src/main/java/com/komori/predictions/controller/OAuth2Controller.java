@@ -63,7 +63,7 @@ public class OAuth2Controller {
                     .profilePictureUrl(picture)
                     .accountVerified(true)
                     .build();
-            newUser = userRepository.save(newUser);
+            newUser = userRepository.saveAndFlush(newUser);
             chipService.createChipsForNewUser(newUser);
             emailService.sendWelcomeEmail(email, firstName);
             response.sendRedirect(frontendUrl + "/auth/callback?email=" + email);

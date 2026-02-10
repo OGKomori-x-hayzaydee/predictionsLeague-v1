@@ -24,7 +24,6 @@ public class ChipService {
                 .toList();
     }
 
-    @Transactional
     public void createChipsForNewUser(UserEntity newUser) {
         List<ChipEntity> chips = List.of(
                 ChipEntity.builder().user(newUser).type(Chip.WILDCARD).build(),
@@ -34,7 +33,7 @@ public class ChipService {
                 ChipEntity.builder().user(newUser).type(Chip.DOUBLE_DOWN).build()
         );
 
-        chipRepository.saveAll(chips);
+        chipRepository.saveAllAndFlush(chips);
     }
 
     @Transactional

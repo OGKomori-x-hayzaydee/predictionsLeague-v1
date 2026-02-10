@@ -31,7 +31,7 @@ public class AuthService {
             throw new EmailAlreadyExistsException();
         }
         UserEntity newUser = convertToUserEntity(request);
-        newUser = userRepository.save(newUser);
+        newUser = userRepository.saveAndFlush(newUser);
         chipService.createChipsForNewUser(newUser);
         emailService.sendWelcomeEmail(request.getEmail(), request.getFirstName());
     }
