@@ -21,8 +21,10 @@ public class ChipEntity {
     private UserEntity user;
     @Enumerated(value = EnumType.STRING)
     private Chip type;
-    private Integer remainingGameweeks;
-    private Integer seasonLimit;
+    @Builder.Default
+    private Integer remainingGameweeks = 0;
+    @Builder.Default
+    private Integer seasonLimit = 0;
     @Builder.Default
     private Integer seasonUsageCount = 0;
     @Builder.Default

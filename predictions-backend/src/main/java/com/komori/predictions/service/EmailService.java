@@ -5,7 +5,6 @@ import brevo.ApiException;
 import brevo.Configuration;
 import brevo.auth.ApiKeyAuth;
 import brevoApi.TransactionalEmailsApi;
-import brevoModel.CreateSmtpEmail;
 import brevoModel.SendSmtpEmail;
 import brevoModel.SendSmtpEmailSender;
 import brevoModel.SendSmtpEmailTo;
@@ -177,8 +176,7 @@ public class EmailService {
         sendSmtpEmail.htmlContent(htmlContent);
 
         try {
-            CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
-            log.info("Result of email sending: {}", result);
+            apiInstance.sendTransacEmail(sendSmtpEmail);
         } catch (ApiException e) {
             log.error("Exception when sending email: {}", e.getResponseBody());
         }
