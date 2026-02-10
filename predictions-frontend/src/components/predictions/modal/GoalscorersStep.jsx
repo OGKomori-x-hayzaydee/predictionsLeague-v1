@@ -7,16 +7,16 @@ import ScoreDisplay from "./ScoreDisplay";
 import GoalscorerSelector from "./GoalscorerSelector";
 import ChipSelector from "./ChipSelector";
 
-export default function GoalscorersStep({ 
-  fixture, 
-  homeScore, 
-  awayScore, 
-  homeScorers, 
-  awayScorers, 
-  onHomeScorerChange, 
-  onAwayScorerChange, 
-  selectedChips, 
-  onToggleChip, 
+export default function GoalscorersStep({
+  fixture,
+  homeScore,
+  awayScore,
+  homeScorers,
+  awayScorers,
+  onHomeScorerChange,
+  onAwayScorerChange,
+  selectedChips,
+  onToggleChip,
   toggleChipInfoModal,
   gameweek,
   chipWarning,
@@ -36,35 +36,35 @@ export default function GoalscorersStep({
       transition={{ duration: 0.3 }}
     >
       {/* Score summary */}
-      <div className={`rounded-xl p-6 mb-6 ${getThemeStyles(theme, {
+      <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 ${getThemeStyles(theme, {
         dark: 'bg-slate-800/50 border border-slate-700/60',
         light: 'bg-slate-50 border border-slate-200'
       })}`}>
-        <div className={`text-xs font-medium mb-3 font-outfit text-center ${getThemeStyles(theme, {
+        <div className={`text-2xs sm:text-xs font-medium mb-2 sm:mb-3 font-outfit text-center ${getThemeStyles(theme, {
           dark: 'text-slate-400',
           light: 'text-slate-600'
         })}`}>
           Your Predicted Score
         </div>
-        <ScoreDisplay 
-          fixture={fixture} 
-          homeScore={homeScore} 
-          awayScore={awayScore} 
-          variant="summary" 
+        <ScoreDisplay
+          fixture={fixture}
+          homeScore={homeScore}
+          awayScore={awayScore}
+          variant="summary"
         />
       </div>
 
       {/* Goalscorers section */}
-      <div className={`rounded-xl p-6 mb-6 ${getThemeStyles(theme, {
+      <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 ${getThemeStyles(theme, {
         dark: 'bg-slate-800/50 border border-slate-700/60',
         light: 'bg-slate-50 border border-slate-200'
       })}`}>
-        <div className="flex items-center space-x-2 mb-4">
-          <TargetIcon className={`w-5 h-5 ${getThemeStyles(theme, {
+        <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+          <TargetIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${getThemeStyles(theme, {
             dark: 'text-blue-400',
             light: 'text-blue-600'
           })}`} />
-          <h3 className={`text-lg font-semibold font-outfit ${getThemeStyles(theme, {
+          <h3 className={`text-base sm:text-lg font-semibold font-outfit ${getThemeStyles(theme, {
             dark: 'text-slate-200',
             light: 'text-slate-800'
           })}`}>
@@ -73,8 +73,8 @@ export default function GoalscorersStep({
         </div>
 
         {homeScore > 0 || awayScore > 0 ? (
-          <div className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-3 sm:mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {/* Home team scorers */}
               {homeScore > 0 && (
                 <GoalscorerSelector
@@ -104,16 +104,16 @@ export default function GoalscorersStep({
           </div>
         ) : (
           <div
-            className={`font-outfit rounded-xl py-4 px-5 text-center border border-dashed ${getThemeStyles(theme, {
+            className={`font-outfit rounded-lg sm:rounded-xl py-3 sm:py-4 px-4 sm:px-5 text-center border border-dashed ${getThemeStyles(theme, {
               dark: "border-slate-600/50 bg-slate-800/30",
               light: "border-slate-300/50 bg-slate-50/30",
-            })} flex flex-col items-center mt-4`}
+            })} flex flex-col items-center mt-3 sm:mt-4`}
           >
             <p
               className={`${getThemeStyles(theme, {
                 dark: "text-slate-200",
                 light: "text-slate-800",
-              })} text-md font-medium`}
+              })} text-sm sm:text-md font-medium`}
             >
               Scoreless draw predicted
             </p>
@@ -121,7 +121,7 @@ export default function GoalscorersStep({
               className={`${getThemeStyles(theme, {
                 dark: "text-slate-400",
                 light: "text-slate-600",
-              })} text-sm mt-1`}
+              })} text-xs sm:text-sm mt-1`}
             >
               No goalscorers needed
             </p>
@@ -145,20 +145,20 @@ export default function GoalscorersStep({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`mt-4 rounded-xl p-4 border flex items-start gap-3 ${getThemeStyles(theme, {
+          className={`mt-3 sm:mt-4 rounded-lg sm:rounded-xl p-3 sm:p-4 border flex items-start gap-2 sm:gap-3 ${getThemeStyles(theme, {
             dark: 'bg-amber-500/10 border-amber-500/30',
             light: 'bg-amber-50 border-amber-300'
           })}`}
         >
-          <ExclamationTriangleIcon className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <ExclamationTriangleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className={`text-sm font-medium font-outfit ${getThemeStyles(theme, {
+            <p className={`text-xs sm:text-sm font-medium font-outfit ${getThemeStyles(theme, {
               dark: 'text-amber-300',
               light: 'text-amber-700'
             })}`}>
               Chip Availability Warning
             </p>
-            <p className={`text-xs mt-1 ${getThemeStyles(theme, {
+            <p className={`text-2xs sm:text-xs mt-1 ${getThemeStyles(theme, {
               dark: 'text-amber-200/80',
               light: 'text-amber-600'
             })}`}>
