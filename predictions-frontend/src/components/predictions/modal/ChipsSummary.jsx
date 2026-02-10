@@ -24,15 +24,15 @@ export default function ChipsSummary({ selectedChips }) {
       className={`${getThemeStyles(theme, {
         dark: "bg-slate-800/50 border-slate-700/60",
         light: "bg-slate-50/50 border-slate-200/60",
-      })} border rounded-xl p-4 mb-4 font-outfit`}
+      })} border rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 font-outfit`}
     >
       <h4
         className={`${getThemeStyles(theme, {
           dark: "text-slate-200",
           light: "text-slate-800",
-        })} text-sm font-medium mb-3 flex items-center`}
+        })} text-xs sm:text-sm font-medium mb-2 sm:mb-3 flex items-center`}
       >
-        <LightningBoltIcon className="mr-2 w-4 h-4 text-purple-400" />
+        <LightningBoltIcon className="mr-1.5 sm:mr-2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
         Selected Match Chips
       </h4>
 
@@ -41,7 +41,7 @@ export default function ChipsSummary({ selectedChips }) {
           className={`${getThemeStyles(theme, {
             dark: "text-slate-400 bg-slate-700/30",
             light: "text-slate-600 bg-slate-100/30",
-          })} text-sm py-2 px-3 rounded-lg text-center`}
+          })} text-xs sm:text-sm py-2 px-3 rounded-lg text-center`}
         >
           No chips selected for this match
         </div>
@@ -57,22 +57,22 @@ export default function ChipsSummary({ selectedChips }) {
                 className={`flex items-center ${getThemeStyles(theme, {
                   dark: "bg-slate-700/40",
                   light: "bg-slate-100/40",
-                })} border border-${chip.color}-500/20 rounded-lg px-3 py-2.5`}
+                })} border border-${chip.color}-500/20 rounded-lg px-2.5 sm:px-3 py-2 sm:py-2.5`}
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center bg-${chip.color}-500/20 border border-${chip.color}-500/30 mr-3 text-lg`}
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-${chip.color}-500/20 border border-${chip.color}-500/30 mr-2 sm:mr-3 text-base sm:text-lg`}
                 >
                   {chip.icon}
                 </div>
-                <div className="flex-1">
-                  <div className={`text-${chip.color}-300 text-sm font-medium`}>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-${chip.color}-300 text-xs sm:text-sm font-medium`}>
                     {chip.name}
                   </div>
                   <div
                     className={`${getThemeStyles(theme, {
                       dark: "text-slate-400",
                       light: "text-slate-600",
-                    })} text-xs leading-relaxed`}
+                    })} text-2xs sm:text-xs leading-relaxed`}
                   >
                     {chip.description}
                   </div>

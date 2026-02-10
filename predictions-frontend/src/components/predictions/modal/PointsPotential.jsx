@@ -76,15 +76,15 @@ export default function PointsPotential({
       className={`${getThemeStyles(theme, {
         dark: "bg-slate-800/50 border-slate-700/60",
         light: "bg-slate-50/50 border-slate-200/60",
-      })} border rounded-xl p-4 font-outfit`}
+      })} border rounded-lg sm:rounded-xl p-3 sm:p-4 font-outfit`}
     >
       <h4
         className={`${getThemeStyles(theme, {
           dark: "text-slate-200",
           light: "text-slate-800",
-        })} text-sm font-medium mb-4 flex items-center`}
+        })} text-xs sm:text-sm font-medium mb-3 sm:mb-4 flex items-center`}
       >
-        <StarIcon className="mr-2 w-4 h-4 text-amber-400" />
+        <StarIcon className="mr-1.5 sm:mr-2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
         Points Potential
       </h4>
 
@@ -267,7 +267,7 @@ export default function PointsPotential({
               className={`${getThemeStyles(theme, {
                 dark: "text-amber-400",
                 light: "text-amber-600",
-              })} font-bold text-xl`}
+              })} font-bold text-lg sm:text-xl`}
             >
               {calculateMaxPotential.total} pts
             </span>

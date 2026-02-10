@@ -4,15 +4,15 @@ import { getThemeStyles } from "../../../utils/themeUtils";
 import TeamLogo from "../../ui/TeamLogo";
 import { LOGO_SIZES } from "../../../utils/teamLogos";
 
-export default function ScoreDisplay({ 
-  fixture, 
-  homeScore, 
-  awayScore, 
+export default function ScoreDisplay({
+  fixture,
+  homeScore,
+  awayScore,
   variant = "summary", // "summary", "review"
   className = ""
 }) {
   const { theme } = useContext(ThemeContext);
-  
+
   const getVariantStyles = () => {
     switch (variant) {
       case "review":
@@ -20,7 +20,7 @@ export default function ScoreDisplay({
           container: getThemeStyles(theme, {
             dark: "bg-purple-500/20 border border-purple-500/30",
             light: "bg-purple-100 border border-purple-200"
-          }) + " rounded-lg px-3",
+          }) + " rounded-lg px-2 sm:px-3",
           scoreBox: getThemeStyles(theme, {
             dark: "bg-slate-800/60",
             light: "bg-white/60"
@@ -39,7 +39,7 @@ export default function ScoreDisplay({
           container: getThemeStyles(theme, {
             dark: "bg-blue-500/20 border border-blue-500/30",
             light: "bg-blue-100 border border-blue-200"
-          }) + " rounded-lg px-3",
+          }) + " rounded-lg px-2 sm:px-3",
           scoreBox: getThemeStyles(theme, {
             dark: "bg-slate-800/60",
             light: "bg-white/60"
@@ -55,13 +55,13 @@ export default function ScoreDisplay({
         };
     }
   };
-  
+
   const styles = getVariantStyles();
 
   return (
     <div className={`flex justify-center items-center ${className}`}>
-      <div className="flex items-center">
-        <div className="mr-2">
+      <div className="flex items-center min-w-0">
+        <div className="mr-1.5 sm:mr-2 flex-shrink-0">
           <TeamLogo
             teamName={fixture.homeTeam}
             size={LOGO_SIZES.sm}
@@ -73,39 +73,39 @@ export default function ScoreDisplay({
           className={`${getThemeStyles(theme, {
             dark: "text-slate-200",
             light: "text-slate-800",
-          })} font-outfit text-sm mr-2 font-medium`}
+          })} font-outfit text-xs sm:text-sm mr-1.5 sm:mr-2 font-medium truncate max-w-[60px] sm:max-w-none`}
         >
           {fixture.homeTeam}
         </span>
       </div>
 
-      <div className={`flex items-center justify-center ${styles.container}`}>
-        <span className={`${styles.scoreBox} rounded-l-md py-2 px-4 text-2xl font-bold ${styles.homeColor}`}>
+      <div className={`flex items-center justify-center flex-shrink-0 ${styles.container}`}>
+        <span className={`${styles.scoreBox} rounded-l-md py-1.5 sm:py-2 px-3 sm:px-4 text-xl sm:text-2xl font-bold ${styles.homeColor}`}>
           {homeScore}
         </span>
         <span
-          className={`px-2 ${getThemeStyles(theme, {
+          className={`px-1.5 sm:px-2 ${getThemeStyles(theme, {
             dark: "text-slate-400",
             light: "text-slate-600",
           })}`}
         >
           -
         </span>
-        <span className={`${styles.scoreBox} rounded-r-md py-2 px-4 text-2xl font-bold ${styles.awayColor}`}>
+        <span className={`${styles.scoreBox} rounded-r-md py-1.5 sm:py-2 px-3 sm:px-4 text-xl sm:text-2xl font-bold ${styles.awayColor}`}>
           {awayScore}
         </span>
       </div>
 
-      <div className="flex items-center ml-3">
+      <div className="flex items-center ml-1.5 sm:ml-3 min-w-0">
         <span
           className={`${getThemeStyles(theme, {
             dark: "text-slate-200",
             light: "text-slate-800",
-          })} font-outfit text-sm mr-2 font-medium`}
+          })} font-outfit text-xs sm:text-sm mr-1.5 sm:mr-2 font-medium truncate max-w-[60px] sm:max-w-none`}
         >
           {fixture.awayTeam}
         </span>
-        <div className="ml-2">
+        <div className="ml-0 sm:ml-2 flex-shrink-0">
           <TeamLogo
             teamName={fixture.awayTeam}
             size={LOGO_SIZES.sm}
