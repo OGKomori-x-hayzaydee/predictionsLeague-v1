@@ -49,6 +49,12 @@ public class FixtureSchedulerService {
                         log.info("Scheduled {} vs {} at {}.", fixture.getHomeTeam(), fixture.getAwayTeam(), fixture.getDate());
                     }
                 }
+
+                try {
+                    TimeUnit.SECONDS.sleep(100);
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage());
+                }
             }
         }
     }
@@ -80,7 +86,7 @@ public class FixtureSchedulerService {
 
                 watcherHolder[0].cancel(false);
             }
-        }, 0, 1, TimeUnit.MINUTES);
+        }, 0, 3, TimeUnit.MINUTES);
     }
 
     private void startGoalPolling(Fixture fixture) {
