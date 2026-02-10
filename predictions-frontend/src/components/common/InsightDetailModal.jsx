@@ -1,7 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InfoCircledIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { ThemeContext } from '../../context/ThemeContext';
+import { getThemeStyles, text } from '../../utils/themeUtils';
 
 /**
  * Modal to show detailed insights explanation
@@ -9,7 +10,48 @@ import { ThemeContext } from '../../context/ThemeContext';
 const InsightDetailModal = ({ insight, isOpen, onClose }) => {
   const { theme } = useContext(ThemeContext);
 
-  if (!insight || !isOpen) return null;
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const themeStyles = useMemo(() => ({
+    modalBg: getThemeStyles(theme, {
+      dark: 'bg-slate-800 border-slate-700',
+      light: 'bg-white border-slate-200',
+    }),
+    cardBg: getThemeStyles(theme, {
+      dark: 'bg-slate-700/30',
+      light: 'bg-slate-50',
+    }),
+    badge: getThemeStyles(theme, {
+      dark: 'bg-blue-500/20 text-blue-400',
+      light: 'bg-blue-100 text-blue-700',
+    }),
+    closeBtn: getThemeStyles(theme, {
+      dark: 'text-slate-400 hover:text-white hover:bg-slate-700',
+      light: 'text-slate-500 hover:text-slate-900 hover:bg-slate-100',
+    }),
+    actionBtn: getThemeStyles(theme, {
+      dark: 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30',
+      light: 'bg-blue-50 text-blue-600 hover:bg-blue-100',
+    }),
+    icon: getThemeStyles(theme, {
+      dark: 'text-blue-400',
+      light: 'text-blue-600',
+    }),
+    dot: getThemeStyles(theme, {
+      dark: 'bg-blue-400',
+      light: 'bg-blue-500',
+    }),
+    titleText: getThemeStyles(theme, text.primary),
+    secondaryText: getThemeStyles(theme, text.secondary),
+  }), [theme]);
 
   const getInsightTips = (insightType) => {
     const tips = {
@@ -49,13 +91,15 @@ const InsightDetailModal = ({ insight, isOpen, onClose }) => {
         'Consider mixing in some higher-risk, higher-reward predictions'
       ]
     };
-    
+
     return tips[insightType] || [
       'Keep analyzing your prediction patterns',
       'Consistency is key to long-term success',
       'Use insights to improve your prediction strategy'
     ];
   };
+
+  if (!insight || !isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -70,78 +114,52 @@ const InsightDetailModal = ({ insight, isOpen, onClose }) => {
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className={`${
-            theme === 'dark'
-              ? 'bg-slate-800 border-slate-700'
-              : 'bg-white border-slate-200'
-          } rounded-xl border p-3 sm:p-6 max-w-[90vw] sm:max-w-md w-full shadow-xl text-sm sm:text-base`}
+          role="dialog"
+          aria-modal="true"
+          className={`${themeStyles.modalBg} rounded-xl border p-3 sm:p-6 max-w-[90vw] sm:max-w-md w-full shadow-xl text-sm sm:text-base`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-              <InfoCircledIcon className={`w-5 h-5 ${
-                theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
-              }`} />
-              <h3 className={`${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              } font-semibold text-lg font-outfit`}>
+              <InfoCircledIcon className={`w-5 h-5 ${themeStyles.icon}`} />
+              <h3 className={`${themeStyles.titleText} font-semibold text-lg font-outfit`}>
                 Insight Details
               </h3>
             </div>
             <button
               onClick={onClose}
-              className={`p-1 rounded-md transition-colors ${
-                theme === 'dark' 
-                  ? 'text-slate-400 hover:text-white hover:bg-slate-700' 
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-              }`}
+              className={`p-2 rounded-md transition-colors ${themeStyles.closeBtn}`}
             >
               <Cross2Icon className="w-4 h-4" />
             </button>
           </div>
 
           {/* Insight Summary */}
-          <div className={`${
-            theme === 'dark' ? 'bg-slate-700/30' : 'bg-slate-50'
-          } rounded-lg p-4 mb-4`}>
+          <div className={`${themeStyles.cardBg} rounded-lg p-4 mb-4`}>
             <div className="flex items-center justify-between mb-2">
-              <h4 className={`${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              } font-medium font-outfit`}>
+              <h4 className={`${themeStyles.titleText} font-medium font-outfit`}>
                 {insight.title}
               </h4>
-              <span className={`px-2 py-1 rounded-md text-sm font-medium ${
-                theme === 'dark'
-                  ? 'bg-blue-500/20 text-blue-400'
-                  : 'bg-blue-100 text-blue-700'
-              }`}>
+              <span className={`px-2 py-1 rounded-md text-sm font-medium ${themeStyles.badge}`}>
                 {insight.value}
               </span>
             </div>
-            <p className={`${
-              theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-            } text-sm`}>
+            <p className={`${themeStyles.secondaryText} text-sm`}>
               {insight.description}
             </p>
           </div>
 
           {/* Tips & Recommendations */}
           <div>
-            <h4 className={`${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            } font-medium font-outfit mb-3`}>
+            <h4 className={`${themeStyles.titleText} font-medium font-outfit mb-3`}>
               Tips to leverage this insight:
             </h4>
             <ul className="space-y-2">
               {getInsightTips(insight.id).map((tip, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full mt-2 ${
-                    theme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'
-                  } flex-shrink-0`} />
-                  <span className={`${
-                    theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-                  } text-sm`}>
+                  <div className={`w-1.5 h-1.5 rounded-full mt-2 ${themeStyles.dot} flex-shrink-0`} />
+                  <span className={`${themeStyles.secondaryText} text-sm`}>
                     {tip}
                   </span>
                 </li>
@@ -153,11 +171,7 @@ const InsightDetailModal = ({ insight, isOpen, onClose }) => {
           <div className="mt-6 flex justify-end">
             <button
               onClick={onClose}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                theme === 'dark'
-                  ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
-                  : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${themeStyles.actionBtn}`}
             >
               Got it
             </button>
