@@ -26,6 +26,7 @@ import { text } from "../../utils/themeUtils";
 import { spacing, padding } from "../../utils/mobileScaleUtils";
 import leagueAPI from "../../services/api/leagueAPI";
 import ViewToggleBarHybrid from "../ui/ViewToggleBarHybrid";
+import TabNavigation from "../ui/TabNavigation";
 import LeaguePredictionContentView from "../predictions/LeaguePredictionContentView";
 import LeaguePredictionFilters from "../predictions/LeaguePredictionFilters";
 
@@ -37,6 +38,12 @@ const leagueViews = [
   { id: "calendar", icon: CalendarIcon, label: "Calendar", description: "Monthly calendar view" },
   { id: "table", icon: TableIcon, label: "Table View", description: "Detailed table format" },
   { id: "carousel", icon: LayoutIcon, label: "Carousel", description: "Horizontal scrolling" },
+];
+
+// League detail tab options
+const leagueTabs = [
+  { id: "leaderboard", label: "Leaderboard", icon: TargetIcon },
+  { id: "predictions", label: "Predictions", icon: StackIcon },
 ];
 
 // ─── Container Card helper classes ──────────────────────────
@@ -56,6 +63,7 @@ const containerHeader = (theme) =>
 
 const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData }) => {
   const { theme } = useContext(ThemeContext);
+  const [activeTab, setActiveTab] = useState("leaderboard");
 
   if (!league) {
     return (
@@ -241,11 +249,20 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
         </div>
       </motion.div>
 
-      {/* Leaderboard Section */}
-      <LeaderboardSection leagueId={leagueId} formatSafeDate={formatSafeDate} />
+      {/* Tab Navigation */}
+      <TabNavigation
+        tabs={leagueTabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
-      {/* Predictions Section */}
-      <PredictionsSection leagueId={leagueId} essentialData={essentialData} />
+      {/* Tab Content */}
+      {activeTab === "leaderboard" && (
+        <LeaderboardSection leagueId={leagueId} formatSafeDate={formatSafeDate} />
+      )}
+      {activeTab === "predictions" && (
+        <PredictionsSection leagueId={leagueId} essentialData={essentialData} />
+      )}
     </motion.div>
   );
 };
@@ -286,16 +303,6 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
   if (loading) {
     return (
       <div className={containerCard(theme)}>
-        <div className={containerHeader(theme)}>
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600"}`}>
-              <TargetIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
-              Leaderboard
-            </h3>
-          </div>
-        </div>
         <div className="flex justify-center py-12">
           <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
         </div>
@@ -306,16 +313,6 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
   if (error) {
     return (
       <div className={containerCard(theme)}>
-        <div className={containerHeader(theme)}>
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600"}`}>
-              <TargetIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
-              Leaderboard
-            </h3>
-          </div>
-        </div>
         <div className="text-center py-12 px-5">
           <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-2 text-red-500" />
           <p className="font-outfit text-red-500">Failed to load standings</p>
@@ -326,26 +323,16 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
 
   return (
     <div className={containerCard(theme)}>
-      {/* Header subsection */}
-      <div className={containerHeader(theme)}>
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600"}`}>
-            <TargetIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div>
-            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
-              Leaderboard
-            </h3>
-            <p className={`${text.secondary[theme]} text-xs sm:text-sm mt-0.5 font-outfit`}>
-              {standings.length > 0 ? `${standings.length} members competing` : "No rankings yet"}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Content */}
       {standings.length > 0 ? (
         <>
+          {/* Info bar */}
+          <div className={`${padding.cardCompact} border-b ${theme === "dark" ? "border-slate-700/30" : "border-slate-200"}`}>
+            <p className={`${text.muted[theme]} text-xs sm:text-sm font-outfit`}>
+              {standings.length} {standings.length === 1 ? "member" : "members"} competing
+            </p>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -567,39 +554,11 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
     // Could open a detailed modal here if needed
   };
 
-  // Hero header (shared by loading, error, and main states)
-  const heroHeader = (
-    <div className="flex flex-row justify-between items-center gap-3 mb-4 sm:mb-6">
-      <div>
-        <h2
-          className={`${
-            theme === "dark" ? "text-teal-100" : "text-teal-700"
-          } text-xl sm:text-2xl font-bold font-dmSerif mb-0.5`}
-        >
-          League Predictions
-        </h2>
-        <p className={`${text.secondary[theme]} font-outfit text-xs sm:text-sm opacity-70`}>
-          View and compare member predictions
-        </p>
-      </div>
-      {!loading && !error && (
-        <ViewToggleBarHybrid
-          viewMode={selectedViewMode}
-          setViewMode={handleViewModeChange}
-          views={leagueViews}
-        />
-      )}
-    </div>
-  );
-
   if (loading) {
     return (
-      <div>
-        {heroHeader}
-        <div className={containerCard(theme)}>
-          <div className="flex justify-center py-12">
-            <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
-          </div>
+      <div className={containerCard(theme)}>
+        <div className="flex justify-center py-12">
+          <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
         </div>
       </div>
     );
@@ -607,13 +566,10 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
 
   if (error) {
     return (
-      <div>
-        {heroHeader}
-        <div className={containerCard(theme)}>
-          <div className="text-center py-12 px-5">
-            <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-2 text-red-500" />
-            <p className="font-outfit text-red-500">Failed to load predictions</p>
-          </div>
+      <div className={containerCard(theme)}>
+        <div className="text-center py-12 px-5">
+          <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-2 text-red-500" />
+          <p className="font-outfit text-red-500">Failed to load predictions</p>
         </div>
       </div>
     );
@@ -621,8 +577,14 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
 
   return (
     <div>
-      {/* Hero-style header row */}
-      {heroHeader}
+      {/* View toggle row */}
+      <div className="flex justify-end mb-3 sm:mb-4">
+        <ViewToggleBarHybrid
+          viewMode={selectedViewMode}
+          setViewMode={handleViewModeChange}
+          views={leagueViews}
+        />
+      </div>
 
       {/* Container card with filters + content */}
       <div className={containerCard(theme)}>
