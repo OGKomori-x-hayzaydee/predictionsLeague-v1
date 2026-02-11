@@ -3,8 +3,8 @@ import PredictionsByMember from "./PredictionsByMember";
 import PredictionGrid from "./PredictionGrid";
 import PredictionCarousel from "./PredictionCarousel";
 import PredictionTable from "./PredictionTable";
-import LeaguePredictionsStack from "./LeaguePredictionsStack";
-import LeaguePredictionsCalendar from "./LeaguePredictionsCalendar";
+import PredictionStack from "./PredictionStack";
+import PredictionCalendar from "./PredictionCalendar";
 
 const LeaguePredictionContentView = ({ 
   viewMode, 
@@ -109,11 +109,14 @@ const LeaguePredictionContentView = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <LeaguePredictionsStack
+          <PredictionStack
             predictions={filteredPredictions}
             onPredictionSelect={onPredictionSelect}
             searchQuery={searchQuery}
             cardStyle={cardStyle}
+            mode="league"
+            showMemberInfo={true}
+            isReadonly={true}
           />
         </motion.div>
       )}
@@ -127,11 +130,14 @@ const LeaguePredictionContentView = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <LeaguePredictionsCalendar
+          <PredictionCalendar
             predictions={filteredPredictions}
             onPredictionSelect={onPredictionSelect}
             searchQuery={searchQuery}
             cardStyle={cardStyle}
+            mode="league"
+            showMemberInfo={true}
+            isReadonly={true}
           />
         </motion.div>
       )}
