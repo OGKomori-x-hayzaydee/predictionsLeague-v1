@@ -108,7 +108,7 @@ const PredictionStack = ({
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!swiperRef.current?.swiper) return;
+      if (!swiperRef.current) return;
 
       let newIndex = activeIndex;
 
@@ -121,7 +121,7 @@ const PredictionStack = ({
       }
 
       if (newIndex !== activeIndex) {
-        swiperRef.current.swiper.slideTo(newIndex);
+        swiperRef.current.slideTo(newIndex);
       }
     };
 
@@ -195,7 +195,7 @@ const PredictionStack = ({
             {/* Arrow navigation + counter row */}
             <div className="flex justify-center items-center gap-4">
               <button
-                onClick={() => swiperRef.current?.swiper?.slidePrev()}
+                onClick={() => swiperRef.current?.slidePrev()}
                 disabled={activeIndex === 0}
                 className={`p-2 rounded-full transition-all ${
                   activeIndex === 0
@@ -220,7 +220,7 @@ const PredictionStack = ({
               </div>
 
               <button
-                onClick={() => swiperRef.current?.swiper?.slideNext()}
+                onClick={() => swiperRef.current?.slideNext()}
                 disabled={activeIndex >= filteredPredictions.length - 1}
                 className={`p-2 rounded-full transition-all ${
                   activeIndex >= filteredPredictions.length - 1
