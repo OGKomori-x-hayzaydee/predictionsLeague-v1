@@ -7,7 +7,6 @@ import {
   PersonIcon,
   CalendarIcon,
   TableIcon,
-  LayoutIcon,
   ChevronDownIcon,
   Cross2Icon,
 } from "@radix-ui/react-icons";
@@ -34,7 +33,6 @@ const ViewToggleBarHybrid = ({ viewMode, setViewMode, views: customViews }) => {
     { id: "teams", icon: PersonIcon, label: "By Team", description: "Grouped by team" },
     { id: "calendar", icon: CalendarIcon, label: "Calendar", description: "Monthly calendar view" },
     { id: "table", icon: TableIcon, label: "Table View", description: "Detailed table format" },
-    { id: "carousel", icon: LayoutIcon, label: "Carousel", description: "Horizontal scrolling" },
   ];
 
   const views = customViews || defaultViews;

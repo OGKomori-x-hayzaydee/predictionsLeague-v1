@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from "framer-motion";
-import FixtureCarousel from "./FixtureCarousel";
 import FixtureGrid from "./FixtureGrid";
 import FixtureCalendar from "./FixtureCalendar";
 import FixturesByTeam from "./FixturesByTeam";
@@ -15,23 +14,6 @@ const ContentView = ({
 }) => {
   return (
     <AnimatePresence mode="wait">
-      {viewMode === "carousel" && (
-        <motion.div
-          key="carousel"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <FixtureCarousel
-            fixtures={fixtures}
-            onFixtureSelect={onFixtureSelect}
-            activeGameweekChips={activeGameweekChips}
-            searchQuery={searchQuery}
-          />
-        </motion.div>
-      )}
-
       {viewMode === "teams" && (
         <motion.div
           key="teams"

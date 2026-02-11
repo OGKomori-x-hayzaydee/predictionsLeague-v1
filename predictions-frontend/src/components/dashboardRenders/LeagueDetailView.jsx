@@ -16,7 +16,6 @@ import {
   ChevronUpIcon,
   ListBulletIcon,
   TableIcon,
-  LayoutIcon,
 } from "@radix-ui/react-icons";
 
 import { showToast } from "../../services/notificationService";
@@ -36,7 +35,6 @@ const leagueViews = [
   { id: "teams", icon: PersonIcon, label: "By Member", description: "Grouped by member" },
   { id: "calendar", icon: CalendarIcon, label: "Calendar", description: "Monthly calendar view" },
   { id: "table", icon: TableIcon, label: "Table View", description: "Detailed table format" },
-  { id: "carousel", icon: LayoutIcon, label: "Carousel", description: "Horizontal scrolling" },
 ];
 
 // League detail tab options

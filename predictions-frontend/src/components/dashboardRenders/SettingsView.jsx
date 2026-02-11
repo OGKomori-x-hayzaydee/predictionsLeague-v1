@@ -319,7 +319,6 @@ const SettingsView = ({ navigateToSection }) => {
                 updatePreference("defaultFixturesView", e.target.value)
               }
               options={[
-                { value: "carousel", label: "Carousel View" },
                 { value: "teams", label: "By Teams" },
                 { value: "stack", label: "Stack View" },
                 { value: "calendar", label: "Calendar View" },
@@ -338,7 +337,6 @@ const SettingsView = ({ navigateToSection }) => {
                 { value: "table", label: "Table View" },
                 { value: "calendar", label: "Calendar View" },
                 { value: "stack", label: "Stack View" },
-                { value: "carousel", label: "Carousel View" },
                 { value: "teams", label: "By Teams" },
               ]}
             />
@@ -357,7 +355,6 @@ const SettingsView = ({ navigateToSection }) => {
                 { value: "table", label: "Table View" },
                 { value: "stack", label: "Stack View" },
                 { value: "calendar", label: "Calendar View" },
-                { value: "carousel", label: "Carousel View" },
               ]}
             />
           </div>
