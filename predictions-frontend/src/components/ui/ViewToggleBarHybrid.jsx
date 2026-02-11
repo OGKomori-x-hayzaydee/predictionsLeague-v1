@@ -17,12 +17,12 @@ import { ThemeContext } from "../../context/ThemeContext";
  * Mobile (< md): Bottom Sheet (Option 2) - Modern, touch-friendly
  * Desktop (>= md): Minimalist Dropdown (Option 3) - Compact, efficient
  */
-const ViewToggleBarHybrid = ({ viewMode, setViewMode }) => {
+const ViewToggleBarHybrid = ({ viewMode, setViewMode, views: customViews }) => {
   const { theme } = useContext(ThemeContext);
   const [showSheet, setShowSheet] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const views = [
+  const defaultViews = [
     { id: "stack", icon: StackIcon, label: "Stack View", description: "Swipeable cards by date" },
     { id: "list", icon: ListBulletIcon, label: "Grid View", description: "Compact grid layout" },
     { id: "teams", icon: PersonIcon, label: "By Team", description: "Grouped by team" },
@@ -31,6 +31,7 @@ const ViewToggleBarHybrid = ({ viewMode, setViewMode }) => {
     { id: "carousel", icon: LayoutIcon, label: "Carousel", description: "Horizontal scrolling" },
   ];
 
+  const views = customViews || defaultViews;
   const currentView = views.find(v => v.id === viewMode);
   const CurrentIcon = currentView?.icon;
 

@@ -14,61 +14,45 @@ import {
   CopyIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ListBulletIcon,
+  TableIcon,
+  LayoutIcon,
 } from "@radix-ui/react-icons";
 
 import { showToast } from "../../services/notificationService";
 import { ThemeContext } from "../../context/ThemeContext";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { text } from "../../utils/themeUtils";
+import { spacing, padding } from "../../utils/mobileScaleUtils";
 import leagueAPI from "../../services/api/leagueAPI";
-import LeaguePredictionViewToggleBar from "../predictions/LeaguePredictionViewToggleBar";
+import ViewToggleBarHybrid from "../ui/ViewToggleBarHybrid";
 import LeaguePredictionContentView from "../predictions/LeaguePredictionContentView";
 import LeaguePredictionFilters from "../predictions/LeaguePredictionFilters";
 
-// ─── Section Card ───────────────────────────────────────────
-const SectionCard = ({ title, description, icon: Icon, children, accentColor = "teal" }) => {
-  const { theme } = useContext(ThemeContext);
+// League-specific view options (uses "By Member" instead of "By Team")
+const leagueViews = [
+  { id: "stack", icon: StackIcon, label: "Stack View", description: "Swipeable cards by date" },
+  { id: "list", icon: ListBulletIcon, label: "Grid View", description: "Compact grid layout" },
+  { id: "teams", icon: PersonIcon, label: "By Member", description: "Grouped by member" },
+  { id: "calendar", icon: CalendarIcon, label: "Calendar", description: "Monthly calendar view" },
+  { id: "table", icon: TableIcon, label: "Table View", description: "Detailed table format" },
+  { id: "carousel", icon: LayoutIcon, label: "Carousel", description: "Horizontal scrolling" },
+];
 
-  const iconColors = {
-    teal: theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600",
-    indigo: theme === "dark" ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-50 text-indigo-600",
-    amber: theme === "dark" ? "bg-amber-500/10 text-amber-400" : "bg-amber-50 text-amber-600",
-  };
+// ─── Container Card helper classes ──────────────────────────
+const containerCard = (theme) =>
+  `${
+    theme === "dark"
+      ? "backdrop-blur-xl border-slate-700/50 bg-slate-900/60 shadow-xl shadow-slate-950/50"
+      : "border-slate-200 bg-white/80 backdrop-blur-sm shadow-lg shadow-slate-900/5"
+  } rounded-xl border overflow-hidden font-outfit`;
 
-  return (
-    <motion.div
-      className={`backdrop-blur-sm rounded-xl border transition-all duration-200 ${
-        theme === "dark"
-          ? "border-slate-700/50 bg-slate-800/40"
-          : "border-slate-200 bg-white shadow-sm"
-      }`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      {(title || Icon) && (
-        <div className={`flex items-center gap-3 p-5 sm:p-6 pb-0`}>
-          {Icon && (
-            <div className={`p-2 rounded-lg ${iconColors[accentColor] || iconColors.teal}`}>
-              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-          )}
-          <div>
-            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
-              {title}
-            </h3>
-            {description && (
-              <p className={`${text.secondary[theme]} text-xs sm:text-sm mt-0.5 font-outfit`}>
-                {description}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-      {children}
-    </motion.div>
-  );
-};
+const containerHeader = (theme) =>
+  `${
+    theme === "dark"
+      ? "bg-slate-800/30 border-b border-slate-700/30"
+      : "bg-slate-50/50 border-b border-slate-200/50"
+  } ${padding.cardCompact}`;
 
 const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData }) => {
   const { theme } = useContext(ThemeContext);
@@ -112,7 +96,7 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className={spacing.normal}
     >
       {/* Back Navigation */}
       <motion.div
@@ -166,13 +150,13 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
               : "bg-gradient-to-br from-teal-500/5 to-indigo-500/5"
           }`}
         />
-        <div className="relative p-8">
+        <div className="relative p-4 sm:p-6 md:p-8">
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className={`text-2xl lg:text-3xl font-bold ${text.primary[theme]} font-dmSerif`}>
+                    <h1 className={`text-2xl sm:text-3xl font-bold ${text.primary[theme]} font-dmSerif`}>
                       {league.name}
                     </h1>
                     {league.isAdmin && (
@@ -187,12 +171,12 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
                       </span>
                     )}
                   </div>
-                  <p className={`${text.secondary[theme]} max-w-2xl leading-relaxed font-outfit`}>
+                  <p className={`${text.secondary[theme]} max-w-2xl leading-relaxed font-outfit text-sm sm:text-base`}>
                     {league.description}
                   </p>
-                  <div className={`flex flex-wrap items-center gap-4 mt-3 text-sm ${text.muted[theme]} font-outfit`}>
+                  <div className={`flex flex-wrap items-center gap-3 sm:gap-4 mt-3 text-xs sm:text-sm ${text.muted[theme]} font-outfit`}>
                     <div className="flex items-center gap-1">
-                      <CalendarIcon className="w-4 h-4" />
+                      <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span>Created {formatSafeDate(league.createdAt, "MMM d, yyyy")}</span>
                     </div>
                     <span className={`w-1 h-1 ${theme === "dark" ? "bg-slate-500" : "bg-slate-400"} rounded-full`} />
@@ -213,7 +197,7 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
                             }`}
                             title="Copy join code"
                           >
-                            <CopyIcon className="w-4 h-4" />
+                            <CopyIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
                         </div>
                       </>
@@ -224,11 +208,11 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-4 lg:gap-6 shrink-0">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 shrink-0">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <PersonIcon className={`w-4 h-4 ${text.muted[theme]}`} />
-                  <span className={`text-2xl font-bold ${text.primary[theme]} font-outfit`}>
+                  <span className={`text-xl sm:text-2xl font-bold ${text.primary[theme]} font-outfit`}>
                     {league.members}
                   </span>
                 </div>
@@ -237,7 +221,7 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <BarChartIcon className={`w-4 h-4 ${text.muted[theme]}`} />
-                  <span className={`text-2xl font-bold ${text.primary[theme]} font-outfit`}>
+                  <span className={`text-xl sm:text-2xl font-bold ${text.primary[theme]} font-outfit`}>
                     #{league.position}
                   </span>
                 </div>
@@ -246,7 +230,7 @@ const LeagueDetailView = ({ leagueId, league, onBack, onManage, essentialData })
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <StarIcon className={`w-4 h-4 ${text.muted[theme]}`} />
-                  <span className={`text-2xl font-bold ${text.primary[theme]} font-outfit`}>
+                  <span className={`text-xl sm:text-2xl font-bold ${text.primary[theme]} font-outfit`}>
                     {league.points}
                   </span>
                 </div>
@@ -301,43 +285,76 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
 
   if (loading) {
     return (
-      <SectionCard title="Leaderboard" icon={TargetIcon} accentColor="teal">
+      <div className={containerCard(theme)}>
+        <div className={containerHeader(theme)}>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600"}`}>
+              <TargetIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
+              Leaderboard
+            </h3>
+          </div>
+        </div>
         <div className="flex justify-center py-12">
           <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
         </div>
-      </SectionCard>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <SectionCard title="Leaderboard" icon={TargetIcon} accentColor="teal">
+      <div className={containerCard(theme)}>
+        <div className={containerHeader(theme)}>
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600"}`}>
+              <TargetIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
+              Leaderboard
+            </h3>
+          </div>
+        </div>
         <div className="text-center py-12 px-5">
-          <ExclamationTriangleIcon className={`w-12 h-12 mx-auto mb-2 text-red-500`} />
+          <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-2 text-red-500" />
           <p className="font-outfit text-red-500">Failed to load standings</p>
         </div>
-      </SectionCard>
+      </div>
     );
   }
 
   return (
-    <SectionCard
-      title="Leaderboard"
-      description={standings.length > 0 ? `${standings.length} members competing` : "No rankings yet"}
-      icon={TargetIcon}
-      accentColor="teal"
-    >
+    <div className={containerCard(theme)}>
+      {/* Header subsection */}
+      <div className={containerHeader(theme)}>
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${theme === "dark" ? "bg-teal-500/10 text-teal-400" : "bg-teal-50 text-teal-600"}`}>
+            <TargetIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+          <div>
+            <h3 className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}>
+              Leaderboard
+            </h3>
+            <p className={`${text.secondary[theme]} text-xs sm:text-sm mt-0.5 font-outfit`}>
+              {standings.length > 0 ? `${standings.length} members competing` : "No rankings yet"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
       {standings.length > 0 ? (
         <>
-          <div className="overflow-x-auto mt-4">
+          <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className={`border-b ${theme === "dark" ? "border-slate-700/30" : "border-slate-200"}`}>
-                  <th className={`px-5 sm:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]}`}>Rank</th>
-                  <th className={`px-5 sm:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]}`}>Player</th>
-                  <th className={`px-5 sm:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]} hidden sm:table-cell`}>Joined</th>
-                  <th className={`px-5 sm:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]} hidden sm:table-cell`}>Predictions</th>
-                  <th className={`px-5 sm:px-6 py-3 text-right text-sm font-medium font-outfit ${text.muted[theme]}`}>Points</th>
+                  <th className={`px-3 sm:px-5 md:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]}`}>Rank</th>
+                  <th className={`px-3 sm:px-5 md:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]}`}>Player</th>
+                  <th className={`px-3 sm:px-5 md:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]} hidden sm:table-cell`}>Joined</th>
+                  <th className={`px-3 sm:px-5 md:px-6 py-3 text-left text-sm font-medium font-outfit ${text.muted[theme]} hidden sm:table-cell`}>Predictions</th>
+                  <th className={`px-3 sm:px-5 md:px-6 py-3 text-right text-sm font-medium font-outfit ${text.muted[theme]}`}>Points</th>
                 </tr>
               </thead>
               <tbody className={`divide-y ${theme === "dark" ? "divide-slate-700/20" : "divide-slate-200"}`}>
@@ -357,7 +374,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
                         : "hover:bg-slate-50"
                     } transition-colors ${player.isCurrentUser ? 'border-l-2' : ''}`}
                   >
-                    <td className="px-5 sm:px-6 py-4">
+                    <td className="px-3 sm:px-5 md:px-6 py-4">
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold font-outfit ${
                           index === 0
@@ -374,7 +391,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
                         #{index + 1}
                       </div>
                     </td>
-                    <td className="px-5 sm:px-6 py-4">
+                    <td className="px-3 sm:px-5 md:px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                           {player.displayName.charAt(0)}
@@ -389,7 +406,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
                         </div>
                       </div>
                     </td>
-                    <td className={`px-5 sm:px-6 py-4 text-sm ${text.secondary[theme]} hidden sm:table-cell`}>
+                    <td className={`px-3 sm:px-5 md:px-6 py-4 text-sm ${text.secondary[theme]} hidden sm:table-cell`}>
                       <div className="flex items-center gap-2">
                         <CalendarIcon className={`w-4 h-4 ${text.muted[theme]}`} />
                         <span className="font-outfit">
@@ -397,7 +414,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 sm:px-6 py-4 hidden sm:table-cell">
+                    <td className="px-3 sm:px-5 md:px-6 py-4 hidden sm:table-cell">
                       <div className={`${text.primary[theme]} font-medium font-outfit`}>
                         {player.predictions || 0}
                       </div>
@@ -405,7 +422,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
                         predictions made
                       </div>
                     </td>
-                    <td className="px-5 sm:px-6 py-4 text-right">
+                    <td className="px-3 sm:px-5 md:px-6 py-4 text-right">
                       <div className={`text-lg font-bold ${text.primary[theme]} font-outfit`}>
                         {player.points}
                       </div>
@@ -421,7 +438,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
 
           {/* Show all / collapse toggle */}
           {hasMore && (
-            <div className={`p-4 border-t ${theme === "dark" ? "border-slate-700/30" : "border-slate-200"}`}>
+            <div className={`${padding.cardCompact} border-t ${theme === "dark" ? "border-slate-700/30" : "border-slate-200"}`}>
               <button
                 onClick={() => setShowAll(!showAll)}
                 className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium font-outfit transition-colors ${
@@ -446,7 +463,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
           )}
         </>
       ) : (
-        <div className="text-center py-12 px-5">
+        <div className={`${padding.cardCompact} text-center py-12`}>
           <TargetIcon className={`w-12 h-12 ${text.muted[theme]} mx-auto mb-4`} />
           <h3 className={`text-lg font-semibold ${text.primary[theme]} mb-2 font-outfit`}>
             No Rankings Yet
@@ -456,7 +473,7 @@ const LeaderboardSection = ({ leagueId, formatSafeDate }) => {
           </p>
         </div>
       )}
-    </SectionCard>
+    </div>
   );
 };
 
@@ -481,7 +498,7 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
   const [gameweekFilter, setGameweekFilter] = useState("current");
   const [memberFilter, setMemberFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -550,79 +567,104 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
     // Could open a detailed modal here if needed
   };
 
+  // Hero header (shared by loading, error, and main states)
+  const heroHeader = (
+    <div className="flex flex-row justify-between items-center gap-3 mb-4 sm:mb-6">
+      <div>
+        <h2
+          className={`${
+            theme === "dark" ? "text-teal-100" : "text-teal-700"
+          } text-xl sm:text-2xl font-bold font-dmSerif mb-0.5`}
+        >
+          League Predictions
+        </h2>
+        <p className={`${text.secondary[theme]} font-outfit text-xs sm:text-sm opacity-70`}>
+          View and compare member predictions
+        </p>
+      </div>
+      {!loading && !error && (
+        <ViewToggleBarHybrid
+          viewMode={selectedViewMode}
+          setViewMode={handleViewModeChange}
+          views={leagueViews}
+        />
+      )}
+    </div>
+  );
+
   if (loading) {
     return (
-      <SectionCard title="League Predictions" icon={StackIcon} accentColor="indigo">
-        <div className="flex justify-center py-12">
-          <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
+      <div>
+        {heroHeader}
+        <div className={containerCard(theme)}>
+          <div className="flex justify-center py-12">
+            <div className={`w-8 h-8 border-2 ${theme === 'dark' ? 'border-teal-400' : 'border-teal-600'} border-t-transparent rounded-full animate-spin`}></div>
+          </div>
         </div>
-      </SectionCard>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <SectionCard title="League Predictions" icon={StackIcon} accentColor="indigo">
-        <div className="text-center py-12 px-5">
-          <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-2 text-red-500" />
-          <p className="font-outfit text-red-500">Failed to load predictions</p>
+      <div>
+        {heroHeader}
+        <div className={containerCard(theme)}>
+          <div className="text-center py-12 px-5">
+            <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-2 text-red-500" />
+            <p className="font-outfit text-red-500">Failed to load predictions</p>
+          </div>
         </div>
-      </SectionCard>
+      </div>
     );
   }
 
   return (
-    <SectionCard
-      title="League Predictions"
-      description="View and compare member predictions for this league"
-      icon={StackIcon}
-      accentColor="indigo"
-    >
-      {/* View Toggle Bar */}
-      <div className={`px-5 sm:px-6 pt-4 flex justify-end`}>
-        <LeaguePredictionViewToggleBar
-          viewMode={selectedViewMode}
-          setViewMode={handleViewModeChange}
-        />
-      </div>
+    <div>
+      {/* Hero-style header row */}
+      {heroHeader}
 
-      {/* Filters and Content */}
-      <div className="p-5 sm:p-6 pt-4 font-outfit">
-        <LeaguePredictionFilters
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          gameweekFilter={gameweekFilter}
-          setGameweekFilter={setGameweekFilter}
-          memberFilter={memberFilter}
-          setMemberFilter={setMemberFilter}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          cardStyle={cardStyle}
-          setCardStyle={setCardStyle}
-          predictions={predictions}
-          currentGameweek={currentGameweek}
-        />
+      {/* Container card with filters + content */}
+      <div className={containerCard(theme)}>
+        {/* Filters subsection - de-emphasized */}
+        <div className={containerHeader(theme)}>
+          <LeaguePredictionFilters
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            gameweekFilter={gameweekFilter}
+            setGameweekFilter={setGameweekFilter}
+            memberFilter={memberFilter}
+            setMemberFilter={setMemberFilter}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            cardStyle={cardStyle}
+            setCardStyle={setCardStyle}
+            predictions={predictions}
+            currentGameweek={currentGameweek}
+          />
+        </div>
 
-        {sortedPredictions.length === 0 ? (
-          <div className="text-center py-12">
-            <TargetIcon className={`w-12 h-12 ${text.muted[theme]} mx-auto mb-4`} />
-            <h3 className={`text-lg font-semibold ${text.primary[theme]} mb-2 font-outfit`}>
-              No Predictions Found
-            </h3>
-            <p className={`${text.secondary[theme]} font-outfit`}>
-              {activeFilter !== "all" || searchQuery || memberFilter !== "all"
-                ? "Try adjusting your filters to see more predictions."
-                : predictions.length === 0
-                ? `No predictions have been made for Gameweek ${gameweekFilter === "current" ? currentGameweek : gameweekFilter} yet.`
-                : "League members will appear here once they start making predictions."}
-            </p>
-          </div>
-        ) : (
-          <div className="mt-6">
+        {/* Content area */}
+        <div className={padding.cardCompact}>
+          {sortedPredictions.length === 0 ? (
+            <div className="text-center py-12">
+              <TargetIcon className={`w-12 h-12 ${text.muted[theme]} mx-auto mb-4`} />
+              <h3 className={`text-lg font-semibold ${text.primary[theme]} mb-2 font-outfit`}>
+                No Predictions Found
+              </h3>
+              <p className={`${text.secondary[theme]} font-outfit`}>
+                {activeFilter !== "all" || searchQuery || memberFilter !== "all"
+                  ? "Try adjusting your filters to see more predictions."
+                  : predictions.length === 0
+                  ? `No predictions have been made for Gameweek ${gameweekFilter === "current" ? currentGameweek : gameweekFilter} yet.`
+                  : "League members will appear here once they start making predictions."}
+              </p>
+            </div>
+          ) : (
             <LeaguePredictionContentView
               viewMode={selectedViewMode}
               predictions={sortedPredictions}
@@ -631,10 +673,10 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
               searchQuery={searchQuery}
               cardStyle={cardStyle}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </SectionCard>
+    </div>
   );
 };
 
