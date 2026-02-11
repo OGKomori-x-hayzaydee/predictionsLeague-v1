@@ -5,6 +5,7 @@ import { ThemeContext } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { text } from "../../utils/themeUtils";
+import { spacing } from "../../utils/mobileScaleUtils";
 import { ToggleButton } from "../ui/buttons";
 import {
   BellIcon,
@@ -226,17 +227,17 @@ const SettingsView = ({ navigateToSection }) => {
   // ─── Render ────────────────────────────────────────────────
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className={`max-w-3xl mx-auto ${spacing.normal}`}>
       {/* Header */}
       <div>
         <h1
           className={`${
             theme === "dark" ? "text-teal-100" : "text-teal-700"
-          } text-3xl font-bold font-dmSerif`}
+          } text-2xl sm:text-3xl font-bold font-dmSerif mb-0.5`}
         >
           Settings
         </h1>
-        <p className={`${text.secondary[theme]} font-outfit mt-2`}>
+        <p className={`${text.secondary[theme]} font-outfit text-xs sm:text-sm opacity-70`}>
           Customize your experience and manage preferences
         </p>
       </div>
