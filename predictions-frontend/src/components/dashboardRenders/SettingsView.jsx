@@ -1,6 +1,8 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { text } from "../../utils/themeUtils";
 import { ToggleButton } from "../ui/buttons";
@@ -17,12 +19,15 @@ import {
   MixerHorizontalIcon,
   EnvelopeClosedIcon,
   PersonIcon,
+  ExitIcon,
 } from "@radix-ui/react-icons";
 import RulesAndPointsModal from "../common/RulesAndPointsModal";
 import ChipStrategyModal from "../predictions/ChipStrategyModal";
 
 const SettingsView = ({ navigateToSection }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const {
     preferences,
     updatePreference,
@@ -38,6 +43,16 @@ const SettingsView = ({ navigateToSection }) => {
   const showSuccessMessage = (message) => {
     setShowSuccess(message);
     setTimeout(() => setShowSuccess(""), 3000);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      navigate("/");
+    }
   };
 
   const handleResetPreferences = () => {
@@ -467,6 +482,25 @@ const SettingsView = ({ navigateToSection }) => {
           Reset All
         </motion.button>
       </motion.div>
+
+      {/* ═══ Sign Out ═══ */}
+      <div
+        className={`mt-2 pt-6 border-t ${
+          theme === "dark" ? "border-slate-700/30" : "border-slate-200/60"
+        }`}
+      >
+        <button
+          onClick={handleLogout}
+          className={`flex items-center gap-3 px-1 py-2 rounded-lg transition-colors font-outfit text-sm font-medium ${
+            theme === "dark"
+              ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              : "text-red-500 hover:text-red-600 hover:bg-red-50"
+          }`}
+        >
+          <ExitIcon className="w-4 h-4" />
+          <span>Sign Out</span>
+        </button>
+      </div>
 
       {/* Modals */}
       <RulesAndPointsModal

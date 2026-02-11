@@ -164,6 +164,7 @@ export default function Home() {
             nextMatchData={statusBarData.nextMatchData}
             loading={statusBarLoading}
             onMakePredictions={() => navigateToSection("fixtures")}
+            onProfileClick={() => navigateToSection("profile")}
           />
           {/* Breadcrumb & Search Bar */}
           <div
