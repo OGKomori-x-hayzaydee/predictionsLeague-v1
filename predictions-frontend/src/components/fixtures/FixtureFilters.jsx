@@ -7,7 +7,8 @@ import {
   ChevronDownIcon,
 } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
-import { text, backgrounds } from "../../utils/themeUtils";
+import { text } from "../../utils/themeUtils";
+import ViewToggleBarHybrid from "../ui/ViewToggleBarHybrid";
 
 const FixtureFilters = ({
   activeFilter,
@@ -22,7 +23,9 @@ const FixtureFilters = ({
   setShowFilters,
   filterTeam,
   setFilterTeam,
-  fixtures = [], // Add fixtures prop to calculate counts
+  fixtures = [],
+  viewMode,
+  setViewMode,
 }) => {
   const { theme } = useContext(ThemeContext);
   const [showSearchOnMobile, setShowSearchOnMobile] = useState(false);
@@ -174,6 +177,11 @@ const FixtureFilters = ({
                     </span>
                   </button>
                 ))}
+              </div>
+
+              {/* View Selector */}
+              <div className="flex items-center gap-2 mb-3">
+                <ViewToggleBarHybrid viewMode={viewMode} setViewMode={setViewMode} />
               </div>
 
               {/* Advanced Filters Toggle */}
@@ -354,6 +362,11 @@ const FixtureFilters = ({
                 </span>
               </button>
             ))}
+          </div>
+
+          {/* View Selector */}
+          <div className="flex items-center">
+            <ViewToggleBarHybrid viewMode={viewMode} setViewMode={setViewMode} />
           </div>
         </div>
 

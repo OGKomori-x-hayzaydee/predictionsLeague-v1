@@ -25,7 +25,6 @@ import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { text } from "../../utils/themeUtils";
 import { spacing, padding } from "../../utils/mobileScaleUtils";
 import leagueAPI from "../../services/api/leagueAPI";
-import ViewToggleBarHybrid from "../ui/ViewToggleBarHybrid";
 import TabNavigation from "../ui/TabNavigation";
 import LeaguePredictionContentView from "../predictions/LeaguePredictionContentView";
 import LeaguePredictionFilters from "../predictions/LeaguePredictionFilters";
@@ -477,7 +476,6 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
   const [selectedViewMode, setSelectedViewMode] = useState(
     preferences?.defaultLeaguePredictionsView || 'teams'
   );
-  const [cardStyle, setCardStyle] = useState(preferences?.cardStyle || 'normal');
 
   // Filter states
   const [activeFilter, setActiveFilter] = useState("all");
@@ -577,15 +575,6 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
 
   return (
     <div>
-      {/* View toggle row */}
-      <div className="flex justify-end mb-3 sm:mb-4">
-        <ViewToggleBarHybrid
-          viewMode={selectedViewMode}
-          setViewMode={handleViewModeChange}
-          views={leagueViews}
-        />
-      </div>
-
       {/* Container card with filters + content */}
       <div className={containerCard(theme)}>
         {/* Filters subsection - de-emphasized */}
@@ -603,8 +592,9 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
             setSortBy={setSortBy}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            cardStyle={cardStyle}
-            setCardStyle={setCardStyle}
+            viewMode={selectedViewMode}
+            setViewMode={handleViewModeChange}
+            views={leagueViews}
             predictions={predictions}
             currentGameweek={currentGameweek}
           />
@@ -633,7 +623,6 @@ const PredictionsSection = ({ leagueId, essentialData }) => {
               currentGameweek={currentGameweek}
               onPredictionSelect={handlePredictionSelect}
               searchQuery={searchQuery}
-              cardStyle={cardStyle}
             />
           )}
         </div>
