@@ -40,13 +40,13 @@ const ViewToggleBarHybrid = ({ viewMode, setViewMode, views: customViews }) => {
       {/* Mobile: Bottom Sheet Button */}
       <button
         onClick={() => setShowSheet(true)}
-        className={`md:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all text-xs font-medium ${
+        className={`md:hidden flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-all text-sm font-medium ${
           theme === "dark"
             ? "bg-slate-800/30 border-slate-700/50 text-slate-400 hover:bg-slate-800/50 hover:text-slate-300"
             : "bg-slate-50/50 border-slate-200/50 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
         }`}
       >
-        {CurrentIcon && <CurrentIcon className="w-3.5 h-3.5" />}
+        {CurrentIcon && <CurrentIcon className="w-4 h-4" />}
         <span className="hidden sm:inline">View:</span>
         <span>{currentView?.label || "Stack"}</span>
       </button>
@@ -55,15 +55,15 @@ const ViewToggleBarHybrid = ({ viewMode, setViewMode, views: customViews }) => {
       <div className="hidden md:block relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-colors text-xs font-medium ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-colors text-sm font-medium ${
             theme === "dark"
               ? "bg-slate-800/30 border-slate-700/50 text-slate-400 hover:bg-slate-800/50 hover:text-slate-300"
               : "bg-slate-50/50 border-slate-200/50 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
           }`}
         >
-          {CurrentIcon && <CurrentIcon className="w-3.5 h-3.5" />}
+          {CurrentIcon && <CurrentIcon className="w-4 h-4" />}
           <span>{currentView?.label}</span>
-          <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+          <ChevronDownIcon className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Desktop Dropdown menu */}
