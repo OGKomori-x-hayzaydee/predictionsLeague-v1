@@ -7,7 +7,7 @@ import "swiper/css";
 import "swiper/css/effect-cards";
 // Import required modules
 import { EffectCards } from "swiper/modules";
-import { ChevronUpIcon, ChevronDownIcon } from "@radix-ui/react-icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 
 import PredictionCard from "./PredictionCard";
 import EmptyState from "../common/EmptyState";
@@ -19,7 +19,10 @@ const PredictionStack = ({
   onEditClick,
   teamLogos,
   searchQuery = "",
-  cardStyle = "normal"
+  cardStyle = "normal",
+  mode = "personal",
+  showMemberInfo = false,
+  isReadonly = false
 }) => {
   const [selectedPrediction, setSelectedPrediction] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -35,6 +38,16 @@ const PredictionStack = ({
       if (!searchQuery) return true;
 
       const query = searchQuery.toLowerCase();
+
+      if (mode === "league") {
+        return (
+          prediction.userDisplayName?.toLowerCase().includes(query) ||
+          prediction.homeTeam.toLowerCase().includes(query) ||
+          prediction.awayTeam.toLowerCase().includes(query) ||
+          `${prediction.homeTeam} vs ${prediction.awayTeam}`.toLowerCase().includes(query)
+        );
+      }
+
       return (
         prediction.homeTeam.toLowerCase().includes(query) ||
         prediction.awayTeam.toLowerCase().includes(query) ||
@@ -42,7 +55,7 @@ const PredictionStack = ({
         prediction.competition?.toLowerCase().includes(query)
       );
     });
-  }, [predictions, searchQuery]);
+  }, [predictions, searchQuery, mode]);
 
   // Initialize to today's first prediction or closest upcoming
   const initializationDone = useRef(false);
@@ -78,7 +91,7 @@ const PredictionStack = ({
   // Slide change handler
   const handleSlideChange = (swiper) => {
     if (!swiper || typeof swiper.activeIndex !== "number") return;
-    
+
     if (swiper.activeIndex !== activeIndex && swiper.activeIndex < filteredPredictions.length) {
       setActiveIndex(swiper.activeIndex);
     }
@@ -126,6 +139,7 @@ const PredictionStack = ({
       setActiveIndex(0);
     }
   }, [filteredPredictions.length, activeIndex]);
+
   return (
     <>
       {filteredPredictions.length === 0 ? (
@@ -134,21 +148,6 @@ const PredictionStack = ({
         <>
           {/* Stack of individual prediction cards using Swiper */}
           <div className="relative">
-            {/* Previous Card Button */}
-            {activeIndex > 0 && (
-              <button
-                onClick={() => swiperRef.current?.swiper.slidePrev()}
-                className={`absolute left-1/2 -translate-x-1/2 -top-2 z-10 p-2 rounded-full transition-all ${
-                  theme === "dark"
-                    ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
-                    : "bg-white hover:bg-slate-50 text-slate-700 shadow-md"
-                }`}
-                aria-label="Previous prediction"
-              >
-                <ChevronUpIcon className="w-5 h-5" />
-              </button>
-            )}
-
             <div className="fixture-swiper-container">
               <Swiper
                 effect={"cards"}
@@ -176,40 +175,40 @@ const PredictionStack = ({
               >
                 {filteredPredictions.map((prediction, index) => (
                   <SwiperSlide key={prediction.id} className="fixture-stack-slide">
-                    {/* Use PredictionCard directly as the stack item */}
                     <PredictionCard
                       prediction={prediction}
-                      mode="personal"
+                      mode={mode}
+                      showMemberInfo={mode === "league" || showMemberInfo}
                       onSelect={handlePredictionClick}
-                      onEdit={onEditClick}
-                      isReadonly={false}
+                      onEdit={mode === "personal" ? onEditClick : undefined}
+                      isReadonly={mode === "league" || isReadonly}
                       size={cardStyle}
                     />
                   </SwiperSlide>
                 ))}
               </Swiper>
             </div>
+          </div>
 
-            {/* Next Card Button */}
-            {activeIndex < filteredPredictions.length - 1 && (
+          {/* Navigation controls and progress indicators */}
+          <div className="flex flex-col items-center mt-4 gap-2">
+            {/* Arrow navigation + counter row */}
+            <div className="flex justify-center items-center gap-4">
               <button
-                onClick={() => swiperRef.current?.swiper.slideNext()}
-                className={`absolute left-1/2 -translate-x-1/2 -bottom-2 z-10 p-2 rounded-full transition-all ${
-                  theme === "dark"
+                onClick={() => swiperRef.current?.swiper?.slidePrev()}
+                disabled={activeIndex === 0}
+                className={`p-2 rounded-full transition-all ${
+                  activeIndex === 0
+                    ? "opacity-30 cursor-not-allowed"
+                    : theme === "dark"
                     ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
                     : "bg-white hover:bg-slate-50 text-slate-700 shadow-md"
                 }`}
-                aria-label="Next prediction"
+                aria-label="Previous prediction"
               >
-                <ChevronDownIcon className="w-5 h-5" />
+                <ChevronLeftIcon className="w-5 h-5" />
               </button>
-            )}
-          </div>
 
-          {/* Progress indicators */}
-          <div className="flex flex-col items-center mt-4 gap-2">
-            {/* Numeric indicator for large lists */}
-            {filteredPredictions.length > 10 && (
               <div
                 className={`text-xs font-medium px-3 py-1 rounded-full ${
                   theme === "dark"
@@ -219,7 +218,22 @@ const PredictionStack = ({
               >
                 {activeIndex + 1} / {filteredPredictions.length}
               </div>
-            )}
+
+              <button
+                onClick={() => swiperRef.current?.swiper?.slideNext()}
+                disabled={activeIndex >= filteredPredictions.length - 1}
+                className={`p-2 rounded-full transition-all ${
+                  activeIndex >= filteredPredictions.length - 1
+                    ? "opacity-30 cursor-not-allowed"
+                    : theme === "dark"
+                    ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
+                    : "bg-white hover:bg-slate-50 text-slate-700 shadow-md"
+                }`}
+                aria-label="Next prediction"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
 
             {/* Dot indicators for smaller lists */}
             {filteredPredictions.length <= 10 && (
