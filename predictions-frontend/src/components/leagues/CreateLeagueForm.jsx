@@ -57,8 +57,7 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
       };
       
       const league = await createLeague(apiData);
-      console.log('League creation completed:', league);
-      onSuccess(); // This will close the modal and the state should already be updated
+      onSuccess();
     } catch (error) {
       console.error("Error creating league:", error);
     } finally {
@@ -70,7 +69,7 @@ const CreateLeagueForm = ({ onCancel, onSuccess }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className={`${
           theme === "dark" ? "text-teal-100" : "text-teal-700"
-        } text-2xl font-outfit`}>Create New League</h2>
+        } text-2xl font-dmSerif`}>Create New League</h2>
         <button 
           type="button"
           onClick={onCancel}
