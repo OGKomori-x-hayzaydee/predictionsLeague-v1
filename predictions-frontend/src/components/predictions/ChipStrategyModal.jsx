@@ -1,13 +1,23 @@
 import { motion } from "framer-motion";
 import { InfoCircledIcon, StarIcon, LightningBoltIcon, TargetIcon, RocketIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { useContext, useMemo, memo } from "react";
+import { useContext, useEffect, useMemo, memo, useCallback } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { backgrounds, text, getThemeStyles } from "../../utils/themeUtils";
 import { CHIP_CONFIG } from "../../utils/chipManager";
 
 const ChipStrategyModal = memo(({ isOpen, onClose }) => {
   const { theme } = useContext(ThemeContext);
-  
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   // Memoize all theme-related styles to prevent recalculation
   const themeStyles = useMemo(() => ({
     modalBg: getThemeStyles(theme, {
@@ -229,6 +239,8 @@ const ChipStrategyModal = memo(({ isOpen, onClose }) => {
         exit={{ scale: 0.96, opacity: 0, y: 20 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
         className={`${themeStyles.modalBg} rounded-xl sm:rounded-3xl max-w-[92vw] sm:max-w-6xl w-full max-h-[92vh] overflow-hidden shadow-2xl border backdrop-blur-xl relative text-sm sm:text-base`}
       >
         {/* Animated background gradients */}
@@ -264,7 +276,7 @@ const ChipStrategyModal = memo(({ isOpen, onClose }) => {
               onClick={onClose}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`w-10 h-10 rounded-xl ${themeStyles.closeBtn} flex items-center justify-center transition-all duration-200 border shadow-sm`}
+              className={`w-11 h-11 rounded-xl ${themeStyles.closeBtn} flex items-center justify-center transition-all duration-200 border shadow-sm`}
             >
               <Cross2Icon className="w-5 h-5" />
             </motion.button>

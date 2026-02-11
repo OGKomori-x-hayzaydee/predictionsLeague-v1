@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusIcon,
@@ -40,23 +40,6 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
     joinLeague,
   } = useLeagues();
 
-  // Component lifecycle logging
-  useEffect(() => {
-    console.log('LeaguesView mounted', { 
-      myLeaguesCount: myLeagues?.length || 0, 
-      isLoading,
-      hasError: !!error 
-    });
-  }, []);
-
-  // Log data changes
-  useEffect(() => {
-    console.log('LeaguesView myLeagues updated', { 
-      count: myLeagues?.length || 0, 
-      isLoading 
-    });
-  }, [myLeagues, isLoading]);
-
   // Filter leagues based on search query
   const filteredMyLeagues = myLeagues.filter(
     (league) =>
@@ -67,21 +50,17 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   // Handle joining a league with code
   const handleJoinWithCode = async () => {
     if (!leagueCode.trim()) {
-      console.warn('Join league attempted with empty code');
       showToast("Please enter a league code", "warning");
       return;
     }
 
-    console.log('Starting join league with code', { leagueCode });
     setJoiningLeague(true);
 
     try {
-      const league = await joinLeague(leagueCode);
-      console.log('Join league successful:', league);
+      await joinLeague(leagueCode);
       setLeagueCode("");
       setShowJoinModal(false);
     } catch (error) {
-      console.error('Join league failed:', error);
       // Error handling is done in the hook with toast
     } finally {
       setJoiningLeague(false);
@@ -90,13 +69,11 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
 
   // Handle viewing league details
   const handleViewLeague = (leagueId) => {
-    console.log('Navigating to league details', { leagueId });
     onViewLeague(leagueId);
   };
 
   // Handle managing a league
   const handleManageLeague = (league) => {
-    console.log('Navigating to league management', { leagueId: league.id, leagueName: league.name });
     onManageLeague(league.id);
   };
 
