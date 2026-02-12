@@ -1,7 +1,6 @@
 import React from "react";
 
 import HeroSection from "../components/landingPage/HeroSection";
-import SocialProofBanner from "../components/landingPage/SocialProofBanner";
 import Features from "../components/landingPage/Features";
 import AppPreview from "../components/landingPage/AppPreview";
 import HowItWorks from "../components/landingPage/HowItWorks";
@@ -15,7 +14,6 @@ export default function Home() {
     <div className="bg-white dark:bg-primary-800 min-h-screen transition-colors duration-300">
       <Navbar />
       <HeroSection />
-      <SocialProofBanner />
       <Features />
       <AppPreview />
       <HowItWorks />
