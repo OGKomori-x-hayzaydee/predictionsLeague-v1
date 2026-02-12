@@ -99,9 +99,9 @@ export default function StatusBar({
               <div className="h-7 w-7 sm:h-12 sm:w-12 bg-slate-700/50 rounded-full mr-2 sm:mr-4 animate-pulse" />
             ) : (
               <div className="h-7 w-7 sm:h-12 sm:w-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium mr-2 sm:mr-4 text-sm sm:text-xl overflow-hidden">
-                {user?.profilePicture ? (
+                {user?.avatar ? (
                   <img
-                    src={user.profilePicture}
+                    src={user.avatar}
                     alt={userData.username}
                     className="w-full h-full object-cover"
                   />

@@ -104,8 +104,8 @@ export default function StatusBarOption3({
             ) : (
               <>
                 <div className="h-6 w-6 lg:h-8 lg:w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-xs lg:text-sm overflow-hidden">
-                  {user?.profilePicture ? (
-                    <img src={user.profilePicture} alt={userData.username} className="w-full h-full object-cover" />
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={userData.username} className="w-full h-full object-cover" />
                   ) : (
                     userData.username.substring(0, 1).toUpperCase()
                   )}
