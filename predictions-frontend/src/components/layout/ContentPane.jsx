@@ -236,13 +236,7 @@ export default function ContentPane({
     // Special case for league details/management
     if (activeItem === "leagues" && selectedLeagueId) {
       // Find the league from available data
-      const selectedLeague = apiLeagues?.find(league => league.id === selectedLeagueId) || 
-                           leagues?.find(league => league.id === selectedLeagueId);
-      
-      console.log('ContentPane league selection:', {
-        selectedLeagueId,
-        selectedLeague: selectedLeague ? 'found' : 'not found'
-      });
+      const selectedLeague = apiLeagues?.find(league => league.id === selectedLeagueId);
 
       // If we're still loading and no league found, show loading
       if (!selectedLeague && secondaryLoading) {

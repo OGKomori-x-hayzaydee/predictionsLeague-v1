@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlusIcon,
@@ -21,6 +21,7 @@ import ErrorState from "../common/ErrorState";
 import SearchInput from "../common/SearchInput";
 import { ThemeContext } from "../../context/ThemeContext";
 import { text, backgrounds, buttons } from "../../utils/themeUtils";
+import { spacing, padding } from "../../utils/mobileScaleUtils";
 
 const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -40,23 +41,6 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
     joinLeague,
   } = useLeagues();
 
-  // Component lifecycle logging
-  useEffect(() => {
-    console.log('LeaguesView mounted', { 
-      myLeaguesCount: myLeagues?.length || 0, 
-      isLoading,
-      hasError: !!error 
-    });
-  }, []);
-
-  // Log data changes
-  useEffect(() => {
-    console.log('LeaguesView myLeagues updated', { 
-      count: myLeagues?.length || 0, 
-      isLoading 
-    });
-  }, [myLeagues, isLoading]);
-
   // Filter leagues based on search query
   const filteredMyLeagues = myLeagues.filter(
     (league) =>
@@ -67,21 +51,17 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
   // Handle joining a league with code
   const handleJoinWithCode = async () => {
     if (!leagueCode.trim()) {
-      console.warn('Join league attempted with empty code');
       showToast("Please enter a league code", "warning");
       return;
     }
 
-    console.log('Starting join league with code', { leagueCode });
     setJoiningLeague(true);
 
     try {
-      const league = await joinLeague(leagueCode);
-      console.log('Join league successful:', league);
+      await joinLeague(leagueCode);
       setLeagueCode("");
       setShowJoinModal(false);
     } catch (error) {
-      console.error('Join league failed:', error);
       // Error handling is done in the hook with toast
     } finally {
       setJoiningLeague(false);
@@ -90,13 +70,11 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
 
   // Handle viewing league details
   const handleViewLeague = (leagueId) => {
-    console.log('Navigating to league details', { leagueId });
     onViewLeague(leagueId);
   };
 
   // Handle managing a league
   const handleManageLeague = (league) => {
-    console.log('Navigating to league management', { leagueId: league.id, leagueName: league.name });
     onManageLeague(league.id);
   };
 
@@ -117,29 +95,29 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
     );
   }
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className={spacing.normal}>
+      {/* HERO SECTION - Prominent header with clear hierarchy */}
+      <div className="flex flex-row justify-between items-center gap-4 mb-4 sm:mb-6">
         <div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <h1
               className={`${
                 theme === "dark" ? "text-teal-100" : "text-teal-700"
-              } text-3xl font-bold font-dmSerif`}
+              } text-2xl sm:text-3xl font-bold font-dmSerif mb-0.5`}
             >
               My Leagues
             </h1>
             <div
-              className={`ml-3 mt-1 ${
+              className={`${
                 theme === "dark"
                   ? "bg-teal-900/30 text-teal-300"
                   : "bg-teal-100 text-teal-700"
-              } text-xs px-2.5 py-1 rounded-full`}
+              } text-xs px-2.5 py-0.5 rounded-full`}
             >
-              {myLeagues.length} {myLeagues.length === 1 ? "League" : "Leagues"}
+              {myLeagues.length}
             </div>
           </div>
-          <p className={`${text.secondary[theme]} font-outfit mt-1`}>
+          <p className={`${text.secondary[theme]} font-outfit text-xs sm:text-sm opacity-70`}>
             Manage your leagues, check rankings, and join competitions
           </p>
         </div>
@@ -158,7 +136,7 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
             } text-sm font-outfit`}
           >
             <EnterIcon className="mr-1.5 w-3.5 h-3.5" />
-            Join League
+            <span className="hidden sm:inline">Join</span>
           </motion.button>
 
           <motion.button
@@ -168,39 +146,44 @@ const LeaguesView = ({ onViewLeague, onManageLeague }) => {
             className={`${buttons.primary[theme]} px-3 py-1.5 rounded-md transition-colors flex items-center text-white text-sm font-medium font-outfit`}
           >
             <PlusCircledIcon className="mr-1.5 w-3.5 h-3.5" />
-            Create League
+            <span className="hidden sm:inline">Create</span>
           </motion.button>
         </div>
       </div>
-      {/* Search and Filter Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex flex-col sm:flex-row gap-4"
+      {/* MAIN LEAGUES CONTAINER - Primary content card with elevation */}
+      <div
+        className={`${
+          theme === "dark"
+            ? "backdrop-blur-xl border-slate-700/50 bg-slate-900/60 shadow-xl shadow-slate-950/50"
+            : "border-slate-200 bg-white/80 backdrop-blur-sm shadow-lg shadow-slate-900/5"
+        } rounded-xl border overflow-hidden font-outfit`}
       >
-        <div className="flex-1">
+        {/* SEARCH/FILTER SECTION - De-emphasized subsection */}
+        <div className={`${
+          theme === "dark"
+            ? "bg-slate-800/30 border-b border-slate-700/30"
+            : "bg-slate-50/50 border-b border-slate-200/50"
+        } ${padding.cardCompact}`}>
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
+            onClear={handleClearSearch}
             placeholder="Search leagues..."
-            className="w-full"
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* No tabs needed - only My Leagues */}
+        {/* CONTENT AREA - League cards */}
+        <div className={padding.cardCompact}>
+          <MyLeaguesContent
+            leagues={filteredMyLeagues}
+            isLoading={isLoading}
+            onViewLeague={handleViewLeague}
+            onManageLeague={handleManageLeague}
+            onCreateLeague={() => setShowCreateModal(true)}
+            onJoinLeague={() => setShowJoinModal(true)}
+          />
         </div>
-      </motion.div>
-      {/* Content Section */}
-      <MyLeaguesContent
-        leagues={filteredMyLeagues}
-        isLoading={isLoading}
-        onViewLeague={handleViewLeague}
-        onManageLeague={handleManageLeague}
-        onCreateLeague={() => setShowCreateModal(true)}
-        onJoinLeague={() => setShowJoinModal(true)}
-      />{" "}
+      </div>
       {/* Create League Modal */}
       <AnimatePresence>
         {showCreateModal && (
@@ -300,7 +283,7 @@ const MyLeaguesContent = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6"
     >
       {leagues.map((league, index) => (
         <LeagueCard

@@ -16,12 +16,13 @@ import { useFixtures } from "../../hooks/useFixtures";
  * Shows: Next Match In + Points
  * Mobile-optimized layout with clear "Predict" button
  */
-export default function StatusBarOption3({ 
-  user, 
+export default function StatusBarOption3({
+  user,
   globalRank,
-  onMakePredictions, 
+  onMakePredictions,
+  onProfileClick,
   loading = false,
-  nextMatchData = null 
+  nextMatchData = null
 }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { fixtures } = useFixtures({ fallbackToSample: false });
@@ -87,11 +88,12 @@ export default function StatusBarOption3({
       <Box className="container mx-auto px-3 py-2 lg:py-4">
         <div className="flex items-center justify-between gap-3 lg:gap-6">
           {/* Left: Profile Chip */}
-          <div
-            className={`flex items-center gap-2 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full flex-shrink-0 ${
+          <button
+            onClick={onProfileClick}
+            className={`flex items-center gap-2 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full flex-shrink-0 transition-colors ${
               theme === "dark"
-                ? "bg-slate-800/50 border border-slate-700/50"
-                : "bg-white border border-slate-200"
+                ? "bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/60"
+                : "bg-white border border-slate-200 hover:bg-slate-50"
             }`}
           >
             {loading ? (
@@ -101,8 +103,12 @@ export default function StatusBarOption3({
               </>
             ) : (
               <>
-                <div className="h-6 w-6 lg:h-8 lg:w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-xs lg:text-sm">
-                  {userData.username.substring(0, 1).toUpperCase()}
+                <div className="h-6 w-6 lg:h-8 lg:w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-xs lg:text-sm overflow-hidden">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={userData.username} className="w-full h-full object-cover" />
+                  ) : (
+                    userData.username.substring(0, 1).toUpperCase()
+                  )}
                 </div>
                 <span
                   className={`${
@@ -113,7 +119,7 @@ export default function StatusBarOption3({
                 </span>
               </>
             )}
-          </div>
+          </button>
 
           {/* Center: Stats Bar */}
           <div className="flex items-center gap-3 lg:gap-6 flex-1 justify-center">

@@ -1,10 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import PredictionsByMember from "./PredictionsByMember";
 import PredictionGrid from "./PredictionGrid";
-import PredictionCarousel from "./PredictionCarousel";
 import PredictionTable from "./PredictionTable";
-import LeaguePredictionsStack from "./LeaguePredictionsStack";
-import LeaguePredictionsCalendar from "./LeaguePredictionsCalendar";
+import PredictionStack from "./PredictionStack";
+import PredictionCalendar from "./PredictionCalendar";
 
 const LeaguePredictionContentView = ({ 
   viewMode, 
@@ -61,26 +60,6 @@ const LeaguePredictionContentView = ({
         </motion.div>
       )}
 
-      {viewMode === "carousel" && (
-        <motion.div
-          key="carousel"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <PredictionCarousel
-            mode="league"
-            predictions={filteredPredictions}
-            currentGameweek={currentGameweek}
-            onPredictionSelect={onPredictionSelect}
-            isReadOnly={true}
-            searchQuery={searchQuery}
-            cardStyle={cardStyle}
-          />
-        </motion.div>
-      )}
-
       {/* Table View */}
       {viewMode === "table" && (
         <motion.div
@@ -109,11 +88,14 @@ const LeaguePredictionContentView = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <LeaguePredictionsStack
+          <PredictionStack
             predictions={filteredPredictions}
             onPredictionSelect={onPredictionSelect}
             searchQuery={searchQuery}
             cardStyle={cardStyle}
+            mode="league"
+            showMemberInfo={true}
+            isReadonly={true}
           />
         </motion.div>
       )}
@@ -127,11 +109,14 @@ const LeaguePredictionContentView = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <LeaguePredictionsCalendar
+          <PredictionCalendar
             predictions={filteredPredictions}
             onPredictionSelect={onPredictionSelect}
             searchQuery={searchQuery}
             cardStyle={cardStyle}
+            mode="league"
+            showMemberInfo={true}
+            isReadonly={true}
           />
         </motion.div>
       )}
