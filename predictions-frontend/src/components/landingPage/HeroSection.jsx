@@ -32,7 +32,7 @@ export default function HeroSection() {
       {/* Subtle radial gradient background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-50 via-white to-white dark:from-primary-700/40 dark:via-primary-800 dark:to-primary-800" />
 
-      <Container size="4" className="relative z-10 px-6">
+      <Container size="4" className="relative z-10 px-4 sm:px-6">
         <motion.div
           className="max-w-4xl mx-auto text-center"
           initial="hidden"
@@ -40,16 +40,16 @@ export default function HeroSection() {
           variants={heroStagger}
         >
           {/* Season badge */}
-          <motion.div className="mb-8" variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-900/30 text-teal-light dark:text-teal-dark text-sm font-medium py-2 px-4 rounded-full font-outfit border border-teal-200 dark:border-teal-800/50">
-              <span className="w-2 h-2 rounded-full bg-teal-light dark:bg-teal-dark animate-pulse" />
+          <motion.div className="mb-5 sm:mb-8" variants={fadeUp}>
+            <span className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-900/30 text-teal-light dark:text-teal-dark text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-full font-outfit border border-teal-200 dark:border-teal-800/50">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-teal-light dark:bg-teal-dark animate-pulse" />
               2025/26 Season
             </span>
           </motion.div>
 
           {/* Main heading */}
           <motion.h1
-            className="text-light-text dark:text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-dmSerif mb-8 leading-[1.05]"
+            className="text-light-text dark:text-white text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-dmSerif mb-4 sm:mb-6 md:mb-8 leading-[1.1] sm:leading-[1.05]"
             variants={fadeUp}
           >
             Welcome to{" "}
@@ -60,7 +60,7 @@ export default function HeroSection() {
 
           {/* Subheading */}
           <motion.p
-            className="text-light-text-secondary dark:text-slate-300 font-outfit text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed"
+            className="text-light-text-secondary dark:text-slate-300 font-outfit text-sm sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed px-2 sm:px-0"
             variants={fadeUp}
           >
             The ultimate Premier League prediction game focused on the Big Six.
@@ -70,31 +70,31 @@ export default function HeroSection() {
 
           {/* CTA buttons */}
           <motion.div
-            className="flex flex-col sm:flex-row justify-center gap-4"
+            className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0"
             variants={fadeUp}
           >
-            <Link to="/signup">
+            <Link to="/signup" className="w-full sm:w-auto">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <Button
-                  className="bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 px-8 py-3 text-base font-semibold font-outfit w-full sm:w-auto cursor-pointer"
+                  className="bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 px-8 py-3 text-sm sm:text-base font-semibold font-outfit w-full sm:w-auto cursor-pointer"
                   size="4"
                 >
                   Get Started
                 </Button>
               </motion.div>
             </Link>
-            <Link to="/howToPlay">
+            <Link to="/howToPlay" className="w-full sm:w-auto">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <Button
-                  className="border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 px-8 py-3 text-base font-outfit w-full sm:w-auto cursor-pointer transition-colors"
+                  className="border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 px-8 py-3 text-sm sm:text-base font-outfit w-full sm:w-auto cursor-pointer transition-colors"
                   size="4"
                   variant="outline"
                 >
