@@ -97,6 +97,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
