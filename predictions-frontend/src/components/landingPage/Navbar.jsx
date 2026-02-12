@@ -102,7 +102,7 @@ const Navbar = memo(() => {
                 alt="Predictions League Logo"
                 className="h-8 mr-3"
               />
-              <span className="text-light-text dark:text-teal-100 text-2xl font-bold font-dmSerif">
+              <span className="text-teal-light dark:text-teal-100 text-2xl font-bold font-dmSerif">
                 predictionsLeague
               </span>
             </NavLink>
