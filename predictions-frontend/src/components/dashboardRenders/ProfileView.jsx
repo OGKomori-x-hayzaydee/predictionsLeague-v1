@@ -1,7 +1,9 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { notificationManager } from "../../services/notificationService";
 import { text } from "../../utils/themeUtils";
 import userAPI from "../../services/api/userAPI";
 import dashboardAPI from "../../services/api/dashboardAPI";
@@ -168,7 +170,8 @@ const HighlightCard = ({
 // ─── Main ProfileView ───────────────────────────────────────
 const ProfileView = ({ navigateToSection }) => {
   const { theme } = useContext(ThemeContext);
-  const { user: authUser, updateUser } = useAuth();
+  const { user: authUser, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
   const recentActivities = useRecentActivity();
 
   // ── Data states ──
@@ -429,13 +432,17 @@ const ProfileView = ({ navigateToSection }) => {
     setDeleteSaving(true);
     setDeleteErrors({});
     try {
-      await userAPI.deleteAccount(passwordData.currentPassword);
+      const response = await userAPI.deleteAccount();
+      if (response.success) {
+        notificationManager.profile.accountDeleted();
+        await logout();
+        navigate("/");
+        return;
+      }
     } catch (err) {
-      setDeleteErrors({ general: "Failed to delete account." });
+      setDeleteErrors({ general: "Failed to delete account. Please try again." });
     } finally {
       setDeleteSaving(false);
-      setShowDeleteConfirm(false);
-      setDeleteConfirmText("");
     }
   };
 
