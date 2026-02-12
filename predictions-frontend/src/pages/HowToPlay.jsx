@@ -383,14 +383,9 @@ export default function HowToPlay() {
                     description="Per correctly predicted scorer."
                   />
                   <PointRow
-                    points="4"
-                    label="Own goal prediction"
-                    description="Correctly predict an own goal."
-                  />
-                  <PointRow
-                    points="-1"
-                    label="Off by 2+ goals"
-                    description="Lose 1pt per goal difference."
+                    points="-X"
+                    label="Goal difference penalty"
+                    description="If your predicted total goals are 3+ away from the actual total, you lose (difference - 2) points."
                     variant="red"
                   />
                 </div>
@@ -406,33 +401,9 @@ export default function HowToPlay() {
                 </h3>
                 <div className="space-y-5">
                   <PointRow
-                    points="3"
-                    label="Clean Sheet"
-                    description="Correctly predict a team keeps a clean sheet."
-                    variant="indigo"
-                  />
-                  <PointRow
-                    points="5"
-                    label="Comeback Kings"
-                    description="Predict a team wins after falling behind."
-                    variant="indigo"
-                  />
-                  <PointRow
-                    points="3"
-                    label="First / Last Scorer"
-                    description="Correctly predict first or last scorer."
-                    variant="indigo"
-                  />
-                  <PointRow
-                    points="1.5x"
-                    label="Derby Day Multiplier"
-                    description="All points multiplied for derby matches."
-                    variant="indigo"
-                  />
-                  <PointRow
-                    points="10"
-                    label="Perfect Week"
-                    description="All six match outcomes correct in a gameweek."
+                    points="+5"
+                    label="Defense++ clean sheet"
+                    description="+5 bonus points per correctly predicted clean sheet when the Defense++ chip is active."
                     variant="indigo"
                   />
                 </div>
@@ -505,16 +476,8 @@ export default function HowToPlay() {
                   multiplier: "Shield",
                   color: "blue",
                   availability: "5 GW cooldown",
-                  desc: "Earn 10 bonus points if all your clean sheet predictions are correct.",
+                  desc: "Earn +5 bonus points per correctly predicted clean sheet across your predictions.",
                   tip: "Best when defensive teams face weaker attacks.",
-                },
-                {
-                  name: "Opportunist",
-                  multiplier: "Late",
-                  color: "amber",
-                  availability: "Twice per season",
-                  desc: "Change all six predictions up to 30 min before the first kickoff.",
-                  tip: "React to late team news and injury updates.",
                 },
                 {
                   name: "Scorer Focus",
@@ -528,7 +491,7 @@ export default function HowToPlay() {
                   name: "All-In Week",
                   multiplier: "Full",
                   color: "red",
-                  availability: "Twice per season",
+                  availability: "4 times per season",
                   desc: "Double the entire gameweek score — including deductions.",
                   tip: "High risk, high reward. Only use when confident across all matches.",
                 },
@@ -548,11 +511,6 @@ export default function HowToPlay() {
                     badge:
                       "bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400",
                     tip: "bg-blue-50 dark:bg-blue-900/20",
-                  },
-                  amber: {
-                    badge:
-                      "bg-amber-50 dark:bg-amber-900/30 text-amber-light dark:text-amber-dark",
-                    tip: "bg-amber-50 dark:bg-amber-900/20",
                   },
                   emerald: {
                     badge:
@@ -805,7 +763,7 @@ export default function HowToPlay() {
                 },
                 {
                   q: "Can I change my predictions after submitting?",
-                  a: "Yes — you can edit predictions any time before the 45-minute deadline. After that, they're locked unless you use an Opportunist chip.",
+                  a: "Yes — you can edit predictions any time before the 45-minute deadline. After that, they're locked.",
                 },
                 {
                   q: "Can I use multiple chips in one gameweek?",
