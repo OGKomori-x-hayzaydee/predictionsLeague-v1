@@ -61,8 +61,8 @@ export default function StatusBarOption1({
               <div className="h-8 w-8 bg-slate-700/50 rounded-full animate-pulse flex-shrink-0" />
             ) : (
               <div className="h-8 w-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0 overflow-hidden">
-                {user?.profilePicture ? (
-                  <img src={user.profilePicture} alt={userData.username} className="w-full h-full object-cover" />
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={userData.username} className="w-full h-full object-cover" />
                 ) : (
                   userData.username.substring(0, 1).toUpperCase()
                 )}
