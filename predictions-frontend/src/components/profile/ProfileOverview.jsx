@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   PersonIcon,
@@ -18,6 +19,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
 import { useNotifications, useRecentActivity } from "../../hooks/useNotifications";
 import userAPI from "../../services/api/userAPI";
+import { notificationManager } from "../../services/notificationService";
 import { text } from "../../utils/themeUtils";
 import { SecondaryButton } from "../ui/buttons";
 import LoadingState from "../common/LoadingState";
@@ -135,7 +137,8 @@ const SelectField = ({ label, value, onChange, options, error }) => {
 
 const ProfileOverview = () => {
   const { theme } = useContext(ThemeContext);
-  const { user, updateUser, isLoading: authLoading } = useAuth();
+  const { user, updateUser, logout, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const { preferences, updateNestedPreference } = useUserPreferences();
   const { profile: notifications } = useNotifications();
   const recentActivities = useRecentActivity();
@@ -295,10 +298,12 @@ const ProfileOverview = () => {
     setDeleteErrors({});
 
     try {
-      const response = await userAPI.deleteAccount(passwordData.currentPassword);
+      const response = await userAPI.deleteAccount();
       if (response.success) {
-        console.log("Account deletion processed...");
-        // Redirect to login or landing page after deletion
+        notificationManager.profile.accountDeleted();
+        await logout();
+        navigate("/");
+        return;
       }
     } catch (error) {
       setDeleteErrors({ general: "Failed to delete account. Please try again." });

@@ -21,7 +21,10 @@ import {
   EnvelopeClosedIcon,
   PersonIcon,
   ExitIcon,
+  TrashIcon,
 } from "@radix-ui/react-icons";
+import userAPI from "../../services/api/userAPI";
+import { notificationManager } from "../../services/notificationService";
 import RulesAndPointsModal from "../common/RulesAndPointsModal";
 import ChipStrategyModal from "../predictions/ChipStrategyModal";
 
@@ -40,6 +43,10 @@ const SettingsView = ({ navigateToSection }) => {
   const [errors, setErrors] = useState({});
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showChipStrategyModal, setShowChipStrategyModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteErrors, setDeleteErrors] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const showSuccessMessage = (message) => {
     setShowSuccess(message);
@@ -53,6 +60,28 @@ const SettingsView = ({ navigateToSection }) => {
     } catch (error) {
       console.error("Logout error:", error);
       navigate("/");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.toLowerCase() !== "delete my account") {
+      setDeleteErrors({ deleteConfirm: 'Please type "delete my account" to confirm' });
+      return;
+    }
+    setIsDeleting(true);
+    setDeleteErrors({});
+    try {
+      const response = await userAPI.deleteAccount();
+      if (response.success) {
+        notificationManager.profile.accountDeleted();
+        await logout();
+        navigate("/");
+        return;
+      }
+    } catch (error) {
+      setDeleteErrors({ general: "Failed to delete account. Please try again." });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -87,6 +116,10 @@ const SettingsView = ({ navigateToSection }) => {
         theme === "dark"
           ? "bg-indigo-500/10 text-indigo-400"
           : "bg-indigo-50 text-indigo-600",
+      red:
+        theme === "dark"
+          ? "bg-red-500/10 text-red-400"
+          : "bg-red-50 text-red-600",
     };
 
     return (
@@ -480,6 +513,112 @@ const SettingsView = ({ navigateToSection }) => {
           Reset All
         </motion.button>
       </motion.div>
+
+      {/* ═══ Section 5: Danger Zone ═══ */}
+      <SectionCard
+        title="Danger Zone"
+        description="Irreversible account actions"
+        icon={TrashIcon}
+        accentColor="red"
+      >
+        <div className="space-y-4">
+          <div className={`p-4 rounded-lg border flex items-start gap-3 ${
+            theme === "dark"
+              ? "bg-red-500/10 border-red-500/20"
+              : "bg-red-50 border-red-200"
+          }`}>
+            <ExclamationTriangleIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+              theme === "dark" ? "text-red-400" : "text-red-600"
+            }`} />
+            <div className="flex-1">
+              <h4 className={`${theme === "dark" ? "text-red-400" : "text-red-600"} font-outfit font-semibold mb-2`}>
+                Delete Account
+              </h4>
+              <p className={`${theme === "dark" ? "text-red-300" : "text-red-600"} text-sm font-outfit mb-3`}>
+                This will permanently delete your account, predictions, leagues, and all associated data. This action cannot be undone.
+              </p>
+
+              {!showDeleteConfirm ? (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors border ${
+                    theme === "dark"
+                      ? "border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white"
+                      : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                  }`}
+                >
+                  Delete Account
+                </motion.button>
+              ) : (
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-3"
+                  >
+                    <div className="space-y-1.5">
+                      <label className={`${theme === "dark" ? "text-red-300" : "text-red-600"} text-sm font-medium font-outfit block`}>
+                        Type &quot;delete my account&quot; to confirm
+                      </label>
+                      <input
+                        type="text"
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="delete my account"
+                        className={`w-full px-3 py-2 rounded-lg border text-sm font-outfit transition-colors focus:outline-none focus:ring-2 ${
+                          theme === "dark"
+                            ? "bg-slate-800 border-slate-600 text-slate-200 focus:ring-red-500/50 placeholder-slate-500"
+                            : "bg-white border-slate-300 text-slate-900 focus:ring-red-500/50 placeholder-slate-400"
+                        }`}
+                      />
+                      {deleteErrors.deleteConfirm && (
+                        <p className="text-red-400 text-xs font-outfit">{deleteErrors.deleteConfirm}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting || deleteConfirmText.toLowerCase() !== "delete my account"}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors border disabled:opacity-50 disabled:cursor-not-allowed ${
+                          theme === "dark"
+                            ? "border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white"
+                            : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                        }`}
+                      >
+                        {isDeleting ? "Deleting..." : "Confirm Deletion"}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteConfirmText("");
+                          setDeleteErrors({});
+                        }}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors border ${
+                          theme === "dark"
+                            ? "border-slate-600 text-slate-300 hover:bg-slate-700"
+                            : "border-slate-300 text-slate-600 hover:bg-slate-100"
+                        }`}
+                      >
+                        Cancel
+                      </motion.button>
+                    </div>
+                    {deleteErrors.general && (
+                      <p className="text-red-400 text-sm font-outfit">{deleteErrors.general}</p>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              )}
+            </div>
+          </div>
+        </div>
+      </SectionCard>
 
       {/* ═══ Sign Out ═══ */}
       <div
