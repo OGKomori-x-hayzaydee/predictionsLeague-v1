@@ -1,10 +1,11 @@
 import React, { useState, useEffect, memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Box, Container, Button } from "@radix-ui/themes";
+import { Container, Button } from "@radix-ui/themes";
 import { motion, AnimatePresence } from "framer-motion";
+import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
+import { useTheme } from "../../hooks/useTheme";
 import logo from "../../assets/logo.png";
 
-// Memoize the NavItem to prevent re-renders
 const NavItem = memo(({ to, children, location }) => {
   const isActive = location.pathname === to;
 
@@ -12,18 +13,18 @@ const NavItem = memo(({ to, children, location }) => {
     <motion.div variants={itemVariants} className="relative">
       <NavLink
         to={to}
-        className={
+        className={`font-outfit text-sm font-medium tracking-wide transition-colors duration-200 ${
           isActive
-            ? "text-teal-300 font-medium"
-            : "text-white hover:text-teal-300"
-        }
+            ? "text-teal-light dark:text-teal-dark"
+            : "text-light-text dark:text-white/80 hover:text-teal-light dark:hover:text-teal-dark"
+        }`}
       >
         <span className="py-1 px-1 block">{children}</span>
         <motion.div
-          className="h-0.5 bg-teal-400"
+          className="h-0.5 bg-teal-light dark:bg-teal-dark"
           initial={{ width: 0 }}
           animate={{ width: isActive ? "100%" : 0 }}
-          whileHover={{ width: isActive ? "100%" : "100%" }}
+          whileHover={{ width: "100%" }}
           transition={{ duration: 0.3 }}
         />
       </NavLink>
@@ -31,7 +32,6 @@ const NavItem = memo(({ to, children, location }) => {
   );
 });
 
-// Animation constants outside component to prevent recreation
 const navbarVariants = {
   hidden: { opacity: 0, y: -20 },
   visible: {
@@ -68,8 +68,8 @@ const Navbar = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { isDarkMode, toggleTheme } = useTheme();
 
-  // Handle scroll event to change navbar appearance
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 20;
@@ -82,42 +82,50 @@ const Navbar = memo(() => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   return (
     <motion.nav
-      className={`fixed top-0 left-0 w-full py-4 z-50 transition-colors duration-300 ${
+      className={`fixed top-0 left-0 w-full py-4 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-primary-500/90 backdrop-blur-md shadow-md"
+          ? "bg-white/90 dark:bg-primary-500/90 backdrop-blur-md shadow-sm dark:shadow-none"
           : "bg-transparent"
       }`}
       initial="hidden"
       animate="visible"
       variants={navbarVariants}
     >
-      <Container size="6" className="mx-auto">
+      <Container size="4" className="mx-auto px-6">
         <div className="flex items-center justify-between">
           <motion.div variants={itemVariants} className="flex items-center">
             <NavLink to="/" className="flex items-center">
-              <img 
-                src={logo} 
-                alt="Predictions League Logo" 
-                className="h-8 mr-3" 
+              <img
+                src={logo}
+                alt="Predictions League Logo"
+                className="h-8 md:mr-3"
               />
-              <span className="text-teal-100 text-2xl font-bold font-dmSerif">
+              <span className="hidden md:inline text-teal-light dark:text-teal-100 text-2xl font-bold font-dmSerif">
                 predictionsLeague
               </span>
             </NavLink>
           </motion.div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="md:hidden flex items-center gap-3">
             <motion.button
-              className="text-white"
-              onClick={toggleMenu}
-              whileHover={{ scale: 1.05 }}
+              className="text-light-text dark:text-white p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+              onClick={toggleTheme}
+              whileTap={{ scale: 0.95 }}
+              variants={itemVariants}
+              aria-label="Toggle theme"
+            >
+              {isDarkMode ? (
+                <SunIcon className="w-5 h-5" />
+              ) : (
+                <MoonIcon className="w-5 h-5" />
+              )}
+            </motion.button>
+            <motion.button
+              className="text-light-text dark:text-white"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               whileTap={{ scale: 0.95 }}
               variants={itemVariants}
             >
@@ -147,35 +155,48 @@ const Navbar = memo(() => {
             </motion.button>
           </div>
 
-          {/* Desktop navigation with animated underlines */}
+          {/* Desktop navigation */}
           <motion.div
-            className="hidden md:flex items-center space-x-6 font-outfit"
+            className="hidden md:flex items-center gap-8 font-outfit"
             variants={itemVariants}
           >
-            <NavItem to="/" location={location}>home</NavItem>
-            <NavItem to="/howToPlay" location={location}>how to play</NavItem>
+            <NavItem to="/" location={location}>Home</NavItem>
+            <NavItem to="/howToPlay" location={location}>How to Play</NavItem>
+
+            <motion.button
+              className="text-light-text dark:text-white p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+              onClick={toggleTheme}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Toggle theme"
+            >
+              {isDarkMode ? (
+                <SunIcon className="w-4 h-4" />
+              ) : (
+                <MoonIcon className="w-4 h-4" />
+              )}
+            </motion.button>
 
             <motion.div variants={itemVariants}>
               <NavLink to="/login">
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  <Button className="loginBtn bg-indigo-600 hover:bg-indigo-700 text-white ml-4 transition-colors">
-                    login
+                  <Button className="bg-indigo-light dark:bg-indigo-dark hover:opacity-90 text-white px-5 transition-opacity">
+                    Log In
                   </Button>
                 </motion.div>
               </NavLink>
             </motion.div>
 
-            <motion.div variants={itemVariants}> 
+            <motion.div variants={itemVariants}>
               <NavLink to="/signup">
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  <Button className="signupBtn border border-indigo-500 bg-transparent hover:bg-indigo-800/40 text-white transition-colors">
-                    sign up
+                  <Button className="border border-indigo-light dark:border-indigo-dark bg-transparent hover:bg-indigo-light/10 dark:hover:bg-indigo-dark/10 text-indigo-light dark:text-indigo-dark transition-colors">
+                    Sign Up
                   </Button>
                 </motion.div>
               </NavLink>
@@ -187,36 +208,30 @@ const Navbar = memo(() => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="md:hidden bg-primary-500/95 backdrop-blur-md mt-4 py-3 px-4 rounded-lg shadow-lg"
+              className="md:hidden bg-white/95 dark:bg-primary-500/95 backdrop-blur-md mt-4 py-4 px-5 rounded-xl shadow-lg dark:shadow-none border border-light-border dark:border-white/10"
               initial="closed"
               animate="open"
               exit="closed"
               variants={mobileMenuVariants}
             >
-              <div className="flex flex-col space-y-3">
-                <NavItem to="/" location={location}>home</NavItem>
-                <NavItem to="/leaderboard" location={location}>leaderboard</NavItem>
-                <NavItem to="/matches" location={location}>matches</NavItem>
-                <NavItem to="/howToPlay" location={location}>how to play</NavItem>
+              <div className="flex flex-col gap-3">
+                <NavItem to="/" location={location}>Home</NavItem>
+                <NavItem to="/howToPlay" location={location}>How to Play</NavItem>
+
+                <div className="border-t border-light-border dark:border-white/10 my-2" />
 
                 <NavLink to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <Button className="loginBtn bg-indigo-600 hover:bg-indigo-700 text-white w-full my-1">
-                      login
+                  <motion.div whileTap={{ scale: 0.97 }}>
+                    <Button className="bg-indigo-light dark:bg-indigo-dark text-white w-full my-1">
+                      Log In
                     </Button>
                   </motion.div>
                 </NavLink>
 
                 <NavLink to="/signup" onClick={() => setIsMenuOpen(false)}>
-                  <motion.div
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <Button className="signupBtn border border-indigo-500 bg-transparent hover:bg-indigo-800/40 text-white w-full my-1">
-                      sign up
+                  <motion.div whileTap={{ scale: 0.97 }}>
+                    <Button className="border border-indigo-light dark:border-indigo-dark bg-transparent text-indigo-light dark:text-indigo-dark w-full my-1">
+                      Sign Up
                     </Button>
                   </motion.div>
                 </NavLink>

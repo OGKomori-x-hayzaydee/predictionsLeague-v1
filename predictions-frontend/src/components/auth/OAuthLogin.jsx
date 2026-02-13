@@ -19,15 +19,15 @@ const OAuthLoginSection = ({ onOAuthLogin, disabled = false, className = "" }) =
   return (
     <div className={`oauth-login-section ${className}`}>
       <div className="flex items-center my-4">
-        <div className="flex-grow border-t border-primary-400/30"></div>
-        <span className="px-4 text-white/60 text-sm font-outfit">or continue with</span>
-        <div className="flex-grow border-t border-primary-400/30"></div>
+        <div className="flex-grow border-t border-slate-200 dark:border-primary-400/30"></div>
+        <span className="px-4 text-light-text-secondary dark:text-slate-400 text-xs sm:text-sm font-outfit">or continue with</span>
+        <div className="flex-grow border-t border-slate-200 dark:border-primary-400/30"></div>
       </div>
-      
+
       <button
         onClick={handleGoogleLogin}
         disabled={disabled}
-        className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-4 rounded-md transition-colors duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-4 rounded-md sm:rounded-lg border border-slate-200 dark:border-transparent transition-colors duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

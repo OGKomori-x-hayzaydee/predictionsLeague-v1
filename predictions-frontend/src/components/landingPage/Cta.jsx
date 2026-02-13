@@ -1,94 +1,98 @@
 import React from "react";
-import { Box, Container, Button } from "@radix-ui/themes";
+import { Container, Button } from "@radix-ui/themes";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+};
+
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
 export default function Cta() {
   return (
-    <Box className="bg-primary-500 py-20">
-      <Container size="3">
+    <section className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-br from-slate-50 via-teal-50/20 to-white dark:from-primary-600 dark:via-indigo-dark/5 dark:to-primary-700 transition-colors duration-300">
+      {/* Subtle decorative elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-0 w-72 h-72 rounded-full bg-teal-light/5 dark:bg-teal-dark/5 blur-3xl" />
+        <div className="absolute bottom-1/4 right-0 w-72 h-72 rounded-full bg-indigo-light/5 dark:bg-indigo-dark/5 blur-3xl" />
+      </div>
+
+      <Container size="4" className="px-6 relative z-10">
         <motion.div
-          className="max-w-3xl mx-auto text-center bg-primary-500/60 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-primary-400/20 hover:border-teal-500/30 transition-all duration-300 p-10"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          whileHover={{ 
-            y: -5, 
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" 
-          }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          className="max-w-3xl mx-auto text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={stagger}
         >
           <motion.h2
-            className="text-teal-100 text-4xl md:text-5xl font-bold font-dmSerif mb-6"
-            initial={{ y: -20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            viewport={{ once: true }}
+            className="font-dmSerif text-4xl md:text-5xl lg:text-6xl text-light-text dark:text-white mb-6 leading-[1.1]"
+            variants={fadeUp}
           >
-            ready to test your prediction skills?
+            Ready to prove your football knowledge?
           </motion.h2>
 
-          <motion.div 
-            className="w-24 h-1 bg-teal-400 mx-auto mb-6"
-            initial={{ width: 0 }}
-            whileInView={{ width: "6rem" }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-          />
-
           <motion.p
-            className="text-white/80 font-outfit text-lg mb-12 mx-auto"
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            viewport={{ once: true }}
+            className="font-outfit text-lg md:text-xl text-light-text-secondary dark:text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed"
+            variants={fadeUp}
           >
-            join thousands of football fans in the ultimate Premier League prediction challenge. sign up today and start making your predictions for the upcoming matches.
+            Join predictionsLeague and start competing with fans across the
+            globe. Free to play, impossible to put down.
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6"
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            viewport={{ once: true }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            variants={fadeUp}
           >
             <Link to="/signup">
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <Button className="signupBtn px-8 py-6 text-white text-lg font-bold" color="teal" variant="solid" size="3">
-                  sign up now
+                <Button
+                  className="bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 px-8 py-3 text-base font-semibold font-outfit w-full sm:w-auto cursor-pointer"
+                  size="4"
+                >
+                  Get Started Free
                 </Button>
               </motion.div>
             </Link>
-
             <Link to="/login">
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <Button className="loginBtn px-8 py-6 text-white text-lg" size="3" variant="outline" color="teal">
-                  log in
+                <Button
+                  className="border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 px-8 py-3 text-base font-outfit w-full sm:w-auto cursor-pointer transition-colors"
+                  size="4"
+                  variant="outline"
+                >
+                  Log In
                 </Button>
               </motion.div>
             </Link>
-          </motion.div>
-
-          <motion.div 
-            className="mt-8 text-teal-300/70 text-sm font-outfit"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <p>join over 10,000 football fans already predicting</p>
           </motion.div>
         </motion.div>
       </Container>
-    </Box>
+    </section>
   );
 }
