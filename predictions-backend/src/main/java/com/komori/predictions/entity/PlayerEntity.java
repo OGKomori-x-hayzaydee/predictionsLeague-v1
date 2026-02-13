@@ -1,7 +1,7 @@
 package com.komori.predictions.entity;
 
 import com.komori.predictions.dto.enumerated.Position;
-import com.komori.predictions.dto.response.api2.Squad;
+import com.komori.predictions.dto.response.fpl.Squad;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,14 +22,14 @@ public class PlayerEntity {
     @Enumerated(value = EnumType.STRING)
     private Position position;
 
-    public PlayerEntity(Squad.SquadList.Athlete athlete, TeamEntity teamEntity) {
-        this.playerId = athlete.getId();
-        this.name = athlete.getName();
+    public PlayerEntity(Squad.Player player, TeamEntity teamEntity) {
+        this.playerId = player.getId();
+        this.name = player.getWebName();
         this.team = teamEntity;
-        String pos = athlete.getPosition().getName();
-        if (pos.equals("Defender")) {
+        int pos = player.getElementType();
+        if (pos == 2) {
             this.position = Position.DEFENDER;
-        } else if (pos.equals("Midfielder")) {
+        } else if (pos == 3) {
             this.position = Position.MIDFIELDER;
         } else {
             this.position = Position.FORWARD;

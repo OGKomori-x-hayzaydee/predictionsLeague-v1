@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TeamRepository extends JpaRepository<TeamEntity, Long> {
-    TeamEntity findByName(String name);
+    TeamEntity findByTeamId(Integer teamId);
 }

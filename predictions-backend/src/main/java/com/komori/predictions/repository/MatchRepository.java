@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MatchRepository extends JpaRepository<MatchEntity, Long> {
-    MatchEntity findByOldFixtureId(Integer oldFixtureId);
+    MatchEntity findByMatchId(Long matchId);
 }

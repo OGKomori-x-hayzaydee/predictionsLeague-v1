@@ -1,36 +1,31 @@
 package com.komori.predictions.service;
 
+import com.komori.predictions.dto.enumerated.GameStatus;
+import com.komori.predictions.dto.request.GameStatusAndScore;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.*;
-import com.komori.predictions.dto.response.api1.ExternalFixtureResponse1;
-import com.komori.predictions.dto.response.api2.FixtureDetails;
-import com.komori.predictions.dto.response.api2.MatchEvents;
-import com.komori.predictions.dto.response.api2.Squad;
+import com.komori.predictions.dto.response.fpl.FixtureDetails;
+import com.komori.predictions.dto.response.fpl.Squad;
 import com.komori.predictions.entity.PlayerEntity;
 import com.komori.predictions.entity.TeamEntity;
 import com.komori.predictions.repository.PlayerRepository;
 import com.komori.predictions.repository.TeamRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,44 +34,25 @@ import java.util.stream.Collectors;
 public class APIService {
     @Value("${app.fixture-list-base-url}")
     private String fixtureListBaseUrl;
-    @Value("${app.fixture-base-url}")
-    private String fixtureBaseUrl;
-    @Value("${app.external-fixture-base-url}")
-    private String externalFixtureBaseUrl;
     @Value("${app.squad-list-base-url}")
     private String squadListBaseUrl;
-    @Value("${app.events-base-url}")
-    private String eventsBaseUrl;
-    private final HttpHeaders firstApiHeaders;
-    private final HttpHeaders secondApiHeaders;
+    @PersistenceContext
+    private final EntityManager entityManager;
     private final RestTemplate restTemplate;
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final MatchdayService matchdayService;
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
 
-    public void updateUpcomingFixtures() {
-        HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
-        ResponseEntity<ExternalFixtureResponse1> responseEntity = restTemplate.exchange(
-                fixtureListBaseUrl + matchdayService.getCurrentMatchday(),
-                HttpMethod.GET,
-                httpEntity,
-                ExternalFixtureResponse1.class
-        );
+    public void updateFixtures() {
+        List<FixtureDetails> response = getFixturesFromAPI();
 
-        ExternalFixtureResponse1 response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError()) {
-            log.error("Error fetching API data for fixtures.");
-            return;
-        }
-
-        List<ExternalFixtureResponse1.Match> matchList = response.getMatches();
-        List<Fixture> newFixtures = matchList.stream()
-                .map(match -> {
-                    TeamEntity home = teamRepository.findByName(match.getHomeTeam().getShortName());
-                    TeamEntity away = teamRepository.findByName(match.getAwayTeam().getShortName());
+        List<Fixture> newFixtures = response.stream()
+                .map(fixture -> {
+                    TeamEntity home = teamRepository.findByTeamId(fixture.getHomeId());
+                    TeamEntity away = teamRepository.findByTeamId(fixture.getAwayId());
                     if (home.getIsBigSixTeam() || away.getIsBigSixTeam()) {
-                        return new Fixture(match, home, away);
+                        return new Fixture(fixture, home, away);
                     }
                     return null;
                 })
@@ -91,148 +67,110 @@ public class APIService {
         }
     }
 
-    public ExternalFixtureResponse1.Match getGameStatus(Fixture fixture) {
-        HttpEntity<Void> httpEntity = new HttpEntity<>(firstApiHeaders);
-        ResponseEntity<ExternalFixtureResponse1.Match> responseEntity = restTemplate.exchange(
-                fixtureBaseUrl + fixture.getId(),
+    public Map<Long, GameStatusAndScore> getGamesStatus() {
+        List<FixtureDetails> response = getFixturesFromAPI();
+
+        return response.stream()
+                .collect(Collectors.toMap(FixtureDetails::getId, fixture -> {
+                    if (fixture.getFinished()) {
+                        return new GameStatusAndScore(GameStatus.FINISHED, fixture.getHomeScore(), fixture.getAwayScore());
+                    } else if (fixture.getStarted()) {
+                        return new GameStatusAndScore(GameStatus.LIVE, fixture.getHomeScore(), fixture.getAwayScore());
+                    } else {
+                        return new GameStatusAndScore(GameStatus.TIMED, fixture.getHomeScore(), fixture.getAwayScore());
+                    }
+                }));
+    }
+
+    public HomeAndAwayScorers getGoalScorers(Long fixtureId) {
+        List<FixtureDetails> response = getFixturesFromAPI();
+
+        Optional<FixtureDetails> fixtureOptional = response.stream()
+                .filter(f -> f.getId().equals(fixtureId))
+                .findFirst();
+
+        if (fixtureOptional.isPresent()) {
+            List<String> homeScorers = new ArrayList<>();
+            List<String> awayScorers = new ArrayList<>();
+            FixtureDetails fixture = fixtureOptional.get();
+            List<FixtureDetails.Event> events = fixture.getStats().stream()
+                    .filter(event -> event.getIdentifier().equals("goals_scored") || event.getIdentifier().equals("own_goals"))
+                    .toList();
+
+            Map<Long,String> playerMap = playerRepository.findAllByTeam_TeamIdIn(List.of(fixture.getHomeId(), fixture.getAwayId())).stream()
+                    .collect(Collectors.toMap(PlayerEntity::getPlayerId, PlayerEntity::getName));
+
+            for (FixtureDetails.Event event : events) {
+                for (FixtureDetails.Event.PlayerAndGoals pg : event.getHome()) {
+                    String playerName = playerMap.get(pg.getPlayerId());
+                    if (event.getIdentifier().equals("own_goals")) {
+                        playerName += " (o.g.)";
+                    }
+
+                    for (int i = 0; i < pg.getGoals(); i++) {
+                        homeScorers.add(playerName);
+                    }
+                }
+                for (FixtureDetails.Event.PlayerAndGoals pg : event.getAway()) {
+                    String playerName = playerMap.get(pg.getPlayerId());
+                    if (event.getIdentifier().equals("own_goals")) {
+                        playerName += " (o.g.)";
+                    }
+
+                    for (int i = 0; i < pg.getGoals(); i++) {
+                        awayScorers.add(playerName);
+                    }
+                }
+            }
+
+            return new HomeAndAwayScorers(homeScorers, awayScorers);
+        } else {
+            throw new RuntimeException("Fixture not found for fixture ID " + fixtureId);
+        }
+    }
+
+    private List<FixtureDetails> getFixturesFromAPI() {
+        ResponseEntity<List<FixtureDetails>> responseEntity = restTemplate.exchange(
+                fixtureListBaseUrl + matchdayService.getCurrentMatchday(),
                 HttpMethod.GET,
-                httpEntity,
-                ExternalFixtureResponse1.Match.class
+                null,
+                new ParameterizedTypeReference<>() {}
         );
 
-        ExternalFixtureResponse1.Match response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError()) {
-            log.error("Error checking match status for {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
+        List<FixtureDetails> response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError() || response.isEmpty()) {
+            throw new RuntimeException("Error fetching fixtures from API");
         }
 
         return response;
     }
 
-    public void addSecondFixtureIds(List<Fixture> fixtures) {
-        LocalDate today = LocalDate.now();
-        String date = today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String encodedDate = URLEncoder.encode(date, StandardCharsets.UTF_8);
-        String url = UriComponentsBuilder.fromUriString(externalFixtureBaseUrl)
-                .queryParam("startDate", encodedDate)
-                .queryParam("endDate", encodedDate)
-                .queryParam("sports", 1)
-                .queryParam("showOdds", false)
-                .queryParam("onlyMajorGames", true)
-                .toUriString();
-
-        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
-        ResponseEntity<FixtureDetails> responseEntity = restTemplate.exchange(
-                url,
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void loadPlayersIntoDatabase() {
+        ResponseEntity<Squad> responseEntity = restTemplate.exchange(
+                squadListBaseUrl,
                 HttpMethod.GET,
-                httpEntity,
-                FixtureDetails.class
+                null,
+                Squad.class
         );
 
-        FixtureDetails response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError() || response.getGames().isEmpty()) {
-            log.error("Error getting list of second fixture IDs");
-            return;
+        Squad response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError()) {
+            throw new RuntimeException("Error fetching players from API");
         }
 
-        List<FixtureDetails.Game> premGames = response.getGames().stream()
-                .filter(game -> game.getCompetitionId() == 7)
+        List<Squad.Player> players = response.getElements().stream()
+                .filter(player -> (player.getElementType() != 1) && (player.getCanSelect()))
                 .toList();
 
-        fixtures.forEach(fixture -> {
-            int homeId = fixture.getHomeId();
-            int awayId = fixture.getAwayId();
+        List<PlayerEntity> playerEntities = players.stream()
+                .map(player -> {
+                    TeamEntity team = entityManager.getReference(TeamEntity.class, player.getTeam());
+                    return new PlayerEntity(player, team);
+                })
+                .toList();
 
-            for (FixtureDetails.Game game : premGames) {
-                if (game.getHomeCompetitor().getId() == homeId && game.getAwayCompetitor().getId() == awayId) {
-                    fixture.setExternalFixtureId(game.getId());
-                    break;
-                }
-            }
-        });
-    }
-
-    public HomeAndAwayScorers getGoalScorers(Fixture fixture) {
-        HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
-        String url = UriComponentsBuilder.fromUriString(eventsBaseUrl)
-                .queryParam("gameId", fixture.getExternalFixtureId())
-                .queryParam("matchupId", fixture.getHomeId() + "-" + fixture.getAwayId() + "-7")
-                .toUriString();
-
-        ResponseEntity<MatchEvents> responseEntity = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                httpEntity,
-                MatchEvents.class
-        );
-
-        MatchEvents response = responseEntity.getBody();
-        if (response == null || responseEntity.getStatusCode().isError()) {
-            log.error("Error getting goalscorers for {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
-            return new HomeAndAwayScorers(new ArrayList<>(), new ArrayList<>());
-        }
-
-        List<MatchEvents.Game.Member> members = response.getGame().getMembers();
-        Map<Long, String> playerNames = members.stream()
-                .collect(Collectors.toMap(MatchEvents.Game.Member::getId, MatchEvents.Game.Member::getName));
-
-        List<String> homeScorers = new ArrayList<>();
-        List<String> awayScorers = new ArrayList<>();
-
-        for (MatchEvents.Game.Event event : response.getGame().getEvents()) {
-            String type = event.getEventType().getName();
-            if (!type.equals("Goal") && !type.equals("Own Goal")) continue;
-
-
-            String playerName = playerNames.get(event.getPlayerId());
-            if (type.equals("Own Goal")) playerName += " (o.g.)";
-
-            if (event.getCompetitorId() == fixture.getHomeId().longValue()) {
-                homeScorers.add(playerName);
-            } else {
-                awayScorers.add(playerName);
-            }
-        }
-
-        return new HomeAndAwayScorers(homeScorers, awayScorers);
-    }
-
-    public void loadPlayersIntoDatabase() {
-        List<TeamEntity> teams = teamRepository.findAll();
-        for (TeamEntity teamEntity : teams) {
-            int teamId = teamEntity.getTeamId();
-            String url = UriComponentsBuilder.fromUriString(squadListBaseUrl)
-                    .queryParam("competitors", teamId)
-                    .toUriString();
-
-            HttpEntity<Void> httpEntity = new HttpEntity<>(secondApiHeaders);
-            ResponseEntity<Squad> responseEntity = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    httpEntity,
-                    Squad.class
-            );
-
-            Squad response = responseEntity.getBody();
-            if (response == null || responseEntity.getStatusCode().isError() || response.getSquads().isEmpty()) {
-                log.error("Error loading players for {}", teamEntity.getName());
-                return;
-            }
-
-            List<Squad.SquadList.Athlete> athletes = response.getSquads().getFirst().getAthletes();
-            List<PlayerEntity> playerEntities = athletes.stream()
-                    .filter(athlete -> (athlete.getPosition().getId() != 0) && (athlete.getPosition().getId() != 1)) // filter out Manager and Keeper
-                    .map(athlete -> new PlayerEntity(athlete, teamEntity))
-                    .toList();
-
-            playerRepository.saveAll(playerEntities);
-            log.info("Successfully loaded all {} players", teamEntity.getName());
-
-            try {
-                TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
+        playerRepository.saveAll(playerEntities);
     }
 }
