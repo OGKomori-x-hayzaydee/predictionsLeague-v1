@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
@@ -143,6 +145,7 @@ public class APIService {
         return response;
     }
 
+    @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void loadPlayersIntoDatabase() {
         ResponseEntity<Squad> responseEntity = restTemplate.exchange(

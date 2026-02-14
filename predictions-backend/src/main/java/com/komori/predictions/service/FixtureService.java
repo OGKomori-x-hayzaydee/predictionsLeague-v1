@@ -3,7 +3,6 @@ package com.komori.predictions.service;
 import com.komori.predictions.dto.response.Fixture;
 import com.komori.predictions.dto.response.Player;
 import com.komori.predictions.repository.PlayerRepository;
-import com.komori.predictions.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,7 +20,6 @@ public class FixtureService {
     private final RedisTemplate<String, Fixture> redisFixtureTemplate;
     private final PlayerRepository playerRepository;
     private final APIService apiService;
-    private final TeamRepository teamRepository;
 
     public List<Fixture> getFixtures() {
         List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
@@ -50,7 +48,7 @@ public class FixtureService {
         List<Player> players = redisPlayerTemplate.opsForList().range(key, 0, -1);
 
         if (players == null || players.isEmpty()) {
-            players = playerRepository.findAllByTeam(teamRepository.findByTeamId(teamId))
+            players = playerRepository.findAllByTeam_TeamId(teamId)
                     .stream()
                     .map(Player::new)
                     .toList();
