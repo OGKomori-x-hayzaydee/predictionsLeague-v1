@@ -100,23 +100,31 @@ public class APIService {
 
             for (FixtureDetails.Event event : events) {
                 for (FixtureDetails.Event.PlayerAndGoals pg : event.getHome()) {
+                    boolean isOwnGoal = "own_goals".equals(event.getIdentifier());
                     String playerName = playerMap.get(pg.getPlayerId());
-                    if (event.getIdentifier().equals("own_goals")) {
-                        playerName += " (o.g.)";
-                    }
+                    String displayName = (isOwnGoal) ? playerName + " (o.g.)" : playerName;
 
                     for (int i = 0; i < pg.getGoals(); i++) {
-                        homeScorers.add(playerName);
+                        if (isOwnGoal) {
+                            awayScorers.add(displayName);
+                        }
+                        else {
+                            homeScorers.add(displayName);
+                        }
                     }
                 }
                 for (FixtureDetails.Event.PlayerAndGoals pg : event.getAway()) {
+                    boolean isOwnGoal = "own_goals".equals(event.getIdentifier());
                     String playerName = playerMap.get(pg.getPlayerId());
-                    if (event.getIdentifier().equals("own_goals")) {
-                        playerName += " (o.g.)";
-                    }
+                    String displayName = (isOwnGoal) ? playerName + " (o.g.)" : playerName;
 
                     for (int i = 0; i < pg.getGoals(); i++) {
-                        awayScorers.add(playerName);
+                        if (isOwnGoal) {
+                            homeScorers.add(displayName);
+                        }
+                        else {
+                            awayScorers.add(displayName);
+                        }
                     }
                 }
             }
