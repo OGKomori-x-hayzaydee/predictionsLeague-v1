@@ -3,10 +3,7 @@ package com.komori.predictions.dto.response;
 import com.komori.predictions.dto.enumerated.GameStatus;
 import com.komori.predictions.dto.response.fpl.FixtureDetails;
 import com.komori.predictions.entity.TeamEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
@@ -15,10 +12,12 @@ import java.util.List;
 
 @Slf4j
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Fixture {
+    @EqualsAndHashCode.Include
     private Long id;
     private Integer homeId;
     private String homeTeam;
