@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dashboardAPI from '../services/api/dashboardAPI';
 import leagueAPI from '../services/api/leagueAPI';
 import { useNextMatch } from './useNextMatch';
@@ -27,12 +27,17 @@ const useDashboardData = () => {
     leagues: null,
     insights: null,
   });
-  
+
   const [secondaryLoading, setSecondaryLoading] = useState({
     predictions: true,
     leagues: true,
     insights: true,
   });
+
+  // Recent scored predictions, used to derive the Dashboard's "LAST
+  // GAMEWEEK" ledger (see ledger useMemo below).
+  const [recentPredictions, setRecentPredictions] = useState([]);
+  const [recentPredictionsLoading, setRecentPredictionsLoading] = useState(true);
 
   const [errors, setErrors] = useState({});
 
@@ -112,14 +117,61 @@ const useDashboardData = () => {
         setSecondaryLoading(prev => ({ ...prev, leagues: false }));
       }
 
+      // Fetch recent scored predictions (for the "LAST GAMEWEEK" ledger)
+      try {
+        setRecentPredictionsLoading(true);
+        const predictions = await dashboardAPI.getRecentPredictions();
+        setRecentPredictions(predictions || []);
+      } catch (error) {
+        console.error('❌ Failed to fetch recent predictions:', error);
+        setErrors(prev => ({ ...prev, recentPredictions: error }));
+      } finally {
+        setRecentPredictionsLoading(false);
+      }
+
       // Performance insights - commented out for later implementation
-      
+
       // Set insights loading to false since we're not fetching it
       setSecondaryLoading(prev => ({ ...prev, insights: false }));
     };
 
     fetchSecondaryData();
   }, [essentialData]);
+
+  // Derive the "LAST GAMEWEEK" ledger from recent predictions: the most
+  // recently completed gameweek's scored predictions, newest first, capped
+  // to 3 rows for the sidebar/sheet. Pure arithmetic over real backend
+  // fields (points/correct/gameweek) — no fabricated data.
+  const ledger = useMemo(() => {
+    const completed = (recentPredictions || []).filter(
+      (p) => p.points !== null && p.points !== undefined && p.gameweek != null
+    );
+    if (completed.length === 0) {
+      return { entries: [], gameweek: null, total: 0 };
+    }
+
+    const latestGameweek = Math.max(...completed.map((p) => p.gameweek));
+    const gwPredictions = completed
+      .filter((p) => p.gameweek === latestGameweek)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const entries = gwPredictions.slice(0, 3).map((p) => ({
+      id: p.matchId,
+      match: `${p.homeTeam} ${p.homeScore}–${p.awayScore} ${p.awayTeam}`,
+      detail: p.correct ? 'Correct result' : 'No points',
+      pts: p.points,
+      mark:
+        p.points >= 10
+          ? 'var(--color-brand-teal)'
+          : p.points > 0
+            ? 'var(--color-brand-indigo)'
+            : 'var(--color-brand-amber-mid)',
+    }));
+
+    const total = gwPredictions.reduce((sum, p) => sum + (p.points || 0), 0);
+
+    return { entries, gameweek: latestGameweek, total };
+  }, [recentPredictions]);
 
   // Refresh function to refetch leagues data
   const refreshLeagues = async () => {
@@ -153,7 +205,13 @@ const useDashboardData = () => {
     
     // Secondary data
     leagues: secondaryData.leagues || [],
-    
+
+    // Ledger ("LAST GAMEWEEK" panel) — derived from recent predictions
+    ledger: ledger.entries,
+    ledgerGameweek: ledger.gameweek,
+    ledgerTotal: ledger.total,
+    ledgerLoading: recentPredictionsLoading,
+
     // Loading states
     secondaryLoading,
     

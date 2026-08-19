@@ -40,6 +40,28 @@ const dashboardAPI = {
     }
   },
 
+  // Recent scored predictions (all gameweeks) — used to build the
+  // Dashboard's "LAST GAMEWEEK" ledger by filtering to the most recently
+  // completed gameweek client-side.
+  getRecentPredictions: async () => {
+    try {
+      const response = await apiCall({
+        method: 'GET',
+        url: '/dashboard/predictions/recent',
+      });
+
+      if (response.success) {
+        return response.data || [];
+      } else {
+        console.error('Failed to fetch recent predictions:', response.error);
+        return [];
+      }
+    } catch (error) {
+      console.error('Failed to fetch recent predictions:', error);
+      return [];
+    }
+  },
+
   getPerformanceInsights: async () => {
     try {
       const response = await apiCall({

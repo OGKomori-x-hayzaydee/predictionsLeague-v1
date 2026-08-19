@@ -17,6 +17,7 @@
   --surface-card-3: #f1f5f9;
   --surface-card-4: #eef2f7;
   --surface-modal: #ffffff;
+  --surface-nav-active: #ccfbf1;
 
   --border-hairline: #e2e8f080;
   --border-base: #e2e8f0;
@@ -66,6 +67,7 @@
   --surface-card-3: #0a1626;
   --surface-card-4: #0b1424;
   --surface-modal: #08121f;
+  --surface-nav-active: #152a3a;
 
   --border-hairline: #16203180;
   --border-base: #16233a;
@@ -115,6 +117,7 @@
   --color-surface-card-3: var(--surface-card-3);
   --color-surface-card-4: var(--surface-card-4);
   --color-surface-modal: var(--surface-modal);
+  --color-surface-nav-active: var(--surface-nav-active);
 
   --color-border-hairline: var(--border-hairline);
   --color-border-base: var(--border-base);
@@ -173,6 +176,21 @@
   --radius-sm: 8px;
   --radius-md: 13px;
   --radius-lg: 16px;
+
+  /*
+    Literal in-between radii from the v2 prototype that don't fall on the
+    xs/sm/md/lg tier scale above (see frontendPrototype spec §3) — named by
+    their literal px value rather than a tier name since they interleave
+    between existing tiers (e.g. 6/7/9 sit between xs=5 and sm=8) and a tier
+    name would be ambiguous. Use rounded-6 / rounded-7 / etc.
+  */
+  --radius-6: 6px;
+  --radius-7: 7px;
+  --radius-9: 9px;
+  --radius-11: 11px;
+  --radius-12: 12px;
+  --radius-14: 14px;
+  --radius-20: 20px;
 
   --color-primary-500: #021526;
   --color-primary-600: #17153b;
@@ -276,8 +294,16 @@ select {
   0% {
     transform: translateX(-80px);
   }
+  /*
+    Prototype uses 1000px. Kept as-is (not the previous 340px): the element
+    this drives (dashboard progress-bar light-sweep) sits inside this app's
+    2-col dashboard grid (1fr + 320px rail) within a max-w-7xl header
+    container, which puts the real track width in the ~850-950px range —
+    much closer to 1000px than to 340px, so 340px was undershooting and
+    likely made the sweep look like it stalls/snaps rather than travels.
+  */
   100% {
-    transform: translateX(340px);
+    transform: translateX(1000px);
   }
 }
 
@@ -288,6 +314,115 @@ select {
   }
   50% {
     opacity: 0.3;
+  }
+}
+
+/* Autocomplete/dropdown row entrance (fast fade + rise). */
+@keyframes slotIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Skeleton-loading background sweep for autocomplete dropdowns. */
+@keyframes shimmer {
+  0% {
+    background-position: -180px 0;
+  }
+  100% {
+    background-position: 180px 0;
+  }
+}
+
+/* Chip-tag "used" glow pulse. */
+@keyframes softPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 #14b8a600;
+  }
+  50% {
+    box-shadow: 0 0 0 4px #14b8a626;
+  }
+}
+
+/* "FILED" rubber-stamp badge entrance on filed fixture cards. */
+@keyframes stampIn {
+  0% {
+    opacity: 0;
+    transform: scale(1.6) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-9deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-9deg);
+  }
+}
+
+/* AI-overview panel reveal on the fixture edit/reel view. */
+@keyframes slideFromBehind {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Leagues podium entrance, staggered per rank. */
+@keyframes podiumRise {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 1st-place podium card glow pulse. */
+@keyframes podiumGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 #5eead400,
+      0 6px 20px #00000000;
+  }
+  50% {
+    box-shadow:
+      0 0 0 7px #5eead422,
+      0 10px 26px #0f766e40;
+  }
+}
+
+/* 1st-place podium card diagonal light sweep. */
+@keyframes podiumShine {
+  0% {
+    transform: translateX(-140%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+/* 1st-place podium card subtle float. */
+@keyframes podiumFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
   }
 }
 

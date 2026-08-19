@@ -4,10 +4,15 @@ import MobileTopBar from './MobileTopBar';
 import BottomTabBar from './BottomTabBar';
 
 /**
- * Authenticated app shell: persistent chrome (desktop top nav / mobile top
- * bar + bottom tab bar) wrapping whichever screen is routed into the
- * Outlet. Each screen owns its own SlotBar (kicker/tabs/reel-nav) as the
- * first thing it renders — the shell doesn't know about per-screen context.
+ * Authenticated app shell (foundation spec §5-§6). Desktop gets a two-tier
+ * chrome: TopNav's own 56px masthead (auto-hides to 44px on Fixtures, see
+ * TopNav.jsx) sits above each screen's own SlotBar (ui/SlotBar.jsx, 46px,
+ * kicker/tabs/reel-nav) as the first thing it renders inside the Outlet —
+ * the shell itself doesn't know about per-screen context. Mobile gets a
+ * single-tier 52px MobileTopBar with no slot-bar equivalent; GW-reel/tabs
+ * context is rebuilt per-screen inside the scrollable content instead.
+ * Both top bars are sticky; BottomTabBar is fixed to the viewport bottom
+ * on mobile only.
  */
 export default function AppShell() {
   return (

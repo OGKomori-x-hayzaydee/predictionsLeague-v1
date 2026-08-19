@@ -132,6 +132,53 @@ export function calculatePoints(prediction) {
 }
 
 /**
+ * Calculate the "ceiling" for a filed-but-not-yet-played prediction — the
+ * points it would earn if it lands exactly as filed. Used by the Dashboard's
+ * fixture-preview "if it lands exactly" figure and the "MAX ON THE TABLE"
+ * stat tile (sum of ceilings across all filed predictions this gameweek).
+ *
+ * This is pure arithmetic over the user's own submitted prediction (score,
+ * named scorers, chips) using the same scoring rules as calculatePoints() —
+ * it is not a forecast/AI signal, just "what if this exact scoreline comes
+ * in". A named scorer is only assumed correct for every goal scored (the
+ * 15pt "perfect" tier) when every goal has a named scorer; otherwise it caps
+ * at the 10pt "exact score" tier, mirroring how calculatePoints() only
+ * awards 15 when scorers match the actual result exactly.
+ * @param {Object} prediction - The filed prediction (homeScore/awayScore/
+ *   homeScorers/awayScorers/chips)
+ * @returns {number} Points if this scoreline lands exactly
+ */
+export function calculateCeilingPoints(prediction) {
+  const predHome = prediction.homeScore ?? 0;
+  const predAway = prediction.awayScore ?? 0;
+  const predHomeScorers = (prediction.homeScorers || []).filter(Boolean);
+  const predAwayScorers = (prediction.awayScorers || []).filter(Boolean);
+  const chips = prediction.chips || [];
+
+  const totalGoals = predHome + predAway;
+  const namedCount = predHomeScorers.length + predAwayScorers.length;
+  const perfectAchievable = totalGoals === 0 || namedCount === totalGoals;
+
+  let points = perfectAchievable ? 15 : 10;
+
+  const perScorer = chips.includes('scorerFocus') ? 4 : 2;
+  points += perScorer * namedCount;
+
+  if (chips.includes('wildcard')) points *= 3;
+  if (chips.includes('doubleDown')) points *= 2;
+  if (chips.includes('allInWeek')) points *= 2;
+
+  if (chips.includes('defensePlusPlus')) {
+    let cleanSheets = 0;
+    if (predHome === 0) cleanSheets++;
+    if (predAway === 0) cleanSheets++;
+    points += 5 * cleanSheets;
+  }
+
+  return points;
+}
+
+/**
  * Get breakdown of points calculation for display purposes.
  * Mirrors backend logic for accurate step-by-step display.
  * @param {Object} prediction - The prediction object
