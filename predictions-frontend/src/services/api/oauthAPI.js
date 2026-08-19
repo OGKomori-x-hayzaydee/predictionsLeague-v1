@@ -7,7 +7,7 @@ class OAuthAPI {
   /**
    * Initiate OAuth login through your proxy
    */
-  initiateLogin(provider = 'google', redirectPath = '/home/dashboard') {
+  initiateLogin(provider = 'google', redirectPath = '/dashboard') {
     // Preserve existing flow type if already set (e.g., from signup page)
     const existingFlowType = sessionStorage.getItem('oauth_flow_type');
     const flowType = existingFlowType || 'login';
@@ -40,7 +40,7 @@ class OAuthAPI {
    * Handle OAuth callback - user returns from OAuth proxy
    */
   async handleCallback() {
-    const redirectPath = sessionStorage.getItem('oauth_redirect_path') || '/home/dashboard';
+    const redirectPath = sessionStorage.getItem('oauth_redirect_path') || '/dashboard';
     const flowType = sessionStorage.getItem('oauth_flow_type') || 'login';
     const provider = sessionStorage.getItem('oauth_provider') || 'google';
     const timestamp = sessionStorage.getItem('oauth_timestamp');

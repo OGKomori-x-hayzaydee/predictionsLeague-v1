@@ -46,11 +46,11 @@ export const generatePerformanceInsights = (predictions = [], stats = {}) => {
  * Analyze home vs away prediction accuracy
  */
 const analyzeHomeAwayPattern = (predictions) => {
-  const homeCorrect = predictions.filter(p => p.predicted_home_goals > p.predicted_away_goals && p.actual_home_goals > p.actual_away_goals).length;
-  const homePredictions = predictions.filter(p => p.predicted_home_goals > p.predicted_away_goals).length;
+  const homeCorrect = predictions.filter(p => p.homeScore > p.awayScore && p.actualHomeScore > p.actualAwayScore).length;
+  const homePredictions = predictions.filter(p => p.homeScore > p.awayScore).length;
   
-  const awayCorrect = predictions.filter(p => p.predicted_away_goals > p.predicted_home_goals && p.actual_away_goals > p.actual_home_goals).length;
-  const awayPredictions = predictions.filter(p => p.predicted_away_goals > p.predicted_home_goals).length;
+  const awayCorrect = predictions.filter(p => p.awayScore > p.homeScore && p.actualAwayScore > p.actualHomeScore).length;
+  const awayPredictions = predictions.filter(p => p.awayScore > p.homeScore).length;
   
   const homeAccuracy = homePredictions > 0 ? (homeCorrect / homePredictions) * 100 : 0;
   const awayAccuracy = awayPredictions > 0 ? (awayCorrect / awayPredictions) * 100 : 0;
@@ -82,26 +82,26 @@ const analyzeTeamPerformance = (predictions) => {
   
   predictions.forEach(pred => {
     // Track predictions for home team
-    if (!teamStats[pred.home_team]) {
-      teamStats[pred.home_team] = { correct: 0, total: 0 };
+    if (!teamStats[pred.homeTeam]) {
+      teamStats[pred.homeTeam] = { correct: 0, total: 0 };
     }
-    teamStats[pred.home_team].total++;
+    teamStats[pred.homeTeam].total++;
     
     // Track predictions for away team  
-    if (!teamStats[pred.away_team]) {
-      teamStats[pred.away_team] = { correct: 0, total: 0 };
+    if (!teamStats[pred.awayTeam]) {
+      teamStats[pred.awayTeam] = { correct: 0, total: 0 };
     }
-    teamStats[pred.away_team].total++;
+    teamStats[pred.awayTeam].total++;
     
     // Check if prediction was correct (simplified - exact score or correct winner)
-    const predictedWinner = pred.predicted_home_goals > pred.predicted_away_goals ? 'home' :
-                           pred.predicted_away_goals > pred.predicted_home_goals ? 'away' : 'draw';
-    const actualWinner = pred.actual_home_goals > pred.actual_away_goals ? 'home' :
-                        pred.actual_away_goals > pred.actual_home_goals ? 'away' : 'draw';
+    const predictedWinner = pred.homeScore > pred.awayScore ? 'home' :
+                           pred.awayScore > pred.homeScore ? 'away' : 'draw';
+    const actualWinner = pred.actualHomeScore > pred.actualAwayScore ? 'home' :
+                        pred.actualAwayScore > pred.actualHomeScore ? 'away' : 'draw';
     
     if (predictedWinner === actualWinner) {
-      teamStats[pred.home_team].correct++;
-      teamStats[pred.away_team].correct++;
+      teamStats[pred.homeTeam].correct++;
+      teamStats[pred.awayTeam].correct++;
     }
   });
   
@@ -143,13 +143,13 @@ const analyzeTeamPerformance = (predictions) => {
  */
 const analyzeTimingPatterns = (predictions) => {
   const weekendPredictions = predictions.filter(p => {
-    const date = new Date(p.match_date || p.date);
+    const date = new Date(p.matchDate || p.date);
     const day = date.getDay();
     return day === 0 || day === 6; // Sunday or Saturday
   });
   
   const weekdayPredictions = predictions.filter(p => {
-    const date = new Date(p.match_date || p.date);
+    const date = new Date(p.matchDate || p.date);
     const day = date.getDay();
     return day >= 1 && day <= 5; // Monday to Friday
   });
@@ -187,8 +187,8 @@ const analyzeTimingPatterns = (predictions) => {
 const analyzeMatchImportance = (predictions) => {
   // Define important match patterns
   const importantMatches = predictions.filter(p => {
-    const homeTeam = p.home_team?.toLowerCase() || '';
-    const awayTeam = p.away_team?.toLowerCase() || '';
+    const homeTeam = p.homeTeam?.toLowerCase() || '';
+    const awayTeam = p.awayTeam?.toLowerCase() || '';
     const big6Teams = ['arsenal', 'chelsea', 'liverpool', 'manchester city', 'manchester united', 'tottenham'];
     
     // Big 6 vs Big 6 matches
@@ -199,8 +199,8 @@ const analyzeMatchImportance = (predictions) => {
   });
   
   const regularMatches = predictions.filter(p => {
-    const homeTeam = p.home_team?.toLowerCase() || '';
-    const awayTeam = p.away_team?.toLowerCase() || '';
+    const homeTeam = p.homeTeam?.toLowerCase() || '';
+    const awayTeam = p.awayTeam?.toLowerCase() || '';
     const big6Teams = ['arsenal', 'chelsea', 'liverpool', 'manchester city', 'manchester united', 'tottenham'];
     
     const isHomeBig6 = big6Teams.some(team => homeTeam.includes(team));
@@ -247,12 +247,12 @@ const analyzeMatchImportance = (predictions) => {
 const analyzeConfidencePatterns = (predictions) => {
   // Analyze goal difference predictions as confidence indicator
   const boldPredictions = predictions.filter(p => {
-    const goalDiff = Math.abs((p.predicted_home_goals || 0) - (p.predicted_away_goals || 0));
+    const goalDiff = Math.abs((p.homeScore || 0) - (p.awayScore || 0));
     return goalDiff >= 2; // 2+ goal difference = bold prediction
   });
   
   const safePredictions = predictions.filter(p => {
-    const goalDiff = Math.abs((p.predicted_home_goals || 0) - (p.predicted_away_goals || 0));
+    const goalDiff = Math.abs((p.homeScore || 0) - (p.awayScore || 0));
     return goalDiff <= 1; // 0-1 goal difference = safe prediction
   });
   
@@ -295,10 +295,10 @@ const calculateAccuracy = (predictions) => {
   if (!predictions || predictions.length === 0) return 0;
   
   const correct = predictions.filter(pred => {
-    const predictedWinner = pred.predicted_home_goals > pred.predicted_away_goals ? 'home' :
-                           pred.predicted_away_goals > pred.predicted_home_goals ? 'away' : 'draw';
-    const actualWinner = pred.actual_home_goals > pred.actual_away_goals ? 'home' :
-                        pred.actual_away_goals > pred.actual_home_goals ? 'away' : 'draw';
+    const predictedWinner = pred.homeScore > pred.awayScore ? 'home' :
+                           pred.awayScore > pred.homeScore ? 'away' : 'draw';
+    const actualWinner = pred.actualHomeScore > pred.actualAwayScore ? 'home' :
+                        pred.actualAwayScore > pred.actualHomeScore ? 'away' : 'draw';
     
     return predictedWinner === actualWinner;
   }).length;

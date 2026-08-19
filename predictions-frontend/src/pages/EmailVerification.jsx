@@ -24,7 +24,7 @@ export default function EmailVerification() {
   // Determine flow type and email (only for regular signup now)
   const flowType = searchParams.get('flow') || 'signup';
   const email = searchParams.get('email') || location.state?.email || '';
-  const redirectTo = searchParams.get('redirect') || '/home/dashboard';
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
 
   useEffect(() => {
     // Prevent multiple initializations

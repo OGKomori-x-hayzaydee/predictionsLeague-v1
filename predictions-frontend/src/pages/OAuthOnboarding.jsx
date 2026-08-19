@@ -25,7 +25,7 @@ export default function OAuthOnboarding() {
     // If user becomes authenticated, redirect to dashboard
     if (authState === 'authenticated') {
       console.log('OAuth Onboarding - User authenticated, redirecting to dashboard');
-      navigate('/home/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [authState, navigate]);
 

@@ -10,15 +10,10 @@
  */
 
 // Re-export specialized hooks for advanced use cases
-export { 
+export {
   useExternalFixtures,
-  useTodaysFixtures, 
+  useTodaysFixtures,
   useLiveFixtures,
-  useUpcomingFixtures,
-  usePremierLeagueAndChampionsLeagueFixtures,
-  useMultipleCompetitions,
-  useCompetitionInfo,
-  useFixturesByTeam,
   useExternalAPIStatus
 } from './useExternalFixtures';
 
@@ -45,12 +40,8 @@ export { useClientSideFixtures as default } from './useClientSideFixtures';
  * - useExternalFixtures() - External fixture data only
  * - useTodaysFixtures() - Today's matches only
  * - useLiveFixtures() - Live/in-progress matches with real-time updates
- * - useUpcomingFixtures() - Future matches only
  * - useUserPredictions() - User prediction data only
- * 
+ *
  * 📊 UTILITY HOOKS:
  * - useExternalAPIStatus() - API health monitoring
- * - useMultipleCompetitions() - Multiple competition fixtures
- * - useCompetitionInfo() - Competition metadata
- * - useFixturesByTeam() - Team-specific fixtures
  */

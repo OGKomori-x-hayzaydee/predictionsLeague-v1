@@ -1,13 +1,8 @@
-import React from 'react';
-
-const LoadingState = ({ message = "Loading..." }) => (
-  <div className="flex flex-col items-center justify-center py-12">
-    <div className="relative w-16 h-16">
-      <div className="w-16 h-16 rounded-full border-2 border-indigo-400/30"></div>
-      <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-indigo-500 rounded-full animate-spin"></div>
+export default function LoadingState({ message = 'Loading...' }) {
+  return (
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-text-muted-2">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-control border-t-brand-teal" />
+      <p className="font-mono text-xs uppercase tracking-wide">{message}</p>
     </div>
-    <p className="mt-4 text-white/70 animate-pulse">{message}</p>
-  </div>
-);
-
-export default LoadingState;
+  );
+}

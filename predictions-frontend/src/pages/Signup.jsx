@@ -310,7 +310,7 @@ export default function Signup() {
         console.log('Signup - Waiting 100ms before navigation...');
         setTimeout(() => {
           console.log('Signup - Navigating to dashboard...');
-          navigate("/home/dashboard", { replace: true });
+          navigate("/dashboard", { replace: true });
         }, 100);
       }
     } catch (registrationError) {

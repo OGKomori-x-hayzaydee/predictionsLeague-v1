@@ -23,10 +23,19 @@ export const UserPreferencesProvider = ({ children }) => {
     
     // Notification preferences
     notifications: {
-      emailAlerts: true,
-      predictionReminders: true,
-      leagueInvitations: true,
-    }
+      deadlineReminders: true,
+      rivalActivity: false,
+      resultsSettled: true,
+      chipExpiryWarnings: true,
+      weeklySummaryEmail: false,
+    },
+
+    // Privacy
+    publicFingerprint: false,
+
+    // Teams followed (local-only — backend only stores one favouriteTeam,
+    // see components/settings/TeamsTab.jsx)
+    followedTeams: [],
   };
 
   // Get initial preferences from localStorage or use defaults

@@ -19,7 +19,7 @@ export default function OAuthCallback() {
       } else {
         // No specific route required, go to dashboard
         console.log('OAuth Callback - No specific route required, going to dashboard');
-        setTimeout(() => navigate('/home/dashboard', { replace: true }), 100);
+        setTimeout(() => navigate('/dashboard', { replace: true }), 100);
       }
     }
   }, [isProcessing, error, authState, getRequiredRoute, navigate]);

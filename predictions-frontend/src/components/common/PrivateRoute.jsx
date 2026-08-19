@@ -70,10 +70,10 @@ const PrivateRoute = ({
  * PublicRoute component - Enhanced with OAuth support
  * For routes that should only be accessible when NOT authenticated
  */
-export const PublicRoute = ({ 
-  children, 
-  redirectTo = '/home/dashboard', 
-  fallback = null 
+export const PublicRoute = ({
+  children,
+  redirectTo = '/dashboard',
+  fallback = null
 }) => {
   const { 
     canAccessDashboard, 

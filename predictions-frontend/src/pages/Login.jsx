@@ -39,7 +39,7 @@ export default function Login() {
   const location = useLocation();
 
   // Get the intended destination after login
-  const from = location.state?.from?.pathname || "/home/dashboard";
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleOAuthLogin = (providerId) => {
     try {

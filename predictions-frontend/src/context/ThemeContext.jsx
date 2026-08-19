@@ -41,7 +41,7 @@ export const ThemeProvider = ({ children }) => {
 
     // Update theme-color meta tag for mobile status bars
     const metaThemeColor = document.querySelector("meta[name='theme-color']");
-    const themeColor = theme === "dark" ? "#021526" : "#ffffff";
+    const themeColor = theme === "dark" ? "#050914" : "#f4f7fb";
 
     if (metaThemeColor) {
       metaThemeColor.setAttribute("content", themeColor);

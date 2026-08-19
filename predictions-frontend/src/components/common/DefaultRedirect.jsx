@@ -1,11 +1,5 @@
-import { Navigate } from "react-router-dom";
-import { useUserPreferences } from "../../context/UserPreferencesContext";
+import { Navigate } from 'react-router-dom';
 
-const DefaultRedirect = () => {
-  const { preferences } = useUserPreferences();
-  
-  // Redirect to the user's preferred default dashboard view
-  return <Navigate to={`/home/${preferences.defaultDashboardView}`} replace />;
-};
-
-export default DefaultRedirect;
+export default function DefaultRedirect() {
+  return <Navigate to="/dashboard" replace />;
+}

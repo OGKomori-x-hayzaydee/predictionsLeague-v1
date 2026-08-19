@@ -1,46 +1,53 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { Theme } from "@radix-ui/themes";
-import { ThemeProvider } from "./context/ThemeContext";
-import { UserPreferencesProvider } from "./context/UserPreferencesContext";
-import { AuthProvider } from "./context/AuthContext";
-import { QueryProvider } from "./context/QueryContext";
-import { ChipManagementProvider } from "./context/ChipManagementContext";
-import DefaultRedirect from "./components/common/DefaultRedirect";
-import PrivateRoute, { PublicRoute } from "./components/common/PrivateRoute";
-import LoadingState from "./components/common/LoadingState";
-import AuthErrorBoundary from "./components/auth/AuthErrorBoundary";
-import LandingPage from "./pages/LandingPage";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import HowToPlay from "./pages/HowToPlay";
-import Home from "./pages/Home";
-import OAuthCallback from "./pages/OAuthCallback";
-import OAuthOnboarding from "./pages/OAuthOnboarding";
-import EmailVerification from "./pages/EmailVerification";
-import { useAuth } from "./context/AuthContext";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Theme } from '@radix-ui/themes';
+import { ThemeProvider } from './context/ThemeContext';
+import { UserPreferencesProvider } from './context/UserPreferencesContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { QueryProvider } from './context/QueryContext';
+import { ChipManagementProvider } from './context/ChipManagementContext';
+import DefaultRedirect from './components/common/DefaultRedirect';
+import PrivateRoute, { PublicRoute } from './components/common/PrivateRoute';
+import LoadingState from './components/common/LoadingState';
+import AuthErrorBoundary from './components/auth/AuthErrorBoundary';
+import AppShell from './components/layout/AppShell';
 
-// App router component that waits for initialization
+// Bridged as-is from predictions-frontend — landing/auth is out of scope
+// for the v2 reskin, which only concerns the authenticated app itself.
+import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import HowToPlay from './pages/HowToPlay';
+import OAuthCallback from './pages/OAuthCallback';
+import OAuthOnboarding from './pages/OAuthOnboarding';
+import EmailVerification from './pages/EmailVerification';
+
+import DashboardPage from './pages/DashboardPage';
+import FixturesPage from './pages/FixturesPage';
+import RecordPage from './pages/RecordPage';
+import ChipsPage from './pages/ChipsPage';
+import LeaguesPage from './pages/LeaguesPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
+
 const AppRouter = () => {
   const { isInitialized, hasInitializationError } = useAuth();
 
-  // Show loading during initialization
   if (!isInitialized()) {
     return (
-      <div className="min-h-screen bg-primary-500 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-surface-app">
         <LoadingState message="Initializing application..." />
       </div>
     );
   }
 
-  // Show error state if initialization failed
   if (hasInitializationError()) {
     return (
-      <div className="min-h-screen bg-primary-500 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-surface-app">
         <div className="text-center">
-          <div className="text-red-400 mb-4">Failed to initialize application</div>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          <p className="mb-4 text-state-error">Failed to initialize application</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-md bg-state-error px-4 py-2 text-white"
           >
             Retry
           </button>
@@ -49,52 +56,29 @@ const AppRouter = () => {
     );
   }
 
-  // Render main application routes
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public / auth — bridged from predictions-frontend, untouched by the reskin */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/howToPlay" element={<HowToPlay />} />
-
-      {/* Auth routes - only accessible when not authenticated */}
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/signup"
-        element={
-          <PublicRoute>
-            <Signup />
-          </PublicRoute>
-        }
-      />
-
-      {/* OAuth callback route - publicly accessible during auth process */}
-      <Route 
-        path="/auth/callback" 
+        path="/auth/callback"
         element={
           <AuthErrorBoundary>
             <OAuthCallback />
           </AuthErrorBoundary>
-        } 
+        }
       />
-
-      {/* Email verification route - shared by signup and OAuth */}
-      <Route 
-        path="/verify-email" 
+      <Route
+        path="/verify-email"
         element={
           <PublicRoute>
             <EmailVerification />
           </PublicRoute>
-        } 
+        }
       />
-
-      {/* Onboarding route */}
       <Route
         path="/auth/finish-onboarding"
         element={
@@ -104,33 +88,25 @@ const AppRouter = () => {
         }
       />
 
-      {/* Protected routes */}
+      {/* Authenticated app — the v2 reskin */}
       <Route
-        path="/home"
         element={
           <PrivateRoute>
-            <DefaultRedirect />
+            <AppShell />
           </PrivateRoute>
         }
-      />
-      <Route
-        path="/home/:view"
-        element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Navigate to="/home/dashboard" replace />
-          </PrivateRoute>
-        }
-      />
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/fixtures" element={<FixturesPage />} />
+        <Route path="/record" element={<RecordPage />} />
+        <Route path="/chips" element={<ChipsPage />} />
+        <Route path="/leagues" element={<LeaguesPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
 
-      {/* Catch all route */}
+      <Route path="/home" element={<PrivateRoute><DefaultRedirect /></PrivateRoute>} />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

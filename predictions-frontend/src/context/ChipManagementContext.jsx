@@ -20,8 +20,7 @@ export function ChipManagementProvider({ children }) {
   const authContext = useAuth();
   const { user, isAuthenticated, isLoading: authLoading } = authContext;
   const [chipManager, setChipManager] = useState(null);
-  const [manualGameweek, setManualGameweek] = useState(null);
-  
+
   // Use React Query hook for chip data (only fetches status)
   const {
     chips: availableChips,
@@ -36,12 +35,8 @@ export function ChipManagementProvider({ children }) {
     error: chipsError,
     refresh: refreshChips
   } = useChips();
-  
-  // Determine current gameweek (prefer backend, fallback to manual override)
-  const currentGameweek = useMemo(() => {
-    if (manualGameweek !== null) return manualGameweek;
-    return backendGameweek || 1;
-  }, [backendGameweek, manualGameweek]);
+
+  const currentGameweek = useMemo(() => backendGameweek || 1, [backendGameweek]);
 
   // Initialize chip manager when user changes
   useEffect(() => {
@@ -150,13 +145,6 @@ export function ChipManagementProvider({ children }) {
     }
   }, [chipManager]);
 
-  /**
-   * Update current gameweek (manual override)
-   */
-  const updateGameweek = useCallback((gameweek) => {
-    setManualGameweek(gameweek);
-  }, []);
-
   const value = {
     // State (from React Query - backend-driven)
     availableChips,
@@ -194,7 +182,6 @@ export function ChipManagementProvider({ children }) {
     checkCompatibility,
     
     // Management
-    updateGameweek,
     refreshChips, // Manual refresh trigger (refetches /chips/status)
     
     // Premium/Paywall features (local config)

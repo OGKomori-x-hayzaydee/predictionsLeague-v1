@@ -289,13 +289,15 @@ export const userAPI = {
 
   /**
    * Delete user account
+   * @param {string} password - Current password for confirmation
    * @returns {Promise<Object>} Account deletion response
    */
-  async deleteAccount() {
+  async deleteAccount(password) {
     try {
       const response = await apiCall({
         method: 'DELETE',
-        url: '/auth/delete-user',
+        url: '/users/account',
+        data: { password },
       });
 
       if (response.success) {

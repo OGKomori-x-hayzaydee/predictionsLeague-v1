@@ -1,70 +1,48 @@
-import React from 'react';
-import StatusBar from '../components/layout/StatusBar';
-import DashboardView from '../components/dashboardRenders/DashboardView';
-import useDashboardData from '../hooks/useDashboardData';
+import SlotBar from '../components/ui/SlotBar';
+import KickerLabel from '../components/ui/KickerLabel';
+import StationRail from '../components/dashboard/StationRail';
+import SpotlightCard from '../components/dashboard/SpotlightCard';
+import DashboardSidebar from '../components/dashboard/DashboardSidebar';
+import LoadingState from '../components/common/LoadingState';
+import { useFixtures } from '../hooks/useFixtures';
+import { useNextMatch } from '../hooks/useNextMatch';
 
-// Example usage of the enhanced DashboardView with loading states
-const DashboardPage = () => {
-  const {
-    essentialData,
-    essentialLoading,
-    statusBarData,
-    statusBarLoading,
-    recentPredictions,
-    leagues,
-    secondaryLoading,
-    errors,
-  } = useDashboardData();
+export default function DashboardPage() {
+  const { fixtures, stats, isLoading } = useFixtures();
+  const { nextMatch, timeDisplay, isLive } = useNextMatch();
 
-  const handleGoToPredictions = (match) => {
-    console.log('Navigate to predictions for match:', match);
-    // Implementation would navigate to predictions page
-  };
-
-  const handleNavigateToSection = (section, params) => {
-    console.log('Navigate to section:', section, params);
-    // Implementation would navigate to specific section
-  };
-
-  const handleMakePredictions = () => {
-    console.log('Navigate to make predictions');
-    // Implementation would navigate to predictions page
-  };
+  const total = stats?.total ?? fixtures.length;
+  const filed = stats?.predicted ?? fixtures.filter((f) => f.predicted).length;
+  const progressPct = total > 0 ? Math.round((filed / total) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Status Bar */}
-      <StatusBar
-        user={statusBarData.user}
-        nextMatchData={statusBarData.nextMatchData}
-        loading={statusBarLoading}
-        onMakePredictions={handleMakePredictions}
-      />
-      
-      {/* Dashboard Content */}
-      <div className="p-4">
-        <div className="max-w-7xl mx-auto">
-          <DashboardView
-            // Data props
-            essentialData={essentialData}
-            recentPredictions={recentPredictions}
-            leagues={leagues}
-            
-            // Action props
-            goToPredictions={handleGoToPredictions}
-            navigateToSection={handleNavigateToSection}
-            
-            // Loading states for progressive loading
-            essentialLoading={essentialLoading}
-            secondaryLoading={secondaryLoading}
-            
-            // Error states
-            errors={errors}
-          />
+    <div className="animate-rise-in">
+      <SlotBar kicker="Season" />
+
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:grid-cols-[1fr_320px] md:px-6">
+        <div className="space-y-6">
+          <div>
+            <h1 className="font-dmSerif text-2xl text-text-primary md:text-3xl">
+              {isLoading ? 'Loading your gameweek…' : `${filed} of ${total} filed`}
+            </h1>
+            <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-surface-card-3">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <KickerLabel as="div" className="mb-2">This gameweek</KickerLabel>
+            {isLoading ? <LoadingState message="Loading fixtures..." /> : <StationRail fixtures={fixtures} />}
+          </div>
+
+          <SpotlightCard match={nextMatch} timeDisplay={timeDisplay} isLive={isLive} />
         </div>
+
+        <DashboardSidebar />
       </div>
     </div>
   );
-};
-
-export default DashboardPage;
+}
