@@ -1,11 +1,6 @@
 import React, { useState, useContext, useMemo } from "react";
 import { motion } from "framer-motion";
 import GameweekChipsPanel from "../panels/GameweekChipsPanel";
-import ViewToggleBar from "../ui/ViewToggleBar";
-import ViewToggleBarOption1 from "../ui/ViewToggleBarOption1";
-import ViewToggleBarOption2 from "../ui/ViewToggleBarOption2";
-import ViewToggleBarOption3 from "../ui/ViewToggleBarOption3";
-import ViewToggleBarHybrid from "../ui/ViewToggleBarHybrid";
 import ContentView from "../fixtures/ContentView";
 import FixtureFilters from "../fixtures/FixtureFilters";
 import { ThemeContext } from "../../context/ThemeContext";
@@ -288,14 +283,6 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
             View and predict upcoming fixtures
           </p>
         </div>
-
-        {/* View toggle controls - HYBRID: Bottom Sheet (mobile) + Dropdown (desktop) */}
-        <ViewToggleBarHybrid viewMode={viewMode} setViewMode={handleViewModeChange} />
-        
-        {/* TESTING OTHER OPTIONS (uncomment to test individually): */}
-        {/* <ViewToggleBarOption1 viewMode={viewMode} setViewMode={handleViewModeChange} /> */}
-        {/* <ViewToggleBarOption2 viewMode={viewMode} setViewMode={handleViewModeChange} /> */}
-        {/* <ViewToggleBarOption3 viewMode={viewMode} setViewMode={handleViewModeChange} /> */}
       </div>
       {/* CHIP STRATEGY SECTION - Elevated card with shadow */}
       <motion.div
@@ -380,6 +367,8 @@ const FixturesView = ({ handleFixtureSelect, toggleChipInfoModal }) => {
             filterTeam={filterTeam}
             setFilterTeam={setFilterTeam}
             fixtures={enhancedFixtures || []}
+            viewMode={viewMode}
+            setViewMode={handleViewModeChange}
           />
         </div>
 

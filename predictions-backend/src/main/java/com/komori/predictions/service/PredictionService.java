@@ -40,7 +40,7 @@ public class PredictionService {
 
         List<UserPrediction> userPredictions = new ArrayList<>();
         predictionEntities.forEach(p -> {
-            MatchEntity match = matchRepository.findByOldFixtureId(p.getMatchId().intValue());
+            MatchEntity match = matchRepository.findByMatchId(p.getMatchId());
             if (match != null) {
                 userPredictions.add(new UserPrediction(match, p));
             } else {
@@ -72,10 +72,10 @@ public class PredictionService {
     @Transactional
     public void updateDatabaseAfterGame(MatchEntity match) {
         log.info("DB transaction started...");
-        List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getOldFixtureId());
+        List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getMatchId());
         for (PredictionEntity prediction : predictions) {
             UserEntity user = prediction.getUser();
-            int points = getPredictionScore(user.getEmail(), match.getOldFixtureId().intValue());
+            int points = getPredictionScore(user.getEmail(), match.getMatchId());
             boolean correct = isPredictionCorrect(prediction, match);
 
             // Update prediction
@@ -99,9 +99,9 @@ public class PredictionService {
     }
 
     // Scoring System
-    public Integer getPredictionScore(String email, int oldFixtureId) {
-        MatchEntity match = matchRepository.findByOldFixtureId(oldFixtureId);
-        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email((long) oldFixtureId, email);
+    public Integer getPredictionScore(String email, long matchId) {
+        MatchEntity match = matchRepository.findByMatchId(matchId);
+        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(matchId, email);
 
         int points = 0;
         int actualHome = match.getHomeScore();

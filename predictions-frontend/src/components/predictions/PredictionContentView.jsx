@@ -3,7 +3,6 @@ import PredictionGrid from "./PredictionGrid";
 import PredictionTable from "./PredictionTable";
 import PredictionCalendar from "./PredictionCalendar";
 import PredictionStack from "./PredictionStack";
-import PredictionCarousel from "./PredictionCarousel";
 import PredictionsByTeam from "./PredictionsByTeam";
 
 const PredictionContentView = ({ 
@@ -88,25 +87,6 @@ const PredictionContentView = ({
             onEditClick={onEditClick}
             teamLogos={teamLogos}
             searchQuery={searchQuery}
-            cardStyle={cardStyle}
-          />
-        </motion.div>
-      )}      {viewMode === "carousel" && (
-        <motion.div
-          key="carousel"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <PredictionCarousel
-            mode="personal"
-            predictions={predictions}
-            onPredictionSelect={onPredictionSelect}
-            onEditClick={onEditClick}
-            teamLogos={teamLogos}
-            searchQuery={searchQuery}
-            isReadOnly={false}
             cardStyle={cardStyle}
           />
         </motion.div>

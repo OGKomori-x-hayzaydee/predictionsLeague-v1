@@ -6,23 +6,23 @@ export default function StepIndicator({ currentStep }) {
   const { theme } = useContext(ThemeContext);
 
   const steps = [
-    { number: 1, title: "Score Prediction", color: "emerald" },
-    { number: 2, title: "Goalscorers & Chips", color: "blue" },
-    { number: 3, title: "Review & Submit", color: "purple" }
+    { number: 1, title: "Score Prediction", shortTitle: "Score", color: "emerald" },
+    { number: 2, title: "Goalscorers & Chips", shortTitle: "Scorers", color: "blue" },
+    { number: 3, title: "Review & Submit", shortTitle: "Review", color: "purple" }
   ];
 
   return (
-    <div className={`rounded-xl p-4 font-outfit ${getThemeStyles(theme, {
+    <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 font-outfit ${getThemeStyles(theme, {
       dark: 'bg-slate-800/50 border border-slate-700/60',
       light: 'bg-slate-50 border border-slate-200'
     })}`}>
       <div className="flex items-center justify-center">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           {steps.map((step, index) => (
             <div key={step.number} className="flex items-center">
               <div className="flex items-center">
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium transition-all duration-200 ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs sm:text-sm font-medium transition-all duration-200 ${
                     currentStep >= step.number
                       ? step.color === "emerald"
                         ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
@@ -38,7 +38,7 @@ export default function StepIndicator({ currentStep }) {
                   {step.number}
                 </div>
                 <div
-                  className={`text-sm ml-3 transition-colors ${
+                  className={`text-2xs sm:text-sm ml-1.5 sm:ml-3 transition-colors ${
                     currentStep === step.number
                       ? step.color === "emerald"
                         ? getThemeStyles(theme, {
@@ -57,14 +57,15 @@ export default function StepIndicator({ currentStep }) {
                       : getThemeStyles(theme, text.muted)
                   }`}
                 >
-                  {step.title}
+                  <span className="hidden sm:inline">{step.title}</span>
+                  <span className="sm:hidden">{step.shortTitle}</span>
                 </div>
               </div>
-              
+
               {index < steps.length - 1 && (
                 <div
-                  className={`w-12 h-0.5 rounded-full mx-3 transition-colors ${
-                    currentStep > step.number 
+                  className={`w-4 sm:w-12 h-0.5 rounded-full mx-1.5 sm:mx-3 transition-colors ${
+                    currentStep > step.number
                       ? step.color === "emerald"
                         ? "bg-emerald-500/70"
                         : step.color === "blue"

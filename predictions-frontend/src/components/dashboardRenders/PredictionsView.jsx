@@ -3,7 +3,6 @@ import PredictionFilters from "../predictions/PredictionFilters";
 import PotentialPointsSummary from "../panels/PotentialPointsSummary";
 import PredictionContentView from "../predictions/PredictionContentView";
 import PredictionBreakdownModal from "../predictions/PredictionBreakdownModal";
-import ViewToggleBarHybrid from "../ui/ViewToggleBarHybrid";
 import EmptyPredictionState from "../predictions/EmptyPredictionState";
 import ChipSyncBanner from "../ui/ChipSyncBanner";
 import { ThemeContext } from "../../context/ThemeContext";
@@ -67,7 +66,6 @@ const PredictionsView = ({ handleEditPrediction }) => {
   });
   
   const [viewMode, setViewMode] = useState(preferences.defaultPredictionsView);
-  const [cardStyle, setCardStyle] = useState(preferences.cardStyle);
   const [selectedPrediction, setSelectedPrediction] = useState(null);
 
   // Wrapper function to update both state and preferences
@@ -262,9 +260,6 @@ const PredictionsView = ({ handleEditPrediction }) => {
             View and manage your predictions
           </p>
         </div>
-
-        {/* View toggle controls - HYBRID: Bottom Sheet (mobile) + Dropdown (desktop) */}
-        <ViewToggleBarHybrid viewMode={viewMode} setViewMode={handleViewModeChange} />
       </div>
       
       {/* POTENTIAL POINTS SUMMARY PANEL - Elevated card with shadow */}
@@ -335,8 +330,8 @@ const PredictionsView = ({ handleEditPrediction }) => {
           setSortBy={setSortBy}
           showFilters={showFilters}
           setShowFilters={setShowFilters}
-          cardStyle={cardStyle}
-          setCardStyle={setCardStyle}
+          viewMode={viewMode}
+          setViewMode={handleViewModeChange}
         />
         </div>
 
@@ -354,7 +349,6 @@ const PredictionsView = ({ handleEditPrediction }) => {
               onPredictionSelect={handlePredictionSelect}
               onEditClick={onEditClick}
               searchQuery={searchQuery}
-              cardStyle={cardStyle}
             />
           )}
         </div>

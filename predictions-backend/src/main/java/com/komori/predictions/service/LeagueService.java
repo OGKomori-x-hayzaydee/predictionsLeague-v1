@@ -82,7 +82,7 @@ public class LeagueService {
             UserEntity user = entity.getUser();
             List<PredictionEntity> predictionEntities = predictionRepository.findAllByUserAndGameweek(user, gameweek);
             predictionEntities.forEach(e -> {
-                MatchEntity match = matchRepository.findByOldFixtureId(e.getMatchId().intValue());
+                MatchEntity match = matchRepository.findByMatchId(e.getMatchId());
                 predictions.add(new LeaguePredictionSummary(e, match));
             });
         }

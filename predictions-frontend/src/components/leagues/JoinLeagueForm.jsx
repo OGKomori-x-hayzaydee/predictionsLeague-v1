@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useContext } from "react";
 import { Cross2Icon, EnterIcon, InfoCircledIcon } from "@radix-ui/react-icons";
 import { ThemeContext } from "../../context/ThemeContext";
+import { buttons } from "../../utils/themeUtils";
 
 const JoinLeagueForm = ({
   leagueCode,
@@ -23,7 +24,7 @@ const JoinLeagueForm = ({
       {" "}
       <div className="flex justify-between items-center mb-4">
         <h2
-          className={`text-2xl font-outfit ${
+          className={`text-2xl font-dmSerif ${
             isDarkMode ? "text-teal-100" : "text-teal-800"
           }`}
         >
@@ -101,7 +102,7 @@ const JoinLeagueForm = ({
             disabled={isLoading}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors flex items-center disabled:opacity-70"
+            className={`px-4 py-2 ${buttons.primary[theme]} text-white rounded-md transition-colors flex items-center disabled:opacity-70`}
           >
             <EnterIcon className="mr-1.5 w-4 h-4" />
             {isLoading ? "Joining..." : "Join League"}

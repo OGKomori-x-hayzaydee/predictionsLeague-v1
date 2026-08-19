@@ -19,19 +19,19 @@ export default function GoalscorerSummary({
       className={`${getThemeStyles(theme, {
         dark: "bg-slate-800/50 border-slate-700/60",
         light: "bg-slate-50/50 border-slate-200/60",
-      })} border rounded-xl p-4 mb-4 font-outfit`}
+      })} border rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 font-outfit`}
     >
       <h4
         className={`${getThemeStyles(theme, {
           dark: "text-slate-200",
           light: "text-slate-800",
-        })} text-sm font-medium mb-3 flex items-center`}
+        })} text-xs sm:text-sm font-medium mb-2 sm:mb-3 flex items-center`}
       >
-        <TargetIcon className="mr-2 w-4 h-4 text-emerald-400" />
+        <TargetIcon className="mr-1.5 sm:mr-2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
         Predicted Goalscorers
       </h4>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {homeScore > 0 && (
           <div className="space-y-2">
             <div

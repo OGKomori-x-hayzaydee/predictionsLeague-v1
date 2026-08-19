@@ -4,11 +4,11 @@ import { ThemeContext } from "../../../context/ThemeContext";
 import { getThemeStyles, backgrounds, text } from "../../../utils/themeUtils";
 import { RocketIcon } from "@radix-ui/react-icons";
 
-export default function ScorePredictionStep({ 
-  fixture, 
-  homeScore, 
-  awayScore, 
-  onHomeScoreChange, 
+export default function ScorePredictionStep({
+  fixture,
+  homeScore,
+  awayScore,
+  onHomeScoreChange,
   onAwayScoreChange,
   disabled = false
 }) {
@@ -21,13 +21,13 @@ export default function ScorePredictionStep({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.2 }}
-      className="pb-4"
+      className="pb-2 sm:pb-4"
     >
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
             <RocketIcon
-              className={`w-5 h-5 ${getThemeStyles(theme, {
+              className={`w-4 h-4 sm:w-5 sm:h-5 ${getThemeStyles(theme, {
                 dark: "text-emerald-400",
                 light: "text-emerald-600",
               })}`}
@@ -37,37 +37,37 @@ export default function ScorePredictionStep({
             className={`${getThemeStyles(
               theme,
               text.primary
-            )} text-xl font-bold font-outfit`}
+            )} text-lg sm:text-xl font-bold font-outfit`}
           >
             Predict the scoreline
           </h3>
         </div>
 
         {/* Rich Card Style Score Prediction */}
-        <div className={`rounded-xl p-6 ${getThemeStyles(theme, {
+        <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 ${getThemeStyles(theme, {
           dark: 'bg-slate-800/50 border border-slate-700/60',
           light: 'bg-slate-50 border border-slate-200'
         })}`}>
           {/* Match Info Header */}
-          <div className={`text-xs font-medium mb-4 font-outfit ${getThemeStyles(theme, text.muted)}`}>
+          <div className={`text-2xs sm:text-xs font-medium mb-3 sm:mb-4 font-outfit ${getThemeStyles(theme, text.muted)}`}>
             Premier League • GW{fixture.gameweek} • {fixture.venue}
           </div>
 
           {/* Score Input Section */}
-          <div className={`rounded-lg p-6 ${getThemeStyles(theme, {
+          <div className={`rounded-lg p-3 sm:p-4 md:p-6 ${getThemeStyles(theme, {
             dark: 'bg-slate-900/50 border border-slate-700/30',
             light: 'bg-white border border-slate-200'
           })}`}>
-            <div className={`text-xs font-medium mb-4 font-outfit ${getThemeStyles(theme, text.muted)}`}>
+            <div className={`text-2xs sm:text-xs font-medium mb-3 sm:mb-4 font-outfit ${getThemeStyles(theme, text.muted)}`}>
               Enter Score Prediction
             </div>
-            
-            <div className="flex items-center justify-center space-x-8">
+
+            <div className="flex items-center justify-center space-x-4 sm:space-x-6 md:space-x-8">
               <div className="text-center flex-1">
-                <div className={`text-sm font-medium font-outfit mb-2 truncate ${getThemeStyles(theme, text.secondary)}`}>
+                <div className={`text-xs sm:text-sm font-medium font-outfit mb-2 truncate ${getThemeStyles(theme, text.secondary)}`}>
                   {fixture.homeTeam}
                 </div>
-                <div className="relative">
+                <div className="relative flex justify-center">
                   <input
                     type="number"
                     min="0"
@@ -83,8 +83,8 @@ export default function ScorePredictionStep({
                       );
                     }}
                     disabled={disabled}
-                    className={`appearance-none rounded-lg w-20 h-16 text-3xl text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-outfit font-bold ${
-                      disabled 
+                    className={`appearance-none rounded-lg w-16 h-14 sm:w-20 sm:h-16 text-2xl sm:text-3xl text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-outfit font-bold ${
+                      disabled
                         ? getThemeStyles(theme, {
                             dark: 'bg-slate-900/50 border border-slate-700/30 text-slate-600 cursor-not-allowed',
                             light: 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
@@ -99,16 +99,16 @@ export default function ScorePredictionStep({
                   />
                 </div>
               </div>
-              
-              <div className={`text-lg font-bold font-outfit ${getThemeStyles(theme, text.muted)}`}>
+
+              <div className={`text-base sm:text-lg font-bold font-outfit ${getThemeStyles(theme, text.muted)}`}>
                 —
               </div>
-              
+
               <div className="text-center flex-1">
-                <div className={`text-sm font-medium font-outfit mb-2 truncate ${getThemeStyles(theme, text.secondary)}`}>
+                <div className={`text-xs sm:text-sm font-medium font-outfit mb-2 truncate ${getThemeStyles(theme, text.secondary)}`}>
                   {fixture.awayTeam}
                 </div>
-                <div className="relative">
+                <div className="relative flex justify-center">
                   <input
                     type="number"
                     min="0"
@@ -124,8 +124,8 @@ export default function ScorePredictionStep({
                       );
                     }}
                     disabled={disabled}
-                    className={`appearance-none rounded-lg w-20 h-16 text-3xl text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-outfit font-bold ${
-                      disabled 
+                    className={`appearance-none rounded-lg w-16 h-14 sm:w-20 sm:h-16 text-2xl sm:text-3xl text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-outfit font-bold ${
+                      disabled
                         ? getThemeStyles(theme, {
                             dark: 'bg-slate-900/50 border border-slate-700/30 text-slate-600 cursor-not-allowed',
                             light: 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'

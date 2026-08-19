@@ -1,12 +1,14 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeContext } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
-import { backgrounds, text } from "../../utils/themeUtils";
-import { ToggleButton, SecondaryButton } from "../ui/buttons";
+import { text } from "../../utils/themeUtils";
+import { spacing } from "../../utils/mobileScaleUtils";
+import { ToggleButton } from "../ui/buttons";
 import {
   BellIcon,
-  GearIcon,
   SunIcon,
   MoonIcon,
   CheckIcon,
@@ -14,83 +16,166 @@ import {
   InfoCircledIcon,
   ResetIcon,
   LightningBoltIcon,
+  ChevronRightIcon,
+  MixerHorizontalIcon,
+  EnvelopeClosedIcon,
+  PersonIcon,
+  ExitIcon,
+  TrashIcon,
 } from "@radix-ui/react-icons";
+import userAPI from "../../services/api/userAPI";
+import { notificationManager } from "../../services/notificationService";
 import RulesAndPointsModal from "../common/RulesAndPointsModal";
 import ChipStrategyModal from "../predictions/ChipStrategyModal";
 
-const SettingsView = () => {
+const SettingsView = ({ navigateToSection }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const { preferences, updatePreference, updateNestedPreference, resetPreferences } =
-    useUserPreferences();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const {
+    preferences,
+    updatePreference,
+    updateNestedPreference,
+    resetPreferences,
+  } = useUserPreferences();
 
   const [showSuccess, setShowSuccess] = useState("");
   const [errors, setErrors] = useState({});
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showChipStrategyModal, setShowChipStrategyModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteErrors, setDeleteErrors] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Show success message
   const showSuccessMessage = (message) => {
     setShowSuccess(message);
     setTimeout(() => setShowSuccess(""), 3000);
   };
 
-  // Handle preferences reset
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      navigate("/");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.toLowerCase() !== "delete my account") {
+      setDeleteErrors({ deleteConfirm: 'Please type "delete my account" to confirm' });
+      return;
+    }
+    setIsDeleting(true);
+    setDeleteErrors({});
+    try {
+      const response = await userAPI.deleteAccount();
+      if (response.success) {
+        notificationManager.profile.accountDeleted();
+        await logout();
+        navigate("/");
+        return;
+      }
+    } catch (error) {
+      setDeleteErrors({ general: "Failed to delete account. Please try again." });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleResetPreferences = () => {
-    if (window.confirm("Are you sure you want to reset all preferences to default values?")) {
+    if (
+      window.confirm(
+        "Are you sure you want to reset all preferences to default values?"
+      )
+    ) {
       resetPreferences();
       showSuccessMessage("Preferences reset to defaults!");
     }
   };
 
-  const SettingCard = ({ children, title, description, icon: Icon }) => (
-    <motion.div
-      className={`${backgrounds.card[theme]} rounded-xl p-6 border ${
-        theme === "dark" 
-          ? "border-slate-700/50 bg-slate-800/30" 
-          : "border-slate-200 bg-white shadow-sm"
-      }`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="flex items-center gap-3 mb-4">
-        {Icon && (
-          <div className={`p-2 rounded-lg ${
-            theme === "dark" 
-              ? "bg-teal-500/10 text-teal-400" 
-              : "bg-teal-50 text-teal-600"
-          }`}>
-            <Icon className="w-5 h-5" />
+  // ─── Inline Sub-components ─────────────────────────────────
+
+  const SectionCard = ({ children, title, description, icon: Icon, accentColor = "teal" }) => {
+    const iconColors = {
+      teal:
+        theme === "dark"
+          ? "bg-teal-500/10 text-teal-400"
+          : "bg-teal-50 text-teal-600",
+      blue:
+        theme === "dark"
+          ? "bg-blue-500/10 text-blue-400"
+          : "bg-blue-50 text-blue-600",
+      amber:
+        theme === "dark"
+          ? "bg-amber-500/10 text-amber-400"
+          : "bg-amber-50 text-amber-600",
+      indigo:
+        theme === "dark"
+          ? "bg-indigo-500/10 text-indigo-400"
+          : "bg-indigo-50 text-indigo-600",
+      red:
+        theme === "dark"
+          ? "bg-red-500/10 text-red-400"
+          : "bg-red-50 text-red-600",
+    };
+
+    return (
+      <motion.div
+        className={`backdrop-blur-sm rounded-xl p-5 sm:p-6 border transition-all duration-200 ${
+          theme === "dark"
+            ? "border-slate-700/50 bg-slate-800/40"
+            : "border-slate-200 bg-white shadow-sm"
+        }`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {(title || Icon) && (
+          <div className="flex items-center gap-3 mb-4">
+            {Icon && (
+              <div
+                className={`p-2 rounded-lg ${
+                  iconColors[accentColor] || iconColors.teal
+                }`}
+              >
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+            )}
+            <div>
+              <h3
+                className={`${text.primary[theme]} font-outfit font-semibold text-base sm:text-lg`}
+              >
+                {title}
+              </h3>
+              {description && (
+                <p
+                  className={`${text.secondary[theme]} text-xs sm:text-sm font-outfit mt-0.5`}
+                >
+                  {description}
+                </p>
+              )}
+            </div>
           </div>
         )}
-        <div>
-          <h3
-            className={`${text.primary[theme]} font-outfit font-semibold text-lg`}
-          >
-            {title}
-          </h3>
-          {description && (
-            <p className={`${text.secondary[theme]} text-sm mt-1 font-outfit`}>
-              {description}
-            </p>
-          )}
-        </div>
-      </div>
-      {children}
-    </motion.div>
-  );
-
-
+        {children}
+      </motion.div>
+    );
+  };
 
   const SelectField = ({ label, value, onChange, options }) => (
-    <div className="space-y-2">
-      <label className={`${text.primary[theme]} text-sm font-medium font-outfit block`}>
+    <div className="space-y-1.5">
+      <label
+        className={`${text.primary[theme]} text-sm font-medium font-outfit block`}
+      >
         {label}
       </label>
       <select
         value={value}
         onChange={onChange}
-        className={`w-full px-3 py-2 rounded-lg border font-outfit text-sm transition-colors ${
+        className={`w-full px-3 py-2.5 rounded-lg border font-outfit text-sm transition-colors ${
           theme === "dark"
             ? "bg-slate-700/50 border-slate-600/50 text-white focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20"
             : "bg-white border-slate-200 text-slate-800 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20"
@@ -106,13 +191,19 @@ const SettingsView = () => {
   );
 
   const ToggleRow = ({ label, description, checked, onChange }) => (
-    <div className="flex items-center justify-between py-4 border-b border-slate-200/10 last:border-b-0">
+    <div
+      className={`flex items-center justify-between py-3.5 border-b last:border-b-0 ${
+        theme === "dark" ? "border-slate-700/40" : "border-slate-200/60"
+      }`}
+    >
       <div>
-        <p className={`${text.primary[theme]} font-outfit font-medium`}>
+        <p className={`${text.primary[theme]} font-outfit font-medium text-sm`}>
           {label}
         </p>
         {description && (
-          <p className={`${text.secondary[theme]} text-sm font-outfit mt-1`}>
+          <p
+            className={`${text.secondary[theme]} text-xs sm:text-sm font-outfit mt-0.5`}
+          >
             {description}
           </p>
         )}
@@ -125,33 +216,63 @@ const SettingsView = () => {
       />
     </div>
   );
-  return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+
+  const HelpRow = ({ label, description, onClick, icon: Icon }) => (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center justify-between py-3.5 border-b last:border-b-0 text-left transition-colors group ${
+        theme === "dark"
+          ? "border-slate-700/40 hover:bg-slate-700/20"
+          : "border-slate-200/60 hover:bg-slate-50"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {Icon && (
+          <Icon
+            className={`w-4 h-4 ${
+              theme === "dark" ? "text-slate-400" : "text-slate-500"
+            }`}
+          />
+        )}
         <div>
-          <h1 className={`${
-            theme === "dark" ? "text-teal-100" : "text-teal-700"
-          } text-3xl font-bold font-dmSerif`}>
-            Settings
-          </h1>
-          <p className={`${text.secondary[theme]} font-outfit mt-2`}>
-            Customize your experience and manage preferences
+          <p
+            className={`${text.primary[theme]} font-outfit font-medium text-sm`}
+          >
+            {label}
           </p>
+          {description && (
+            <p
+              className={`${text.secondary[theme]} text-xs font-outfit mt-0.5`}
+            >
+              {description}
+            </p>
+          )}
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleResetPreferences}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            theme === "dark"
-              ? "bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 border border-slate-600/50"
-              : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
-          }`}
+      </div>
+      <ChevronRightIcon
+        className={`w-4 h-4 transition-transform group-hover:translate-x-0.5 ${
+          theme === "dark" ? "text-slate-500" : "text-slate-400"
+        }`}
+      />
+    </button>
+  );
+
+  // ─── Render ────────────────────────────────────────────────
+
+  return (
+    <div className={`max-w-3xl mx-auto ${spacing.normal}`}>
+      {/* Header */}
+      <div>
+        <h1
+          className={`${
+            theme === "dark" ? "text-teal-100" : "text-teal-700"
+          } text-2xl sm:text-3xl font-bold font-dmSerif mb-0.5`}
         >
-          <ResetIcon className="w-4 h-4" />
-          Reset All
-        </motion.button>
+          Settings
+        </h1>
+        <p className={`${text.secondary[theme]} font-outfit text-xs sm:text-sm opacity-70`}>
+          Customize your experience and manage preferences
+        </p>
       </div>
 
       {/* Success Message */}
@@ -181,36 +302,42 @@ const SettingsView = () => {
         </motion.div>
       )}
 
-      {/* Main Settings Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* Appearance & Theme */}
-        <SettingCard
-          title="Appearance"
-          description="Customize how the app looks"
-          icon={theme === "dark" ? MoonIcon : SunIcon}
-        >
-          <div className="space-y-4">
-            <ToggleRow
-              label="Dark Mode"
-              description="Switch between light and dark themes"
-              checked={theme === "dark"}
-              onChange={toggleTheme}
-            />
-          </div>
-        </SettingCard>
+      {/* ═══ Section 1: Appearance & Display ═══ */}
+      <SectionCard
+        title="Appearance & Display"
+        description="Theme, layout, and view preferences"
+        icon={theme === "dark" ? MoonIcon : SunIcon}
+      >
+        {/* Toggles */}
+        <div>
+          <ToggleRow
+            label="Dark Mode"
+            description="Switch between light and dark themes"
+            checked={theme === "dark"}
+            onChange={toggleTheme}
+          />
+          <ToggleRow
+            label="Show Button Labels"
+            description="Display text on navigation buttons"
+            checked={preferences.showButtonTitles}
+            onChange={(value) => updatePreference("showButtonTitles", value)}
+          />
+        </div>
 
-        {/* Interface Preferences */}
-        <SettingCard
-          title="Interface"
-          description="Customize your app experience"
-          icon={GearIcon}
-        >
-          <div className="space-y-4">
+        {/* Default Views sub-group */}
+        <div className="mt-5">
+          <p
+            className={`${text.secondary[theme]} text-xs font-outfit font-medium uppercase tracking-wider mb-3`}
+          >
+            Default Views
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <SelectField
-              label="Default Dashboard View"
+              label="Dashboard"
               value={preferences.defaultDashboardView}
-              onChange={(e) => updatePreference("defaultDashboardView", e.target.value)}
+              onChange={(e) =>
+                updatePreference("defaultDashboardView", e.target.value)
+              }
               options={[
                 { value: "fixtures", label: "Fixtures" },
                 { value: "predictions", label: "Predictions" },
@@ -219,11 +346,12 @@ const SettingsView = () => {
               ]}
             />
             <SelectField
-              label="Default Fixtures View"
+              label="Fixtures"
               value={preferences.defaultFixturesView}
-              onChange={(e) => updatePreference("defaultFixturesView", e.target.value)}
+              onChange={(e) =>
+                updatePreference("defaultFixturesView", e.target.value)
+              }
               options={[
-                { value: "carousel", label: "Carousel View" },
                 { value: "teams", label: "By Teams" },
                 { value: "stack", label: "Stack View" },
                 { value: "calendar", label: "Calendar View" },
@@ -232,109 +360,290 @@ const SettingsView = () => {
               ]}
             />
             <SelectField
-              label="Default Predictions View"
+              label="Predictions"
               value={preferences.defaultPredictionsView}
-              onChange={(e) => updatePreference("defaultPredictionsView", e.target.value)}
+              onChange={(e) =>
+                updatePreference("defaultPredictionsView", e.target.value)
+              }
               options={[
                 { value: "list", label: "Grid View" },
                 { value: "table", label: "Table View" },
                 { value: "calendar", label: "Calendar View" },
                 { value: "stack", label: "Stack View" },
-                { value: "carousel", label: "Carousel View" },
                 { value: "teams", label: "By Teams" },
               ]}
             />
             <SelectField
-              label="Default League Predictions View"
+              label="League Predictions"
               value={preferences.defaultLeaguePredictionsView}
-              onChange={(e) => updatePreference("defaultLeaguePredictionsView", e.target.value)}
+              onChange={(e) =>
+                updatePreference(
+                  "defaultLeaguePredictionsView",
+                  e.target.value
+                )
+              }
               options={[
                 { value: "teams", label: "By Members" },
                 { value: "list", label: "Grid View" },
                 { value: "table", label: "Table View" },
                 { value: "stack", label: "Stack View" },
                 { value: "calendar", label: "Calendar View" },
-                { value: "carousel", label: "Carousel View" },
               ]}
             />
-            <ToggleRow
-              label="Show Button Labels"
-              description="Display text on navigation buttons"
-              checked={preferences.showButtonTitles}
-              onChange={(value) => updatePreference("showButtonTitles", value)}
-            />
           </div>
-        </SettingCard>
+        </div>
+      </SectionCard>
 
-        {/* Notifications */}
-        <SettingCard
-          title="Notifications"
-          description="Manage what you get notified about"
-          icon={BellIcon}
-        >
-          <div className="space-y-4">
-            <ToggleRow
-              label="Email Notifications"
-              description="Get updates via email"
-              checked={preferences.notifications.emailAlerts}
-              onChange={(value) => updateNestedPreference("notifications", "emailAlerts", value)}
-            />
-            <ToggleRow
-              label="Prediction Reminders"
-              description="Reminders before deadlines"
-              checked={preferences.notifications.predictionReminders}
-              onChange={(value) => updateNestedPreference("notifications", "predictionReminders", value)}
-            />
-            <ToggleRow
-              label="League Updates"
-              description="Notifications for league activity"
-              checked={preferences.notifications.leagueInvitations}
-              onChange={(value) => updateNestedPreference("notifications", "leagueInvitations", value)}
-            />
-          </div>
-        </SettingCard>
+      {/* ═══ Section 2: Notifications ═══ */}
+      <SectionCard
+        title="Notifications"
+        description="Manage what you get notified about"
+        icon={BellIcon}
+        accentColor="blue"
+      >
+        <div>
+          <ToggleRow
+            label="Email Notifications"
+            description="Get updates via email"
+            checked={preferences.notifications.emailAlerts}
+            onChange={(value) =>
+              updateNestedPreference("notifications", "emailAlerts", value)
+            }
+          />
+          <ToggleRow
+            label="Prediction Reminders"
+            description="Reminders before deadlines"
+            checked={preferences.notifications.predictionReminders}
+            onChange={(value) =>
+              updateNestedPreference(
+                "notifications",
+                "predictionReminders",
+                value
+              )
+            }
+          />
+          <ToggleRow
+            label="League Updates"
+            description="Notifications for league activity"
+            checked={preferences.notifications.leagueInvitations}
+            onChange={(value) =>
+              updateNestedPreference(
+                "notifications",
+                "leagueInvitations",
+                value
+              )
+            }
+          />
+        </div>
+      </SectionCard>
 
-        {/* Help & Support */}
-        <SettingCard
-          title="Help & Support"
-          description="Get help and learn more"
-          icon={InfoCircledIcon}
+      {/* ═══ Section 3: Help & Resources ═══ */}
+      <SectionCard
+        title="Help & Resources"
+        description="Learn the rules, get support"
+        icon={InfoCircledIcon}
+        accentColor="indigo"
+      >
+        <div>
+          <HelpRow
+            label="Rules & Points System"
+            description="How scoring and predictions work"
+            icon={InfoCircledIcon}
+            onClick={() => setShowRulesModal(true)}
+          />
+          <HelpRow
+            label="Chip Strategy Guide"
+            description="Learn how to use your chips effectively"
+            icon={LightningBoltIcon}
+            onClick={() => setShowChipStrategyModal(true)}
+          />
+          <HelpRow
+            label="Contact Support"
+            description="Get in touch with our team"
+            icon={EnvelopeClosedIcon}
+            onClick={() =>
+              window.open("mailto:support@predictionsleague.com")
+            }
+          />
+          {navigateToSection && (
+            <HelpRow
+              label="Account Settings"
+              description="Edit profile, change password, manage account"
+              icon={PersonIcon}
+              onClick={() => navigateToSection("profile")}
+            />
+          )}
+        </div>
+      </SectionCard>
+
+      {/* ═══ Reset Footer ═══ */}
+      <motion.div
+        className={`rounded-xl p-4 sm:p-5 border flex items-center justify-between ${
+          theme === "dark"
+            ? "border-slate-700/30 bg-slate-800/20"
+            : "border-slate-200/60 bg-slate-50/50"
+        }`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div>
+          <p
+            className={`${text.primary[theme]} font-outfit font-medium text-sm`}
+          >
+            Reset Preferences
+          </p>
+          <p
+            className={`${text.secondary[theme]} text-xs font-outfit mt-0.5`}
+          >
+            Restore all settings to their default values
+          </p>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleResetPreferences}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors ${
+            theme === "dark"
+              ? "bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 border border-slate-600/50"
+              : "bg-white hover:bg-slate-100 text-slate-700 border border-slate-200"
+          }`}
         >
-          <div className="space-y-3">
-            <SecondaryButton
-              variant="outline"
-              className="w-full justify-center"
-              onClick={() => setShowRulesModal(true)}
-            >
-              <InfoCircledIcon className="mr-2 h-4 w-4" />
-              View Rules & Points System
-            </SecondaryButton>
-            <SecondaryButton
-              variant="outline"
-              className="w-full justify-center"
-              onClick={() => setShowChipStrategyModal(true)}
-            >
-              <LightningBoltIcon className="mr-2 h-4 w-4" />
-              Chip Strategy Guide
-            </SecondaryButton>
-            <SecondaryButton
-              variant="outline"
-              className="w-full justify-center"
-              onClick={() => window.open("mailto:support@predictionsleague.com")}
-            >
-              Contact Support
-            </SecondaryButton>
+          <ResetIcon className="w-4 h-4" />
+          Reset All
+        </motion.button>
+      </motion.div>
+
+      {/* ═══ Section 5: Danger Zone ═══ */}
+      <SectionCard
+        title="Danger Zone"
+        description="Irreversible account actions"
+        icon={TrashIcon}
+        accentColor="red"
+      >
+        <div className="space-y-4">
+          <div className={`p-4 rounded-lg border flex items-start gap-3 ${
+            theme === "dark"
+              ? "bg-red-500/10 border-red-500/20"
+              : "bg-red-50 border-red-200"
+          }`}>
+            <ExclamationTriangleIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+              theme === "dark" ? "text-red-400" : "text-red-600"
+            }`} />
+            <div className="flex-1">
+              <h4 className={`${theme === "dark" ? "text-red-400" : "text-red-600"} font-outfit font-semibold mb-2`}>
+                Delete Account
+              </h4>
+              <p className={`${theme === "dark" ? "text-red-300" : "text-red-600"} text-sm font-outfit mb-3`}>
+                This will permanently delete your account, predictions, leagues, and all associated data. This action cannot be undone.
+              </p>
+
+              {!showDeleteConfirm ? (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors border ${
+                    theme === "dark"
+                      ? "border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white"
+                      : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                  }`}
+                >
+                  Delete Account
+                </motion.button>
+              ) : (
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-3"
+                  >
+                    <div className="space-y-1.5">
+                      <label className={`${theme === "dark" ? "text-red-300" : "text-red-600"} text-sm font-medium font-outfit block`}>
+                        Type &quot;delete my account&quot; to confirm
+                      </label>
+                      <input
+                        type="text"
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="delete my account"
+                        className={`w-full px-3 py-2 rounded-lg border text-sm font-outfit transition-colors focus:outline-none focus:ring-2 ${
+                          theme === "dark"
+                            ? "bg-slate-800 border-slate-600 text-slate-200 focus:ring-red-500/50 placeholder-slate-500"
+                            : "bg-white border-slate-300 text-slate-900 focus:ring-red-500/50 placeholder-slate-400"
+                        }`}
+                      />
+                      {deleteErrors.deleteConfirm && (
+                        <p className="text-red-400 text-xs font-outfit">{deleteErrors.deleteConfirm}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting || deleteConfirmText.toLowerCase() !== "delete my account"}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors border disabled:opacity-50 disabled:cursor-not-allowed ${
+                          theme === "dark"
+                            ? "border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white"
+                            : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                        }`}
+                      >
+                        {isDeleting ? "Deleting..." : "Confirm Deletion"}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteConfirmText("");
+                          setDeleteErrors({});
+                        }}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium font-outfit transition-colors border ${
+                          theme === "dark"
+                            ? "border-slate-600 text-slate-300 hover:bg-slate-700"
+                            : "border-slate-300 text-slate-600 hover:bg-slate-100"
+                        }`}
+                      >
+                        Cancel
+                      </motion.button>
+                    </div>
+                    {deleteErrors.general && (
+                      <p className="text-red-400 text-sm font-outfit">{deleteErrors.general}</p>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              )}
+            </div>
           </div>
-        </SettingCard>
+        </div>
+      </SectionCard>
+
+      {/* ═══ Sign Out ═══ */}
+      <div
+        className={`mt-2 pt-6 border-t ${
+          theme === "dark" ? "border-slate-700/30" : "border-slate-200/60"
+        }`}
+      >
+        <button
+          onClick={handleLogout}
+          className={`flex items-center gap-3 px-1 py-2 rounded-lg transition-colors font-outfit text-sm font-medium ${
+            theme === "dark"
+              ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              : "text-red-500 hover:text-red-600 hover:bg-red-50"
+          }`}
+        >
+          <ExitIcon className="w-4 h-4" />
+          <span>Sign Out</span>
+        </button>
       </div>
-      
-      {/* Rules Modal */}
+
+      {/* Modals */}
       <RulesAndPointsModal
         isOpen={showRulesModal}
         onClose={() => setShowRulesModal(false)}
       />
-      
-      {/* Chip Strategy Modal */}
       <ChipStrategyModal
         isOpen={showChipStrategyModal}
         onClose={() => setShowChipStrategyModal(false)}

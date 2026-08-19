@@ -24,7 +24,6 @@ public class ChipService {
                 .toList();
     }
 
-    @Transactional
     public void createChipsForNewUser(UserEntity newUser) {
         List<ChipEntity> chips = List.of(
                 ChipEntity.builder().user(newUser).type(Chip.WILDCARD).build(),
@@ -34,22 +33,32 @@ public class ChipService {
                 ChipEntity.builder().user(newUser).type(Chip.DOUBLE_DOWN).build()
         );
 
-        chipRepository.saveAll(chips);
+        chipRepository.saveAllAndFlush(chips);
     }
 
     @Transactional
     public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
         for (Chip chip : prediction.getChips()) {
             ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
-            chipEntity.setLastUsedGameweek(prediction.getGameweek());
-            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
-            if (chipEntity.getType() == Chip.WILDCARD) {
-                chipEntity.setRemainingGameweeks(8);
-            } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                chipEntity.setRemainingGameweeks(6);
-            } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
-                chipEntity.setRemainingGameweeks(1);
+
+            if (chipEntity.getType() == Chip.ALL_IN_WEEK) {
+                Integer lastUsed = chipEntity.getLastUsedGameweek();
+                if (lastUsed == null || !lastUsed.equals(prediction.getGameweek())) {
+                    chipEntity.setLastUsedGameweek(prediction.getGameweek());
+                    chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+                }
+            } else {
+                chipEntity.setLastUsedGameweek(prediction.getGameweek());
+                chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+                if (chipEntity.getType() == Chip.WILDCARD) {
+                    chipEntity.setRemainingGameweeks(8);
+                } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
+                    chipEntity.setRemainingGameweeks(6);
+                } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
+                    chipEntity.setRemainingGameweeks(1);
+                }
             }
+
             chipRepository.save(chipEntity);
         }
     }

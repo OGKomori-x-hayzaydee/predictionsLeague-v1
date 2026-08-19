@@ -24,7 +24,7 @@ public class FixtureService {
     public List<Fixture> getFixtures() {
         List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         if (fixtures == null || fixtures.isEmpty()) {
-            apiService.updateUpcomingFixtures();
+            apiService.updateFixtures();
             fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         }
 

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,10 +30,6 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    @Value("${app.first-api-key}")
-    private String firstApiKey;
-    @Value("${app.second-api-key}")
-    private String secondApiKey;
     @Value("${app.frontend-url}")
     private String frontendUrl;
     private final CustomUserDetailsService userDetailsService;
@@ -84,19 +79,5 @@ public class SecurityConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder.build();
-    }
-
-    @Bean
-    public HttpHeaders firstApiHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Auth-Token", firstApiKey);
-        return headers;
-    }
-
-    @Bean
-    public HttpHeaders secondApiHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", secondApiKey);
-        return headers;
     }
 }

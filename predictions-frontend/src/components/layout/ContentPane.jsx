@@ -236,13 +236,7 @@ export default function ContentPane({
     // Special case for league details/management
     if (activeItem === "leagues" && selectedLeagueId) {
       // Find the league from available data
-      const selectedLeague = apiLeagues?.find(league => league.id === selectedLeagueId) || 
-                           leagues?.find(league => league.id === selectedLeagueId);
-      
-      console.log('ContentPane league selection:', {
-        selectedLeagueId,
-        selectedLeague: selectedLeague ? 'found' : 'not found'
-      });
+      const selectedLeague = apiLeagues?.find(league => league.id === selectedLeagueId);
 
       // If we're still loading and no league found, show loading
       if (!selectedLeague && secondaryLoading) {
@@ -339,6 +333,8 @@ export default function ContentPane({
                 awayPlayers: match.awayPlayers || [],
               })
             }
+            handleEditPrediction={handleEditPrediction}
+            handleFixtureSelect={handleFixtureSelect}
             navigateToSection={navigateToSection}
             toggleChipInfoModal={toggleChipInfoModal}
           />
@@ -351,7 +347,7 @@ export default function ContentPane({
           />
         );
       case "profile":
-        return <ProfileView />;
+        return <ProfileView navigateToSection={navigateToSection} />;
       case "predictions":
         return (
           <PredictionsView
@@ -379,7 +375,7 @@ export default function ContentPane({
           />
         );
       case "settings":
-        return <SettingsView />;
+        return <SettingsView navigateToSection={navigateToSection} />;
       default:
         return (
           <DashboardView

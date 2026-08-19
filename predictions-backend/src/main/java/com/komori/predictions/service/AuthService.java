@@ -31,7 +31,7 @@ public class AuthService {
             throw new EmailAlreadyExistsException();
         }
         UserEntity newUser = convertToUserEntity(request);
-        newUser = userRepository.save(newUser);
+        newUser = userRepository.saveAndFlush(newUser);
         chipService.createChipsForNewUser(newUser);
         emailService.sendWelcomeEmail(request.getEmail(), request.getFirstName());
     }
@@ -95,6 +95,14 @@ public class AuthService {
         user.setFavouriteTeam(request.getFavouriteTeam());
         user.setUsername(request.getUsername());
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+
+        userRepository.delete(user);
     }
 
     public void checkVerifiedStatus(String email) {
