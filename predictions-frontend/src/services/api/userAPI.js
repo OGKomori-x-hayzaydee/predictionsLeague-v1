@@ -254,22 +254,24 @@ export const userAPI = {
   },
 
   /**
-   * Change user password
+   * Change user password.
+   * Backend route is ProfileController#changePassword (POST /profile/change-password,
+   * body { oldPassword, newPassword } — see PasswordChangeRequest). The previous
+   * implementation here called a PUT /users/change-password route that doesn't
+   * exist on the backend at all; fixed to hit the real endpoint.
    * @param {Object} passwordData - Password change data
    * @param {string} passwordData.currentPassword - Current password
    * @param {string} passwordData.newPassword - New password
-   * @param {string} passwordData.confirmPassword - Confirm new password
    * @returns {Promise<Object>} Password change response
    */
   async changePassword(passwordData) {
     try {
       const response = await apiCall({
-        method: 'PUT',
-        url: '/users/change-password',
+        method: 'POST',
+        url: '/profile/change-password',
         data: {
-          currentPassword: passwordData.currentPassword,
+          oldPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
-          confirmPassword: passwordData.confirmPassword,
         },
       });
 
@@ -288,16 +290,18 @@ export const userAPI = {
   },
 
   /**
-   * Delete user account
-   * @param {string} password - Current password for confirmation
+   * Delete user account.
+   * Backend route is AuthController#deleteUser (DELETE /auth/delete-user), which
+   * identifies the user from the auth cookie and takes no body. The previous
+   * implementation here called a DELETE /users/account route that doesn't exist
+   * on the backend; fixed to hit the real endpoint.
    * @returns {Promise<Object>} Account deletion response
    */
-  async deleteAccount(password) {
+  async deleteAccount() {
     try {
       const response = await apiCall({
         method: 'DELETE',
-        url: '/users/account',
-        data: { password },
+        url: '/auth/delete-user',
       });
 
       if (response.success) {
