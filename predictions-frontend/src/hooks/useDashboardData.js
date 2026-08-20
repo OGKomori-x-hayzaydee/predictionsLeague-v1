@@ -140,17 +140,23 @@ const useDashboardData = () => {
 
   // Derive the "LAST GAMEWEEK" ledger from recent predictions: the most
   // recently completed gameweek's scored predictions, newest first, capped
-  // to 3 rows for the sidebar/sheet. Pure arithmetic over real backend
-  // fields (points/correct/gameweek) — no fabricated data.
+  // to 3 rows for the sidebar/sheet, plus the season's best-scoring
+  // gameweek. Pure arithmetic over real backend fields (points/correct/
+  // gameweek) — no fabricated data.
   const ledger = useMemo(() => {
     const completed = (recentPredictions || []).filter(
       (p) => p.points !== null && p.points !== undefined && p.gameweek != null
     );
     if (completed.length === 0) {
-      return { entries: [], gameweek: null, total: 0 };
+      return { entries: [], gameweek: null, total: 0, bestGameweek: null, bestTotal: 0 };
     }
 
-    const latestGameweek = Math.max(...completed.map((p) => p.gameweek));
+    const gwTotals = new Map();
+    completed.forEach((p) => {
+      gwTotals.set(p.gameweek, (gwTotals.get(p.gameweek) || 0) + (p.points || 0));
+    });
+
+    const latestGameweek = Math.max(...gwTotals.keys());
     const gwPredictions = completed
       .filter((p) => p.gameweek === latestGameweek)
       .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -168,9 +174,18 @@ const useDashboardData = () => {
             : 'var(--color-brand-amber-mid)',
     }));
 
-    const total = gwPredictions.reduce((sum, p) => sum + (p.points || 0), 0);
+    const total = gwTotals.get(latestGameweek) || 0;
 
-    return { entries, gameweek: latestGameweek, total };
+    let bestGameweek = null;
+    let bestTotal = -Infinity;
+    gwTotals.forEach((sum, gw) => {
+      if (sum > bestTotal) {
+        bestTotal = sum;
+        bestGameweek = gw;
+      }
+    });
+
+    return { entries, gameweek: latestGameweek, total, bestGameweek, bestTotal };
   }, [recentPredictions]);
 
   // Refresh function to refetch leagues data
@@ -210,6 +225,8 @@ const useDashboardData = () => {
     ledger: ledger.entries,
     ledgerGameweek: ledger.gameweek,
     ledgerTotal: ledger.total,
+    ledgerBestGameweek: ledger.bestGameweek,
+    ledgerBestTotal: ledger.bestTotal,
     ledgerLoading: recentPredictionsLoading,
 
     // Loading states

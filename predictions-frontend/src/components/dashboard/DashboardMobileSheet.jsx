@@ -11,7 +11,7 @@ import LedgerSection from './LedgerSection';
  * cross-screen concern outside this screen's scope — so this only covers
  * Dashboard's own "dash" sheet content.
  */
-export default function DashboardMobileSheet({ open, onClose, ledger, ledgerFooter, ledgerLoading }) {
+export default function DashboardMobileSheet({ open, onClose, ledger, ledgerFooter, ledgerLoading, leagues }) {
   if (!open) return null;
 
   return (
@@ -27,7 +27,7 @@ export default function DashboardMobileSheet({ open, onClose, ledger, ledgerFoot
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-[18px] pb-[22px] pt-1.5">
           <div className="flex flex-col gap-5">
-            <RivalsSection />
+            <RivalsSection leagues={leagues} />
             <div className="h-px shrink-0 bg-border-base" />
             <ChipStockSection />
             <div className="h-px shrink-0 bg-border-base" />

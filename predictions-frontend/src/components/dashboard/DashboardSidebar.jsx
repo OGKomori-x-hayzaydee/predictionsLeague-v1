@@ -9,10 +9,10 @@ import LedgerSection from './LedgerSection';
  * inside DashboardMobileSheet instead (prototype mobile lines 2339-2342 +
  * 3779-3819) since the mobile shell has no equivalent right-rail chrome.
  */
-export default function DashboardSidebar({ ledger, ledgerFooter, ledgerLoading }) {
+export default function DashboardSidebar({ ledger, ledgerFooter, ledgerLoading, leagues }) {
   return (
     <div className="hidden min-h-0 flex-col gap-[22px] overflow-y-auto border-l border-border-hairline bg-surface-bar px-5 py-[22px] md:flex">
-      <RivalsSection />
+      <RivalsSection leagues={leagues} />
       <div className="h-px shrink-0 bg-border-base" />
       <ChipStockSection />
       <div className="h-px shrink-0 bg-border-base" />

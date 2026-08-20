@@ -4,6 +4,7 @@ import KickerLabel from '../ui/KickerLabel';
 import Card from '../ui/Card';
 import { CHIP_CONFIG } from '../../utils/chipManager';
 import { CHIP_HUES, DEFAULT_CHIP_HUE } from './chipHues';
+import { getMatchInsight } from '../../utils/matchInsights';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -12,6 +13,27 @@ function formatKickoff(dateStr) {
   const day = d.toLocaleDateString(undefined, { weekday: 'short' });
   const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
   return `${day} ${time}`;
+}
+
+// Familiar broadcast-slot naming (Friday Night, Saturday Lunchtime, ...) —
+// pure formatting over the real kickoff date, no schedule/broadcast data.
+function formatSlot(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return '';
+  const day = d.getDay();
+  const hour = d.getHours() + d.getMinutes() / 60;
+  if (day === 5) return 'Friday Night';
+  if (day === 6) return hour < 13 ? 'Saturday Lunchtime' : hour < 17.5 ? 'Saturday 3pm' : 'Saturday Evening';
+  if (day === 0) return hour < 15 ? 'Sunday Early' : 'Sunday Late';
+  if (day === 1) return 'Monday Night';
+  return d.toLocaleDateString(undefined, { weekday: 'long' });
+}
+
+function meetingClasses(result) {
+  if (result === 'W') return 'border-brand-teal-mid/40 bg-brand-teal-deep/15 text-brand-teal';
+  if (result === 'L') return 'border-[#b4530966] bg-[#78350f26] text-brand-amber-mid';
+  return 'border-border-card bg-surface-card-3 text-text-muted-2';
 }
 
 function ScorerPill({ name, hue, size = 'md' }) {
@@ -28,16 +50,14 @@ function ScorerPill({ name, hue, size = 'md' }) {
 
 /**
  * Fixture-preview card — the selected station's detail view (Spine.dc.html
- * desktop lines 131-266, mobile lines 2257-2336). Real data only: venue,
- * kickoff, filed status, the user's own filed scoreline/scorers/chip, and
- * the real "ceiling" (calculateCeilingPoints, via useFixtureSpine). The
- * prototype's team-form letter strips (W/D/L) and AI-overview contents
- * (predicted score/confidence, H2H, crowd picks) have no backing data
- * source on this backend (no team-form/odds/AI service, no match-history
- * archive) — team form is dropped entirely rather than fabricated, and the
- * AI-overview slot renders an honest "coming soon" placeholder instead of
- * invented numbers, matching the constraint that this is a genuinely new
- * product with no accumulated history to derive "smart" reads from.
+ * desktop lines 131-266, mobile lines 2257-2336). Venue, kickoff, filed
+ * status, and the user's own filed scoreline/scorers/chip/ceiling
+ * (calculateCeilingPoints, via useFixtureSpine) are all real data. The
+ * team-form strips and the AI-overview panel (predicted score/confidence,
+ * last-5-meetings, crowd picks) have no backing data source on this backend
+ * (no team-form/odds/AI service, no match-history archive) — see
+ * utils/matchInsights.js for the deterministic sample data standing in for
+ * them until a real source exists.
  */
 export default function FixturePreviewCard({
   fixture,
@@ -63,6 +83,7 @@ export default function FixturePreviewCard({
   const chipId = prediction?.chips?.[0];
   const chip = chipId ? CHIP_CONFIG[chipId] : null;
   const chipHue = chipId ? CHIP_HUES[chipId] || DEFAULT_CHIP_HUE : null;
+  const insight = getMatchInsight(fixture);
 
   const homeScorers = (prediction?.homeScorers || []).filter(Boolean);
   const awayScorers = (prediction?.awayScorers || []).filter(Boolean);
@@ -76,8 +97,8 @@ export default function FixturePreviewCard({
     <Card className="flex flex-col overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-base px-[22px] py-[13px]">
         <div className="flex items-center gap-[11px] text-xs">
-          <span className="font-mono text-[11px] tracking-[0.14em] text-brand-teal">
-            {homeTeam} v {awayTeam}
+          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-teal">
+            {formatSlot(date) || `${homeTeam} v ${awayTeam}`}
           </span>
           {venue && (
             <>
@@ -120,6 +141,11 @@ export default function FixturePreviewCard({
               <span className="font-dmSerif text-lg text-text-primary sm:text-[22px]">{homeTeam}</span>
               <TeamCrest team={homeTeam} size={crestSize} />
             </div>
+            {insight && (
+              <span className="font-mono text-[10px] tracking-[0.14em] text-text-muted-4">
+                {insight.homeForm}
+              </span>
+            )}
             <div className="flex flex-wrap justify-end gap-1.5">
               {homeScorers.length > 0 ? (
                 homeScorers.map((name) => (
@@ -157,6 +183,11 @@ export default function FixturePreviewCard({
               <TeamCrest team={awayTeam} size={crestSize} />
               <span className="font-dmSerif text-lg text-text-primary sm:text-[22px]">{awayTeam}</span>
             </div>
+            {insight && (
+              <span className="font-mono text-[10px] tracking-[0.14em] text-text-muted-4">
+                {insight.awayForm}
+              </span>
+            )}
             <div className="flex flex-wrap gap-1.5">
               {awayScorers.length > 0 ? (
                 awayScorers.map((name) => (
@@ -196,12 +227,63 @@ export default function FixturePreviewCard({
             <span className="ml-auto font-mono text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
           )}
         </button>
-        {(!isMobile || aiOpen) && (
-          <p className="text-xs leading-relaxed text-text-muted-1">
-            Match reads (predicted score, head-to-head, crowd picks) are arriving once a real
-            odds/model data source is wired in for this fixture — this isn&apos;t guesswork we&apos;re
-            willing to show you yet.
-          </p>
+        {(!isMobile || aiOpen) && insight && (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-baseline gap-2.5">
+                <span className="font-dmSerif text-xl text-text-primary">
+                  {insight.predictedHome}-{insight.predictedAway}
+                </span>
+                <span className="font-mono text-[11px] text-brand-teal">{insight.confidence}% confidence</span>
+              </div>
+              <div className="relative h-1 overflow-hidden rounded-full bg-surface-card-3">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-brand-teal-mid"
+                  style={{ width: `${insight.confidence}%` }}
+                />
+              </div>
+              <p className="text-xs leading-relaxed text-text-muted-1">{insight.blurb}</p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-3">
+                Last 5 meetings
+              </KickerLabel>
+              <div className="flex gap-1">
+                {insight.meetings.map((result, i) => (
+                  <span
+                    key={i}
+                    className={`flex h-5 w-5 items-center justify-center rounded-xs border font-mono text-[10px] ${meetingClasses(result)}`}
+                  >
+                    {result}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-text-muted-2">{insight.meetingsSummary}</p>
+              <p className="text-xs text-text-muted-3">{insight.meetingsNote}</p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-3">
+                What the league is picking
+              </KickerLabel>
+              <div className="flex flex-col gap-1.5">
+                {insight.crowd.map((c) => (
+                  <div key={c.label} className="flex items-center gap-2">
+                    <span className="w-[88px] shrink-0 truncate text-xs text-text-muted-1">{c.label}</span>
+                    <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-surface-card-3">
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-brand-indigo-mid/70"
+                        style={{ width: `${c.pct}%` }}
+                      />
+                    </div>
+                    <span className="w-8 shrink-0 text-right font-mono text-[11px] text-text-muted-2">{c.pct}%</span>
+                  </div>
+                ))}
+              </div>
+              <p className="font-mono text-[11px] text-text-muted-3">most-picked {insight.mostPicked}</p>
+            </div>
+          </div>
         )}
       </div>
     </Card>

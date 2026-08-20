@@ -29,7 +29,16 @@ export default function DashboardPage() {
     isLoading: fixturesLoading,
   } = useFixtureSpine();
 
-  const { essentialData, ledger, ledgerGameweek, ledgerTotal, ledgerLoading } = useDashboardData();
+  const {
+    essentialData,
+    ledger,
+    ledgerGameweek,
+    ledgerTotal,
+    ledgerBestGameweek,
+    ledgerBestTotal,
+    ledgerLoading,
+    leagues,
+  } = useDashboardData();
   const { timeDisplay, isLive } = useNextMatch();
 
   const currentGameweek = essentialData?.season?.currentGameweek;
@@ -42,7 +51,11 @@ export default function DashboardPage() {
     ? `${stillOpen} still open · deadline ${deadlineFormatted}`
     : `${stillOpen} still open`;
   const progressPct = total > 0 ? Math.round((filedCount / total) * 100) : 0;
-  const ledgerFooter = ledgerGameweek ? `GW${ledgerGameweek} total ${ledgerTotal} pts` : null;
+  const ledgerFooter = !ledgerGameweek
+    ? null
+    : ledgerBestGameweek && ledgerBestGameweek !== ledgerGameweek
+      ? `GW${ledgerGameweek} total ${ledgerTotal} · best week GW${ledgerBestGameweek} on ${ledgerBestTotal}`
+      : `GW${ledgerGameweek} total ${ledgerTotal} pts`;
 
   return (
     <div className="animate-rise-in">
@@ -101,7 +114,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <DashboardSidebar ledger={ledger} ledgerFooter={ledgerFooter} ledgerLoading={ledgerLoading} />
+        <DashboardSidebar ledger={ledger} ledgerFooter={ledgerFooter} ledgerLoading={ledgerLoading} leagues={leagues} />
       </div>
 
       {/* Mobile — Spine.dc.html mobile dashboard lines 2215-2345 */}
@@ -173,6 +186,7 @@ export default function DashboardPage() {
         ledger={ledger}
         ledgerFooter={ledgerFooter}
         ledgerLoading={ledgerLoading}
+        leagues={leagues}
       />
     </div>
   );
