@@ -30,7 +30,8 @@ const STAMP_HOLD_MS = 980;
 const RETURN_MS = 700;
 
 /**
- * Fixtures Page — matched like-for-like with v2 prototype and reference mockups.
+ * Fixtures Page — perfectly proportioned desktop viewport with widened editor
+ * and dock-integrated action button above THE REEL.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -189,7 +190,7 @@ export default function FixturesPage() {
 
   return (
     <div
-      className="relative flex h-[calc(100vh-6.25rem)] md:h-[calc(100vh-5.75rem)] flex-col overflow-hidden animate-rise-in"
+      className="relative flex h-[calc(100vh-2.75rem)] flex-col overflow-hidden animate-rise-in"
       style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}
     >
       {/* Top SlotBar */}
@@ -229,35 +230,18 @@ export default function FixturesPage() {
       {!isLoading && !isError && selectedFixture && (
         <>
           {/* Desktop Main Content Area (flex-1 with internal overflow-y-auto) */}
-          <div className="hidden md:flex flex-1 min-h-0 overflow-y-auto px-6 py-3">
+          <div className="hidden md:flex flex-1 min-h-0 overflow-y-auto px-6 py-2">
             <div
-              className={`mx-auto w-full max-w-7xl grid gap-6 items-start ${
-                showEditor && hasLivePrediction ? 'grid-cols-[1fr_22rem]' : 'grid-cols-1'
+              className={`mx-auto w-full grid gap-6 items-start ${
+                showEditor && hasLivePrediction
+                  ? 'max-w-[90rem] grid-cols-[1fr_22rem]'
+                  : 'max-w-[76rem] grid-cols-1'
               }`}
             >
               {/* Center Area */}
               <div className="flex min-w-0 flex-col items-center">
                 {showEditor ? (
-                  <div className="flex w-full flex-col items-center gap-3">
-                    <FixtureEditor {...editorProps} />
-
-                    {/* Action Button Centered Directly Below AI Team Read */}
-                    <div className="flex flex-col items-center justify-center my-2">
-                      {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
-                      <button
-                        type="button"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
-                          isPredicted
-                            ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
-                            : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
-                        }`}
-                      >
-                        {buttonLabel} &rarr;
-                      </button>
-                    </div>
-                  </div>
+                  <FixtureEditor {...editorProps} />
                 ) : (
                   /* Resting Filed State (Picture 3) */
                   <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 py-2">
@@ -301,9 +285,28 @@ export default function FixturesPage() {
             </div>
           </div>
 
-          {/* Desktop Fixed Bottom Footer (Contained Reel Strip) */}
-          <div className="hidden md:flex flex-none flex-col gap-2 border-t border-[#16203180] bg-[#050b14cc] px-6 py-2.5 backdrop-blur-md">
-            <FixtureReelStrip stations={stations} />
+          {/* Desktop Fixed Bottom Footer Dock (Button + Contained Reel Strip) */}
+          <div className="hidden md:flex flex-none flex-col gap-2.5 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md">
+            <div className="w-full max-w-[76rem] mx-auto flex flex-col gap-2.5">
+              {showEditor && (
+                <div className="flex flex-col items-center justify-center">
+                  {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
+                      isPredicted
+                        ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
+                        : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
+                    }`}
+                  >
+                    {buttonLabel} &rarr;
+                  </button>
+                </div>
+              )}
+              <FixtureReelStrip stations={stations} />
+            </div>
           </div>
 
           {/* Mobile Layout */}

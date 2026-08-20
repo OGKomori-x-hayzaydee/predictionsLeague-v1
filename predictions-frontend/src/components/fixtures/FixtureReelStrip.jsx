@@ -10,9 +10,9 @@ function formatDay(dateStr) {
 }
 
 /**
- * "THE REEL" fixture-thumbnail strip along the bottom of the desktop editor
+ * "THE REEL" fixture-thumbnail strip along the bottom dock of the desktop editor
  * (Spine.dc.html desktop lines 664-679).
- * Contained in a centered max-width container with rem/em units.
+ * Contained in max-w-[76rem] matching the widened editor width.
  */
 export default function FixtureReelStrip({ stations }) {
   if (!stations.length) return null;
@@ -21,7 +21,7 @@ export default function FixtureReelStrip({ stations }) {
   const totalPoints = stations.reduce((sum, s) => sum + (s.predicted ? (s.ceiling || 15) : 0), 0);
 
   return (
-    <div className="flex flex-col gap-1.5 w-full max-w-5xl mx-auto">
+    <div className="flex flex-col gap-1.5 w-full max-w-[76rem] mx-auto">
       <div className="flex items-center justify-between">
         <span className="font-mono text-[0.625rem] tracking-widest text-[#5b667d]">THE REEL</span>
         <span className="font-mono text-[0.625rem] tracking-widest text-[#5b667d]">

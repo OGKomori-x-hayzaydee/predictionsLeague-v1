@@ -21,8 +21,7 @@ function formColor(result) {
 }
 
 /**
- * Fixture Editor — matching Spine.dc.html lines 328-456.
- * Sized with rem/em units and bold DM Serif typography.
+ * Fixture Editor — widened by ~15% for generous breathing room.
  */
 export default function FixtureEditor({
   fixture,
@@ -62,16 +61,16 @@ export default function FixtureEditor({
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-3 md:gap-4">
+    <div className="flex w-full flex-col items-center gap-2.5">
       {/* Header Kickoff + Venue */}
       <span className="font-mono text-xs tracking-widest text-[#8fa6bf]">
         {formatKickoff(fixture.date)} · {fixture.venue || 'Stadium'}
       </span>
 
       {/* Main Stepper Grid */}
-      <div className="grid w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-start gap-4 md:gap-8">
+      <div className="grid w-full max-w-4xl grid-cols-[1fr_auto_1fr] items-start gap-4 md:gap-8">
         {/* Home Side (Right Aligned) */}
-        <div className="flex flex-col items-end gap-2 text-right pt-2 min-w-0">
+        <div className="flex flex-col items-end gap-1.5 text-right pt-1 min-w-0">
           <TeamCrest team={fixture.homeTeam} size={56} />
           <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
             {fixture.homeTeam}
@@ -92,10 +91,10 @@ export default function FixtureEditor({
         </div>
 
         {/* Center Steppers + Slots */}
-        <div className="flex flex-col items-center gap-1.5">
+        <div className="flex flex-col items-center gap-1">
           <div className="flex items-start gap-4 md:gap-6">
             {/* Home Score Stepper */}
-            <div className="flex w-32 md:w-36 flex-col items-center gap-1">
+            <div className="flex w-32 md:w-36 flex-col items-center gap-0.5">
               <ScoreStepper
                 team={fixture.homeTeam}
                 value={draft.homeScore}
@@ -114,10 +113,10 @@ export default function FixtureEditor({
             </div>
 
             {/* Dash */}
-            <span className="pt-8 md:pt-10 font-dmSerif text-3xl md:text-4xl text-[#2c3a53] leading-none">–</span>
+            <span className="pt-7 md:pt-9 font-dmSerif text-3xl md:text-4xl text-[#2c3a53] leading-none">–</span>
 
             {/* Away Score Stepper */}
-            <div className="flex w-32 md:w-36 flex-col items-center gap-1">
+            <div className="flex w-32 md:w-36 flex-col items-center gap-0.5">
               <ScoreStepper
                 team={fixture.awayTeam}
                 value={draft.awayScore}
@@ -144,7 +143,7 @@ export default function FixtureEditor({
         </div>
 
         {/* Away Side (Left Aligned) */}
-        <div className="flex flex-col items-start gap-2 pt-2 min-w-0">
+        <div className="flex flex-col items-start gap-1.5 pt-1 min-w-0">
           <TeamCrest team={fixture.awayTeam} size={56} />
           <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
             {fixture.awayTeam}
@@ -165,13 +164,13 @@ export default function FixtureEditor({
         </div>
       </div>
 
-      {/* Chips Selector */}
-      <div className="w-full max-w-5xl">
+      {/* Chips Selector (Widened container) */}
+      <div className="w-full max-w-[76rem]">
         <ChipSelector chips={matchChips} selected={draft.chip} onToggle={onChangeChip} />
       </div>
 
-      {/* AI Team Read Panel */}
-      <div className="w-full max-w-5xl">
+      {/* AI Team Read Panel (Widened container) */}
+      <div className="w-full max-w-[76rem]">
         <AiTeamReadPanel
           fixture={fixture}
           open={aiOpen}
