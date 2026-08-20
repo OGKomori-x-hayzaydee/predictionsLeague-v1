@@ -6,6 +6,7 @@ import FixtureEditor from '../components/fixtures/FixtureEditor';
 import FixtureSlip from '../components/fixtures/FixtureSlip';
 import FixtureReelStrip from '../components/fixtures/FixtureReelStrip';
 import FilingCeremony from '../components/fixtures/FilingCeremony';
+import AiTeamReadPanel from '../components/fixtures/AiTeamReadPanel';
 import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
 import { useNextMatch } from '../hooks/useNextMatch';
@@ -24,20 +25,12 @@ function formatKickoff(dateStr) {
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
 
-// FilingCeremony's phase timeline, literal from Spine.dc.html's fileIt():
-// center holds at least this long (matched to the real request in parallel),
-// then stamp holds STAMP_HOLD_MS, then return holds RETURN_MS, then idle.
 const MIN_CENTER_MS = 520;
-const STAMP_HOLD_MS = 1500 - 520;
-const RETURN_MS = 2200 - 1500;
+const STAMP_HOLD_MS = 980;
+const RETURN_MS = 700;
 
 /**
- * Fixtures — the prediction-filing flow. GW-reel navigation via SlotBar's
- * `reelNav` mode (desktop, Spine.dc.html lines 63-89/664-679) and inline
- * prev/next (mobile, lines 2350-2357). Built on useFixtureSpine (shared with
- * Dashboard) for the fixture list/selection/ceiling, plus a local draft
- * state for the in-progress scoreline/scorers/chip so the live ceiling
- * preview (rail + editor footer) stays in sync while editing.
+ * Fixtures Page — Complete recreation of Spine.dc.html lines 319-751.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -74,12 +67,6 @@ export default function FixturesPage() {
     return () => fileTimersRef.current.forEach(clearTimeout);
   }, []);
 
-  // Reset the draft + editor state whenever the selected fixture changes
-  // (prev/next, or a fresh load) — mirrors the prototype's per-fixture `ed`
-  // state keyed by index. Intentionally keyed on the fixture id only (not
-  // the whole userPrediction object) so this doesn't re-fire on every
-  // background refetch of the same fixture while it's being edited.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const existing = selectedFixture?.userPrediction;
     setDraft({
@@ -91,8 +78,6 @@ export default function FixturesPage() {
     });
     setEditorOpen(false);
     setSubmitError(null);
-    // Navigating away (prev/next) cancels any in-flight filing ceremony,
-    // matching the prototype's prev()/next() also resetting phase to idle.
     fileTimersRef.current.forEach(clearTimeout);
     fileTimersRef.current = [];
     setFilePhase('idle');
@@ -102,13 +87,10 @@ export default function FixturesPage() {
   const deadlineFormatted = essentialData?.season?.deadlineFormatted;
   const showDeadlineCountdown =
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
-  const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : undefined;
+  const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : 'GW24';
 
-  // "Filed and resting" only when the fixture is actually filed AND the
-  // editor hasn't been opened — the instant a filed fixture is reopened for
-  // editing it reads as in-progress again until re-submitted, matching the
-  // prototype's `e.filed` flag clearing on any edit.
-  const filedNow = !!selectedFixture?.predicted && !editorOpen;
+  const isPredicted = !!selectedFixture?.predicted;
+  const filedNow = isPredicted && !editorOpen;
   const showEditor = !filedNow;
 
   const liveCeiling = calculateCeilingPoints({
@@ -121,18 +103,11 @@ export default function FixturesPage() {
   const activePrediction = filedNow ? selectedFixture.userPrediction : draft;
   const activeCeiling = filedNow ? selectedCeiling : liveCeiling;
 
-  // The filing ceremony: center (card floats up, dims in) -> stamp (lands,
-  // FILED badge pops) -> return (drifts up, fades) -> idle. Phase only
-  // advances center -> stamp once the real request actually succeeds — the
-  // prototype's fixed 520ms is instead a *minimum* center time, raced
-  // against the network call, so a slow request just holds "center" longer
-  // rather than stamping early.
   const handleSubmit = async () => {
     if (!selectedFixture || filePhase !== 'idle') return;
     setSubmitting(true);
     setSubmitError(null);
     setFilePhase('center');
-    setEditorOpen(false);
 
     const minCenter = new Promise((resolve) => {
       fileTimersRef.current.push(setTimeout(resolve, MIN_CENTER_MS));
@@ -144,8 +119,8 @@ export default function FixturesPage() {
           {
             homeScore: draft.homeScore,
             awayScore: draft.awayScore,
-            homeScorers: draft.homeScorers.filter(Boolean),
-            awayScorers: draft.awayScorers.filter(Boolean),
+            homeScorers: (draft.homeScorers || []).filter(Boolean),
+            awayScorers: (draft.awayScorers || []).filter(Boolean),
             chips: draft.chip ? [draft.chip] : [],
           },
           selectedFixture,
@@ -156,7 +131,6 @@ export default function FixturesPage() {
 
       if (!result.success) {
         setFilePhase('idle');
-        setEditorOpen(true);
         setSubmitError(result.error?.message || 'Could not file this prediction.');
         return;
       }
@@ -164,11 +138,19 @@ export default function FixturesPage() {
       queryClient.invalidateQueries({ queryKey: ['user-predictions'] });
       queryClient.invalidateQueries({ queryKey: ['hybrid-fixtures'] });
       setFilePhase('stamp');
-      fileTimersRef.current.push(setTimeout(() => setFilePhase('return'), STAMP_HOLD_MS));
-      fileTimersRef.current.push(setTimeout(() => setFilePhase('idle'), STAMP_HOLD_MS + RETURN_MS));
+      fileTimersRef.current.push(
+        setTimeout(() => {
+          setFilePhase('return');
+        }, STAMP_HOLD_MS)
+      );
+      fileTimersRef.current.push(
+        setTimeout(() => {
+          setFilePhase('idle');
+          setEditorOpen(false);
+        }, STAMP_HOLD_MS + RETURN_MS)
+      );
     } catch (err) {
       setFilePhase('idle');
-      setEditorOpen(true);
       setSubmitError(err?.message || 'Could not file this prediction.');
     } finally {
       setSubmitting(false);
@@ -176,7 +158,7 @@ export default function FixturesPage() {
   };
 
   const statusPill = selectedFixture
-    ? filedNow
+    ? isPredicted
       ? { label: 'FILED', bg: '#0f766e26', border: '#14b8a666', fg: '#5eead4' }
       : { label: 'OPEN', bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' }
     : undefined;
@@ -199,10 +181,11 @@ export default function FixturesPage() {
   };
 
   return (
-    <div className="animate-rise-in">
+    <div className="relative min-h-[calc(100vh-56px)] overflow-hidden animate-rise-in" style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}>
+      {/* Top SlotBar */}
       <div className="hidden md:block">
         <SlotBar
-          kicker="Fixtures"
+          kicker="THE REEL"
           reelNav={
             fixtures.length
               ? {
@@ -216,6 +199,7 @@ export default function FixturesPage() {
                 }
               : undefined
           }
+          right={`${stations.filter((s) => s.predicted).length} of ${fixtures.length} filed`}
           deadline={showDeadlineCountdown ? timeDisplay : undefined}
         />
       </div>
@@ -234,49 +218,65 @@ export default function FixturesPage() {
 
       {!isLoading && !isError && selectedFixture && (
         <>
-          {/* Desktop — foundation spec §5.3, fixtures grid 1fr 316px */}
-          <div className="hidden md:grid md:grid-cols-[1fr_316px] md:items-start">
-            <div className="flex min-w-0 flex-col gap-6 px-6 py-6">
+          {/* Desktop Layout */}
+          <div
+            className={`hidden md:grid md:items-start transition-[grid-template-columns] duration-300 ${
+              showEditor ? 'md:grid-cols-[1fr_380px]' : 'md:grid-cols-1'
+            }`}
+          >
+            {/* Center Area */}
+            <div className="flex min-w-0 flex-col gap-6 px-8 py-6 pb-28">
               {showEditor ? (
                 <FixtureEditor {...editorProps} />
               ) : (
-                <div className="flex justify-center py-6">
+                /* Resting Filed State (Picture 3) */
+                <div className="mx-auto flex w-full max-w-[640px] flex-col items-center gap-6 py-4">
                   <FixtureSlip
                     fixture={selectedFixture}
                     prediction={activePrediction}
-                    filed={filedNow}
+                    filed={true}
                     ceiling={activeCeiling}
-                    variant="main"
+                    variant="resting"
                     onEdit={() => setEditorOpen(true)}
                     gameweekLabel={gameweekLabel}
                     deadlineLabel={deadlineFormatted}
                   />
+
+                  <div className="w-full">
+                    <AiTeamReadPanel
+                      fixture={selectedFixture}
+                      open={aiOpen}
+                      onToggle={() => setAiOpen((v) => !v)}
+                    />
+                  </div>
                 </div>
               )}
+            </div>
 
-              <div className="flex flex-col gap-2 border-t border-border-hairline pt-4">
-                <span className="font-mono text-[10px] tracking-[0.16em] text-text-muted-4">THE REEL</span>
-                <FixtureReelStrip stations={stations} />
+            {/* Right Live Preview Slip (Picture 5 - only when editing) */}
+            {showEditor && (
+              <div className="sticky top-6 flex flex-col gap-4 pr-6 pt-6">
+                <FixtureSlip
+                  fixture={selectedFixture}
+                  prediction={activePrediction}
+                  filed={isPredicted}
+                  ceiling={activeCeiling}
+                  variant="rail"
+                  onFile={handleSubmit}
+                  gameweekLabel={gameweekLabel}
+                  deadlineLabel={deadlineFormatted}
+                />
               </div>
-            </div>
-
-            <div className="flex flex-col gap-4 border-l border-border-hairline bg-surface-bar px-5 py-6">
-              <FixtureSlip
-                fixture={selectedFixture}
-                prediction={activePrediction}
-                filed={filedNow}
-                ceiling={activeCeiling}
-                variant="rail"
-                onEdit={showEditor ? undefined : () => setEditorOpen(true)}
-                gameweekLabel={gameweekLabel}
-                deadlineLabel={deadlineFormatted}
-              />
-            </div>
+            )}
           </div>
 
-          {/* Mobile — no shell-level slot bar (foundation spec §6.1); the
-              GW-reel prev/next is rebuilt inline here instead. */}
-          <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:hidden">
+          {/* Sticky Bottom Reel Bar (Desktop) */}
+          <div className="hidden md:block fixed inset-x-0 bottom-0 z-30 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md">
+            <FixtureReelStrip stations={stations} />
+          </div>
+
+          {/* Mobile Layout */}
+          <div className="flex flex-col gap-4 px-4 pb-8 pt-4 md:hidden">
             <div className="flex items-center justify-between gap-2.5">
               <button
                 type="button"
@@ -309,21 +309,29 @@ export default function FixturesPage() {
             {showEditor ? (
               <FixtureEditor {...editorProps} />
             ) : (
-              <FixtureSlip
-                fixture={selectedFixture}
-                prediction={activePrediction}
-                filed={filedNow}
-                ceiling={activeCeiling}
-                variant="mobile"
-                onEdit={() => setEditorOpen(true)}
-                gameweekLabel={gameweekLabel}
-                deadlineLabel={deadlineFormatted}
-              />
+              <div className="flex flex-col gap-4">
+                <FixtureSlip
+                  fixture={selectedFixture}
+                  prediction={activePrediction}
+                  filed={true}
+                  ceiling={activeCeiling}
+                  variant="resting"
+                  onEdit={() => setEditorOpen(true)}
+                  gameweekLabel={gameweekLabel}
+                  deadlineLabel={deadlineFormatted}
+                />
+                <AiTeamReadPanel
+                  fixture={selectedFixture}
+                  open={aiOpen}
+                  onToggle={() => setAiOpen((v) => !v)}
+                />
+              </div>
             )}
           </div>
         </>
       )}
 
+      {/* Spotlight Filing Ceremony */}
       <FilingCeremony
         phase={filePhase}
         fixture={selectedFixture}
