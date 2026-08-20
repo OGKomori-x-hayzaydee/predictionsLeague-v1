@@ -74,30 +74,33 @@ export default function RivalsSection({ leagues }) {
         <p className="text-xs text-text-muted-2">No standings yet.</p>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-[9px]">
         {rows.map((m) => (
-          <div key={m.id ?? m.username} className="flex items-center gap-2.5">
+          <div key={m.id ?? m.username} className="flex cursor-pointer items-center gap-[10px]">
             <span
               className={`w-3.5 shrink-0 font-mono text-[11px] ${
-                m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-3'
+                m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-4'
               }`}
             >
               {m.position}
             </span>
             <span
-              className={`min-w-0 flex-1 truncate text-sm ${
-                m.isCurrentUser ? 'font-semibold text-brand-teal' : 'text-text-muted-1'
+              className={`min-w-0 flex-1 truncate text-[13px] ${
+                m.isCurrentUser ? 'font-medium text-brand-teal' : 'text-text-secondary'
               }`}
             >
               {m.isCurrentUser ? 'You' : m.displayName || m.username}
             </span>
-            <div className="h-1 w-14 shrink-0 overflow-hidden rounded-full bg-surface-card-3">
-              <div
-                className={`h-full rounded-full ${m.isCurrentUser ? 'bg-brand-teal' : 'bg-border-control'}`}
-                style={{ width: `${Math.max(8, ((m.points || 0) / maxPoints) * 100)}%` }}
+            <span className="flex h-1.5 w-16 overflow-hidden rounded-sm bg-[#111c2e]">
+              <span
+                className="rounded-sm"
+                style={{
+                  width: `${Math.max(8, ((m.points || 0) / maxPoints) * 100)}%`,
+                  background: m.isCurrentUser ? '#5eead4' : '#1e3450',
+                }}
               />
-            </div>
-            <span className="w-9 shrink-0 text-right font-mono text-[11px] text-text-muted-2">
+            </span>
+            <span className="w-[30px] shrink-0 text-right font-mono text-xs text-text-tertiary">
               {m.points}
             </span>
           </div>

@@ -19,24 +19,22 @@ function DesktopStation({ station }) {
   const { homeTeam, awayTeam, predicted, scoreLabel, isSelected, onSelect, date } = station;
   const dayColor = isSelected ? 'text-brand-teal' : 'text-text-muted-5';
   const scoreColor = predicted ? 'text-brand-indigo' : isSelected ? 'text-brand-teal' : 'text-text-muted-5';
-  const tickClasses = isSelected
-    ? 'h-[34px] w-[3px] bg-brand-teal'
-    : predicted
-      ? 'h-[22px] w-[2px] bg-brand-indigo-mid'
-      : 'h-[12px] w-[2px] bg-border-control/60';
+  const tickW = isSelected ? 'w-[3px]' : 'w-[2px]';
+  const tickH = isSelected ? 'h-[34px]' : predicted ? 'h-[22px]' : 'h-[12px]';
+  const tickBg = isSelected ? 'bg-brand-teal' : predicted ? 'bg-brand-indigo-mid' : 'bg-border-control/60';
 
   return (
     <button
       onClick={onSelect}
-      className="flex flex-1 flex-col items-center gap-2 border-0 bg-none pb-1.5 font-outfit"
+      className="flex flex-1 cursor-pointer flex-col items-center gap-[6px] border-0 bg-none p-0 pb-1 font-outfit"
     >
-      <span className={`font-mono text-[10px] ${dayColor}`}>{formatDay(date)}</span>
-      <span className={`flex items-center gap-[5px] rounded-sm border px-[7px] py-1.5 ${plateClasses(isSelected, predicted)}`}>
+      <span className={`font-mono text-[10px] leading-none ${dayColor}`}>{formatDay(date)}</span>
+      <span className={`flex items-center gap-[5px] rounded-[8px] border px-[7px] py-[6px] ${plateClasses(isSelected, predicted)}`}>
         <TeamCrest team={homeTeam} size={18} />
         <TeamCrest team={awayTeam} size={18} />
       </span>
-      <span className={`rounded-xs ${tickClasses}`} />
-      <span className={`font-mono text-[11px] tracking-[0.06em] ${scoreColor}`}>{scoreLabel || '—'}</span>
+      <span className={`rounded-sm ${tickW} ${tickH} ${tickBg}`} />
+      <span className={`font-mono text-[11px] leading-none tracking-[0.06em] ${scoreColor}`}>{scoreLabel || '—'}</span>
     </button>
   );
 }
@@ -50,10 +48,10 @@ function MobileStation({ station }) {
     <button
       onClick={onSelect}
       style={{ scrollSnapAlign: 'center' }}
-      className="flex w-[58px] shrink-0 flex-col items-center gap-1.5 border-0 bg-none font-outfit"
+      className="flex w-[58px] shrink-0 cursor-pointer flex-col items-center gap-1.5 border-0 bg-none p-0 font-outfit"
     >
       <span className={`font-mono text-[9.5px] ${dayColor}`}>{formatDay(date)}</span>
-      <span className={`flex items-center gap-1 rounded-sm border px-1.5 py-1.5 ${plateClasses(isSelected, predicted)}`}>
+      <span className={`flex items-center gap-1 rounded-[8px] border px-1.5 py-1.5 ${plateClasses(isSelected, predicted)}`}>
         <TeamCrest team={homeTeam} size={16} />
         <TeamCrest team={awayTeam} size={16} />
       </span>
@@ -66,12 +64,13 @@ function MobileStation({ station }) {
  * Per-fixture "station" rail — the pattern the prototype's "Spine" file is
  * named after (Spine.dc.html desktop lines 114-129, mobile lines 2232-2255).
  * Driven entirely by useFixtureSpine's `stations` (semantic data only); this
- * component owns presentation/colors.
+ * component owns presentation/colors. Compacted spacing to keep the rail
+ * tight and allow the fixture card below to breathe.
  */
 export default function StationRail({ stations, variant = 'desktop', onPrev, onNext, canPrev, canNext }) {
   if (!stations.length) {
     return (
-      <div className="rounded-md border border-dashed border-border-card p-6 text-center text-sm text-text-muted-2">
+      <div className="rounded-[14px] border border-dashed border-border-card p-6 text-center text-sm text-text-muted-2">
         No fixtures for this gameweek yet.
       </div>
     );
@@ -118,8 +117,8 @@ export default function StationRail({ stations, variant = 'desktop', onPrev, onN
   }
 
   return (
-    <div className="relative pb-1.5">
-      <div className="absolute inset-x-0 top-[58px] h-px bg-border-card" />
+    <div className="relative pb-1">
+      <div className="absolute inset-x-0 top-[52px] h-px bg-[#1d2a41]" />
       <div className="relative flex items-end justify-between gap-0.5">
         {stations.map((station) => (
           <DesktopStation key={station.id} station={station} />

@@ -14,6 +14,7 @@ import { useNextMatch } from '../hooks/useNextMatch';
 export default function DashboardPage() {
   const [aiOpen, setAiOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('this');
 
   const {
     stations,
@@ -57,11 +58,19 @@ export default function DashboardPage() {
       ? `GW${ledgerGameweek} total ${ledgerTotal} · best week GW${ledgerBestGameweek} on ${ledgerBestTotal}`
       : `GW${ledgerGameweek} total ${ledgerTotal} pts`;
 
+  const slotTabs = [
+    { id: 'this', label: 'This week' },
+    { id: 'next', label: 'Next week' },
+  ];
+
   return (
     <div className="animate-rise-in">
       <div className="hidden md:block">
         <SlotBar
-          kicker={currentGameweek ? `Gameweek ${currentGameweek}` : 'Gameweek'}
+          kicker={currentGameweek ? `GAMEWEEK ${currentGameweek}` : 'GAMEWEEK'}
+          tabs={slotTabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
           right={`${filedCount} of ${total} filed`}
           deadline={showDeadlineCountdown ? timeDisplay : undefined}
         />
@@ -71,16 +80,16 @@ export default function DashboardPage() {
       <div className="hidden md:grid md:grid-cols-[1fr_320px] md:items-stretch">
         <div className="flex min-w-0 flex-col gap-0 px-6 pb-6 pt-5">
           <div className="flex items-end justify-between gap-6">
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
               <h1 className="font-dmSerif text-4xl text-text-primary">
                 {fixturesLoading ? 'Loading your gameweek…' : `${filedCount} of ${total} filed`}
               </h1>
-              <span className="text-sm text-text-muted-1">{openLine}</span>
+              <span className="text-[13px] text-[#8896ad]">{openLine}</span>
             </div>
             <div className="flex flex-none flex-col items-end gap-1.5">
-              <KickerLabel as="span" className="tracking-[0.13em] text-text-muted-3">
-                Max on the table
-              </KickerLabel>
+              <span className="font-mono text-[10.5px] tracking-[0.13em] text-[#66748c]">
+                MAX ON THE TABLE
+              </span>
               <span className="font-dmSerif text-[29px] leading-none text-brand-amber">
                 {tableMaxPoints}
                 <span className="text-sm text-[#8a7a4a]"> pts</span>
@@ -88,7 +97,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="relative mt-4 h-[5px] overflow-hidden rounded-full bg-surface-card-3">
+          {/* Progress bar */}
+          <div className="relative mt-4 h-[5px] overflow-hidden rounded-full bg-[#111c2e]">
             <div
               className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid transition-all"
               style={{ width: `${progressPct}%` }}
@@ -96,7 +106,8 @@ export default function DashboardPage() {
             <div className="absolute top-0 bottom-0 w-[60px] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sweep_3.4s_linear_infinite]" />
           </div>
 
-          <div className="mt-[26px]">
+          {/* Station rail — compact */}
+          <div className="mt-[22px]">
             {fixturesLoading ? (
               <LoadingState message="Loading fixtures..." />
             ) : (
@@ -104,7 +115,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="mt-5">
+          {/* Fixture preview card — constrained width with breathing room */}
+          <div className="mx-auto mt-5 mb-[22px] w-full max-w-[820px]">
             <FixturePreviewCard
               fixture={selectedFixture}
               ceiling={selectedCeiling}
@@ -126,7 +138,7 @@ export default function DashboardPage() {
           <span className="text-[12.5px] text-text-muted-1">{openLine}</span>
         </div>
 
-        <div className="relative h-[5px] overflow-hidden rounded-full bg-surface-card-3">
+        <div className="relative h-[5px] overflow-hidden rounded-full bg-[#111c2e]">
           <div
             className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid"
             style={{ width: `${progressPct}%` }}
@@ -173,7 +185,7 @@ export default function DashboardPage() {
 
         <button
           onClick={() => setSheetOpen(true)}
-          className="flex items-center justify-between rounded-md border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
+          className="flex items-center justify-between rounded-[14px] border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
         >
           Rivals, chips in hand &amp; last gameweek
           <span className="font-mono text-[11px] text-brand-teal">VIEW &rsaquo;</span>

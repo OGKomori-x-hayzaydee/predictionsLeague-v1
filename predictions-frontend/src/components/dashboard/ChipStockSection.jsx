@@ -33,7 +33,7 @@ export default function ChipStockSection() {
       {!isLoading && chips.length === 0 && (
         <p className="text-xs text-text-muted-2">No chips yet.</p>
       )}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-[10px]">
         {chips.map((chip) => {
           const hue = CHIP_HUES[chip.id] || DEFAULT_CHIP_HUE;
           const left = chipLeftLabel(chip);
@@ -41,15 +41,15 @@ export default function ChipStockSection() {
             <button
               key={chip.chipId || chip.id}
               onClick={() => navigate('/chips')}
-              className="flex items-center gap-2.5 text-left"
+              className="flex cursor-pointer items-center gap-[10px] text-left"
             >
               <span
-                className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-7 font-mono text-[10px] font-semibold"
+                className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[7px] font-mono text-[10px] font-semibold"
                 style={{ background: `${hue}1f`, border: `1px solid ${hue}55`, color: hue }}
               >
                 {CHIP_BADGES[chip.id] || chip.icon}
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm text-text-muted-1">{chip.name}</span>
+              <span className="min-w-0 flex-1 truncate text-[13px] text-[#b6c1d1]">{chip.name}</span>
               <span
                 className={`shrink-0 font-mono text-[11px] ${
                   chip.available === false ? 'text-brand-amber-mid' : 'text-text-muted-3'

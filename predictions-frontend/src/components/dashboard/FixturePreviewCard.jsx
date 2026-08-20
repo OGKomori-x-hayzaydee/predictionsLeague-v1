@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import TeamCrest from '../ui/TeamCrest';
 import KickerLabel from '../ui/KickerLabel';
-import Card from '../ui/Card';
 import { CHIP_CONFIG } from '../../utils/chipManager';
 import { CHIP_HUES, DEFAULT_CHIP_HUE } from './chipHues';
 import { getMatchInsight } from '../../utils/matchInsights';
@@ -30,22 +29,24 @@ function formatSlot(dateStr) {
   return d.toLocaleDateString(undefined, { weekday: 'long' });
 }
 
-function meetingClasses(result) {
-  if (result === 'W') return 'border-brand-teal-mid/40 bg-brand-teal-deep/15 text-brand-teal';
-  if (result === 'L') return 'border-[#b4530966] bg-[#78350f26] text-brand-amber-mid';
-  return 'border-border-card bg-surface-card-3 text-text-muted-2';
-}
-
-function ScorerPill({ name, hue, size = 'md' }) {
-  const dotClass = size === 'sm' ? 'h-1.5 w-1.5' : 'h-[7px] w-[7px]';
+function ScorerRow({ name, side = 'home' }) {
   return (
-    <span
-      className={`flex items-center gap-2 ${size === 'sm' ? 'rounded-full border border-border-card bg-surface-card-3 px-2.5 py-1 text-xs' : 'text-[13.5px]'} text-text-tertiary`}
-    >
-      <span className={`shrink-0 rounded-full border-[1.5px] ${dotClass}`} style={{ borderColor: hue }} />
+    <span className="flex items-center gap-2 text-[13.5px] text-text-tertiary">
+      {side === 'away' && (
+        <span className="h-[7px] w-[7px] shrink-0 rounded-full border-[1.5px] border-brand-teal" />
+      )}
       {name}
+      {side === 'home' && (
+        <span className="h-[7px] w-[7px] shrink-0 rounded-full border-[1.5px] border-brand-teal" />
+      )}
     </span>
   );
+}
+
+function meetingColor(result) {
+  if (result === 'W') return '#5eead4';
+  if (result === 'L') return '#f87171';
+  return '#fcd34d';
 }
 
 /**
@@ -54,10 +55,7 @@ function ScorerPill({ name, hue, size = 'md' }) {
  * status, and the user's own filed scoreline/scorers/chip/ceiling
  * (calculateCeilingPoints, via useFixtureSpine) are all real data. The
  * team-form strips and the AI-overview panel (predicted score/confidence,
- * last-5-meetings, crowd picks) have no backing data source on this backend
- * (no team-form/odds/AI service, no match-history archive) — see
- * utils/matchInsights.js for the deterministic sample data standing in for
- * them until a real source exists.
+ * last-5-meetings, crowd picks) use matchInsights.js.
  */
 export default function FixturePreviewCard({
   fixture,
@@ -72,9 +70,12 @@ export default function FixturePreviewCard({
 
   if (!fixture) {
     return (
-      <Card className="p-6 text-center text-sm text-text-muted-2">
+      <div
+        className="rounded-[14px] border border-border-card p-6 text-center text-sm text-text-muted-2"
+        style={{ background: 'linear-gradient(180deg, #0a1120, #070d18)' }}
+      >
         No fixture selected.
-      </Card>
+      </div>
     );
   }
 
@@ -94,8 +95,12 @@ export default function FixturePreviewCard({
     : 'bg-[#78350f26] border-[#b4530966] text-brand-amber-mid';
 
   return (
-    <Card className="flex flex-col overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-base px-[22px] py-[13px]">
+    <div
+      className="flex flex-col overflow-hidden rounded-[14px] border border-border-card"
+      style={{ background: 'linear-gradient(180deg, #0a1120, #070d18)' }}
+    >
+      {/* Header bar — slot label + venue + kickoff + status + CTA */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#16203a] px-[22px] py-[13px]">
         <div className="flex items-center gap-[11px] text-xs">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-teal">
             {formatSlot(date) || `${homeTeam} v ${awayTeam}`}
@@ -103,13 +108,13 @@ export default function FixturePreviewCard({
           {venue && (
             <>
               <span className="h-3 w-px bg-[#233248]" />
-              <span className="text-text-muted-3">{venue}</span>
+              <span className="text-[12px] text-[#7c8aa2]">{venue}</span>
             </>
           )}
           {date && (
             <>
               <span className="h-3 w-px bg-[#233248]" />
-              <span className="font-mono text-[11px] text-text-muted-3">{formatKickoff(date)}</span>
+              <span className="font-mono text-[11px] text-[#66748c]">{formatKickoff(date)}</span>
             </>
           )}
         </div>
@@ -119,51 +124,65 @@ export default function FixturePreviewCard({
           >
             {predicted ? 'FILED' : 'NOT FILED'}
           </span>
-          <span className="hidden text-xs text-text-muted-1 sm:inline">
+          <span className="hidden text-xs text-[#8fa0b8] sm:inline">
             {predicted ? `${ceiling} pts if it lands exactly` : 'nothing on the line'}
           </span>
           <button
             type="button"
             onClick={() => navigate('/fixtures')}
-            className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-9 bg-brand-indigo-mid px-3.5 py-[9px] font-outfit text-[13px] font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-3.5 py-[9px] font-outfit text-[13px] font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
             {predicted ? 'Edit in reel' : 'File in reel'}
+            <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
+              <path d="M3 7.5h8.5M8 4l3.5 3.5L8 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </div>
 
+      {/* Body — filed scoreline or "nothing filed" */}
       {predicted ? (
         <div
-          className={`flex items-center gap-6 px-6 py-6 ${isMobile ? 'flex-col' : 'justify-center gap-[26px] py-[22px]'}`}
+          className={`grid items-start gap-[26px] px-7 ${
+            isMobile ? 'grid-cols-1 justify-items-center py-5' : 'grid-cols-[1fr_auto_1fr] py-5'
+          }`}
         >
-          <div className="flex flex-1 flex-col items-center gap-3 sm:items-end">
+          {/* Home side */}
+          <div className="flex flex-col items-end gap-3 min-w-0">
             <div className="flex items-center gap-3.5">
-              <span className="font-dmSerif text-lg text-text-primary sm:text-[22px]">{homeTeam}</span>
+              <div className="flex flex-col items-end gap-[3px]">
+                <span className="font-dmSerif text-[22px] leading-tight text-text-primary whitespace-nowrap">
+                  {homeTeam}
+                </span>
+                {insight && (
+                  <span className="flex items-center gap-1">
+                    {insight.homeForm.split('').map((ch, i) => (
+                      <span key={i} className="font-mono text-[10px]" style={{ color: meetingColor(ch) }}>
+                        {ch}
+                      </span>
+                    ))}
+                  </span>
+                )}
+              </div>
               <TeamCrest team={homeTeam} size={crestSize} />
             </div>
-            {insight && (
-              <span className="font-mono text-[10px] tracking-[0.14em] text-text-muted-4">
-                {insight.homeForm}
-              </span>
-            )}
-            <div className="flex flex-wrap justify-end gap-1.5">
+            <div className="flex flex-col items-end gap-1.5">
               {homeScorers.length > 0 ? (
-                homeScorers.map((name) => (
-                  <ScorerPill key={name} name={name} hue="#5eead4" size={isMobile ? 'sm' : 'md'} />
-                ))
+                homeScorers.map((name) => <ScorerRow key={name} name={name} side="home" />)
               ) : (
                 <span className="font-mono text-[11px] text-text-muted-4">no scorer named</span>
               )}
             </div>
           </div>
 
+          {/* Score centre */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-4">
-              <span className="font-dmSerif text-4xl leading-none text-text-primary sm:text-[52px]">
+              <span className={`font-dmSerif leading-[0.9] text-text-primary ${isMobile ? 'text-[42px]' : 'text-[62px]'}`}>
                 {prediction.homeScore}
               </span>
-              <span className="font-dmSerif text-2xl text-text-muted-4">–</span>
-              <span className="font-dmSerif text-4xl leading-none text-text-primary sm:text-[52px]">
+              <span className={`font-dmSerif text-[#2c3a53] leading-none ${isMobile ? 'text-xl' : 'text-[30px]'}`}>–</span>
+              <span className={`font-dmSerif leading-[0.9] text-text-primary ${isMobile ? 'text-[42px]' : 'text-[62px]'}`}>
                 {prediction.awayScore}
               </span>
             </div>
@@ -178,21 +197,28 @@ export default function FixturePreviewCard({
             )}
           </div>
 
-          <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
+          {/* Away side */}
+          <div className="flex flex-col items-start gap-3 min-w-0">
             <div className="flex items-center gap-3.5">
               <TeamCrest team={awayTeam} size={crestSize} />
-              <span className="font-dmSerif text-lg text-text-primary sm:text-[22px]">{awayTeam}</span>
+              <div className="flex flex-col gap-[3px]">
+                <span className="font-dmSerif text-[22px] leading-tight text-text-primary whitespace-nowrap">
+                  {awayTeam}
+                </span>
+                {insight && (
+                  <span className="flex items-center gap-1">
+                    {insight.awayForm.split('').map((ch, i) => (
+                      <span key={i} className="font-mono text-[10px]" style={{ color: meetingColor(ch) }}>
+                        {ch}
+                      </span>
+                    ))}
+                  </span>
+                )}
+              </div>
             </div>
-            {insight && (
-              <span className="font-mono text-[10px] tracking-[0.14em] text-text-muted-4">
-                {insight.awayForm}
-              </span>
-            )}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-col gap-1.5">
               {awayScorers.length > 0 ? (
-                awayScorers.map((name) => (
-                  <ScorerPill key={name} name={name} hue={isMobile ? '#818cf8' : '#5eead4'} size={isMobile ? 'sm' : 'md'} />
-                ))
+                awayScorers.map((name) => <ScorerRow key={name} name={name} side="away" />)
               ) : (
                 <span className="font-mono text-[11px] text-text-muted-4">no scorer named</span>
               )}
@@ -200,19 +226,20 @@ export default function FixturePreviewCard({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-1.5 px-6 py-6">
-          <span className="font-dmSerif text-xl text-text-primary sm:text-2xl">
+        <div className="flex flex-col gap-1.5 px-7 py-[22px]">
+          <span className="font-dmSerif text-[25px] leading-tight text-text-primary">
             Nothing filed on {homeTeam} v {awayTeam}
           </span>
-          <span className="max-w-[46em] text-sm text-text-muted-2">
+          <span className="max-w-[46em] text-[13px] text-[#8896ad]" style={{ textWrap: 'pretty' }}>
             {deadlineLabel
-              ? `File a scoreline before the deadline (${deadlineLabel}) to put points on it.`
+              ? `The read below is the model's, not yours. File a scoreline before the deadline (${deadlineLabel}) to put points on it.`
               : 'File a scoreline before the deadline to put points on it.'}
           </span>
         </div>
       )}
 
-      <div className="flex flex-col gap-3 border-t border-border-base bg-surface-card-2 px-[22px] py-4">
+      {/* AI overview — 3-column grid matching prototype lines 214-265 */}
+      <div className="flex flex-col gap-3 border-t border-[#16203a] bg-[#070d18] px-[22px] py-[15px]">
         <button
           type="button"
           onClick={isMobile ? onToggleAi : undefined}
@@ -228,64 +255,95 @@ export default function FixturePreviewCard({
           )}
         </button>
         {(!isMobile || aiOpen) && insight && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-baseline gap-2.5">
-                <span className="font-dmSerif text-xl text-text-primary">
-                  {insight.predictedHome}-{insight.predictedAway}
+          <div
+            className={`grid gap-[22px] items-start ${
+              isMobile ? 'grid-cols-1' : 'grid-cols-[1.2fr_1px_0.85fr_1px_0.95fr]'
+            }`}
+          >
+            {/* Column 1: AI predicted score + confidence */}
+            <div className="flex flex-col gap-[9px] min-w-0">
+              <div className="flex items-baseline gap-[11px]">
+                <span className="font-dmSerif text-[28px] leading-none text-brand-indigo-pale">
+                  {insight.predictedHome}–{insight.predictedAway}
                 </span>
-                <span className="font-mono text-[11px] text-brand-teal">{insight.confidence}% confidence</span>
+                <span className="font-mono text-[11px] text-brand-indigo">
+                  {insight.confidence}% confidence
+                </span>
               </div>
-              <div className="relative h-1 overflow-hidden rounded-full bg-surface-card-3">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full bg-brand-teal-mid"
+              <span className="flex h-1 overflow-hidden rounded-sm bg-[#131d2f]">
+                <span
+                  className="bg-gradient-to-r from-brand-indigo-mid to-brand-indigo"
                   style={{ width: `${insight.confidence}%` }}
                 />
-              </div>
-              <p className="text-xs leading-relaxed text-text-muted-1">{insight.blurb}</p>
+              </span>
+              <p className="m-0 text-[12.5px] leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
+                {insight.blurb}
+              </p>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-3">
-                Last 5 meetings
-              </KickerLabel>
-              <div className="flex gap-1">
-                {insight.meetings.map((result, i) => (
+            {!isMobile && <span className="bg-[#16203a]" />}
+
+            {/* Column 2: Last 5 Meetings */}
+            <div className="flex flex-col gap-[10px] min-w-0">
+              <span className="font-mono text-[10px] tracking-[0.12em] text-text-muted-4">
+                LAST 5 MEETINGS
+              </span>
+              <div className="flex items-center gap-1.5">
+                {insight.meetings.map((ch, i) => (
                   <span
                     key={i}
-                    className={`flex h-5 w-5 items-center justify-center rounded-xs border font-mono text-[10px] ${meetingClasses(result)}`}
+                    className="flex h-5 w-5 items-center justify-center rounded-[5px] border border-[#1d2a41] bg-[#101a2c] font-mono text-[10px]"
+                    style={{ color: meetingColor(ch) }}
                   >
-                    {result}
+                    {ch}
                   </span>
                 ))}
               </div>
-              <p className="text-xs text-text-muted-2">{insight.meetingsSummary}</p>
-              <p className="text-xs text-text-muted-3">{insight.meetingsNote}</p>
+              <span className="font-mono text-[11px] text-[#66748c]">
+                {insight.meetingsSummary}
+              </span>
+              <span className="text-xs leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
+                {insight.meetingsNote}
+              </span>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-3">
-                What the league is picking
-              </KickerLabel>
-              <div className="flex flex-col gap-1.5">
-                {insight.crowd.map((c) => (
-                  <div key={c.label} className="flex items-center gap-2">
-                    <span className="w-[88px] shrink-0 truncate text-xs text-text-muted-1">{c.label}</span>
-                    <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-surface-card-3">
-                      <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-brand-indigo-mid/70"
-                        style={{ width: `${c.pct}%` }}
-                      />
-                    </div>
-                    <span className="w-8 shrink-0 text-right font-mono text-[11px] text-text-muted-2">{c.pct}%</span>
-                  </div>
+            {!isMobile && <span className="bg-[#16203a]" />}
+
+            {/* Column 3: What the League is Picking */}
+            <div className="flex flex-col gap-[10px] min-w-0">
+              <span className="font-mono text-[10px] tracking-[0.12em] text-text-muted-4">
+                WHAT THE LEAGUE IS PICKING
+              </span>
+              <span className="flex h-2 overflow-hidden rounded bg-[#101a2c]">
+                {insight.crowd.map((c, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      width: `${c.pct}%`,
+                      background: i === 0 ? '#5eead4' : i === 1 ? '#475569' : '#818cf8',
+                    }}
+                  />
+                ))}
+              </span>
+              <div className="flex flex-col gap-[5px]">
+                {insight.crowd.map((c, i) => (
+                  <span key={c.label} className="flex items-center gap-2 text-xs text-[#8fa0b8]">
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ background: i === 0 ? '#5eead4' : i === 1 ? '#475569' : '#818cf8' }}
+                    />
+                    <span className="flex-1 truncate">{c.label}</span>
+                    <span className="font-mono text-text-tertiary">{c.pct}%</span>
+                  </span>
                 ))}
               </div>
-              <p className="font-mono text-[11px] text-text-muted-3">most-picked {insight.mostPicked}</p>
+              <span className="font-mono text-[11px] text-[#66748c]">
+                most-picked {insight.mostPicked}
+              </span>
             </div>
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 }
