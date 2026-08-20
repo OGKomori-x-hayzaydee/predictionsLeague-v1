@@ -30,7 +30,7 @@ const STAMP_HOLD_MS = 980;
 const RETURN_MS = 700;
 
 /**
- * Fixtures Page — perfectly proportioned with rem/em units and centered footer reel.
+ * Fixtures Page — matched like-for-like with v2 prototype and reference mockups.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -92,6 +92,9 @@ export default function FixturesPage() {
   const isPredicted = !!selectedFixture?.predicted;
   const filedNow = isPredicted && !editorOpen;
   const showEditor = !filedNow;
+
+  const totalGoals = draft.homeScore + draft.awayScore;
+  const hasLivePrediction = totalGoals > 0 || isPredicted || draft.chip;
 
   const liveCeiling = calculateCeilingPoints({
     homeScore: draft.homeScore,
@@ -176,6 +179,14 @@ export default function FixturesPage() {
     onToggleAi: () => setAiOpen((v) => !v),
   };
 
+  const buttonLabel = submitting
+    ? 'Filing…'
+    : isPredicted
+      ? 'Filed · amend to re-file'
+      : totalGoals === 0
+        ? 'Review & file 0–0'
+        : 'Review & file';
+
   return (
     <div
       className="relative flex h-[calc(100vh-6.25rem)] md:h-[calc(100vh-5.75rem)] flex-col overflow-hidden animate-rise-in"
@@ -221,13 +232,32 @@ export default function FixturesPage() {
           <div className="hidden md:flex flex-1 min-h-0 overflow-y-auto px-6 py-3">
             <div
               className={`mx-auto w-full max-w-7xl grid gap-6 items-start ${
-                showEditor ? 'grid-cols-[1fr_22rem]' : 'grid-cols-1'
+                showEditor && hasLivePrediction ? 'grid-cols-[1fr_22rem]' : 'grid-cols-1'
               }`}
             >
               {/* Center Area */}
               <div className="flex min-w-0 flex-col items-center">
                 {showEditor ? (
-                  <FixtureEditor {...editorProps} />
+                  <div className="flex w-full flex-col items-center gap-3">
+                    <FixtureEditor {...editorProps} />
+
+                    {/* Action Button Centered Directly Below AI Team Read */}
+                    <div className="flex flex-col items-center justify-center my-2">
+                      {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
+                      <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
+                          isPredicted
+                            ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
+                            : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
+                        }`}
+                      >
+                        {buttonLabel} &rarr;
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   /* Resting Filed State (Picture 3) */
                   <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 py-2">
@@ -247,14 +277,15 @@ export default function FixturesPage() {
                         fixture={selectedFixture}
                         open={aiOpen}
                         onToggle={() => setAiOpen((v) => !v)}
+                        totalGoals={selectedFixture.userPrediction?.homeScore + selectedFixture.userPrediction?.awayScore}
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Right Live Preview Slip (Picture 5 - only while editing) */}
-              {showEditor && (
+              {/* Right Live Preview Slip (Picture 4 - while editing with live prediction) */}
+              {showEditor && hasLivePrediction && (
                 <div className="sticky top-0 flex flex-col gap-2">
                   <FixtureSlip
                     fixture={selectedFixture}
@@ -270,28 +301,9 @@ export default function FixturesPage() {
             </div>
           </div>
 
-          {/* Desktop Fixed Bottom Footer (Centered Button + Contained Reel Strip) */}
+          {/* Desktop Fixed Bottom Footer (Contained Reel Strip) */}
           <div className="hidden md:flex flex-none flex-col gap-2 border-t border-[#16203180] bg-[#050b14cc] px-6 py-2.5 backdrop-blur-md">
-            <div className="w-full max-w-5xl mx-auto flex flex-col gap-2">
-              {showEditor && (
-                <div className="flex flex-col items-center justify-center">
-                  {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
-                      isPredicted
-                        ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
-                        : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
-                    }`}
-                  >
-                    {submitting ? 'Filing…' : isPredicted ? 'Filed · amend to re-file' : 'Review & file'} &rarr;
-                  </button>
-                </div>
-              )}
-              <FixtureReelStrip stations={stations} />
-            </div>
+            <FixtureReelStrip stations={stations} />
           </div>
 
           {/* Mobile Layout */}
@@ -334,7 +346,7 @@ export default function FixturesPage() {
                   disabled={submitting}
                   className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-indigo-mid px-6 py-3 font-outfit text-sm font-semibold text-white shadow-lg"
                 >
-                  {submitting ? 'Filing…' : isPredicted ? 'Filed · amend to re-file' : 'Review & file'} &rarr;
+                  {buttonLabel} &rarr;
                 </button>
               </div>
             ) : (
@@ -353,6 +365,7 @@ export default function FixturesPage() {
                   fixture={selectedFixture}
                   open={aiOpen}
                   onToggle={() => setAiOpen((v) => !v)}
+                  totalGoals={selectedFixture.userPrediction?.homeScore + selectedFixture.userPrediction?.awayScore}
                 />
               </div>
             )}

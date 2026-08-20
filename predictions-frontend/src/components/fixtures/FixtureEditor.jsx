@@ -177,6 +177,7 @@ export default function FixtureEditor({
           open={aiOpen}
           onToggle={onToggleAi}
           onPickScorer={handlePickLikelyScorer}
+          totalGoals={totalGoals}
         />
       </div>
     </div>
