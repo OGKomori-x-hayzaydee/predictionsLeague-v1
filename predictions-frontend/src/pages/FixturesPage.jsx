@@ -99,7 +99,10 @@ export default function FixturesPage() {
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
   const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : 'GW24';
 
-  const hasOptimisticFiling = optimisticFiled?.id === selectedFixture?.id;
+  // Guard against both sides being null/undefined at once (e.g. before
+  // fixtures have loaded) — `undefined === undefined` would otherwise read
+  // as a spurious match and crash the very next line on `optimisticFiled.prediction`.
+  const hasOptimisticFiling = !!optimisticFiled && !!selectedFixture && optimisticFiled.id === selectedFixture.id;
   const isPredicted = !!selectedFixture?.predicted || hasOptimisticFiling;
   const filedNow = isPredicted && !editorOpen;
   const showEditor = !filedNow;
