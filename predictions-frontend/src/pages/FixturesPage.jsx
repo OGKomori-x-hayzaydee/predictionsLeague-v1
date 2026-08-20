@@ -30,7 +30,7 @@ const STAMP_HOLD_MS = 980;
 const RETURN_MS = 700;
 
 /**
- * Fixtures Page — Complete recreation of Spine.dc.html lines 319-751.
+ * Fixtures Page — perfectly proportioned to fit the viewport without awkward scrollbars or cutoffs.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -174,16 +174,15 @@ export default function FixturesPage() {
     matchChips,
     aiOpen,
     onToggleAi: () => setAiOpen((v) => !v),
-    ceiling: liveCeiling,
-    onSubmit: handleSubmit,
-    submitting,
-    error: submitError,
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-56px)] overflow-hidden animate-rise-in" style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}>
+    <div
+      className="relative flex h-[calc(100vh-98px)] flex-col overflow-hidden animate-rise-in"
+      style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}
+    >
       {/* Top SlotBar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block flex-none">
         <SlotBar
           kicker="THE REEL"
           reelNav={
@@ -218,65 +217,83 @@ export default function FixturesPage() {
 
       {!isLoading && !isError && selectedFixture && (
         <>
-          {/* Desktop Layout */}
-          <div
-            className={`hidden md:grid md:items-start transition-[grid-template-columns] duration-300 ${
-              showEditor ? 'md:grid-cols-[1fr_380px]' : 'md:grid-cols-1'
-            }`}
-          >
-            {/* Center Area */}
-            <div className="flex min-w-0 flex-col gap-6 px-8 py-6 pb-28">
-              {showEditor ? (
-                <FixtureEditor {...editorProps} />
-              ) : (
-                /* Resting Filed State (Picture 3) */
-                <div className="mx-auto flex w-full max-w-[640px] flex-col items-center gap-6 py-4">
+          {/* Desktop Main Content Area (flex-1 with internal overflow-y-auto) */}
+          <div className="hidden md:flex flex-1 min-h-0 overflow-y-auto px-6 py-3">
+            <div
+              className={`mx-auto w-full max-w-[1240px] grid gap-5 items-start ${
+                showEditor ? 'grid-cols-[1fr_320px]' : 'grid-cols-1'
+              }`}
+            >
+              {/* Center Area */}
+              <div className="flex min-w-0 flex-col items-center">
+                {showEditor ? (
+                  <FixtureEditor {...editorProps} />
+                ) : (
+                  /* Resting Filed State (Picture 3) */
+                  <div className="mx-auto flex w-full max-w-[600px] flex-col items-center gap-4 py-2">
+                    <FixtureSlip
+                      fixture={selectedFixture}
+                      prediction={activePrediction}
+                      filed={true}
+                      ceiling={activeCeiling}
+                      variant="resting"
+                      onEdit={() => setEditorOpen(true)}
+                      gameweekLabel={gameweekLabel}
+                      deadlineLabel={deadlineFormatted}
+                    />
+
+                    <div className="w-full">
+                      <AiTeamReadPanel
+                        fixture={selectedFixture}
+                        open={aiOpen}
+                        onToggle={() => setAiOpen((v) => !v)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Live Preview Slip (Picture 5 - only while editing) */}
+              {showEditor && (
+                <div className="sticky top-0 flex flex-col gap-2">
                   <FixtureSlip
                     fixture={selectedFixture}
                     prediction={activePrediction}
-                    filed={true}
+                    filed={isPredicted}
                     ceiling={activeCeiling}
-                    variant="resting"
-                    onEdit={() => setEditorOpen(true)}
+                    variant="rail"
                     gameweekLabel={gameweekLabel}
                     deadlineLabel={deadlineFormatted}
                   />
-
-                  <div className="w-full">
-                    <AiTeamReadPanel
-                      fixture={selectedFixture}
-                      open={aiOpen}
-                      onToggle={() => setAiOpen((v) => !v)}
-                    />
-                  </div>
                 </div>
               )}
             </div>
-
-            {/* Right Live Preview Slip (Picture 5 - only when editing) */}
-            {showEditor && (
-              <div className="sticky top-6 flex flex-col gap-4 pr-6 pt-6">
-                <FixtureSlip
-                  fixture={selectedFixture}
-                  prediction={activePrediction}
-                  filed={isPredicted}
-                  ceiling={activeCeiling}
-                  variant="rail"
-                  onFile={handleSubmit}
-                  gameweekLabel={gameweekLabel}
-                  deadlineLabel={deadlineFormatted}
-                />
-              </div>
-            )}
           </div>
 
-          {/* Sticky Bottom Reel Bar (Desktop) */}
-          <div className="hidden md:block fixed inset-x-0 bottom-0 z-30 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md">
+          {/* Desktop Fixed Bottom Footer (Button + Reel Strip) */}
+          <div className="hidden md:flex flex-none flex-col gap-2 border-t border-[#16203180] bg-[#050b14cc] px-6 py-2 backdrop-blur-md">
+            {showEditor && (
+              <div className="flex flex-col items-center justify-center">
+                {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className={`flex cursor-pointer items-center gap-2 rounded-full px-7 py-2.5 font-outfit text-xs font-semibold transition-all disabled:opacity-50 ${
+                    isPredicted
+                      ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
+                      : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
+                  }`}
+                >
+                  {submitting ? 'Filing…' : isPredicted ? 'Filed · amend to re-file' : 'Review & file'} &rarr;
+                </button>
+              </div>
+            )}
             <FixtureReelStrip stations={stations} />
           </div>
 
           {/* Mobile Layout */}
-          <div className="flex flex-col gap-4 px-4 pb-8 pt-4 md:hidden">
+          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-8 pt-3 md:hidden">
             <div className="flex items-center justify-between gap-2.5">
               <button
                 type="button"
@@ -307,7 +324,17 @@ export default function FixturesPage() {
             </div>
 
             {showEditor ? (
-              <FixtureEditor {...editorProps} />
+              <div className="flex flex-col gap-3">
+                <FixtureEditor {...editorProps} />
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-indigo-mid px-6 py-3 font-outfit text-sm font-semibold text-white shadow-lg"
+                >
+                  {submitting ? 'Filing…' : isPredicted ? 'Filed · amend to re-file' : 'Review & file'} &rarr;
+                </button>
+              </div>
             ) : (
               <div className="flex flex-col gap-4">
                 <FixtureSlip
