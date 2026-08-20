@@ -5,7 +5,7 @@ import LoadingState from '../components/common/LoadingState';
 import FixtureEditor from '../components/fixtures/FixtureEditor';
 import FixtureSlip from '../components/fixtures/FixtureSlip';
 import FixtureReelStrip from '../components/fixtures/FixtureReelStrip';
-import FilingCeremony from '../components/fixtures/FilingCeremony';
+import FloatingSlipCard from '../components/fixtures/FloatingSlipCard';
 import AiTeamReadPanel from '../components/fixtures/AiTeamReadPanel';
 import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
@@ -25,13 +25,18 @@ function formatKickoff(dateStr) {
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
 
+// Timings mirror the prototype's fileIt() exactly (script ~line 4139-4148):
+// phase flips to "stamp" 520ms after filing starts, "return" 980ms after
+// that, and "idle" 700ms after that.
 const MIN_CENTER_MS = 520;
 const STAMP_HOLD_MS = 980;
 const RETURN_MS = 700;
 
 /**
- * Fixtures Page — perfectly proportioned desktop viewport with widened editor
- * and dock-integrated action button above THE REEL.
+ * Fixtures Page — desktop editor with a corner-anchored live-preview slip
+ * that morphs in place into the "FILED" ceremony (see FloatingSlipCard),
+ * matching Spine.dc.html's buildReel() choreography instead of a detached
+ * centered modal.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -43,7 +48,6 @@ export default function FixturesPage() {
     stations,
     selectedIndex,
     selectedFixture,
-    selectedCeiling,
     selectPrev,
     selectNext,
     canSelectPrev,
@@ -62,6 +66,10 @@ export default function FixturesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [filePhase, setFilePhase] = useState('idle');
+  // Optimistic "just filed" snapshot for the *currently open* fixture, so the
+  // resting-slip reveal isn't gated behind the invalidated queries' network
+  // round-trip — matching the prototype's instant local state flip.
+  const [optimisticFiled, setOptimisticFiled] = useState(null);
   const fileTimersRef = useRef([]);
 
   useEffect(() => {
@@ -79,6 +87,7 @@ export default function FixturesPage() {
     });
     setEditorOpen(false);
     setSubmitError(null);
+    setOptimisticFiled(null);
     fileTimersRef.current.forEach(clearTimeout);
     fileTimersRef.current = [];
     setFilePhase('idle');
@@ -90,12 +99,13 @@ export default function FixturesPage() {
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
   const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : 'GW24';
 
-  const isPredicted = !!selectedFixture?.predicted;
+  const hasOptimisticFiling = optimisticFiled?.id === selectedFixture?.id;
+  const isPredicted = !!selectedFixture?.predicted || hasOptimisticFiling;
   const filedNow = isPredicted && !editorOpen;
   const showEditor = !filedNow;
 
   const totalGoals = draft.homeScore + draft.awayScore;
-  const hasLivePrediction = totalGoals > 0 || isPredicted || draft.chip;
+  const hasLivePrediction = totalGoals > 0 || draft.chip;
 
   const liveCeiling = calculateCeilingPoints({
     homeScore: draft.homeScore,
@@ -104,14 +114,31 @@ export default function FixturesPage() {
     awayScorers: draft.awayScorers,
     chips: draft.chip ? [draft.chip] : [],
   });
-  const activePrediction = filedNow ? selectedFixture.userPrediction : draft;
-  const activeCeiling = filedNow ? selectedCeiling : liveCeiling;
+
+  const restingPrediction = hasOptimisticFiling
+    ? optimisticFiled.prediction
+    : selectedFixture?.userPrediction;
+  const restingCeiling = restingPrediction ? calculateCeilingPoints(restingPrediction) : 0;
+
+  const activePrediction = filedNow ? restingPrediction : draft;
+  const activeCeiling = filedNow ? restingCeiling : liveCeiling;
+
+  // Drives the corner live-preview card: shown once there's something to
+  // preview pre-filing, or for the whole non-idle filing sequence — matches
+  // buildReel()'s `shown = (!filed && anyPicked) || phase !== "idle"`.
+  const previewVisible = !isPredicted && hasLivePrediction;
+  const railShown = previewVisible || filePhase !== 'idle';
 
   const handleSubmit = async () => {
     if (!selectedFixture || filePhase !== 'idle') return;
     setSubmitting(true);
     setSubmitError(null);
     setFilePhase('center');
+    // Close the editor immediately (prototype's `fixEditOpen:false` at t=0) —
+    // harmless pre-filing since `showEditor` stays true until `isPredicted`
+    // flips, but it's what lets the resting slip + AI panel be the thing
+    // revealed once the dim/card fade away at the end of the sequence.
+    setEditorOpen(false);
 
     const minCenter = new Promise((resolve) => {
       fileTimersRef.current.push(setTimeout(resolve, MIN_CENTER_MS));
@@ -135,12 +162,18 @@ export default function FixturesPage() {
 
       if (!result.success) {
         setFilePhase('idle');
+        setEditorOpen(true);
         setSubmitError(result.error?.message || 'Could not file this prediction.');
         return;
       }
 
       queryClient.invalidateQueries({ queryKey: ['user-predictions'] });
       queryClient.invalidateQueries({ queryKey: ['hybrid-fixtures'] });
+      // Flip the "filed" state and the ceremony's stamp phase in the same
+      // tick, so the resting-slip branch mounts exactly as the stamp
+      // appears — its AI panel's .98s-delayed slide-in then lands exactly
+      // when the stamp begins fading (see STAMP_HOLD_MS below).
+      setOptimisticFiled({ id: selectedFixture.id, prediction: { ...draft } });
       setFilePhase('stamp');
       fileTimersRef.current.push(
         setTimeout(() => {
@@ -150,11 +183,11 @@ export default function FixturesPage() {
       fileTimersRef.current.push(
         setTimeout(() => {
           setFilePhase('idle');
-          setEditorOpen(false);
         }, STAMP_HOLD_MS + RETURN_MS)
       );
     } catch (err) {
       setFilePhase('idle');
+      setEditorOpen(true);
       setSubmitError(err?.message || 'Could not file this prediction.');
     } finally {
       setSubmitting(false);
@@ -180,13 +213,21 @@ export default function FixturesPage() {
     onToggleAi: () => setAiOpen((v) => !v),
   };
 
-  const buttonLabel = submitting
+  const buttonLabel = submitting || filePhase !== 'idle'
     ? 'Filing…'
     : isPredicted
       ? 'Filed · amend to re-file'
       : totalGoals === 0
         ? 'Review & file 0–0'
         : 'Review & file';
+
+  // Only animate the AI panel's entrance right after an active filing
+  // sequence (matches aiSlideAnimDesk/aiSlideAnimMob: "none" once idle so a
+  // normal page load into an already-filed fixture doesn't replay it).
+  const aiSlideStyleDesktop =
+    filePhase === 'idle' ? undefined : { animation: 'slideFromBehind .5s ease .98s both' };
+  const aiSlideStyleMobile =
+    filePhase === 'idle' ? undefined : { animation: 'slideFromBehind .5s ease 1.5s both' };
 
   return (
     <div
@@ -229,84 +270,83 @@ export default function FixturesPage() {
 
       {!isLoading && !isError && selectedFixture && (
         <>
-          {/* Desktop Main Content Area (flex-1 with internal overflow-y-auto) */}
-          <div className="hidden md:flex flex-1 min-h-0 overflow-y-auto px-6 py-2">
+          {/* Desktop body — its own relative/overflow-hidden scope so the dim
+              + floating card only ever cover this fixture's content, never
+              the masthead/slotbar above it. */}
+          <div className="relative hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
             <div
-              className={`mx-auto w-full grid gap-6 items-start ${
-                showEditor && hasLivePrediction
-                  ? 'max-w-[90rem] grid-cols-[1fr_22rem]'
-                  : 'max-w-[76rem] grid-cols-1'
-              }`}
+              className="flex flex-1 min-h-0 flex-col"
+              style={{
+                paddingRight: railShown ? '366px' : '0px',
+                transition: 'padding-right .46s cubic-bezier(.4,0,.2,1)',
+              }}
             >
-              {/* Center Area */}
-              <div className="flex min-w-0 flex-col items-center">
-                {showEditor ? (
-                  <FixtureEditor {...editorProps} />
-                ) : (
-                  /* Resting Filed State (Picture 3) */
-                  <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 py-2">
-                    <FixtureSlip
-                      fixture={selectedFixture}
-                      prediction={activePrediction}
-                      filed={true}
-                      ceiling={activeCeiling}
-                      variant="resting"
-                      onEdit={() => setEditorOpen(true)}
-                      gameweekLabel={gameweekLabel}
-                      deadlineLabel={deadlineFormatted}
-                    />
-
-                    <div className="w-full">
-                      <AiTeamReadPanel
+              {/* Scrollable content */}
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 py-2">
+                <div className="mx-auto flex w-full max-w-[76rem] flex-col items-center">
+                  {showEditor ? (
+                    <FixtureEditor {...editorProps} />
+                  ) : (
+                    /* Resting Filed State */
+                    <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 py-2">
+                      <FixtureSlip
                         fixture={selectedFixture}
-                        open={aiOpen}
-                        onToggle={() => setAiOpen((v) => !v)}
-                        totalGoals={selectedFixture.userPrediction?.homeScore + selectedFixture.userPrediction?.awayScore}
+                        prediction={activePrediction}
+                        filed={true}
+                        ceiling={activeCeiling}
+                        variant="resting"
+                        onEdit={() => setEditorOpen(true)}
+                        gameweekLabel={gameweekLabel}
+                        deadlineLabel={deadlineFormatted}
                       />
+
+                      <div className="w-full" style={aiSlideStyleDesktop}>
+                        <AiTeamReadPanel
+                          fixture={selectedFixture}
+                          open={aiOpen}
+                          onToggle={() => setAiOpen((v) => !v)}
+                          totalGoals={(activePrediction?.homeScore ?? 0) + (activePrediction?.awayScore ?? 0)}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              {/* Right Live Preview Slip (Picture 4 - while editing with live prediction) */}
-              {showEditor && hasLivePrediction && (
-                <div className="sticky top-0 flex flex-col gap-2">
-                  <FixtureSlip
-                    fixture={selectedFixture}
-                    prediction={activePrediction}
-                    filed={isPredicted}
-                    ceiling={activeCeiling}
-                    variant="rail"
-                    gameweekLabel={gameweekLabel}
-                    deadlineLabel={deadlineFormatted}
-                  />
+              {/* Fixed Bottom Footer Dock (Button + Contained Reel Strip) */}
+              <div className="flex flex-none flex-col gap-2.5 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md">
+                <div className="w-full max-w-[76rem] mx-auto flex flex-col gap-2.5">
+                  {showEditor && (
+                    <div className="flex flex-col items-center justify-center">
+                      {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
+                      <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={submitting || filePhase !== 'idle'}
+                        className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
+                          isPredicted
+                            ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
+                            : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
+                        }`}
+                      >
+                        {buttonLabel} &rarr;
+                      </button>
+                    </div>
+                  )}
+                  <FixtureReelStrip stations={stations} />
                 </div>
-              )}
+              </div>
             </div>
-          </div>
 
-          {/* Desktop Fixed Bottom Footer Dock (Button + Contained Reel Strip) */}
-          <div className="hidden md:flex flex-none flex-col gap-2.5 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md">
-            <div className="w-full max-w-[76rem] mx-auto flex flex-col gap-2.5">
-              {showEditor && (
-                <div className="flex flex-col items-center justify-center">
-                  {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
-                      isPredicted
-                        ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
-                        : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
-                    }`}
-                  >
-                    {buttonLabel} &rarr;
-                  </button>
-                </div>
-              )}
-              <FixtureReelStrip stations={stations} />
-            </div>
+            <FloatingSlipCard
+              fixture={selectedFixture}
+              prediction={filePhase !== 'idle' || previewVisible ? draft : restingPrediction}
+              ceiling={filePhase !== 'idle' || previewVisible ? liveCeiling : restingCeiling}
+              filed={isPredicted}
+              phase={filePhase}
+              visible={previewVisible}
+              gameweekLabel={gameweekLabel}
+            />
           </div>
 
           {/* Mobile Layout */}
@@ -346,11 +386,12 @@ export default function FixturesPage() {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={submitting}
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-indigo-mid px-6 py-3 font-outfit text-sm font-semibold text-white shadow-lg"
+                  disabled={submitting || filePhase !== 'idle'}
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-indigo-mid px-6 py-3 font-outfit text-sm font-semibold text-white shadow-lg disabled:opacity-60"
                 >
                   {buttonLabel} &rarr;
                 </button>
+                {submitError && <p className="text-center text-xs text-state-error">{submitError}</p>}
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -364,26 +405,19 @@ export default function FixturesPage() {
                   gameweekLabel={gameweekLabel}
                   deadlineLabel={deadlineFormatted}
                 />
-                <AiTeamReadPanel
-                  fixture={selectedFixture}
-                  open={aiOpen}
-                  onToggle={() => setAiOpen((v) => !v)}
-                  totalGoals={selectedFixture.userPrediction?.homeScore + selectedFixture.userPrediction?.awayScore}
-                />
+                <div style={aiSlideStyleMobile}>
+                  <AiTeamReadPanel
+                    fixture={selectedFixture}
+                    open={aiOpen}
+                    onToggle={() => setAiOpen((v) => !v)}
+                    totalGoals={(activePrediction?.homeScore ?? 0) + (activePrediction?.awayScore ?? 0)}
+                  />
+                </div>
               </div>
             )}
           </div>
         </>
       )}
-
-      {/* Spotlight Filing Ceremony */}
-      <FilingCeremony
-        phase={filePhase}
-        fixture={selectedFixture}
-        prediction={draft}
-        ceiling={liveCeiling}
-        gameweekLabel={gameweekLabel}
-      />
     </div>
   );
 }

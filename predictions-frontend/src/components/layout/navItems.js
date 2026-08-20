@@ -6,9 +6,9 @@ import { HomeIcon, CalendarIcon, BarChartIcon, CardStackIcon, TargetIcon, Person
 // breakpoints, not the primary nav bars below). Route paths match the real
 // routes registered in src/App.jsx.
 export const PAGES = [
-  { id: 'dashboard', label: 'Home', path: '/dashboard', Icon: HomeIcon },
+  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', Icon: HomeIcon },
   { id: 'fixtures', label: 'Fixtures', path: '/fixtures', Icon: CalendarIcon },
-  { id: 'record', label: 'Record', path: '/record', Icon: BarChartIcon },
+  { id: 'record', label: 'My Record', path: '/record', Icon: BarChartIcon },
   { id: 'chips', label: 'Chips', path: '/chips', Icon: CardStackIcon },
   { id: 'leagues', label: 'Leagues', path: '/leagues', Icon: TargetIcon },
   { id: 'profile', label: 'Profile', path: '/profile', Icon: PersonIcon },
