@@ -39,7 +39,9 @@ export function useChipPlan() {
     });
   };
 
-  return { plan, assign, clear };
+  const clearAll = () => setPlan({});
+
+  return { plan, assign, clear, clearAll };
 }
 
 export default useChipPlan;
