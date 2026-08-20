@@ -41,6 +41,31 @@ export function namedScorers(homeScorers = [], awayScorers = []) {
   return [...(homeScorers || []), ...(awayScorers || [])].filter(Boolean);
 }
 
+// Placeholder scorer options (ScorerSelect.jsx's EXTRA_OPTIONS) that don't
+// count as a "named" scorer in the sentence below.
+const EXTRA_SCORER_NAMES = ['Own goal', 'Not sure yet'];
+
+/**
+ * "Liverpool 2, Man City 1 — Liverpool to win, with Salah, Gakpo and Haaland
+ * on the scoresheet." — the in-progress slip's descriptive read, matching
+ * Spine.dc.html's `sentence` (script ~line 4274). Distinct from slipHeadline
+ * above (the terser "edge past" newspaper style used once a prediction is
+ * actually filed) — this is the live draft preview shown while filing.
+ */
+export function slipSentence(homeTeam, awayTeam, homeScore, awayScore, homeScorers = [], awayScorers = []) {
+  const outcome =
+    homeScore === awayScore ? 'a draw' : homeScore > awayScore ? `${homeTeam} to win` : `${awayTeam} to win`;
+  const named = [...(homeScorers || []), ...(awayScorers || [])].filter(
+    (n) => n && !EXTRA_SCORER_NAMES.includes(n)
+  );
+  const scorersClause = named.length
+    ? `, with ${
+        named.length > 2 ? `${named.slice(0, 2).join(', ')} and ${named[2]}` : named.join(' and ')
+      } on the scoresheet.`
+    : '.';
+  return `${homeTeam} ${homeScore}, ${awayTeam} ${awayScore} — ${outcome}${scorersClause}`;
+}
+
 /**
  * "Arsenal edge past Chelsea, 2-1" style headline, matching Spine.dc.html's
  * headlineFor() (script ~line 4150) — pure string formatting over the

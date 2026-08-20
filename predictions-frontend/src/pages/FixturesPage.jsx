@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
 import FixtureEditor from '../components/fixtures/FixtureEditor';
 import FixtureSlip from '../components/fixtures/FixtureSlip';
 import FixtureReelStrip from '../components/fixtures/FixtureReelStrip';
+import FilingCeremony from '../components/fixtures/FilingCeremony';
 import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
 import { useNextMatch } from '../hooks/useNextMatch';
@@ -22,6 +23,13 @@ function formatKickoff(dateStr) {
 }
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
+
+// FilingCeremony's phase timeline, literal from Spine.dc.html's fileIt():
+// center holds at least this long (matched to the real request in parallel),
+// then stamp holds STAMP_HOLD_MS, then return holds RETURN_MS, then idle.
+const MIN_CENTER_MS = 520;
+const STAMP_HOLD_MS = 1500 - 520;
+const RETURN_MS = 2200 - 1500;
 
 /**
  * Fixtures — the prediction-filing flow. GW-reel navigation via SlotBar's
@@ -59,6 +67,12 @@ export default function FixturesPage() {
   const [aiOpen, setAiOpen] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [filePhase, setFilePhase] = useState('idle');
+  const fileTimersRef = useRef([]);
+
+  useEffect(() => {
+    return () => fileTimersRef.current.forEach(clearTimeout);
+  }, []);
 
   // Reset the draft + editor state whenever the selected fixture changes
   // (prev/next, or a fresh load) — mirrors the prototype's per-fixture `ed`
@@ -77,6 +91,11 @@ export default function FixturesPage() {
     });
     setEditorOpen(false);
     setSubmitError(null);
+    // Navigating away (prev/next) cancels any in-flight filing ceremony,
+    // matching the prototype's prev()/next() also resetting phase to idle.
+    fileTimersRef.current.forEach(clearTimeout);
+    fileTimersRef.current = [];
+    setFilePhase('idle');
   }, [selectedFixture?.id]);
 
   const currentGameweek = essentialData?.season?.currentGameweek;
@@ -102,30 +121,54 @@ export default function FixturesPage() {
   const activePrediction = filedNow ? selectedFixture.userPrediction : draft;
   const activeCeiling = filedNow ? selectedCeiling : liveCeiling;
 
+  // The filing ceremony: center (card floats up, dims in) -> stamp (lands,
+  // FILED badge pops) -> return (drifts up, fades) -> idle. Phase only
+  // advances center -> stamp once the real request actually succeeds — the
+  // prototype's fixed 520ms is instead a *minimum* center time, raced
+  // against the network call, so a slow request just holds "center" longer
+  // rather than stamping early.
   const handleSubmit = async () => {
-    if (!selectedFixture) return;
+    if (!selectedFixture || filePhase !== 'idle') return;
     setSubmitting(true);
     setSubmitError(null);
+    setFilePhase('center');
+    setEditorOpen(false);
+
+    const minCenter = new Promise((resolve) => {
+      fileTimersRef.current.push(setTimeout(resolve, MIN_CENTER_MS));
+    });
+
     try {
-      const result = await userPredictionsAPI.makePrediction(
-        {
-          homeScore: draft.homeScore,
-          awayScore: draft.awayScore,
-          homeScorers: draft.homeScorers.filter(Boolean),
-          awayScorers: draft.awayScorers.filter(Boolean),
-          chips: draft.chip ? [draft.chip] : [],
-        },
-        selectedFixture,
-        !!selectedFixture.predicted
-      );
+      const [result] = await Promise.all([
+        userPredictionsAPI.makePrediction(
+          {
+            homeScore: draft.homeScore,
+            awayScore: draft.awayScore,
+            homeScorers: draft.homeScorers.filter(Boolean),
+            awayScorers: draft.awayScorers.filter(Boolean),
+            chips: draft.chip ? [draft.chip] : [],
+          },
+          selectedFixture,
+          !!selectedFixture.predicted
+        ),
+        minCenter,
+      ]);
+
       if (!result.success) {
+        setFilePhase('idle');
+        setEditorOpen(true);
         setSubmitError(result.error?.message || 'Could not file this prediction.');
         return;
       }
+
       queryClient.invalidateQueries({ queryKey: ['user-predictions'] });
       queryClient.invalidateQueries({ queryKey: ['hybrid-fixtures'] });
-      setEditorOpen(false);
+      setFilePhase('stamp');
+      fileTimersRef.current.push(setTimeout(() => setFilePhase('return'), STAMP_HOLD_MS));
+      fileTimersRef.current.push(setTimeout(() => setFilePhase('idle'), STAMP_HOLD_MS + RETURN_MS));
     } catch (err) {
+      setFilePhase('idle');
+      setEditorOpen(true);
       setSubmitError(err?.message || 'Could not file this prediction.');
     } finally {
       setSubmitting(false);
@@ -280,6 +323,14 @@ export default function FixturesPage() {
           </div>
         </>
       )}
+
+      <FilingCeremony
+        phase={filePhase}
+        fixture={selectedFixture}
+        prediction={draft}
+        ceiling={liveCeiling}
+        gameweekLabel={gameweekLabel}
+      />
     </div>
   );
 }
