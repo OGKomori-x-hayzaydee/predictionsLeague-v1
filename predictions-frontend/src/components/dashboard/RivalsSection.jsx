@@ -1,26 +1,108 @@
+import { useEffect, useState } from 'react';
 import KickerLabel from '../ui/KickerLabel';
+import leagueAPI from '../../services/api/leagueAPI';
 
 /**
- * The prototype's "RIVALS · OWLS & OTHERS" panel is a leaderboard of other
- * players' season points relative to yours — but even in the prototype
- * itself those names/points are hardcoded fixtures, not real data, and the
- * backend has no rivals-comparison endpoint (no per-league leaderboard of
- * other members' points, only the current user's own position via
- * /dashboard/leagues/user). Rather than fabricate rival names and scores,
- * this renders an honest "coming soon" state — the surrounding layout slot
- * still exists so this reads as a real, complete screen with one deferred
- * panel, not a missing one.
+ * Real per-league standings (leagueAPI.getLeagueStandings — the same
+ * endpoint useLeagueDetail uses for the Leagues screen), windowed to a
+ * handful of rows around the current user. Picks the user's first league;
+ * a league switcher is out of scope for the Dashboard's compact sidebar.
  */
-export default function RivalsSection() {
+function useRivals(league) {
+  const [standings, setStandings] = useState(null);
+  const [isLoading, setIsLoading] = useState(!!league);
+
+  useEffect(() => {
+    if (!league?.id) {
+      setStandings(null);
+      setIsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+    leagueAPI
+      .getLeagueStandings(league.id)
+      .then((res) => {
+        if (cancelled) return;
+        const list = Array.from(res?.standings || []).sort(
+          (a, b) => (a.position ?? 999) - (b.position ?? 999)
+        );
+        setStandings(list);
+      })
+      .catch(() => !cancelled && setStandings([]))
+      .finally(() => !cancelled && setIsLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [league?.id]);
+
+  return { standings, isLoading };
+}
+
+// Top N, or a window centered on the user when they sit outside it — same
+// "leaderboard around you" shape as the Leagues screen's podium/rankings.
+function windowAroundUser(standings, size = 5) {
+  if (!standings || standings.length === 0) return [];
+  const idx = standings.findIndex((m) => m.isCurrentUser);
+  if (idx === -1 || idx < size) return standings.slice(0, size);
+  const half = Math.floor(size / 2);
+  let start = Math.max(0, idx - half);
+  const end = Math.min(standings.length, start + size);
+  start = Math.max(0, end - size);
+  return standings.slice(start, end);
+}
+
+export default function RivalsSection({ leagues }) {
+  const league = leagues?.[0] || null;
+  const { standings, isLoading } = useRivals(league);
+  const rows = windowAroundUser(standings);
+  const maxPoints = rows.length ? Math.max(...rows.map((m) => m.points || 0), 1) : 1;
+
   return (
     <div className="flex flex-col gap-[11px]">
       <KickerLabel as="div" className="tracking-[0.16em] text-text-muted-3">
-        Rivals
+        Rivals{league ? ` · ${league.name}` : ''}
       </KickerLabel>
-      <p className="text-xs leading-relaxed text-text-muted-2">
-        Head-to-head standings against the rest of your leagues are arriving soon — check back once
-        league leaderboards are wired in.
-      </p>
+
+      {!league && !isLoading && (
+        <p className="text-xs leading-relaxed text-text-muted-2">
+          Join a league to see how you stack up against your rivals.
+        </p>
+      )}
+      {league && isLoading && <p className="text-xs text-text-muted-2">Loading…</p>}
+      {league && !isLoading && rows.length === 0 && (
+        <p className="text-xs text-text-muted-2">No standings yet.</p>
+      )}
+
+      <div className="flex flex-col gap-2">
+        {rows.map((m) => (
+          <div key={m.id ?? m.username} className="flex items-center gap-2.5">
+            <span
+              className={`w-3.5 shrink-0 font-mono text-[11px] ${
+                m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-3'
+              }`}
+            >
+              {m.position}
+            </span>
+            <span
+              className={`min-w-0 flex-1 truncate text-sm ${
+                m.isCurrentUser ? 'font-semibold text-brand-teal' : 'text-text-muted-1'
+              }`}
+            >
+              {m.isCurrentUser ? 'You' : m.displayName || m.username}
+            </span>
+            <div className="h-1 w-14 shrink-0 overflow-hidden rounded-full bg-surface-card-3">
+              <div
+                className={`h-full rounded-full ${m.isCurrentUser ? 'bg-brand-teal' : 'bg-border-control'}`}
+                style={{ width: `${Math.max(8, ((m.points || 0) / maxPoints) * 100)}%` }}
+              />
+            </div>
+            <span className="w-9 shrink-0 text-right font-mono text-[11px] text-text-muted-2">
+              {m.points}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
