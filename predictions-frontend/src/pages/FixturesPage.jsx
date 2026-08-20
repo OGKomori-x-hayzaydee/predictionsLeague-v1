@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import SlotBar from '../components/ui/SlotBar';
@@ -64,6 +64,10 @@ export default function FixturesPage() {
   const { essentialData } = useDashboardData();
   const { timeDisplay, isLive } = useNextMatch();
 
+  // Positioned ancestor `FloatingSlipCard` measures itself against, to
+  // compute a true pane-centered translate instead of a fixed vw/vh guess
+  // (see filingChoreography.js's getCardTarget doc comment).
+  const paneRef = useRef(null);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [editorOpen, setEditorOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(true);
@@ -265,7 +269,7 @@ export default function FixturesPage() {
           {/* Desktop body — its own relative/overflow-hidden scope so the dim
               + floating card only ever cover this fixture's content, never
               the masthead/slotbar above it. */}
-          <div className="relative hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
+          <div ref={paneRef} className="relative hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
             {/*
               Layout-thrash fix: this outer div's own paddingRight toggles
               instantly (no CSS transition) between 0 and RAIL_WIDTH_PX — as
@@ -361,6 +365,7 @@ export default function FixturesPage() {
               visible={previewVisible}
               isSlow={isSlow}
               gameweekLabel={gameweekLabel}
+              paneRef={paneRef}
             />
           </div>
 

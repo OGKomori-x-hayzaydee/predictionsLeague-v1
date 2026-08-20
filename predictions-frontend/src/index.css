@@ -385,6 +385,29 @@ select {
   }
 }
 
+/*
+  Floating filing-slip card border light-sweep, fired once as the FILED
+  stamp lands (Fixtures page) — pairs with the whole-card scale bounce
+  driven from filingChoreography.js's stamp-phase keyframe array.
+*/
+@keyframes cardShimmer {
+  0% {
+    box-shadow:
+      0 0 0 0 #14b8a600,
+      inset 0 0 0 0 #14b8a600;
+  }
+  35% {
+    box-shadow:
+      0 0 0 3px #14b8a655,
+      inset 0 0 18px 2px #14b8a633;
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 #14b8a600,
+      inset 0 0 0 0 #14b8a600;
+  }
+}
+
 /* "FILED" rubber-stamp badge entrance on filed fixture cards. */
 @keyframes stampIn {
   0% {

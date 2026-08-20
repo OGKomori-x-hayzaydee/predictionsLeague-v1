@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import TeamCrest from '../ui/TeamCrest';
 import { buildLedgerRows, namedScorers, slipHeadline, slipSentence } from './predictionLedger';
@@ -8,7 +9,55 @@ import {
   isCelebrationPhase,
   BACKDROP_TRANSITION,
   CARD_TRANSITION,
+  CARD_BOUNCE_TRANSITION,
 } from './filingChoreography';
+
+// Card is docked `top-5 right-6` (20px/24px) — kept as named constants so
+// the measurement math below and the className below can't drift apart.
+const DOCK_TOP_PX = 20;
+const DOCK_RIGHT_PX = 24;
+
+/**
+ * Measures the live translate needed to move the card from its docked
+ * top-right slot to sitting centered (both axes) within `paneRef`'s box,
+ * recomputed via ResizeObserver whenever either box's size changes —
+ * including the card's own height changing as its content swaps between
+ * the live-preview and FILED-celebration layouts. This is what replaces
+ * the old fixed `-34vw/12vh` guess (see filingChoreography.js) and is the
+ * fix for the card visibly drifting off-true-center right as it stamped.
+ */
+function useMeasuredCenterOffset(paneRef, cardRef) {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const paneEl = paneRef?.current;
+    const cardEl = cardRef.current;
+    if (!paneEl || !cardEl) return undefined;
+
+    const recompute = () => {
+      const paneRect = paneEl.getBoundingClientRect();
+      // offsetWidth/Height (not getBoundingClientRect) so a `scale`
+      // transform already applied by Framer Motion doesn't feed back into
+      // the measurement — these reflect the untransformed layout box.
+      const cardW = cardEl.offsetWidth;
+      const cardH = cardEl.offsetHeight;
+      const dockCenterX = paneRect.width - DOCK_RIGHT_PX - cardW / 2;
+      const dockCenterY = DOCK_TOP_PX + cardH / 2;
+      setOffset({
+        x: paneRect.width / 2 - dockCenterX,
+        y: paneRect.height / 2 - dockCenterY,
+      });
+    };
+
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(paneEl);
+    ro.observe(cardEl);
+    return () => ro.disconnect();
+  }, [paneRef, cardRef]);
+
+  return offset;
+}
 
 /**
  * The corner-anchored live-preview slip that morphs into the "FILED"
@@ -43,12 +92,22 @@ export default function FloatingSlipCard({
   visible = false,
   isSlow = false,
   gameweekLabel = 'GW24',
+  paneRef,
 }) {
+  const cardRef = useRef(null);
+  const centerOffset = useMeasuredCenterOffset(paneRef, cardRef);
+
   if (!fixture) return null;
   const { homeTeam, awayTeam } = fixture;
 
   const shown = visible || phase !== FILE_PHASES.IDLE;
   const isCelebration = isCelebrationPhase(phase);
+  // Bounce only needs its own snappier timing for the `scale` keyframe
+  // array — x/y/opacity keep CARD_TRANSITION's normal arrival easing.
+  const cardTransition =
+    phase === FILE_PHASES.STAMP
+      ? { ...CARD_TRANSITION, scale: CARD_BOUNCE_TRANSITION }
+      : CARD_TRANSITION;
   // Only meaningful mid-file, before the stamp lands — a slow `stamp`/
   // `return` phase isn't a thing (those are local timers, not network-bound).
   const showSlowHint = isSlow && phase === FILE_PHASES.CENTER;
@@ -80,16 +139,29 @@ export default function FloatingSlipCard({
       <motion.div
         className="absolute right-6 top-5 z-50 w-[380px] max-w-[90vw]"
         initial={false}
-        animate={getCardTarget(phase, shown)}
-        transition={CARD_TRANSITION}
+        animate={getCardTarget(phase, shown, centerOffset)}
+        transition={cardTransition}
         style={{ pointerEvents: shown ? 'auto' : 'none' }}
       >
         <div
+          ref={cardRef}
           className={`relative flex flex-col gap-3 overflow-hidden rounded-2xl border bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[17px] pb-[19px] shadow-2xl transition-colors duration-500 ${
             showSlowHint ? 'ring-2 ring-[#fcd34d40] animate-pulse' : ''
           }`}
           style={{ borderColor: filed ? '#14b8a666' : '#22304a' }}
         >
+          {/* One-shot light border shimmer as the stamp lands — only
+              rendered during the `stamp` phase itself (not `return` too),
+              same "remount restarts the CSS animation" trick the FILED
+              badge below already relies on. */}
+          {phase === FILE_PHASES.STAMP && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-2xl"
+              style={{ animation: 'cardShimmer .9s ease-out both' }}
+            />
+          )}
+
           {!isCelebration ? (
             <>
               {/* Compact live-preview (cardIsSide) */}
