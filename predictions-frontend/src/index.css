@@ -169,6 +169,16 @@
   surface/brand tokens above. Do not use these in new app screens.
 */
 @theme {
+  /*
+    Mapping Tailwind's own font-sans/font-mono theme keys to the same
+    families (not just the custom --font-outfit/--font-dmSerif/--font-mono
+    aliases below) so Outfit is the default *everywhere* Tailwind falls
+    back to its own font stack — e.g. Preflight's `html` rule, or any
+    future use of the plain `font-sans`/`font-mono` utilities — not only
+    where components opt into the custom aliases explicitly.
+  */
+  --font-sans: "Outfit", sans-serif;
+  --font-serif: "DM Serif Text", serif;
   --font-dmSerif: "DM Serif Text", serif;
   --font-dm-serif: "DM Serif Text", serif;
   --font-outfit: "Outfit", sans-serif;

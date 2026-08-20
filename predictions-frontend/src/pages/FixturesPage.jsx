@@ -301,12 +301,7 @@ export default function FixturesPage() {
                       />
 
                       <div className="w-full" style={aiSlideStyleDesktop}>
-                        <AiTeamReadPanel
-                          fixture={selectedFixture}
-                          open={aiOpen}
-                          onToggle={() => setAiOpen((v) => !v)}
-                          totalGoals={(activePrediction?.homeScore ?? 0) + (activePrediction?.awayScore ?? 0)}
-                        />
+                        <AiTeamReadPanel open={aiOpen} onToggle={() => setAiOpen((v) => !v)} />
                       </div>
                     </div>
                   )}
@@ -406,12 +401,7 @@ export default function FixturesPage() {
                   deadlineLabel={deadlineFormatted}
                 />
                 <div style={aiSlideStyleMobile}>
-                  <AiTeamReadPanel
-                    fixture={selectedFixture}
-                    open={aiOpen}
-                    onToggle={() => setAiOpen((v) => !v)}
-                    totalGoals={(activePrediction?.homeScore ?? 0) + (activePrediction?.awayScore ?? 0)}
-                  />
+                  <AiTeamReadPanel open={aiOpen} onToggle={() => setAiOpen((v) => !v)} />
                 </div>
               </div>
             )}

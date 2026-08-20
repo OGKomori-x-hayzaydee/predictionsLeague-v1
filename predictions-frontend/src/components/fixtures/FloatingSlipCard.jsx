@@ -75,8 +75,6 @@ export default function FloatingSlipCard({
           className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[17px] pb-[19px] shadow-2xl transition-colors duration-500"
           style={{ borderColor: filed ? '#14b8a666' : '#22304a' }}
         >
-          <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand-teal-mid via-brand-indigo-mid to-brand-amber" />
-
           {!isHome ? (
             <>
               {/* Compact live-preview (cardIsSide) */}

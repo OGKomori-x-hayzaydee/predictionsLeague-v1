@@ -3,7 +3,6 @@ import ScoreStepper from './ScoreStepper';
 import ScorerSelect from './ScorerSelect';
 import ChipSelector from './ChipSelector';
 import AiTeamReadPanel from './AiTeamReadPanel';
-import { getMatchInsight } from '../../utils/matchInsights';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -12,12 +11,6 @@ function formatKickoff(dateStr) {
   const day = d.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase();
   const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
   return `${day} ${time}`;
-}
-
-function formColor(result) {
-  if (result === 'W') return '#5eead4';
-  if (result === 'L') return '#f87171';
-  return '#fcd34d';
 }
 
 /**
@@ -36,29 +29,6 @@ export default function FixtureEditor({
   onToggleAi,
 }) {
   const totalGoals = draft.homeScore + draft.awayScore;
-  const insight = getMatchInsight(fixture);
-
-  const handlePickLikelyScorer = (name, side) => {
-    if (side === 'home') {
-      const current = [...(draft.homeScorers || [])];
-      const emptyIdx = current.findIndex((s) => !s);
-      if (emptyIdx !== -1) {
-        current[emptyIdx] = name;
-        onChangeHomeScorers(current);
-      } else if (current.length < draft.homeScore) {
-        onChangeHomeScorers([...current, name]);
-      }
-    } else {
-      const current = [...(draft.awayScorers || [])];
-      const emptyIdx = current.findIndex((s) => !s);
-      if (emptyIdx !== -1) {
-        current[emptyIdx] = name;
-        onChangeAwayScorers(current);
-      } else if (current.length < draft.awayScore) {
-        onChangeAwayScorers([...current, name]);
-      }
-    }
-  };
 
   return (
     <div className="flex w-full flex-col items-center gap-2.5">
@@ -75,19 +45,6 @@ export default function FixtureEditor({
           <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
             {fixture.homeTeam}
           </span>
-          {insight && (
-            <div className="flex items-center gap-1">
-              {insight.homeForm.split('').map((ch, i) => (
-                <span
-                  key={i}
-                  className="font-mono text-xs font-medium"
-                  style={{ color: formColor(ch) }}
-                >
-                  {ch}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Center Steppers + Slots */}
@@ -148,19 +105,6 @@ export default function FixtureEditor({
           <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
             {fixture.awayTeam}
           </span>
-          {insight && (
-            <div className="flex items-center gap-1">
-              {insight.awayForm.split('').map((ch, i) => (
-                <span
-                  key={i}
-                  className="font-mono text-xs font-medium"
-                  style={{ color: formColor(ch) }}
-                >
-                  {ch}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -171,13 +115,7 @@ export default function FixtureEditor({
 
       {/* AI Team Read Panel (Widened container) */}
       <div className="w-full max-w-[76rem]">
-        <AiTeamReadPanel
-          fixture={fixture}
-          open={aiOpen}
-          onToggle={onToggleAi}
-          onPickScorer={handlePickLikelyScorer}
-          totalGoals={totalGoals}
-        />
+        <AiTeamReadPanel open={aiOpen} onToggle={onToggleAi} />
       </div>
     </div>
   );

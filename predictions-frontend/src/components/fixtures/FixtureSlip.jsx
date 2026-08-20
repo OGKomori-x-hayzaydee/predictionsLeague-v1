@@ -29,8 +29,6 @@ export default function FixtureSlip({
   if (variant === 'resting' || variant === 'main') {
     return (
       <div className="relative flex w-full max-w-2xl flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-6 shadow-2xl">
-        <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand-teal-mid via-brand-indigo-mid to-brand-amber" />
-
         {/* Top line */}
         <div className="flex items-baseline justify-between gap-2.5">
           <span className="font-mono text-xs tracking-wider text-[#66748c]">
@@ -112,8 +110,6 @@ export default function FixtureSlip({
   // LIVE PREVIEW SLIP (Picture 5 - Right rail preview while editing)
   return (
     <div className="relative flex w-full flex-col gap-3 overflow-hidden rounded-xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-4 shadow-xl">
-      <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand-teal-mid via-brand-indigo-mid to-brand-amber" />
-
       {/* Top line */}
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-mono text-[0.6875rem] tracking-wider text-[#66748c]">

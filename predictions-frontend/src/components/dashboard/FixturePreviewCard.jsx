@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import TeamCrest from '../ui/TeamCrest';
 import { CHIP_CONFIG } from '../../utils/chipManager';
 import { CHIP_HUES, DEFAULT_CHIP_HUE } from './chipHues';
-import { getMatchInsight } from '../../utils/matchInsights';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -42,12 +41,6 @@ function ScorerRow({ name, side = 'home' }) {
   );
 }
 
-function meetingColor(result) {
-  if (result === 'W') return '#5eead4';
-  if (result === 'L') return '#f87171';
-  return '#fcd34d';
-}
-
 /**
  * Fixture-preview card — the selected station's detail view (Spine.dc.html
  * desktop lines 131-266, mobile lines 2257-2336).
@@ -79,7 +72,6 @@ export default function FixturePreviewCard({
   const chipId = prediction?.chips?.[0];
   const chip = chipId ? CHIP_CONFIG[chipId] : null;
   const chipHue = chipId ? CHIP_HUES[chipId] || DEFAULT_CHIP_HUE : null;
-  const insight = getMatchInsight(fixture);
 
   const homeScorers = (prediction?.homeScorers || []).filter(Boolean);
   const awayScorers = (prediction?.awayScorers || []).filter(Boolean);
@@ -149,15 +141,6 @@ export default function FixturePreviewCard({
                 <span className="font-dmSerif text-[22px] leading-tight text-white whitespace-nowrap">
                   {homeTeam}
                 </span>
-                {insight && (
-                  <span className="flex items-center gap-1">
-                    {insight.homeForm.split('').map((ch, i) => (
-                      <span key={i} className="font-mono text-[10px]" style={{ color: meetingColor(ch) }}>
-                        {ch}
-                      </span>
-                    ))}
-                  </span>
-                )}
               </div>
               <TeamCrest team={homeTeam} size={crestSize} />
             </div>
@@ -200,15 +183,6 @@ export default function FixturePreviewCard({
                 <span className="font-dmSerif text-[22px] leading-tight text-white whitespace-nowrap">
                   {awayTeam}
                 </span>
-                {insight && (
-                  <span className="flex items-center gap-1">
-                    {insight.awayForm.split('').map((ch, i) => (
-                      <span key={i} className="font-mono text-[10px]" style={{ color: meetingColor(ch) }}>
-                        {ch}
-                      </span>
-                    ))}
-                  </span>
-                )}
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -233,8 +207,9 @@ export default function FixturePreviewCard({
         </div>
       )}
 
-      {/* AI overview — 3-column grid matching prototype lines 214-265 */}
-      <div className="flex flex-col gap-3 border-t border-[#16203a] bg-[#070d18] px-[22px] py-[15px]">
+      {/* AI overview — no live model/odds/crowd-data source yet, so this is
+          an honest "coming soon" placeholder rather than invented numbers. */}
+      <div className="flex flex-col gap-2.5 border-t border-[#16203a] bg-[#070d18] px-[22px] py-[15px]">
         <button
           type="button"
           onClick={isMobile ? onToggleAi : undefined}
@@ -245,98 +220,19 @@ export default function FixturePreviewCard({
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#66748c]">
             AI overview
           </span>
+          <span className="font-mono text-[10px] text-[#4f5b70]">coming soon</span>
           {isMobile && (
             <span className="ml-auto font-mono text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
           )}
         </button>
-        {(!isMobile || aiOpen) && insight && (
-          <div
-            className={`grid gap-[22px] items-start ${
-              isMobile ? 'grid-cols-1' : 'grid-cols-[1.2fr_1px_0.85fr_1px_0.95fr]'
-            }`}
+        {(!isMobile || aiOpen) && (
+          <p
+            className="m-0 max-w-lg font-outfit text-[12.5px] leading-relaxed text-[#8fa0b8]"
+            style={{ textWrap: 'pretty' }}
           >
-            {/* Column 1: AI predicted score + confidence */}
-            <div className="flex flex-col gap-[9px] min-w-0">
-              <div className="flex items-baseline gap-[11px]">
-                <span className="font-dmSerif text-[28px] leading-none text-[#c7d2fe]">
-                  {insight.predictedHome}–{insight.predictedAway}
-                </span>
-                <span className="font-mono text-[11px] text-[#818cf8]">
-                  {insight.confidence}% confidence
-                </span>
-              </div>
-              <span className="flex h-1 overflow-hidden rounded-sm bg-[#131d2f]">
-                <span
-                  className="bg-gradient-to-r from-[#4f46e5] to-[#818cf8]"
-                  style={{ width: `${insight.confidence}%` }}
-                />
-              </span>
-              <p className="m-0 font-outfit text-[12.5px] leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
-                {insight.blurb}
-              </p>
-            </div>
-
-            {!isMobile && <span className="bg-[#16203a]" />}
-
-            {/* Column 2: Last 5 Meetings */}
-            <div className="flex flex-col gap-[10px] min-w-0">
-              <span className="font-mono text-[10px] tracking-[0.12em] text-[#5b667d]">
-                LAST 5 MEETINGS
-              </span>
-              <div className="flex items-center gap-1.5">
-                {insight.meetings.map((ch, i) => (
-                  <span
-                    key={i}
-                    className="flex h-5 w-5 items-center justify-center rounded-[5px] border border-[#1d2a41] bg-[#101a2c] font-mono text-[10px]"
-                    style={{ color: meetingColor(ch) }}
-                  >
-                    {ch}
-                  </span>
-                ))}
-              </div>
-              <span className="font-mono text-[11px] text-[#66748c]">
-                {insight.meetingsSummary}
-              </span>
-              <span className="font-outfit text-xs leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
-                {insight.meetingsNote}
-              </span>
-            </div>
-
-            {!isMobile && <span className="bg-[#16203a]" />}
-
-            {/* Column 3: What the League is Picking */}
-            <div className="flex flex-col gap-[10px] min-w-0">
-              <span className="font-mono text-[10px] tracking-[0.12em] text-[#5b667d]">
-                WHAT THE LEAGUE IS PICKING
-              </span>
-              <span className="flex h-2 overflow-hidden rounded bg-[#101a2c]">
-                {insight.crowd.map((c, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      width: `${c.pct}%`,
-                      background: i === 0 ? '#5eead4' : i === 1 ? '#475569' : '#818cf8',
-                    }}
-                  />
-                ))}
-              </span>
-              <div className="flex flex-col gap-[5px]">
-                {insight.crowd.map((c, i) => (
-                  <span key={c.label} className="flex items-center gap-2 font-outfit text-xs text-[#8fa0b8]">
-                    <span
-                      className="h-1.5 w-1.5 shrink-0 rounded-full"
-                      style={{ background: i === 0 ? '#5eead4' : i === 1 ? '#475569' : '#818cf8' }}
-                    />
-                    <span className="flex-1 truncate font-outfit">{c.label}</span>
-                    <span className="font-mono text-xs text-[#c8d2e0]">{c.pct}%</span>
-                  </span>
-                ))}
-              </div>
-              <span className="font-mono text-[11px] text-[#66748c]">
-                most-picked {insight.mostPicked}
-              </span>
-            </div>
-          </div>
+            Predicted scorelines, head-to-head history and what the league is picking will land here
+            once a live model is plugged in. For now, this one&rsquo;s on you.
+          </p>
         )}
       </div>
     </div>
