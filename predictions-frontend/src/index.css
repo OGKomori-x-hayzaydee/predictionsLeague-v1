@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Outfit:wght@100..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=Outfit:wght@100..900&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -182,7 +182,9 @@
   --font-dmSerif: "DM Serif Text", serif;
   --font-dm-serif: "DM Serif Text", serif;
   --font-outfit: "Outfit", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  /* Mono retired app-wide (see the .font-mono override below) — this
+     theme token now also resolves to Outfit for consistency. */
+  --font-mono: "Outfit", sans-serif;
 
   --radius-xs: 5px;
   --radius-sm: 8px;
@@ -297,8 +299,16 @@ select {
   font-family: "Outfit", sans-serif !important;
 }
 
+/*
+  Mono font retired app-wide per design direction — every existing
+  `font-mono` className (there are many, across chips/dashboard/fixtures/
+  leagues/profile/record/settings) now renders in Outfit instead of IBM
+  Plex Mono. Kept as its own rule (rather than deleting the className
+  usages) so this is a single point of control instead of a sprawling
+  find-and-replace across dozens of files.
+*/
 .font-mono {
-  font-family: "IBM Plex Mono", monospace !important;
+  font-family: "Outfit", sans-serif !important;
 }
 
 @keyframes riseIn {

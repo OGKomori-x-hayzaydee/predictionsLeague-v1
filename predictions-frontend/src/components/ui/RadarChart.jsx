@@ -37,7 +37,7 @@ export default function RadarChart({ rows, youLabel = 'You', themLabel = 'Them',
             y={p.y}
             textAnchor={p.anchor}
             fill="var(--text-muted-1)"
-            fontFamily="'IBM Plex Mono',monospace"
+            fontFamily="'Outfit',sans-serif"
             fontSize="6.4"
             letterSpacing="0.6"
           >
