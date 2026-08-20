@@ -59,17 +59,17 @@ export default function SearchTab({ predictions, initialQuery = '', highlightId 
           placeholder="Search a team or a scoreline…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="flex-1 rounded-[10px] border border-border-control bg-surface-card-4 px-3.5 py-2.5 text-[13.5px] text-text-primary outline-none focus:border-brand-teal"
+          className="flex-1 rounded-[10px] border border-border-control bg-surface-card-4 px-4 py-3 text-sm text-text-primary outline-none focus:border-brand-teal"
         />
         {/* Desktop: segmented pill filter. Mobile: a compact dropdown
             (matches the reference screenshots — a full pill row doesn't fit
             comfortably next to the search box at phone widths). */}
-        <div className="hidden gap-0.5 rounded-9 border border-border-card bg-surface-card-4 p-[3px] sm:flex">
+        <div className="hidden gap-0.5 rounded-9 border border-border-card bg-surface-card-4 p-1 sm:flex">
           {OUTCOME_FILTERS.map((f) => (
             <button
               key={f.id}
               onClick={() => setOutcome(f.id)}
-              className={`rounded-7 px-2.5 py-[7px] font-outfit text-[10.5px] tracking-wide transition-colors ${
+              className={`rounded-7 px-3.5 py-2.5 font-outfit text-xs tracking-wide transition-colors ${
                 outcome === f.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2 hover:text-text-primary'
               }`}
             >

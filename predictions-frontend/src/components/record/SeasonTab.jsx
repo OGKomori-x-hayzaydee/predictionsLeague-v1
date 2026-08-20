@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import StatTile from '../ui/StatTile';
 import GameweekRidge from './GameweekRidge';
 import PredictionRow from './PredictionRow';
+import VisualizationsGate from './VisualizationsGate';
 import { calculatePoints } from '../../utils/pointsCalculation';
+
+const VIZ_THRESHOLD = 5;
 
 function weekSlice(predictions, gameweek) {
   const weekPredictions = gameweek
@@ -31,10 +34,11 @@ function weekSlice(predictions, gameweek) {
  * `mobileGameweek` state rather than the shared `selectedGameweek` prop, so
  * defaulting it doesn't also force the desktop drawer open.
  */
-export default function SeasonTab({ predictions, stats, selectedGameweek, onSelectGameweek, onViewFull }) {
+export default function SeasonTab({ predictions, stats, selectedGameweek, onSelectGameweek, onViewFull, previewMode = false }) {
   const { weekPredictions, weekTotal, weekExact } = weekSlice(predictions, selectedGameweek);
 
   const settledWeeks = stats.pointsByGameweek.length;
+  const vizGated = !previewMode && settledWeeks < VIZ_THRESHOLD;
   const best = stats.bestWeek;
   const weeks = stats.pointsByGameweek; // ascending by gameweek
   const latestWeek = weeks.length ? weeks[weeks.length - 1].gameweek : null;
@@ -105,6 +109,8 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
               )}
             </div>
           </div>
+        ) : vizGated ? (
+          <VisualizationsGate settledWeeks={settledWeeks} threshold={VIZ_THRESHOLD} />
         ) : (
           <>
             <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
@@ -122,18 +128,11 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
               <StatTile label="Average week" value={stats.avgPerWeek} />
             </div>
 
-            {settledWeeks === 0 ? (
-              <p className="text-sm text-text-muted-2">
-                No predictions have settled yet this season — once your first gameweek's results come in, your
-                record will build here.
-              </p>
-            ) : (
-              <div className="flex min-h-[110px] items-center justify-center rounded-14 border border-dashed border-border-control">
-                <span className="px-4 text-center text-[13.5px] text-text-muted-4">
-                  Select a week on the ridge to unfold its calls here.
-                </span>
-              </div>
-            )}
+            <div className="flex min-h-[110px] items-center justify-center rounded-14 border border-dashed border-border-control">
+              <span className="px-4 text-center text-[13.5px] text-text-muted-4">
+                Select a week on the ridge to unfold its calls here.
+              </span>
+            </div>
           </>
         )}
       </div>
@@ -152,10 +151,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
         </div>
 
         {settledWeeks === 0 ? (
-          <p className="text-sm text-text-muted-2">
-            No predictions have settled yet this season — once your first gameweek's results come in, your record
-            will build here.
-          </p>
+          <VisualizationsGate settledWeeks={settledWeeks} threshold={VIZ_THRESHOLD} />
         ) : (
           <>
             <div className="flex flex-col gap-3 rounded-14 border border-border-card bg-surface-card p-4">

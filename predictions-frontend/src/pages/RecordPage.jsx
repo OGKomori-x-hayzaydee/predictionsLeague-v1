@@ -142,7 +142,7 @@ export default function RecordPage() {
   const slotRight = hasHistory ? `${stats.totalCompleted} calls filed · ${stats.seasonPoints} pts` : undefined;
 
   return (
-    <div className="animate-rise-in">
+    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-2.75rem)] md:overflow-hidden">
       <div className="hidden items-center md:flex">
         <div className="flex-1">
           <SlotBar kicker="My Record" tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} right={slotRight} />
@@ -206,74 +206,77 @@ export default function RecordPage() {
         </div>
       )}
 
-      {loading ? (
-        <LoadingState message="Loading your record..." />
-      ) : !hasHistory ? (
-        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-6 text-center">
-          <span
-            aria-hidden="true"
-            className="mb-1 flex h-14 w-14 items-center justify-center rounded-14 border border-dashed border-border-control text-2xl text-text-muted-4"
-          >
-            🎟️
-          </span>
-          <span className="font-dmSerif text-2xl text-text-primary">No predictions on record yet</span>
-          <p className="max-w-sm text-sm text-text-muted-2">
-            Once you file your first prediction it'll show up here, gameweek by gameweek, with the points
-            breakdown behind every call.
-          </p>
-          <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/fixtures"
-              className="rounded-9 bg-brand-indigo-mid px-4 py-2 text-sm text-white transition-colors hover:bg-brand-indigo-hover"
+      <div className="md:min-h-0 md:flex-1">
+        {loading ? (
+          <LoadingState message="Loading your record..." />
+        ) : !hasHistory ? (
+          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-6 text-center">
+            <span
+              aria-hidden="true"
+              className="mb-1 flex h-14 w-14 items-center justify-center rounded-14 border border-dashed border-border-control text-2xl text-text-muted-4"
             >
-              Go to Fixtures
-            </Link>
-            <button
-              onClick={() => setPreviewMode(true)}
-              className="font-outfit text-[11px] tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
-            >
-              Preview with example data →
-            </button>
+              🎟️
+            </span>
+            <span className="font-dmSerif text-2xl text-text-primary">No predictions on record yet</span>
+            <p className="max-w-sm text-sm text-text-muted-2">
+              Once you file your first prediction it'll show up here, gameweek by gameweek, with the points
+              breakdown behind every call.
+            </p>
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/fixtures"
+                className="rounded-9 bg-brand-indigo-mid px-4 py-2 text-sm text-white transition-colors hover:bg-brand-indigo-hover"
+              >
+                Go to Fixtures
+              </Link>
+              <button
+                onClick={() => setPreviewMode(true)}
+                className="font-outfit text-[11px] tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
+              >
+                Preview with example data →
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="md:grid md:min-h-0 md:grid-cols-[1fr_320px] md:items-stretch">
-          <div className="min-w-0 px-4 py-5 md:px-[26px] md:py-5">
-            {activeTab === 'season' && (
-              <SeasonTab
-                predictions={effectivePredictions}
-                stats={stats}
-                selectedGameweek={selectedGameweek}
-                onSelectGameweek={setSelectedGameweek}
-                onViewFull={handleViewFull}
-              />
-            )}
-            {activeTab === 'allTime' && (
-              <AllTimeTab
-                predictions={effectivePredictions}
-                stats={stats}
-                previewMode={previewMode}
-                demoSeasonHistory={DEMO_SEASON_HISTORY}
-                demoRankTrajectory={DEMO_RANK_TRAJECTORY}
-                demoRankNote={DEMO_RANK_NOTE}
-              />
-            )}
-            {activeTab === 'search' && (
-              <SearchTab predictions={effectivePredictions} initialQuery={searchQuery} highlightId={highlightId} />
-            )}
+        ) : (
+          <div className="md:grid md:h-full md:min-h-0 md:grid-cols-[1fr_320px] md:items-stretch">
+            <div className="min-w-0 px-4 py-5 md:min-h-0 md:overflow-y-auto md:px-[26px] md:py-6">
+              {activeTab === 'season' && (
+                <SeasonTab
+                  predictions={effectivePredictions}
+                  stats={stats}
+                  selectedGameweek={selectedGameweek}
+                  onSelectGameweek={setSelectedGameweek}
+                  onViewFull={handleViewFull}
+                  previewMode={previewMode}
+                />
+              )}
+              {activeTab === 'allTime' && (
+                <AllTimeTab
+                  predictions={effectivePredictions}
+                  stats={stats}
+                  previewMode={previewMode}
+                  demoSeasonHistory={DEMO_SEASON_HISTORY}
+                  demoRankTrajectory={DEMO_RANK_TRAJECTORY}
+                  demoRankNote={DEMO_RANK_NOTE}
+                />
+              )}
+              {activeTab === 'search' && (
+                <SearchTab predictions={effectivePredictions} initialQuery={searchQuery} highlightId={highlightId} />
+              )}
 
-            <button
-              onClick={() => setSheetOpen(true)}
-              className="mt-4 flex w-full items-center justify-between rounded-md border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary md:hidden"
-            >
-              Hit rate, bands &amp; chip return
-              <span className="font-outfit text-[11px] text-brand-teal">VIEW &rsaquo;</span>
-            </button>
+              <button
+                onClick={() => setSheetOpen(true)}
+                className="mt-4 flex w-full items-center justify-between rounded-md border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary md:hidden"
+              >
+                Hit rate, bands &amp; chip return
+                <span className="font-outfit text-[11px] text-brand-teal">VIEW &rsaquo;</span>
+              </button>
+            </div>
+
+            <RecordSidebar {...scopeProps} insight={insight} />
           </div>
-
-          <RecordSidebar {...scopeProps} insight={insight} />
-        </div>
-      )}
+        )}
+      </div>
 
       <RecordMobileSheet open={sheetOpen} onClose={() => setSheetOpen(false)} {...scopeProps} insight={insight} />
     </div>

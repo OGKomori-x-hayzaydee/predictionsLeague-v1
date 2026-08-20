@@ -106,17 +106,17 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
       style={{ background: theme.wash, borderColor: theme.border }}
     >
       {/* Collapsed header — always visible, toggles expansion */}
-      <button onClick={() => setExpanded((e) => !e)} className="flex w-full items-center gap-3 px-4 py-3 text-left">
+      <button onClick={() => setExpanded((e) => !e)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">
         <span className="w-11 shrink-0 font-outfit text-[10px] tracking-wide text-text-muted-4">
           GW{prediction.gameweek}
         </span>
 
         <span className="flex min-w-0 flex-1 items-center gap-2">
-          <TeamCrest team={prediction.homeTeam} size={20} />
-          <span className="truncate text-[13px] text-text-secondary">{prediction.homeTeam}</span>
+          <TeamCrest team={prediction.homeTeam} size={22} />
+          <span className="truncate text-sm text-text-secondary">{prediction.homeTeam}</span>
           <span className="font-outfit text-[11px] text-text-muted-5">v</span>
-          <span className="truncate text-[13px] text-text-secondary">{prediction.awayTeam}</span>
-          <TeamCrest team={prediction.awayTeam} size={20} />
+          <span className="truncate text-sm text-text-secondary">{prediction.awayTeam}</span>
+          <TeamCrest team={prediction.awayTeam} size={22} />
         </span>
 
         {!expanded && (
