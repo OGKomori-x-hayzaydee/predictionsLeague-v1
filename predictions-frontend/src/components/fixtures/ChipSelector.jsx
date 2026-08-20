@@ -24,15 +24,15 @@ function chipLeftLabel(chipId, matchChips) {
 
 /**
  * Chip selector grid — matching Spine.dc.html lines 438-456.
- * Compact proportions to prevent vertical page overflow.
+ * Sized in rem/em units.
  */
 export default function ChipSelector({ chips = [], selected, onToggle }) {
   return (
-    <div className="flex w-full flex-col gap-1.5">
-      <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#5b667d]">
+    <div className="flex w-full flex-col gap-2">
+      <span className="font-mono text-xs uppercase tracking-[0.16em] text-[#5b667d]">
         CHIPS · ONE PER MATCH
       </span>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
         {CHIP_LIST.map((c) => {
           const isSelected = selected === c.id;
           const hue = CHIP_HUES[c.id] || DEFAULT_CHIP_HUE;
@@ -44,27 +44,27 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
               key={c.id}
               type="button"
               onClick={() => onToggle(isSelected ? null : c.id)}
-              className={`flex cursor-pointer items-start gap-2 rounded-[9px] border p-2 text-left font-outfit transition-all ${
+              className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-left font-outfit transition-all ${
                 isSelected
-                  ? 'border-brand-amber bg-[#0d1c2ecc] shadow-[0_0_0_1.5px_#fcd34d33]'
+                  ? 'border-[#fcd34d] bg-[#0d1c2ecc] shadow-[0_0_0_2px_#fcd34d33]'
                   : isUsed
                     ? 'border-[#1c2942] bg-[#080e1a80] opacity-60'
                     : 'border-[#1c2942] bg-[#080e1ab8] hover:border-[#2f4160]'
               }`}
             >
               {/* Token badge */}
-              <div className="flex flex-col items-center gap-0.5 shrink-0">
+              <div className="flex flex-col items-center gap-1 shrink-0">
                 <div
-                  className="flex h-7 w-7 items-center justify-center rounded-full"
+                  className="flex w-9 h-9 items-center justify-center rounded-full"
                   style={{
                     background: `repeating-conic-gradient(${isSelected ? '#fcd34d' : hue} 0deg 18deg, #08111f 18deg 36deg)`,
-                    boxShadow: isSelected ? `0 0 10px #fcd34d40` : 'none',
+                    boxShadow: isSelected ? `0 0 0.75rem #fcd34d40` : 'none',
                   }}
                 >
                   <div
-                    className="flex h-5 w-5 items-center justify-center rounded-full bg-[#08111f] font-mono text-[9px] font-bold"
+                    className="flex w-6 h-6 items-center justify-center rounded-full bg-[#08111f] font-mono text-[0.6875rem] font-bold"
                     style={{
-                      border: `1px solid ${isSelected ? '#fcd34d' : hue}`,
+                      border: `1.5px solid ${isSelected ? '#fcd34d' : hue}`,
                       color: isSelected ? '#fcd34d' : hue,
                     }}
                   >
@@ -72,7 +72,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
                   </div>
                 </div>
                 <span
-                  className="font-mono text-[8.5px]"
+                  className="font-mono text-[0.625rem]"
                   style={{ color: isSelected ? '#fcd34d' : isUsed ? '#5b667d' : '#8fa0b8' }}
                 >
                   {left}
@@ -82,13 +82,13 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
               {/* Info */}
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span
-                  className={`text-[11.5px] font-medium leading-tight ${
+                  className={`text-xs font-semibold leading-tight ${
                     isSelected ? 'text-[#fcd34d]' : 'text-white'
                   }`}
                 >
                   {c.name}
                 </span>
-                <span className="text-[10px] leading-tight text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
+                <span className="text-[0.6875rem] leading-snug text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
                   {c.desc}
                 </span>
               </div>

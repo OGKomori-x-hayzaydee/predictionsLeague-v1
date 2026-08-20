@@ -2,8 +2,8 @@ import TeamCrest from '../ui/TeamCrest';
 import { buildLedgerRows, namedScorers, slipHeadline, slipSentence } from './predictionLedger';
 
 /**
- * The "sign & file" spotlight sequence (Picture 2 / prototype lines 684-751 & 3701-3767).
- * State machine: idle -> center -> stamp -> return -> idle.
+ * Spotlight filing ceremony sequence.
+ * Sized with rem/em units.
  */
 export default function FilingCeremony({ phase, fixture, prediction, ceiling, gameweekLabel = 'GW24' }) {
   if (phase === 'idle' || !fixture) return null;
@@ -36,7 +36,7 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
 
       {/* Floating Center Card */}
       <div
-        className="fixed left-1/2 top-1/2 z-[96] w-[360px] pointer-events-none"
+        className="fixed left-1/2 top-1/2 z-[96] w-96 max-w-[90vw] pointer-events-none"
         style={{
           transform: cardTransform,
           opacity: cardOpacity,
@@ -44,28 +44,28 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
         }}
       >
         <div
-          className={`relative flex flex-col gap-3.5 overflow-hidden rounded-[16px] border bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-6 shadow-[0_34px_70px_-26px_#000e] ${
+          className={`relative flex flex-col gap-3.5 overflow-hidden rounded-2xl border bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-6 shadow-2xl ${
             isStamped ? 'border-[#14b8a699]' : 'border-[#1c2942]'
           }`}
         >
-          <span className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-brand-teal-mid via-brand-indigo-mid to-brand-amber" />
+          <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand-teal-mid via-brand-indigo-mid to-brand-amber" />
 
           {!isStamped ? (
             <>
               {/* Center Pre-Stamp State */}
               <div className="flex items-baseline justify-between gap-2.5">
-                <span className="font-mono text-[10px] tracking-[0.14em] text-[#66748c]">
+                <span className="font-mono text-xs tracking-wider text-[#66748c]">
                   THE SLIP · {gameweekLabel}
                 </span>
-                <span className="font-mono text-[10px] tracking-[0.12em] text-[#fcd34d]">FILING…</span>
+                <span className="font-mono text-xs tracking-wide text-[#fcd34d]">FILING…</span>
               </div>
 
-              <div className="flex items-center justify-center gap-3.5 py-1">
-                <TeamCrest team={homeTeam} size={30} />
-                <span className="font-dmSerif text-[42px] leading-none text-white">{homeScore}</span>
-                <span className="font-dmSerif text-xl text-[#2c3a53]">–</span>
-                <span className="font-dmSerif text-[42px] leading-none text-white">{awayScore}</span>
-                <TeamCrest team={awayTeam} size={30} />
+              <div className="flex items-center justify-center gap-4 py-1">
+                <TeamCrest team={homeTeam} size={32} />
+                <span className="font-dmSerif text-5xl leading-none text-white">{homeScore}</span>
+                <span className="font-dmSerif text-2xl text-[#2c3a53]">–</span>
+                <span className="font-dmSerif text-5xl leading-none text-white">{awayScore}</span>
+                <TeamCrest team={awayTeam} size={32} />
               </div>
 
               <p className="m-0 font-outfit text-xs leading-relaxed text-[#c8d2e0]" style={{ textWrap: 'pretty' }}>
@@ -76,7 +76,7 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
 
               <div className="flex flex-col gap-1.5">
                 {ledger.map((row) => (
-                  <div key={row.label} className="flex items-baseline justify-between gap-2.5 text-xs text-[#8fa0b8]">
+                  <div key={row.label} className="flex items-baseline justify-between gap-2 text-xs text-[#8fa0b8]">
                     <span>{row.label}</span>
                     <span className="font-mono text-white">{row.value}</span>
                   </div>
@@ -87,7 +87,7 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
 
               <div className="flex items-end justify-between">
                 <span className="text-xs text-[#8fa0b8]">If it lands exactly</span>
-                <span className="font-dmSerif text-[28px] leading-none text-[#fcd34d]">{ceiling}</span>
+                <span className="font-dmSerif text-3xl leading-none text-[#fcd34d]">{ceiling}</span>
               </div>
             </>
           ) : (
@@ -95,25 +95,25 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
               {/* Stamped State */}
               <div className="relative">
                 <div className="flex items-baseline justify-between gap-2.5">
-                  <span className="font-mono text-[10px] tracking-[0.14em] text-[#66748c]">
+                  <span className="font-mono text-xs tracking-wider text-[#66748c]">
                     THE SLIP · {gameweekLabel}
                   </span>
-                  <span className="font-mono text-[10px] tracking-[0.12em] text-[#5eead4]">FILED</span>
+                  <span className="font-mono text-xs tracking-wide text-[#5eead4]">FILED</span>
                 </div>
-                <h2 className="m-0 mt-2 max-w-[76%] font-dmSerif text-xl leading-tight text-white" style={{ textWrap: 'pretty' }}>
+                <h2 className="m-0 mt-2 max-w-[76%] font-dmSerif text-2xl leading-tight text-white" style={{ textWrap: 'pretty' }}>
                   {headline}
                 </h2>
-                <span className="absolute right-0 top-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3 py-1 font-mono text-xs font-bold tracking-[0.08em] text-[#5eead4] animate-[stampIn_.42s_cubic-bezier(.2,1.4,.4,1)_both]">
+                <span className="absolute right-0 top-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3.5 py-1 font-mono text-xs font-bold tracking-wider text-[#5eead4] animate-[stampIn_.42s_cubic-bezier(.2,1.4,.4,1)_both]">
                   FILED
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-3.5 py-1">
-                <TeamCrest team={homeTeam} size={30} />
-                <span className="font-dmSerif text-[42px] leading-none text-white">
+              <div className="flex items-center justify-center gap-4 py-1">
+                <TeamCrest team={homeTeam} size={32} />
+                <span className="font-dmSerif text-5xl leading-none text-white">
                   {homeScore}–{awayScore}
                 </span>
-                <TeamCrest team={awayTeam} size={30} />
+                <TeamCrest team={awayTeam} size={32} />
               </div>
 
               <div className="h-px bg-[#16203a]" />
@@ -123,14 +123,14 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
                   scorers.map((name, i) => (
                     <span
                       key={`${name}-${i}`}
-                      className="flex items-center gap-1.5 rounded-full border border-[#1c2942] bg-[#0b1626] px-2.5 py-1 text-xs text-[#c8d2e0]"
+                      className="flex items-center gap-1.5 rounded-full border border-[#1c2942] bg-[#0b1626] px-3 py-1 text-xs text-[#c8d2e0]"
                     >
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] border-brand-teal" />
+                      <span className="w-1.5 h-1.5 shrink-0 rounded-full border-[1.5px] border-brand-teal" />
                       {name}
                     </span>
                   ))
                 ) : (
-                  <span className="font-mono text-[10.5px] text-[#4f5b70]">no scorers named</span>
+                  <span className="font-mono text-xs text-[#4f5b70]">no scorers named</span>
                 )}
               </div>
 
@@ -138,7 +138,7 @@ export default function FilingCeremony({ phase, fixture, prediction, ceiling, ga
 
               <div className="flex items-end justify-between">
                 <span className="text-xs text-[#8fa0b8]">If it lands exactly</span>
-                <span className="font-dmSerif text-[28px] leading-none text-[#fcd34d]">{ceiling}</span>
+                <span className="font-dmSerif text-3xl leading-none text-[#fcd34d]">{ceiling}</span>
               </div>
             </>
           )}

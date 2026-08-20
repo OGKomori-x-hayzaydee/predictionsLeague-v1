@@ -30,7 +30,7 @@ const STAMP_HOLD_MS = 980;
 const RETURN_MS = 700;
 
 /**
- * Fixtures Page — perfectly proportioned to fit the viewport without awkward scrollbars or cutoffs.
+ * Fixtures Page — perfectly proportioned with rem/em units and centered footer reel.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -178,7 +178,7 @@ export default function FixturesPage() {
 
   return (
     <div
-      className="relative flex h-[calc(100vh-98px)] flex-col overflow-hidden animate-rise-in"
+      className="relative flex h-[calc(100vh-6.25rem)] md:h-[calc(100vh-5.75rem)] flex-col overflow-hidden animate-rise-in"
       style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}
     >
       {/* Top SlotBar */}
@@ -220,8 +220,8 @@ export default function FixturesPage() {
           {/* Desktop Main Content Area (flex-1 with internal overflow-y-auto) */}
           <div className="hidden md:flex flex-1 min-h-0 overflow-y-auto px-6 py-3">
             <div
-              className={`mx-auto w-full max-w-[1240px] grid gap-5 items-start ${
-                showEditor ? 'grid-cols-[1fr_320px]' : 'grid-cols-1'
+              className={`mx-auto w-full max-w-7xl grid gap-6 items-start ${
+                showEditor ? 'grid-cols-[1fr_22rem]' : 'grid-cols-1'
               }`}
             >
               {/* Center Area */}
@@ -230,7 +230,7 @@ export default function FixturesPage() {
                   <FixtureEditor {...editorProps} />
                 ) : (
                   /* Resting Filed State (Picture 3) */
-                  <div className="mx-auto flex w-full max-w-[600px] flex-col items-center gap-4 py-2">
+                  <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 py-2">
                     <FixtureSlip
                       fixture={selectedFixture}
                       prediction={activePrediction}
@@ -270,26 +270,28 @@ export default function FixturesPage() {
             </div>
           </div>
 
-          {/* Desktop Fixed Bottom Footer (Button + Reel Strip) */}
-          <div className="hidden md:flex flex-none flex-col gap-2 border-t border-[#16203180] bg-[#050b14cc] px-6 py-2 backdrop-blur-md">
-            {showEditor && (
-              <div className="flex flex-col items-center justify-center">
-                {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className={`flex cursor-pointer items-center gap-2 rounded-full px-7 py-2.5 font-outfit text-xs font-semibold transition-all disabled:opacity-50 ${
-                    isPredicted
-                      ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
-                      : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
-                  }`}
-                >
-                  {submitting ? 'Filing…' : isPredicted ? 'Filed · amend to re-file' : 'Review & file'} &rarr;
-                </button>
-              </div>
-            )}
-            <FixtureReelStrip stations={stations} />
+          {/* Desktop Fixed Bottom Footer (Centered Button + Contained Reel Strip) */}
+          <div className="hidden md:flex flex-none flex-col gap-2 border-t border-[#16203180] bg-[#050b14cc] px-6 py-2.5 backdrop-blur-md">
+            <div className="w-full max-w-5xl mx-auto flex flex-col gap-2">
+              {showEditor && (
+                <div className="flex flex-col items-center justify-center">
+                  {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
+                      isPredicted
+                        ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
+                        : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
+                    }`}
+                  >
+                    {submitting ? 'Filing…' : isPredicted ? 'Filed · amend to re-file' : 'Review & file'} &rarr;
+                  </button>
+                </div>
+              )}
+              <FixtureReelStrip stations={stations} />
+            </div>
           </div>
 
           {/* Mobile Layout */}
@@ -300,15 +302,15 @@ export default function FixturesPage() {
                 onClick={selectPrev}
                 disabled={!canSelectPrev}
                 aria-label="Previous fixture"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-9 border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
               >
                 &#8249;
               </button>
               <div className="flex flex-col items-center gap-0.5">
-                <span className="font-mono text-[10.5px] tracking-[0.14em] text-brand-teal">
+                <span className="font-mono text-xs tracking-wider text-brand-teal">
                   {selectedIndex + 1} / {fixtures.length}
                 </span>
-                <span className="font-mono text-[10px] tracking-[0.1em] text-text-muted-1">
+                <span className="font-mono text-xs tracking-wide text-text-muted-1">
                   {[formatKickoff(selectedFixture.date), selectedFixture.venue].filter(Boolean).join(' · ')}
                 </span>
               </div>
@@ -317,7 +319,7 @@ export default function FixturesPage() {
                 onClick={selectNext}
                 disabled={!canSelectNext}
                 aria-label="Next fixture"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-9 border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
               >
                 &#8250;
               </button>

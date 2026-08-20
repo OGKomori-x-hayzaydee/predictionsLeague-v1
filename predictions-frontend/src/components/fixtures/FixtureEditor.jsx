@@ -14,8 +14,15 @@ function formatKickoff(dateStr) {
   return `${day} ${time}`;
 }
 
+function formColor(result) {
+  if (result === 'W') return '#5eead4';
+  if (result === 'L') return '#f87171';
+  return '#fcd34d';
+}
+
 /**
- * Fixture Editor — compact layout matching Spine.dc.html.
+ * Fixture Editor — matching Spine.dc.html lines 328-456.
+ * Sized with rem/em units and bold DM Serif typography.
  */
 export default function FixtureEditor({
   fixture,
@@ -55,37 +62,44 @@ export default function FixtureEditor({
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-2">
+    <div className="flex w-full flex-col items-center gap-3 md:gap-4">
       {/* Header Kickoff + Venue */}
-      <span className="font-mono text-[10.5px] tracking-[0.16em] text-[#8fa6bf]">
+      <span className="font-mono text-xs tracking-widest text-[#8fa6bf]">
         {formatKickoff(fixture.date)} · {fixture.venue || 'Stadium'}
       </span>
 
       {/* Main Stepper Grid */}
-      <div className="grid w-full max-w-[960px] grid-cols-[1fr_auto_1fr] items-start gap-3 md:gap-6">
+      <div className="grid w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-start gap-4 md:gap-8">
         {/* Home Side (Right Aligned) */}
-        <div className="flex flex-col items-end gap-1.5 text-right pt-1 min-w-0">
-          <TeamCrest team={fixture.homeTeam} size={48} />
-          <span className="font-dmSerif text-2xl md:text-[28px] leading-tight text-white">
+        <div className="flex flex-col items-end gap-2 text-right pt-2 min-w-0">
+          <TeamCrest team={fixture.homeTeam} size={56} />
+          <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
             {fixture.homeTeam}
           </span>
           {insight && (
-            <span className="font-mono text-[10.5px] tracking-[0.12em] text-[#7f93ad]">
-              {insight.homeForm.split('').join(' ')}
-            </span>
+            <div className="flex items-center gap-1">
+              {insight.homeForm.split('').map((ch, i) => (
+                <span
+                  key={i}
+                  className="font-mono text-xs font-medium"
+                  style={{ color: formColor(ch) }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Center Steppers + Slots */}
-        <div className="flex flex-col items-center gap-1">
-          <div className="flex items-start gap-3 md:gap-4">
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-start gap-4 md:gap-6">
             {/* Home Score Stepper */}
-            <div className="flex w-[120px] md:w-[136px] flex-col items-center gap-0.5">
+            <div className="flex w-32 md:w-36 flex-col items-center gap-1">
               <ScoreStepper
                 team={fixture.homeTeam}
                 value={draft.homeScore}
                 onChange={onChangeHomeScore}
-                size="md"
               />
               <div className="mt-1 w-full">
                 <ScorerSelect
@@ -100,15 +114,14 @@ export default function FixtureEditor({
             </div>
 
             {/* Dash */}
-            <span className="pt-6 md:pt-7 font-dmSerif text-2xl md:text-3xl text-[#2c3a53] leading-none">–</span>
+            <span className="pt-8 md:pt-10 font-dmSerif text-3xl md:text-4xl text-[#2c3a53] leading-none">–</span>
 
             {/* Away Score Stepper */}
-            <div className="flex w-[120px] md:w-[136px] flex-col items-center gap-0.5">
+            <div className="flex w-32 md:w-36 flex-col items-center gap-1">
               <ScoreStepper
                 team={fixture.awayTeam}
                 value={draft.awayScore}
                 onChange={onChangeAwayScore}
-                size="md"
               />
               <div className="mt-1 w-full">
                 <ScorerSelect
@@ -124,33 +137,41 @@ export default function FixtureEditor({
           </div>
 
           {totalGoals === 0 && (
-            <span className="max-w-[22em] text-center font-mono text-[9.5px] leading-relaxed tracking-[0.06em] text-[#4f5b70]">
+            <span className="max-w-xs text-center font-mono text-[0.6875rem] leading-relaxed tracking-wide text-[#4f5b70]">
               0–0 AS IT STANDS · A VALID CALL — SCORER SLOTS OPEN AS THE NUMBERS MOVE
             </span>
           )}
         </div>
 
         {/* Away Side (Left Aligned) */}
-        <div className="flex flex-col items-start gap-1.5 pt-1 min-w-0">
-          <TeamCrest team={fixture.awayTeam} size={48} />
-          <span className="font-dmSerif text-2xl md:text-[28px] leading-tight text-white">
+        <div className="flex flex-col items-start gap-2 pt-2 min-w-0">
+          <TeamCrest team={fixture.awayTeam} size={56} />
+          <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
             {fixture.awayTeam}
           </span>
           {insight && (
-            <span className="font-mono text-[10.5px] tracking-[0.12em] text-[#7f93ad]">
-              {insight.awayForm.split('').join(' ')}
-            </span>
+            <div className="flex items-center gap-1">
+              {insight.awayForm.split('').map((ch, i) => (
+                <span
+                  key={i}
+                  className="font-mono text-xs font-medium"
+                  style={{ color: formColor(ch) }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>
 
       {/* Chips Selector */}
-      <div className="w-full max-w-[960px]">
+      <div className="w-full max-w-5xl">
         <ChipSelector chips={matchChips} selected={draft.chip} onToggle={onChangeChip} />
       </div>
 
       {/* AI Team Read Panel */}
-      <div className="w-full max-w-[960px]">
+      <div className="w-full max-w-5xl">
         <AiTeamReadPanel
           fixture={fixture}
           open={aiOpen}

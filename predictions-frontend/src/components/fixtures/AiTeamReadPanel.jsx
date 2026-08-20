@@ -44,7 +44,8 @@ function getFormRows(homeTeam, awayTeam, insight) {
 }
 
 /**
- * AI TEAM READ Panel — compact proportions matching Spine.dc.html.
+ * AI TEAM READ Panel — matching Spine.dc.html lines 458-534.
+ * Sized with rem/em and standard Tailwind tokens.
  */
 export default function AiTeamReadPanel({
   fixture,
@@ -65,61 +66,61 @@ export default function AiTeamReadPanel({
   ];
 
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-[11px] border border-[#1c2942] bg-[#080e1ab8]">
+    <div className="flex w-full flex-col overflow-hidden rounded-xl border border-[#1c2942] bg-[#080e1ab8]">
       {/* Header bar */}
       <div
         onClick={onToggle}
-        className="flex cursor-pointer items-center gap-2 px-3.5 py-2 select-none"
+        className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 select-none"
       >
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#818cf8]" />
-        <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#66748c]">
+        <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-[#818cf8]" />
+        <span className="font-mono text-xs uppercase tracking-[0.16em] text-[#66748c]">
           AI TEAM READ
         </span>
-        <span className="h-2.5 w-px bg-[#233248]" />
-        <span className="font-mono text-[9.5px] text-[#4f5b70]">UPDATED 14 MIN AGO</span>
-        <span className="ml-auto font-mono text-[10px] text-[#8496ad]">
+        <span className="w-px h-3 bg-[#233248]" />
+        <span className="font-mono text-xs text-[#4f5b70]">UPDATED 14 MIN AGO</span>
+        <span className="ml-auto font-mono text-xs text-[#8496ad]">
           4 fitness doubts · xG {insight?.predictedHome ?? 2}.1–{insight?.predictedAway ?? 1}.8 · 4 likely scorers
         </span>
-        <span className="font-mono text-[11px] text-[#8496ad]">{open ? '▴' : '▾'}</span>
+        <span className="font-mono text-xs text-[#8496ad]">{open ? '▴' : '▾'}</span>
       </div>
 
       {open && (
         <div className="grid grid-cols-1 border-t border-[#16203a] md:grid-cols-3 md:divide-x md:divide-[#16233a]">
           {/* Column 1: AVAILABILITY */}
-          <div className="flex flex-col gap-1.5 min-w-0 p-3">
-            <span className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-[#4f5b70]">
+          <div className="flex flex-col gap-2 min-w-0 p-3.5">
+            <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-[#4f5b70]">
               AVAILABILITY
             </span>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {/* Home */}
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="truncate text-[10.5px] text-[#7f93ad] font-medium">{fixture?.homeTeam}</span>
+                <span className="truncate text-xs text-[#7f93ad] font-medium">{fixture?.homeTeam}</span>
                 {homeInjuries.map((p) => (
-                  <div key={p.name} className="flex flex-col gap-0 min-w-0">
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#c8d2e0] min-w-0 leading-tight">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.dot }} />
+                  <div key={p.name} className="flex flex-col gap-0.5 min-w-0">
+                    <div className="flex items-center gap-2 text-xs text-[#c8d2e0] min-w-0">
+                      <span className="w-1.5 h-1.5 shrink-0 rounded-full" style={{ background: p.dot }} />
                       <span className="flex-1 truncate">{p.name}</span>
-                      <span className="font-mono text-[9px] tracking-[0.06em]" style={{ color: p.dot }}>
+                      <span className="font-mono text-[0.625rem] tracking-wider" style={{ color: p.dot }}>
                         {p.status}
                       </span>
                     </div>
-                    <span className="pl-3 font-mono text-[9px] text-[#4f5b70] leading-none">{p.reason}</span>
+                    <span className="pl-3.5 font-mono text-[0.625rem] text-[#4f5b70]">{p.reason}</span>
                   </div>
                 ))}
               </div>
               {/* Away */}
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="truncate text-[10.5px] text-[#7f93ad] font-medium">{fixture?.awayTeam}</span>
+                <span className="truncate text-xs text-[#7f93ad] font-medium">{fixture?.awayTeam}</span>
                 {awayInjuries.map((p) => (
-                  <div key={p.name} className="flex flex-col gap-0 min-w-0">
-                    <div className="flex items-center gap-1.5 text-[11px] text-[#c8d2e0] min-w-0 leading-tight">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.dot }} />
+                  <div key={p.name} className="flex flex-col gap-0.5 min-w-0">
+                    <div className="flex items-center gap-2 text-xs text-[#c8d2e0] min-w-0">
+                      <span className="w-1.5 h-1.5 shrink-0 rounded-full" style={{ background: p.dot }} />
                       <span className="flex-1 truncate">{p.name}</span>
-                      <span className="font-mono text-[9px] tracking-[0.06em]" style={{ color: p.dot }}>
+                      <span className="font-mono text-[0.625rem] tracking-wider" style={{ color: p.dot }}>
                         {p.status}
                       </span>
                     </div>
-                    <span className="pl-3 font-mono text-[9px] text-[#4f5b70] leading-none">{p.reason}</span>
+                    <span className="pl-3.5 font-mono text-[0.625rem] text-[#4f5b70]">{p.reason}</span>
                   </div>
                 ))}
               </div>
@@ -127,49 +128,49 @@ export default function AiTeamReadPanel({
           </div>
 
           {/* Column 2: GOALS IN LAST 5 · xG */}
-          <div className="flex flex-col gap-1.5 min-w-0 p-3">
-            <span className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-[#4f5b70]">
+          <div className="flex flex-col gap-2 min-w-0 p-3.5">
+            <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-[#4f5b70]">
               GOALS IN LAST 5 · xG
             </span>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
               {formRows.map((p) => (
-                <div key={p.name} className="flex items-center gap-2 text-[11px] text-[#c8d2e0]">
+                <div key={p.name} className="flex items-center gap-2 text-xs text-[#c8d2e0]">
                   <span className="flex-1 truncate">{p.name}</span>
-                  <span className="flex h-1.5 w-14 overflow-hidden rounded-full bg-[#111c2e]">
+                  <span className="flex h-1.5 w-16 overflow-hidden rounded-full bg-[#111c2e]">
                     <span style={{ width: p.bar, background: p.barFg }} className="rounded-full" />
                   </span>
-                  <span className="w-3 text-right font-mono text-[10px] text-[#8fa0b8]">{p.goals}</span>
+                  <span className="w-4 text-right font-mono text-xs text-[#8fa0b8]">{p.goals}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-0.5 flex items-baseline gap-1.5">
-              <span className="font-mono text-[9px] tracking-[0.1em] text-[#5b667d]">xG</span>
-              <span className="font-mono text-xs font-medium text-[#c7d2fe]">
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="font-mono text-[0.625rem] tracking-wider text-[#5b667d]">xG</span>
+              <span className="font-mono text-sm font-medium text-[#c7d2fe]">
                 {insight?.predictedHome ?? 2}.1 – {insight?.predictedAway ?? 1}.8
               </span>
-              <span className="text-[10px] text-[#66748c]">high-scoring model read</span>
+              <span className="text-[0.6875rem] text-[#66748c]">high-scoring model read</span>
             </div>
           </div>
 
           {/* Column 3: LIKELY SCORERS · TAP TO FILL */}
-          <div className="flex flex-col gap-1.5 min-w-0 p-3">
-            <span className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-[#4f5b70]">
+          <div className="flex flex-col gap-2 min-w-0 p-3.5">
+            <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-[#4f5b70]">
               LIKELY SCORERS · TAP TO FILL
             </span>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {likelyScorers.map((p) => (
                 <button
                   key={p.name}
                   type="button"
                   onClick={() => onPickScorer?.(p.name, p.side)}
-                  className="flex cursor-pointer items-center gap-1 rounded-full border border-[#1e3450] bg-[#0d1c2e99] px-2 py-0.5 text-[11px] text-[#5eead4] transition-colors hover:border-[#14b8a666]"
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full border border-[#1e3450] bg-[#0d1c2e99] px-2.5 py-1 text-xs text-[#5eead4] transition-colors hover:border-[#14b8a666]"
                 >
                   <span>{p.name}</span>
-                  <span className="font-mono text-[9px] text-[#99f6e4]">{p.pct}</span>
+                  <span className="font-mono text-[0.625rem] text-[#99f6e4]">{p.pct}</span>
                 </button>
               ))}
             </div>
-            <span className="text-[10.5px] leading-tight text-[#66748c]" style={{ textWrap: 'pretty' }}>
+            <span className="text-xs leading-relaxed text-[#66748c]" style={{ textWrap: 'pretty' }}>
               Tapping drops the name into the first empty slot on that side.
             </span>
           </div>
