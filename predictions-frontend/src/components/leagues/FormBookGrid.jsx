@@ -1,4 +1,3 @@
-import KickerLabel from '../ui/KickerLabel';
 import TeamCrest from '../ui/TeamCrest';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';

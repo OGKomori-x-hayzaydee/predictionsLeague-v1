@@ -21,7 +21,7 @@ const DETAIL_TABS = [
 ];
 
 export default function LeaguesPage() {
-  const { myLeagues, isLoading, joinLeague, createLeague, refreshMyLeagues } = useLeagues();
+  const { myLeagues, isLoading, createLeague, refreshMyLeagues } = useLeagues();
   const [selected, setSelected] = useState(null);
 
   if (selected) {
