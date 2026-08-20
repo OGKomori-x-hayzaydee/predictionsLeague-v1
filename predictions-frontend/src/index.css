@@ -165,10 +165,11 @@
   and their components/landingPage + components/auth dependencies). Those
   pages are bridged from predictions-frontend as-is and are out of scope
   for the v2 reskin, so they keep their original v1 palette instead of the
-  surface-*/brand-* tokens above. Do not use these in new app screens.
+  surface/brand tokens above. Do not use these in new app screens.
 */
 @theme {
   --font-dmSerif: "DM Serif Text", serif;
+  --font-dm-serif: "DM Serif Text", serif;
   --font-outfit: "Outfit", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 
@@ -273,7 +274,20 @@ button,
 input,
 textarea,
 select {
+  font-family: "Outfit", sans-serif;
+}
+
+.font-dmSerif,
+.font-dm-serif {
+  font-family: "DM Serif Text", serif !important;
+}
+
+.font-outfit {
   font-family: "Outfit", sans-serif !important;
+}
+
+.font-mono {
+  font-family: "IBM Plex Mono", monospace !important;
 }
 
 @keyframes riseIn {
