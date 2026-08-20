@@ -73,7 +73,7 @@ export default function FixtureSlip({
               </span>
             ))
           ) : (
-            <span className="font-mono text-xs text-[#4f5b70]">no scorers named</span>
+            <span className="font-outfit text-xs text-[#4f5b70]">no scorers named</span>
           )}
         </div>
 
