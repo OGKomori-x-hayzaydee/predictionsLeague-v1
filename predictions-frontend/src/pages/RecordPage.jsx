@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
 import SeasonTab from '../components/record/SeasonTab';
@@ -10,6 +10,7 @@ import RecordMobileSheet from '../components/record/RecordMobileSheet';
 import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { computeProfileStats, computeChipAlmanac } from '../utils/profileStats';
 import { calculatePoints } from '../utils/pointsCalculation';
+import { DEMO_PREDICTIONS, DEMO_SEASON_HISTORY, DEMO_RANK_TRAJECTORY, DEMO_RANK_NOTE } from '../components/record/recordDemoData';
 import {
   computePointsBands,
   computeScoringRate,
@@ -25,11 +26,19 @@ const TABS = [
 ];
 
 export default function RecordPage() {
-  const [activeTab, setActiveTab] = useState('season');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'season';
+  const highlightId = searchParams.get('highlight');
+  const searchQuery = searchParams.get('q') || '';
+
   const [selectedGameweek, setSelectedGameweek] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Opt-in only (see plan: "hybrid" data-gates + preview) — never shown by
+  // default, and always paired with an unmissable banner below so real vs.
+  // illustrative data is never ambiguous.
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,8 +52,35 @@ export default function RecordPage() {
     };
   }, []);
 
-  const stats = useMemo(() => computeProfileStats(predictions), [predictions]);
-  const hasHistory = predictions.length > 0;
+  const hasRealHistory = predictions.length > 0;
+  const effectivePredictions = previewMode ? DEMO_PREDICTIONS : predictions;
+  const hasHistory = effectivePredictions.length > 0;
+
+  const stats = useMemo(() => computeProfileStats(effectivePredictions), [effectivePredictions]);
+
+  const setActiveTab = (id) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', id);
+      next.delete('q');
+      next.delete('highlight');
+      return next;
+    });
+    setSelectedGameweek(null);
+  };
+
+  // "Full prediction" (Season ticket card) -> Search tab, pre-queried to
+  // this exact fixture and auto-expanded/scrolled/glowing there — a real,
+  // bookmarkable deep link rather than local component state.
+  const handleViewFull = (prediction) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', 'search');
+      next.set('q', `${prediction.homeTeam} ${prediction.awayTeam}`);
+      next.set('highlight', String(prediction.id ?? prediction.matchId ?? ''));
+      return next;
+    });
+  };
 
   // Scope for the sidebar/sheet: a single selected gameweek (Season tab
   // drawer open), career-wide (All-time tab), or the season default —
@@ -54,7 +90,7 @@ export default function RecordPage() {
     const worst = computeBestWorstWeeks(stats.pointsByGameweek).worst;
 
     if (activeTab === 'season' && selectedGameweek) {
-      const weekPredictions = predictions.filter((p) => p.gameweek === selectedGameweek);
+      const weekPredictions = effectivePredictions.filter((p) => p.gameweek === selectedGameweek);
       const weekTotal = weekPredictions.reduce((t, p) => t + (calculatePoints(p) ?? 0), 0);
       const rate = computeScoringRate(weekPredictions);
       return {
@@ -73,7 +109,7 @@ export default function RecordPage() {
     }
 
     if (activeTab === 'allTime') {
-      const rate = computeScoringRate(predictions);
+      const rate = computeScoringRate(effectivePredictions);
       return {
         scopeLabel: 'CAREER POINTS',
         scopeVal: stats.seasonPoints,
@@ -81,13 +117,13 @@ export default function RecordPage() {
         scopePct: rate.pct,
         scopeFoot: stats.bestWeek && worst ? `BEST WEEK ${stats.bestWeek.points} · WORST ${worst.points}` : undefined,
         bandsLabel: 'POINTS PER CALL, CAREER',
-        bands: computePointsBands(predictions),
+        bands: computePointsBands(effectivePredictions),
         chipScope: 'CAREER',
-        chipReturn: computeChipAlmanac(predictions),
+        chipReturn: computeChipAlmanac(effectivePredictions),
       };
     }
 
-    const rate = computeScoringRate(predictions);
+    const rate = computeScoringRate(effectivePredictions);
     return {
       scopeLabel: 'SEASON POINTS',
       scopeVal: stats.seasonPoints,
@@ -95,58 +131,136 @@ export default function RecordPage() {
       scopePct: rate.pct,
       scopeFoot: stats.bestWeek && worst ? `BEST WEEK ${stats.bestWeek.points} · WORST ${worst.points}` : undefined,
       bandsLabel: 'POINTS PER CALL, SEASON',
-      bands: computePointsBands(predictions),
+      bands: computePointsBands(effectivePredictions),
       chipScope: 'THIS SEASON',
-      chipReturn: computeChipAlmanac(predictions),
+      chipReturn: computeChipAlmanac(effectivePredictions),
     };
-  }, [activeTab, selectedGameweek, predictions, stats]);
+  }, [activeTab, selectedGameweek, effectivePredictions, stats]);
 
-  const insight = useMemo(() => computeScorelineInsight(computeScorelineHitRates(predictions)), [predictions]);
+  const insight = useMemo(() => computeScorelineInsight(computeScorelineHitRates(effectivePredictions)), [effectivePredictions]);
 
   const slotRight = hasHistory ? `${stats.totalCompleted} calls filed · ${stats.seasonPoints} pts` : undefined;
 
   return (
     <div className="animate-rise-in">
-      <SlotBar
-        kicker="My Record"
-        tabs={TABS}
-        activeTab={activeTab}
-        onTabChange={(id) => {
-          setActiveTab(id);
-          setSelectedGameweek(null);
-        }}
-        right={slotRight}
-      />
+      <div className="hidden items-center md:flex">
+        <div className="flex-1">
+          <SlotBar kicker="My Record" tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} right={slotRight} />
+        </div>
+        {hasRealHistory && (
+          <button
+            onClick={() => setPreviewMode((v) => !v)}
+            className={`mr-[22px] shrink-0 rounded-7 border px-2.5 py-1 font-mono text-[10px] tracking-wide transition-colors ${
+              previewMode
+                ? 'border-brand-amber/50 text-brand-amber'
+                : 'border-border-card text-text-muted-3 hover:text-brand-teal'
+            }`}
+          >
+            {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile pill tab strip — the mobile shell has no equivalent of
+          SlotBar's underline-tab chrome (matches the reference screenshots'
+          rounded segmented control instead), so this replaces it entirely
+          below `md`. */}
+      <div className="flex items-center justify-center gap-2 px-4 pb-1 pt-4 md:hidden">
+        <div className="flex flex-1 max-w-sm gap-0.5 rounded-9 border border-border-card bg-surface-card-4 p-[3px]">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`flex-1 rounded-7 px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                activeTab === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {hasRealHistory && (
+          <button
+            onClick={() => setPreviewMode((v) => !v)}
+            aria-label="Toggle preview with example data"
+            className={`shrink-0 rounded-9 border p-2.5 ${
+              previewMode ? 'border-brand-amber/50 text-brand-amber' : 'border-border-card text-text-muted-3'
+            }`}
+          >
+            🎟️
+          </button>
+        )}
+      </div>
+
+      {previewMode && (
+        <div className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-9 border border-brand-amber/40 bg-[color-mix(in_srgb,var(--brand-amber)_10%,transparent)] px-4 py-2.5 md:mx-[26px]">
+          <span className="font-mono text-[10.5px] tracking-[0.1em] text-brand-amber">
+            PREVIEW · Example data, not your real record
+          </span>
+          <button
+            onClick={() => setPreviewMode(false)}
+            className="shrink-0 font-mono text-[10.5px] tracking-wide text-brand-amber underline decoration-dotted underline-offset-2 hover:text-brand-amber-mid"
+          >
+            Exit preview
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <LoadingState message="Loading your record..." />
       ) : !hasHistory ? (
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-6 text-center">
+          <span
+            aria-hidden="true"
+            className="mb-1 flex h-14 w-14 items-center justify-center rounded-14 border border-dashed border-border-control text-2xl text-text-muted-4"
+          >
+            🎟️
+          </span>
           <span className="font-dmSerif text-2xl text-text-primary">No predictions on record yet</span>
           <p className="max-w-sm text-sm text-text-muted-2">
             Once you file your first prediction it'll show up here, gameweek by gameweek, with the points
             breakdown behind every call.
           </p>
-          <Link
-            to="/fixtures"
-            className="mt-1 rounded-9 bg-brand-indigo-mid px-4 py-2 text-sm text-white transition-colors hover:bg-brand-indigo-hover"
-          >
-            Go to Fixtures
-          </Link>
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/fixtures"
+              className="rounded-9 bg-brand-indigo-mid px-4 py-2 text-sm text-white transition-colors hover:bg-brand-indigo-hover"
+            >
+              Go to Fixtures
+            </Link>
+            <button
+              onClick={() => setPreviewMode(true)}
+              className="font-mono text-[11px] tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
+            >
+              Preview with example data →
+            </button>
+          </div>
         </div>
       ) : (
         <div className="md:grid md:min-h-0 md:grid-cols-[1fr_320px] md:items-stretch">
           <div className="min-w-0 px-4 py-5 md:px-[26px] md:py-5">
             {activeTab === 'season' && (
               <SeasonTab
-                predictions={predictions}
+                predictions={effectivePredictions}
                 stats={stats}
                 selectedGameweek={selectedGameweek}
                 onSelectGameweek={setSelectedGameweek}
+                onViewFull={handleViewFull}
               />
             )}
-            {activeTab === 'allTime' && <AllTimeTab predictions={predictions} stats={stats} />}
-            {activeTab === 'search' && <SearchTab predictions={predictions} />}
+            {activeTab === 'allTime' && (
+              <AllTimeTab
+                predictions={effectivePredictions}
+                stats={stats}
+                previewMode={previewMode}
+                demoSeasonHistory={DEMO_SEASON_HISTORY}
+                demoRankTrajectory={DEMO_RANK_TRAJECTORY}
+                demoRankNote={DEMO_RANK_NOTE}
+              />
+            )}
+            {activeTab === 'search' && (
+              <SearchTab predictions={effectivePredictions} initialQuery={searchQuery} highlightId={highlightId} />
+            )}
 
             <button
               onClick={() => setSheetOpen(true)}

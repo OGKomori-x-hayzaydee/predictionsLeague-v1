@@ -8,19 +8,44 @@ import { computeTeamAccuracy } from '../../utils/profileStats';
 import { computeScorelineHitRates, computeBestWorstWeeks } from '../../utils/recordStats';
 
 /**
+ * Honest "locked" state for a section that needs more real history than
+ * exists yet — a ghosted backdrop (so it reads as "there's something here,
+ * just not yet" rather than a blank gap) plus a lock glyph and plain-
+ * language copy about what unlocks it. See AllTimeTab's doc comment for
+ * why this replaced outright omission.
+ */
+function DataGateTeaser({ icon, text }) {
+  return (
+    <div className="relative flex min-h-[120px] flex-col items-center justify-center gap-2 overflow-hidden rounded-9 border border-dashed border-border-control px-4 py-6 text-center">
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center text-6xl opacity-[0.04]">
+        {icon}
+      </span>
+      <span aria-hidden="true" className="text-lg text-text-muted-4">🔒</span>
+      <p className="max-w-[22em] text-[12.5px] leading-relaxed text-text-muted-3">{text}</p>
+    </div>
+  );
+}
+
+/**
  * All-time view — Spine.dc.html desktop lines 846-950 (`REC.isAll`), mobile
  * lines 2720-2804. The prototype mocks a three-season, ranked-league
  * history here; this app only has one season of real prediction data and no
  * historical-rank endpoint (see predictions-backend LeagueController /
- * ProfileController), so the season-by-season comparison and rank
- * trajectory panels are intentionally omitted rather than faked — every
- * section below is a genuine aggregate of the user's own settled calls.
+ * ProfileController). Rather than either faking that history OR silently
+ * omitting the section, the season-by-season comparison and rank-trajectory
+ * panels render as a designed "data gate" teaser (real default) that
+ * explains honestly what unlocks it — unless `previewMode` is on, in which
+ * case the caller-supplied illustrative `demoSeasonHistory`/
+ * `demoRankTrajectory` render the real thing so the page's full populated
+ * look is always inspectable on demand. Every other section below is a
+ * genuine aggregate of the user's own settled calls regardless of mode.
  */
-export default function AllTimeTab({ predictions, stats }) {
+export default function AllTimeTab({ predictions, stats, previewMode = false, demoSeasonHistory = [], demoRankTrajectory = [], demoRankNote }) {
   const teamAccuracy = computeTeamAccuracy(predictions);
   const scorelineHitRates = computeScorelineHitRates(predictions);
   const { best, worst } = computeBestWorstWeeks(stats.pointsByGameweek);
   const trend = stats.pointsByGameweek.map((p) => p.points);
+  const hasMultiSeason = previewMode && demoSeasonHistory.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -48,6 +73,63 @@ export default function AllTimeTab({ predictions, stats }) {
         </div>
         <Sparkline data={trend} height={110} />
       </Card>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Card className="relative overflow-hidden p-4">
+          <KickerLabel as="div" className="mb-3">Season by season</KickerLabel>
+          {hasMultiSeason ? (
+            <div className="flex flex-col gap-3">
+              {demoSeasonHistory.map((s) => (
+                <div key={s.season} className="flex flex-col gap-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="flex items-baseline gap-2">
+                      <span className="text-[12.5px] text-text-muted-2">{s.season}</span>
+                      <span className="font-dmSerif text-lg text-text-primary">{s.points}</span>
+                      <span className="text-[11px] text-text-muted-3">{s.avgPerWeek} a week</span>
+                    </span>
+                    <span className="font-mono text-[10px] text-text-muted-3">
+                      {s.rank}
+                      {s.rank === 1 ? 'st' : s.rank === 2 ? 'nd' : s.rank === 3 ? 'rd' : 'th'} of {s.totalTeams}
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-card-4">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid"
+                      style={{ width: `${Math.round(((s.totalTeams - s.rank + 1) / s.totalTeams) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+              <div className="mt-1 flex items-baseline justify-between border-t border-border-base pt-2">
+                <span className="font-mono text-[10px] tracking-wide text-text-muted-3">LIFETIME</span>
+                <span className="font-dmSerif text-xl text-brand-teal">
+                  {demoSeasonHistory.reduce((t, s) => t + s.points, 0) + stats.seasonPoints} pts
+                </span>
+              </div>
+            </div>
+          ) : (
+            <DataGateTeaser
+              icon="📅"
+              text="Unlocks once you've completed 2 full seasons — this one's still in progress."
+            />
+          )}
+        </Card>
+
+        <Card className="relative overflow-hidden p-4">
+          <div className="mb-3 flex items-baseline justify-between">
+            <KickerLabel>Rank trajectory</KickerLabel>
+            {hasMultiSeason && <span className="font-mono text-[10.5px] text-brand-indigo">4TH OF 12</span>}
+          </div>
+          {hasMultiSeason ? (
+            <div className="flex flex-col gap-2">
+              <Sparkline data={demoRankTrajectory.map((r) => -r)} height={80} stroke="var(--brand-indigo-mid)" fill={false} />
+              {demoRankNote && <p className="text-[11.5px] leading-relaxed text-text-muted-2">{demoRankNote}</p>}
+            </div>
+          ) : (
+            <DataGateTeaser icon="📈" text="Needs a full second season of results to plot a trend." />
+          )}
+        </Card>
+      </div>
 
       <Card className="p-4">
         <KickerLabel as="div" className="mb-3">Hit rate by scoreline type</KickerLabel>

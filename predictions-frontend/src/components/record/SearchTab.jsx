@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PredictionRow from './PredictionRow';
 import { callVerdict } from '../../utils/recordStats';
 
@@ -13,10 +13,22 @@ const OUTCOME_FILTERS = [
  * Search/filter view — Spine.dc.html desktop lines 952-1028 (`REC.isSearch`),
  * mobile lines 2806-2859. Free-text team/scoreline search plus an outcome
  * filter over every call the user has ever filed.
+ *
+ * `initialQuery`/`highlightId` come from RecordPage's URL-driven "Full
+ * prediction" deep link (Season card -> here): when set, the query box is
+ * seeded so the result reads as an actual filtered query (not just a scroll
+ * target), and the matching row force-expands + scrolls into view + glows
+ * (see PredictionRow's `highlighted` prop).
  */
-export default function SearchTab({ predictions }) {
-  const [query, setQuery] = useState('');
+export default function SearchTab({ predictions, initialQuery = '', highlightId }) {
+  const [query, setQuery] = useState(initialQuery);
   const [outcome, setOutcome] = useState('all');
+
+  // Only re-seed when a *new* deep link arrives (initialQuery changes),
+  // never overwriting the user's own subsequent typing.
+  useEffect(() => {
+    if (initialQuery) setQuery(initialQuery);
+  }, [initialQuery]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -49,7 +61,10 @@ export default function SearchTab({ predictions }) {
           onChange={(e) => setQuery(e.target.value)}
           className="flex-1 rounded-[10px] border border-border-control bg-surface-card-4 px-3.5 py-2.5 text-[13.5px] text-text-primary outline-none focus:border-brand-teal"
         />
-        <div className="flex gap-0.5 rounded-9 border border-border-card bg-surface-card-4 p-[3px]">
+        {/* Desktop: segmented pill filter. Mobile: a compact dropdown
+            (matches the reference screenshots — a full pill row doesn't fit
+            comfortably next to the search box at phone widths). */}
+        <div className="hidden gap-0.5 rounded-9 border border-border-card bg-surface-card-4 p-[3px] sm:flex">
           {OUTCOME_FILTERS.map((f) => (
             <button
               key={f.id}
@@ -62,6 +77,17 @@ export default function SearchTab({ predictions }) {
             </button>
           ))}
         </div>
+        <select
+          value={outcome}
+          onChange={(e) => setOutcome(e.target.value)}
+          className="rounded-9 border border-border-card bg-surface-card-4 px-3 py-2.5 font-mono text-[11px] tracking-wide text-text-secondary outline-none sm:hidden"
+        >
+          {OUTCOME_FILTERS.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.id === 'all' ? 'All calls' : f.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <span className="font-mono text-[10.5px] text-text-muted-4">
@@ -71,9 +97,10 @@ export default function SearchTab({ predictions }) {
 
       <div className="flex flex-col gap-2">
         {filtered.length === 0 && <p className="text-sm text-text-muted-2">No matches.</p>}
-        {filtered.slice(0, 60).map((p) => (
-          <PredictionRow key={p.id || p.matchId} prediction={p} />
-        ))}
+        {filtered.slice(0, 60).map((p) => {
+          const id = p.id || p.matchId;
+          return <PredictionRow key={id} prediction={p} highlighted={highlightId != null && String(id) === String(highlightId)} />;
+        })}
       </div>
     </div>
   );
