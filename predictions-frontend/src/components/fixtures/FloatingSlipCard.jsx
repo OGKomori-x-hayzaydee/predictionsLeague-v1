@@ -166,11 +166,11 @@ export default function FloatingSlipCard({
             <>
               {/* Compact live-preview (cardIsSide) */}
               <div className="flex items-baseline justify-between gap-2.5">
-                <span className="font-mono text-[0.625rem] tracking-wider text-[#66748c]">
+                <span className="font-outfit text-[0.625rem] tracking-wider text-[#66748c]">
                   THE SLIP · {gameweekLabel}
                 </span>
                 <span
-                  className={`flex items-center gap-1.5 font-mono text-[0.625rem] tracking-wide ${
+                  className={`flex items-center gap-1.5 font-outfit text-[0.625rem] tracking-wide ${
                     filed ? 'text-[#5eead4]' : 'text-brand-amber-mid'
                   }`}
                 >
@@ -197,7 +197,7 @@ export default function FloatingSlipCard({
                 {ledger.map((row) => (
                   <div key={row.label} className="flex items-baseline justify-between gap-2.5 text-xs text-[#8fa0b8]">
                     <span>{row.label}</span>
-                    <span className="font-mono text-white">{row.value}</span>
+                    <span className="font-outfit text-white">{row.value}</span>
                   </div>
                 ))}
               </div>
@@ -209,7 +209,7 @@ export default function FloatingSlipCard({
                 <span className="font-dmSerif text-3xl leading-none text-[#fcd34d]">{ceiling}</span>
               </div>
 
-              <span className="font-mono text-[0.625rem] leading-relaxed text-[#4f5b70]">
+              <span className="font-outfit text-[0.625rem] leading-relaxed text-[#4f5b70]">
                 This slip is what gets filed. Review it, then sign it off.
               </span>
             </>
@@ -218,10 +218,10 @@ export default function FloatingSlipCard({
               {/* Celebration / FILED stamp (cardIsHome) */}
               <div className="relative">
                 <div className="flex items-baseline justify-between gap-2.5">
-                  <span className="font-mono text-[0.625rem] tracking-wider text-[#66748c]">
+                  <span className="font-outfit text-[0.625rem] tracking-wider text-[#66748c]">
                     THE SLIP · {gameweekLabel}
                   </span>
-                  <span className="font-mono text-[0.625rem] tracking-wide text-[#5eead4]">FILED</span>
+                  <span className="font-outfit text-[0.625rem] tracking-wide text-[#5eead4]">FILED</span>
                 </div>
                 <h2 className="m-0 mt-2.5 mr-[70px] font-dmSerif text-[22px] leading-tight text-white" style={{ textWrap: 'pretty' }}>
                   {headline}
@@ -230,7 +230,7 @@ export default function FloatingSlipCard({
                     (index.css `stampIn`) since it's a small one-shot entrance
                     detail, not on the interrupt-critical phase path. */}
                 <span
-                  className="absolute right-0 top-0.5 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-[11px] py-[5px] font-mono text-[11.5px] font-bold tracking-wider text-[#5eead4]"
+                  className="absolute right-0 top-0.5 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-[11px] py-[5px] font-outfit text-[11.5px] font-bold tracking-wider text-[#5eead4]"
                   style={{ animation: 'stampIn .42s cubic-bezier(.2,1.4,.4,1) both' }}
                 >
                   FILED
@@ -259,7 +259,7 @@ export default function FloatingSlipCard({
                     </span>
                   ))
                 ) : (
-                  <span className="font-mono text-[0.625rem] text-[#4f5b70]">no scorers named</span>
+                  <span className="font-outfit text-[0.625rem] text-[#4f5b70]">no scorers named</span>
                 )}
               </div>
 

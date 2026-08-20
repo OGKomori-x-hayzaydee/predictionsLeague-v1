@@ -33,7 +33,7 @@ export default function FixtureEditor({
   return (
     <div className="flex w-full flex-col items-center gap-2.5">
       {/* Header Kickoff + Venue */}
-      <span className="font-mono text-xs tracking-widest text-[#8fa6bf]">
+      <span className="font-outfit text-xs tracking-widest text-[#8fa6bf]">
         {formatKickoff(fixture.date)} · {fixture.venue || 'Stadium'}
       </span>
 
@@ -93,7 +93,7 @@ export default function FixtureEditor({
           </div>
 
           {totalGoals === 0 && (
-            <span className="max-w-xs text-center font-mono text-[0.6875rem] leading-relaxed tracking-wide text-[#4f5b70]">
+            <span className="max-w-xs text-center font-outfit text-[0.6875rem] leading-relaxed tracking-wide text-[#4f5b70]">
               0–0 AS IT STANDS · A VALID CALL — SCORER SLOTS OPEN AS THE NUMBERS MOVE
             </span>
           )}

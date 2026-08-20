@@ -87,7 +87,7 @@ export default function DashboardPage() {
               <span className="text-[13px] text-[#8896ad]">{openLine}</span>
             </div>
             <div className="flex flex-none flex-col items-end gap-1.5">
-              <span className="font-mono text-[10.5px] tracking-[0.13em] text-[#66748c]">
+              <span className="font-outfit text-[10.5px] tracking-[0.13em] text-[#66748c]">
                 MAX ON THE TABLE
               </span>
               <span className="font-dmSerif text-[29px] leading-none text-brand-amber">
@@ -188,7 +188,7 @@ export default function DashboardPage() {
           className="flex items-center justify-between rounded-[14px] border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
         >
           Rivals, chips in hand &amp; last gameweek
-          <span className="font-mono text-[11px] text-brand-teal">VIEW &rsaquo;</span>
+          <span className="font-outfit text-[11px] text-brand-teal">VIEW &rsaquo;</span>
         </button>
       </div>
 

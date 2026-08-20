@@ -89,7 +89,7 @@ export default function FixturePreviewCard({
       {/* Header bar — slot label + venue + kickoff + status + CTA */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#16203a] px-[22px] py-[13px]">
         <div className="flex items-center gap-[11px] text-xs">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-teal">
+          <span className="font-outfit text-[11px] uppercase tracking-[0.14em] text-brand-teal">
             {formatSlot(date) || `${homeTeam} v ${awayTeam}`}
           </span>
           {venue && (
@@ -101,13 +101,13 @@ export default function FixturePreviewCard({
           {date && (
             <>
               <span className="h-3 w-px bg-[#233248]" />
-              <span className="font-mono text-[11px] text-[#66748c]">{formatKickoff(date)}</span>
+              <span className="font-outfit text-[11px] text-[#66748c]">{formatKickoff(date)}</span>
             </>
           )}
         </div>
         <div className="flex items-center gap-3.5">
           <span
-            className={`whitespace-nowrap rounded-xs border px-[9px] py-1 font-mono text-[10px] tracking-[0.12em] ${statusClasses}`}
+            className={`whitespace-nowrap rounded-xs border px-[9px] py-1 font-outfit text-[10px] tracking-[0.12em] ${statusClasses}`}
           >
             {predicted ? 'FILED' : 'NOT FILED'}
           </span>
@@ -148,7 +148,7 @@ export default function FixturePreviewCard({
               {homeScorers.length > 0 ? (
                 homeScorers.map((name) => <ScorerRow key={name} name={name} side="home" />)
               ) : (
-                <span className="font-mono text-[11px] text-[#4f5b70]">no scorer named</span>
+                <span className="font-outfit text-[11px] text-[#4f5b70]">no scorer named</span>
               )}
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function FixturePreviewCard({
             </div>
             {chip && (
               <span
-                className="flex items-center gap-[7px] whitespace-nowrap rounded-full border px-2.5 py-1 font-mono text-[10px] tracking-[0.1em]"
+                className="flex items-center gap-[7px] whitespace-nowrap rounded-full border px-2.5 py-1 font-outfit text-[10px] tracking-[0.1em]"
                 style={{ background: `${chipHue}1f`, borderColor: `${chipHue}55`, color: chipHue }}
               >
                 {chip.name}
@@ -189,7 +189,7 @@ export default function FixturePreviewCard({
               {awayScorers.length > 0 ? (
                 awayScorers.map((name) => <ScorerRow key={name} name={name} side="away" />)
               ) : (
-                <span className="font-mono text-[11px] text-[#4f5b70]">no scorer named</span>
+                <span className="font-outfit text-[11px] text-[#4f5b70]">no scorer named</span>
               )}
             </div>
           </div>
@@ -217,12 +217,12 @@ export default function FixturePreviewCard({
           className={`flex items-center gap-[9px] text-left ${isMobile ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[#818cf8]" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#66748c]">
+          <span className="font-outfit text-[10px] uppercase tracking-[0.16em] text-[#66748c]">
             AI overview
           </span>
-          <span className="font-mono text-[10px] text-[#4f5b70]">coming soon</span>
+          <span className="font-outfit text-[10px] text-[#4f5b70]">coming soon</span>
           {isMobile && (
-            <span className="ml-auto font-mono text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
+            <span className="ml-auto font-outfit text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
           )}
         </button>
         {(!isMobile || aiOpen) && (

@@ -78,7 +78,7 @@ export default function RivalsSection({ leagues }) {
         {rows.map((m) => (
           <div key={m.id ?? m.username} className="flex cursor-pointer items-center gap-[10px]">
             <span
-              className={`w-3.5 shrink-0 font-mono text-[11px] ${
+              className={`w-3.5 shrink-0 font-outfit text-[11px] ${
                 m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-4'
               }`}
             >
@@ -100,7 +100,7 @@ export default function RivalsSection({ leagues }) {
                 }}
               />
             </span>
-            <span className="w-[30px] shrink-0 text-right font-mono text-xs text-text-tertiary">
+            <span className="w-[30px] shrink-0 text-right font-outfit text-xs text-text-tertiary">
               {m.points}
             </span>
           </div>

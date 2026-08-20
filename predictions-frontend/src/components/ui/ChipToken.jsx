@@ -18,7 +18,7 @@ export default function ChipToken({ tag, hue = 'var(--brand-teal)', size = 40, m
         style={{ width: size, height: size, ...style }}
       >
         <span
-          className="flex items-center justify-center rounded-full border border-dashed border-border-base font-mono text-text-muted-3"
+          className="flex items-center justify-center rounded-full border border-dashed border-border-base font-outfit text-text-muted-3"
           style={{ width: inner, height: inner, fontSize }}
         >
           {tag}
@@ -38,7 +38,7 @@ export default function ChipToken({ tag, hue = 'var(--brand-teal)', size = 40, m
       }}
     >
       <span
-        className="flex items-center justify-center rounded-full bg-surface-card-4 font-mono font-semibold"
+        className="flex items-center justify-center rounded-full bg-surface-card-4 font-outfit font-semibold"
         style={{ width: inner, height: inner, border: `1.5px solid ${hue}`, color: hue, fontSize }}
       >
         {tag}

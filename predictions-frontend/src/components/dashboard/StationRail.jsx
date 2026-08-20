@@ -28,13 +28,13 @@ function DesktopStation({ station }) {
       onClick={onSelect}
       className="flex flex-1 cursor-pointer flex-col items-center gap-[6px] border-0 bg-none p-0 pb-1 font-outfit"
     >
-      <span className={`font-mono text-[10px] leading-none ${dayColor}`}>{formatDay(date)}</span>
+      <span className={`font-outfit text-[10px] leading-none ${dayColor}`}>{formatDay(date)}</span>
       <span className={`flex items-center gap-[5px] rounded-[8px] border px-[7px] py-[6px] ${plateClasses(isSelected, predicted)}`}>
         <TeamCrest team={homeTeam} size={18} />
         <TeamCrest team={awayTeam} size={18} />
       </span>
       <span className={`rounded-sm ${tickW} ${tickH} ${tickBg}`} />
-      <span className={`font-mono text-[11px] leading-none tracking-[0.06em] ${scoreColor}`}>{scoreLabel || '—'}</span>
+      <span className={`font-outfit text-[11px] leading-none tracking-[0.06em] ${scoreColor}`}>{scoreLabel || '—'}</span>
     </button>
   );
 }
@@ -50,12 +50,12 @@ function MobileStation({ station }) {
       style={{ scrollSnapAlign: 'center' }}
       className="flex w-[58px] shrink-0 cursor-pointer flex-col items-center gap-1.5 border-0 bg-none p-0 font-outfit"
     >
-      <span className={`font-mono text-[9.5px] ${dayColor}`}>{formatDay(date)}</span>
+      <span className={`font-outfit text-[9.5px] ${dayColor}`}>{formatDay(date)}</span>
       <span className={`flex items-center gap-1 rounded-[8px] border px-1.5 py-1.5 ${plateClasses(isSelected, predicted)}`}>
         <TeamCrest team={homeTeam} size={16} />
         <TeamCrest team={awayTeam} size={16} />
       </span>
-      <span className={`font-mono text-[10.5px] ${scoreColor}`}>{scoreLabel || '—'}</span>
+      <span className={`font-outfit text-[10.5px] ${scoreColor}`}>{scoreLabel || '—'}</span>
     </button>
   );
 }

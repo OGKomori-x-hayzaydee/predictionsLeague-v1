@@ -29,7 +29,7 @@ function chipLeftLabel(chipId, matchChips) {
 export default function ChipSelector({ chips = [], selected, onToggle }) {
   return (
     <div className="flex w-full flex-col gap-2">
-      <span className="font-mono text-xs uppercase tracking-[0.16em] text-[#5b667d]">
+      <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
         CHIPS · ONE PER MATCH
       </span>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
@@ -62,7 +62,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
                   }}
                 >
                   <div
-                    className="flex w-6 h-6 items-center justify-center rounded-full bg-[#08111f] font-mono text-[0.6875rem] font-bold"
+                    className="flex w-6 h-6 items-center justify-center rounded-full bg-[#08111f] font-outfit text-[0.6875rem] font-bold"
                     style={{
                       border: `1.5px solid ${isSelected ? '#fcd34d' : hue}`,
                       color: isSelected ? '#fcd34d' : hue,
@@ -72,7 +72,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
                   </div>
                 </div>
                 <span
-                  className="font-mono text-[0.625rem]"
+                  className="font-outfit text-[0.625rem]"
                   style={{ color: isSelected ? '#fcd34d' : isUsed ? '#5b667d' : '#8fa0b8' }}
                 >
                   {left}

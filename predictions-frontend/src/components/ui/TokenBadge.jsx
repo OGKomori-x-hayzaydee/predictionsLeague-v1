@@ -13,7 +13,7 @@ export default function TokenBadge({ label, color = 'var(--brand-teal)', size = 
       }}
     >
       <span
-        className="flex items-center justify-center rounded-full border border-border-card bg-surface-card-2 font-mono font-semibold text-text-primary"
+        className="flex items-center justify-center rounded-full border border-border-card bg-surface-card-2 font-outfit font-semibold text-text-primary"
         style={{ width: size * 0.7, height: size * 0.7, fontSize: Math.max(size * 0.3, 9) }}
       >
         {label}

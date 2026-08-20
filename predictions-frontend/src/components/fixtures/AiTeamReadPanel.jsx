@@ -15,11 +15,11 @@ export default function AiTeamReadPanel({ open, onToggle }) {
         className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 select-none"
       >
         <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-[#818cf8]" />
-        <span className="font-mono text-xs uppercase tracking-widest text-[#66748c]">
+        <span className="font-outfit text-xs uppercase tracking-widest text-[#66748c]">
           AI TEAM READ
         </span>
-        <span className="ml-auto font-mono text-xs text-[#8496ad]">Coming soon</span>
-        <span className="font-mono text-xs text-[#8496ad]">{open ? '▴' : '▾'}</span>
+        <span className="ml-auto font-outfit text-xs text-[#8496ad]">Coming soon</span>
+        <span className="font-outfit text-xs text-[#8496ad]">{open ? '▴' : '▾'}</span>
       </div>
 
       {open && (
