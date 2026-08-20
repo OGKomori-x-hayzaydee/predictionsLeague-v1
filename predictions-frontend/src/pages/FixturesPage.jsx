@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
@@ -11,8 +12,16 @@ import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
 import { useNextMatch } from '../hooks/useNextMatch';
 import { useChipManagement } from '../context/ChipManagementContext';
+import useFilingSequence from '../hooks/useFilingSequence';
 import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { calculateCeilingPoints } from '../utils/pointsCalculation';
+import {
+  FILE_PHASES,
+  RAIL_WIDTH_PX,
+  CONTENT_LAYOUT_TRANSITION,
+  AI_PANEL_VARIANTS,
+  AI_PANEL_DELAY_MS,
+} from '../components/fixtures/filingChoreography';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -25,18 +34,13 @@ function formatKickoff(dateStr) {
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
 
-// Timings mirror the prototype's fileIt() exactly (script ~line 4139-4148):
-// phase flips to "stamp" 520ms after filing starts, "return" 980ms after
-// that, and "idle" 700ms after that.
-const MIN_CENTER_MS = 520;
-const STAMP_HOLD_MS = 980;
-const RETURN_MS = 700;
-
 /**
  * Fixtures Page — desktop editor with a corner-anchored live-preview slip
  * that morphs in place into the "FILED" ceremony (see FloatingSlipCard),
  * matching Spine.dc.html's buildReel() choreography instead of a detached
- * centered modal.
+ * centered modal. The phase machine itself (idle/center/stamp/return) and
+ * its timings live in `useFilingSequence` + `filingChoreography.js` so this
+ * component only has to react to `filePhase`, not re-derive it.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
@@ -65,17 +69,17 @@ export default function FixturesPage() {
   const [aiOpen, setAiOpen] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [filePhase, setFilePhase] = useState('idle');
+  const { phase: filePhase, isSlow, isFiling, file, reset: resetFiling } = useFilingSequence();
   // Optimistic "just filed" snapshot for the *currently open* fixture, so the
   // resting-slip reveal isn't gated behind the invalidated queries' network
   // round-trip — matching the prototype's instant local state flip.
   const [optimisticFiled, setOptimisticFiled] = useState(null);
-  const fileTimersRef = useRef([]);
 
-  useEffect(() => {
-    return () => fileTimersRef.current.forEach(clearTimeout);
-  }, []);
-
+  // Navigation-interrupt fix: fixture switching (chevrons/reel strip) is
+  // disabled while `isFiling`, so by the time this effect can ever run for
+  // a *different* fixture, no filing sequence is in flight — `resetFiling`
+  // here is just a defensive clear of the idle phase state, not a mid-flight
+  // cancellation.
   useEffect(() => {
     const existing = selectedFixture?.userPrediction;
     setDraft({
@@ -88,10 +92,8 @@ export default function FixturesPage() {
     setEditorOpen(false);
     setSubmitError(null);
     setOptimisticFiled(null);
-    fileTimersRef.current.forEach(clearTimeout);
-    fileTimersRef.current = [];
-    setFilePhase('idle');
-  }, [selectedFixture?.id]);
+    resetFiling();
+  }, [selectedFixture?.id, resetFiling]);
 
   const currentGameweek = essentialData?.season?.currentGameweek;
   const deadlineFormatted = essentialData?.season?.deadlineFormatted;
@@ -130,66 +132,50 @@ export default function FixturesPage() {
   // preview pre-filing, or for the whole non-idle filing sequence — matches
   // buildReel()'s `shown = (!filed && anyPicked) || phase !== "idle"`.
   const previewVisible = !isPredicted && hasLivePrediction;
-  const railShown = previewVisible || filePhase !== 'idle';
+  const railShown = previewVisible || isFiling;
 
   const handleSubmit = async () => {
-    if (!selectedFixture || filePhase !== 'idle') return;
+    if (!selectedFixture || isFiling) return;
     setSubmitting(true);
     setSubmitError(null);
-    setFilePhase('center');
     // Close the editor immediately (prototype's `fixEditOpen:false` at t=0) —
     // harmless pre-filing since `showEditor` stays true until `isPredicted`
     // flips, but it's what lets the resting slip + AI panel be the thing
     // revealed once the dim/card fade away at the end of the sequence.
     setEditorOpen(false);
 
-    const minCenter = new Promise((resolve) => {
-      fileTimersRef.current.push(setTimeout(resolve, MIN_CENTER_MS));
-    });
-
     try {
-      const [result] = await Promise.all([
-        userPredictionsAPI.makePrediction(
-          {
-            homeScore: draft.homeScore,
-            awayScore: draft.awayScore,
-            homeScorers: (draft.homeScorers || []).filter(Boolean),
-            awayScorers: (draft.awayScorers || []).filter(Boolean),
-            chips: draft.chip ? [draft.chip] : [],
+      const result = await file(
+        () =>
+          userPredictionsAPI.makePrediction(
+            {
+              homeScore: draft.homeScore,
+              awayScore: draft.awayScore,
+              homeScorers: (draft.homeScorers || []).filter(Boolean),
+              awayScorers: (draft.awayScorers || []).filter(Boolean),
+              chips: draft.chip ? [draft.chip] : [],
+            },
+            selectedFixture,
+            !!selectedFixture.predicted
+          ),
+        {
+          // Runs synchronously right before the hook flips phase -> "stamp",
+          // so the resting-slip branch mounts in the same tick the stamp
+          // appears (its AI panel's mount-relative delay then lands exactly
+          // right — see AI_PANEL_DELAY_MS).
+          onFiled: () => {
+            queryClient.invalidateQueries({ queryKey: ['user-predictions'] });
+            queryClient.invalidateQueries({ queryKey: ['hybrid-fixtures'] });
+            setOptimisticFiled({ id: selectedFixture.id, prediction: { ...draft } });
           },
-          selectedFixture,
-          !!selectedFixture.predicted
-        ),
-        minCenter,
-      ]);
+        }
+      );
 
-      if (!result.success) {
-        setFilePhase('idle');
+      if (!result?.success) {
         setEditorOpen(true);
-        setSubmitError(result.error?.message || 'Could not file this prediction.');
-        return;
+        setSubmitError(result?.error?.message || 'Could not file this prediction.');
       }
-
-      queryClient.invalidateQueries({ queryKey: ['user-predictions'] });
-      queryClient.invalidateQueries({ queryKey: ['hybrid-fixtures'] });
-      // Flip the "filed" state and the ceremony's stamp phase in the same
-      // tick, so the resting-slip branch mounts exactly as the stamp
-      // appears — its AI panel's .98s-delayed slide-in then lands exactly
-      // when the stamp begins fading (see STAMP_HOLD_MS below).
-      setOptimisticFiled({ id: selectedFixture.id, prediction: { ...draft } });
-      setFilePhase('stamp');
-      fileTimersRef.current.push(
-        setTimeout(() => {
-          setFilePhase('return');
-        }, STAMP_HOLD_MS)
-      );
-      fileTimersRef.current.push(
-        setTimeout(() => {
-          setFilePhase('idle');
-        }, STAMP_HOLD_MS + RETURN_MS)
-      );
     } catch (err) {
-      setFilePhase('idle');
       setEditorOpen(true);
       setSubmitError(err?.message || 'Could not file this prediction.');
     } finally {
@@ -216,7 +202,7 @@ export default function FixturesPage() {
     onToggleAi: () => setAiOpen((v) => !v),
   };
 
-  const buttonLabel = submitting || filePhase !== 'idle'
+  const buttonLabel = submitting || isFiling
     ? 'Filing…'
     : isPredicted
       ? 'Filed · amend to re-file'
@@ -227,10 +213,10 @@ export default function FixturesPage() {
   // Only animate the AI panel's entrance right after an active filing
   // sequence (matches aiSlideAnimDesk/aiSlideAnimMob: "none" once idle so a
   // normal page load into an already-filed fixture doesn't replay it).
-  const aiSlideStyleDesktop =
-    filePhase === 'idle' ? undefined : { animation: 'slideFromBehind .5s ease .98s both' };
-  const aiSlideStyleMobile =
-    filePhase === 'idle' ? undefined : { animation: 'slideFromBehind .5s ease 1.5s both' };
+  // `initial` is only read once, at mount, so this correctly captures
+  // "was a filing sequence in flight when this panel first appeared?"
+  // without needing to be re-evaluated on every subsequent phase change.
+  const aiPanelWasFiling = filePhase !== FILE_PHASES.IDLE;
 
   return (
     <div
@@ -246,8 +232,11 @@ export default function FixturesPage() {
               ? {
                   counter: `${selectedIndex + 1} / ${fixtures.length}`,
                   title: selectedFixture ? `${selectedFixture.homeTeam} v ${selectedFixture.awayTeam}` : '',
-                  canPrev: canSelectPrev,
-                  canNext: canSelectNext,
+                  // Navigation-interrupt fix: briefly block fixture-switching
+                  // while a filing sequence is in flight, rather than letting
+                  // it hard-cut an in-progress API call + animation.
+                  canPrev: canSelectPrev && !isFiling,
+                  canNext: canSelectNext && !isFiling,
                   onPrev: selectPrev,
                   onNext: selectNext,
                   status: statusPill,
@@ -277,15 +266,28 @@ export default function FixturesPage() {
               + floating card only ever cover this fixture's content, never
               the masthead/slotbar above it. */}
           <div className="relative hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
+            {/*
+              Layout-thrash fix: this outer div's own paddingRight toggles
+              instantly (no CSS transition) between 0 and RAIL_WIDTH_PX — as
+              a `flex-1`/`stretch` element its own outer rect never changes
+              size, so that's cheap. The *smoothing* comes from Framer
+              Motion's `layout` prop on the two children below, whose
+              available width genuinely narrows in response: `layout`
+              measures their rect once before/after the change and
+              transform-interpolates between the two (one reflow at each
+              end, zero per-frame reflows during the ~460ms transition,
+              unlike the old continuous `padding-right` CSS transition).
+            */}
             <div
               className="flex flex-1 min-h-0 flex-col"
-              style={{
-                paddingRight: railShown ? '366px' : '0px',
-                transition: 'padding-right .46s cubic-bezier(.4,0,.2,1)',
-              }}
+              style={{ paddingRight: railShown ? RAIL_WIDTH_PX : 0 }}
             >
               {/* Scrollable content */}
-              <div className="flex flex-1 min-h-0 flex-col overflow-y-auto px-6 py-2">
+              <motion.div
+                layout
+                transition={CONTENT_LAYOUT_TRANSITION}
+                className="flex flex-1 min-h-0 flex-col overflow-y-auto px-6 py-2"
+              >
                 <div
                   className={`mx-auto flex w-full max-w-[76rem] flex-col items-center ${
                     showEditor ? '' : 'my-auto'
@@ -307,16 +309,26 @@ export default function FixturesPage() {
                         deadlineLabel={deadlineFormatted}
                       />
 
-                      <div className="w-full" style={aiSlideStyleDesktop}>
+                      <motion.div
+                        className="w-full"
+                        initial={aiPanelWasFiling ? 'hidden' : false}
+                        animate="visible"
+                        variants={AI_PANEL_VARIANTS}
+                        transition={{ duration: 0.5, ease: 'easeOut', delay: AI_PANEL_DELAY_MS.desktop / 1000 }}
+                      >
                         <AiTeamReadPanel open={aiOpen} onToggle={() => setAiOpen((v) => !v)} />
-                      </div>
+                      </motion.div>
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Fixed Bottom Footer Dock (Button + Contained Reel Strip) */}
-              <div className="flex flex-none flex-col gap-2.5 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md">
+              <motion.div
+                layout
+                transition={CONTENT_LAYOUT_TRANSITION}
+                className="flex flex-none flex-col gap-2.5 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md"
+              >
                 <div className="w-full max-w-[76rem] mx-auto flex flex-col gap-2.5">
                   {showEditor && (
                     <div className="flex flex-col items-center justify-center">
@@ -324,7 +336,7 @@ export default function FixturesPage() {
                       <button
                         type="button"
                         onClick={handleSubmit}
-                        disabled={submitting || filePhase !== 'idle'}
+                        disabled={submitting || isFiling}
                         className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
                           isPredicted
                             ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
@@ -335,18 +347,19 @@ export default function FixturesPage() {
                       </button>
                     </div>
                   )}
-                  <FixtureReelStrip stations={stations} />
+                  <FixtureReelStrip stations={stations} locked={isFiling} />
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             <FloatingSlipCard
               fixture={selectedFixture}
-              prediction={filePhase !== 'idle' || previewVisible ? draft : restingPrediction}
-              ceiling={filePhase !== 'idle' || previewVisible ? liveCeiling : restingCeiling}
+              prediction={isFiling || previewVisible ? draft : restingPrediction}
+              ceiling={isFiling || previewVisible ? liveCeiling : restingCeiling}
               filed={isPredicted}
               phase={filePhase}
               visible={previewVisible}
+              isSlow={isSlow}
               gameweekLabel={gameweekLabel}
             />
           </div>
@@ -357,7 +370,7 @@ export default function FixturesPage() {
               <button
                 type="button"
                 onClick={selectPrev}
-                disabled={!canSelectPrev}
+                disabled={!canSelectPrev || isFiling}
                 aria-label="Previous fixture"
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
               >
@@ -374,7 +387,7 @@ export default function FixturesPage() {
               <button
                 type="button"
                 onClick={selectNext}
-                disabled={!canSelectNext}
+                disabled={!canSelectNext || isFiling}
                 aria-label="Next fixture"
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
               >
@@ -388,7 +401,7 @@ export default function FixturesPage() {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={submitting || filePhase !== 'idle'}
+                  disabled={submitting || isFiling}
                   className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-indigo-mid px-6 py-3 font-outfit text-sm font-semibold text-white shadow-lg disabled:opacity-60"
                 >
                   {buttonLabel} &rarr;
@@ -397,6 +410,13 @@ export default function FixturesPage() {
               </div>
             ) : (
               <div className="flex flex-col gap-4">
+                {/* Mobile intentionally has no FloatingSlipCard/backdrop
+                    ceremony at all (unchanged from the pre-rewrite
+                    behaviour) — it relies on the disabled "Filing…" submit
+                    button through `center`, then a plain switch to this
+                    resting view once filed, with only the AI panel's
+                    entrance animated. Preserved as-is; not in scope to add
+                    a new mobile overlay as part of this port. */}
                 <FixtureSlip
                   fixture={selectedFixture}
                   prediction={activePrediction}
@@ -407,9 +427,14 @@ export default function FixturesPage() {
                   gameweekLabel={gameweekLabel}
                   deadlineLabel={deadlineFormatted}
                 />
-                <div style={aiSlideStyleMobile}>
+                <motion.div
+                  initial={aiPanelWasFiling ? 'hidden' : false}
+                  animate="visible"
+                  variants={AI_PANEL_VARIANTS}
+                  transition={{ duration: 0.5, ease: 'easeOut', delay: AI_PANEL_DELAY_MS.mobile / 1000 }}
+                >
                   <AiTeamReadPanel open={aiOpen} onToggle={() => setAiOpen((v) => !v)} />
-                </div>
+                </motion.div>
               </div>
             )}
           </div>

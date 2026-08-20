@@ -401,18 +401,6 @@ select {
   }
 }
 
-/* AI-overview panel reveal on the fixture edit/reel view. */
-@keyframes slideFromBehind {
-  0% {
-    opacity: 0;
-    transform: translateY(-24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Leagues podium entrance, staggered per rank. */
 @keyframes podiumRise {
   from {

@@ -13,8 +13,15 @@ function formatDay(dateStr) {
  * "THE REEL" fixture-thumbnail strip along the bottom dock of the desktop editor
  * (Spine.dc.html desktop lines 664-679).
  * Contained in max-w-[76rem] matching the widened editor width.
+ *
+ * `locked` briefly disables station-switching while a prediction is
+ * actively being filed (phase !== 'idle') — the simplest, most robust fix
+ * for the navigation-interrupt bug: rather than trying to gracefully
+ * cancel/retarget an in-flight API call + optimistic-state update for a
+ * *different* fixture mid-animation, we just block navigation for the
+ * ~2.2s the ceremony takes.
  */
-export default function FixtureReelStrip({ stations }) {
+export default function FixtureReelStrip({ stations, locked = false }) {
   if (!stations.length) return null;
 
   const filedCount = stations.filter((s) => s.predicted).length;
@@ -49,7 +56,12 @@ export default function FixtureReelStrip({ stations }) {
               key={s.id}
               type="button"
               onClick={s.onSelect}
-              className={`flex min-w-0 flex-1 cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-2 font-outfit transition-all hover:border-[#2b4162] ${bgClass} ${borderClass}`}
+              disabled={locked}
+              aria-disabled={locked}
+              title={locked ? 'Finish filing this prediction before switching fixtures' : undefined}
+              className={`flex min-w-0 flex-1 flex-col gap-1 overflow-hidden rounded-lg border p-2 font-outfit transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                locked ? '' : 'cursor-pointer hover:border-[#2b4162]'
+              } ${bgClass} ${borderClass}`}
             >
               <span className="font-mono text-[0.625rem] tracking-wider" style={{ color: dayColor }}>
                 {formatDay(s.date)}

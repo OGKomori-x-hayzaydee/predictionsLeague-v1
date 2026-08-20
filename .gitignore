@@ -34,3 +34,4 @@ test
 *.sw?
 
 .md
+.gstack/
