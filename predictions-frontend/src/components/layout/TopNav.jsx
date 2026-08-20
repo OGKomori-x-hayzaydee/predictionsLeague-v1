@@ -37,7 +37,7 @@ export default function TopNav() {
         dim ? 'h-11 opacity-[0.42]' : 'h-14 opacity-100'
       }`}
     >
-      <div className="relative flex h-full items-center gap-[26px] px-[22px]">
+      <div className="flex h-full items-center gap-[26px] px-[22px]">
         <button
           onClick={() => navigate('/dashboard')}
           className="flex shrink-0 items-center gap-[9px]"
@@ -47,7 +47,14 @@ export default function TopNav() {
           <span className="font-dmSerif text-[15px] text-brand-teal-pale">predictionsLeague</span>
         </button>
 
-        <nav className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-[3px]">
+        {/*
+          Flex-centered (not absolute+translate-centered) so the nav shares
+          space with the logo and season/rank/avatar blocks instead of
+          ignoring their width — true viewport-centering caused this to
+          overlap the right-hand stats block at common desktop widths.
+          overflow-x-auto is a safety net if it ever still doesn't fit.
+        */}
+        <nav className="flex min-w-0 flex-1 items-center justify-center gap-[3px] overflow-x-auto">
           {NAV_ITEMS.map(({ id, label, path }) => (
             <NavLink
               key={id}
@@ -65,7 +72,7 @@ export default function TopNav() {
           ))}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-[18px]">
+        <div className="flex shrink-0 items-center gap-[18px]">
           {points !== null && (
             <div className="flex flex-col items-end leading-tight">
               <KickerLabel as="span" className="text-[9.5px] tracking-[0.12em] text-text-muted-4">

@@ -285,8 +285,12 @@ export default function FixturesPage() {
               }}
             >
               {/* Scrollable content */}
-              <div className="flex-1 min-h-0 overflow-y-auto px-6 py-2">
-                <div className="mx-auto flex w-full max-w-[76rem] flex-col items-center">
+              <div className="flex flex-1 min-h-0 flex-col overflow-y-auto px-6 py-2">
+                <div
+                  className={`mx-auto flex w-full max-w-[76rem] flex-col items-center ${
+                    showEditor ? '' : 'my-auto'
+                  }`}
+                >
                   {showEditor ? (
                     <FixtureEditor {...editorProps} />
                   ) : (
