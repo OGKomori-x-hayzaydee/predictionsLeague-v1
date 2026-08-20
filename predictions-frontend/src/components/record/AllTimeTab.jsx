@@ -67,7 +67,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
       <Card className="p-4">
         <div className="mb-2 flex items-baseline justify-between">
           <KickerLabel>Points per settled week</KickerLabel>
-          <span className="font-mono text-[10.5px] text-brand-teal">
+          <span className="font-outfit text-[10.5px] text-brand-teal">
             {trend.length ? `AVERAGE ${stats.avgPerWeek} A WEEK` : ''}
           </span>
         </div>
@@ -87,7 +87,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
                       <span className="font-dmSerif text-lg text-text-primary">{s.points}</span>
                       <span className="text-[11px] text-text-muted-3">{s.avgPerWeek} a week</span>
                     </span>
-                    <span className="font-mono text-[10px] text-text-muted-3">
+                    <span className="font-outfit text-[10px] text-text-muted-3">
                       {s.rank}
                       {s.rank === 1 ? 'st' : s.rank === 2 ? 'nd' : s.rank === 3 ? 'rd' : 'th'} of {s.totalTeams}
                     </span>
@@ -101,7 +101,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
                 </div>
               ))}
               <div className="mt-1 flex items-baseline justify-between border-t border-border-base pt-2">
-                <span className="font-mono text-[10px] tracking-wide text-text-muted-3">LIFETIME</span>
+                <span className="font-outfit text-[10px] tracking-wide text-text-muted-3">LIFETIME</span>
                 <span className="font-dmSerif text-xl text-brand-teal">
                   {demoSeasonHistory.reduce((t, s) => t + s.points, 0) + stats.seasonPoints} pts
                 </span>
@@ -118,7 +118,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
         <Card className="relative overflow-hidden p-4">
           <div className="mb-3 flex items-baseline justify-between">
             <KickerLabel>Rank trajectory</KickerLabel>
-            {hasMultiSeason && <span className="font-mono text-[10.5px] text-brand-indigo">4TH OF 12</span>}
+            {hasMultiSeason && <span className="font-outfit text-[10.5px] text-brand-indigo">4TH OF 12</span>}
           </div>
           {hasMultiSeason ? (
             <div className="flex flex-col gap-2">
@@ -150,7 +150,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
       <Card className="p-4">
         <div className="mb-3 flex items-baseline justify-between">
           <KickerLabel>Who you read well</KickerLabel>
-          <span className="font-mono text-[9.5px] text-text-muted-4">SHARE OF CALLS CORRECT</span>
+          <span className="font-outfit text-[9.5px] text-text-muted-4">SHARE OF CALLS CORRECT</span>
         </div>
         {teamAccuracy.length === 0 ? (
           <p className="text-sm text-text-muted-2">Not enough settled predictions yet.</p>
@@ -169,7 +169,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
                   title={`${t.team} · ${t.accuracy}% of ${t.predictions} calls`}
                 >
                   <TeamCrest team={t.team} size={20} />
-                  <span className="font-mono text-[10px]" style={{ color: strong ? 'var(--brand-teal)' : 'var(--text-muted-2)' }}>
+                  <span className="font-outfit text-[10px]" style={{ color: strong ? 'var(--brand-teal)' : 'var(--text-muted-2)' }}>
                     {t.accuracy}%
                   </span>
                 </div>

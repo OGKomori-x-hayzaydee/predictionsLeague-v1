@@ -7,7 +7,7 @@
 export default function GameweekRidge({ weeks, selected, onSelect }) {
   if (!weeks.length) {
     return (
-      <div className="flex h-[68px] items-center justify-center font-mono text-[11px] text-text-muted-3">
+      <div className="flex h-[68px] items-center justify-center font-outfit text-[11px] text-text-muted-3">
         No settled gameweeks yet
       </div>
     );
@@ -28,7 +28,7 @@ export default function GameweekRidge({ weeks, selected, onSelect }) {
               className="flex h-full flex-1 flex-col items-center justify-end gap-1"
             >
               <span
-                className="font-mono text-[9px]"
+                className="font-outfit text-[9px]"
                 style={{ color: on ? 'var(--brand-teal)' : 'var(--text-muted-4)' }}
               >
                 {w.points}
@@ -41,7 +41,7 @@ export default function GameweekRidge({ weeks, selected, onSelect }) {
                 }}
               />
               <span
-                className="h-[13px] font-mono text-[9px]"
+                className="h-[13px] font-outfit text-[9px]"
                 style={{ color: on ? 'var(--brand-teal)' : 'var(--text-muted-4)' }}
               >
                 {w.gameweek % 4 === 0 || on ? w.gameweek : ''}

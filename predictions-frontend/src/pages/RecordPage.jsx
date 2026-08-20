@@ -150,7 +150,7 @@ export default function RecordPage() {
         {hasRealHistory && (
           <button
             onClick={() => setPreviewMode((v) => !v)}
-            className={`mr-[22px] shrink-0 rounded-7 border px-2.5 py-1 font-mono text-[10px] tracking-wide transition-colors ${
+            className={`mr-[22px] shrink-0 rounded-7 border px-2.5 py-1 font-outfit text-[10px] tracking-wide transition-colors ${
               previewMode
                 ? 'border-brand-amber/50 text-brand-amber'
                 : 'border-border-card text-text-muted-3 hover:text-brand-teal'
@@ -194,12 +194,12 @@ export default function RecordPage() {
 
       {previewMode && (
         <div className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-9 border border-brand-amber/40 bg-[color-mix(in_srgb,var(--brand-amber)_10%,transparent)] px-4 py-2.5 md:mx-[26px]">
-          <span className="font-mono text-[10.5px] tracking-[0.1em] text-brand-amber">
+          <span className="font-outfit text-[10.5px] tracking-[0.1em] text-brand-amber">
             PREVIEW · Example data, not your real record
           </span>
           <button
             onClick={() => setPreviewMode(false)}
-            className="shrink-0 font-mono text-[10.5px] tracking-wide text-brand-amber underline decoration-dotted underline-offset-2 hover:text-brand-amber-mid"
+            className="shrink-0 font-outfit text-[10.5px] tracking-wide text-brand-amber underline decoration-dotted underline-offset-2 hover:text-brand-amber-mid"
           >
             Exit preview
           </button>
@@ -230,7 +230,7 @@ export default function RecordPage() {
             </Link>
             <button
               onClick={() => setPreviewMode(true)}
-              className="font-mono text-[11px] tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
+              className="font-outfit text-[11px] tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
             >
               Preview with example data →
             </button>
@@ -267,7 +267,7 @@ export default function RecordPage() {
               className="mt-4 flex w-full items-center justify-between rounded-md border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary md:hidden"
             >
               Hit rate, bands &amp; chip return
-              <span className="font-mono text-[11px] text-brand-teal">VIEW &rsaquo;</span>
+              <span className="font-outfit text-[11px] text-brand-teal">VIEW &rsaquo;</span>
             </button>
           </div>
 

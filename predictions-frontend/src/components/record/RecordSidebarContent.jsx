@@ -24,14 +24,14 @@ export default function RecordSidebarContent({ scopeLabel, scopeVal, scopeVerdic
           <span className="font-dmSerif text-4xl leading-none text-brand-teal">{scopeVal}</span>
           <span className="text-[13px] text-text-muted-2">pts</span>
         </span>
-        <span className="font-mono text-[11px] leading-relaxed text-text-muted-2">{scopeVerdict}</span>
+        <span className="font-outfit text-[11px] leading-relaxed text-text-muted-2">{scopeVerdict}</span>
         <div className="relative mt-0.5 h-1 overflow-hidden rounded-full bg-surface-card-4">
           <div
             className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid"
             style={{ width: `${Math.max(0, Math.min(100, scopePct))}%` }}
           />
         </div>
-        {scopeFoot && <span className="font-mono text-[10px] text-text-muted-4">{scopeFoot}</span>}
+        {scopeFoot && <span className="font-outfit text-[10px] text-text-muted-4">{scopeFoot}</span>}
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -45,7 +45,7 @@ export default function RecordSidebarContent({ scopeLabel, scopeVal, scopeVerdic
               <span className="flex h-[7px] flex-1 overflow-hidden rounded-full bg-surface-card-4">
                 <span className="h-full rounded-full" style={{ width: `${b.pct}%`, background: b.color }} />
               </span>
-              <span className="w-[24px] shrink-0 text-right font-mono text-[11px] text-text-muted-1">{b.n}</span>
+              <span className="w-[24px] shrink-0 text-right font-outfit text-[11px] text-text-muted-1">{b.n}</span>
             </span>
           ))
         )}
@@ -57,11 +57,11 @@ export default function RecordSidebarContent({ scopeLabel, scopeVal, scopeVerdic
         <KickerLabel className="tracking-[0.16em]">CHIP RETURN, {chipScope}</KickerLabel>
         {chipReturn.map((c) => (
           <span key={c.chipId} className="flex items-center gap-2.5">
-            <span className="w-5 shrink-0 font-mono text-[10px] text-text-muted-1">{CHIP_TAGS[c.chipId] || c.icon}</span>
+            <span className="w-5 shrink-0 font-outfit text-[10px] text-text-muted-1">{CHIP_TAGS[c.chipId] || c.icon}</span>
             <span className="flex-1 truncate text-[12.5px] text-text-tertiary">{c.name}</span>
-            <span className="font-mono text-[10px] text-text-muted-2">{c.usageCount ? `${c.usageCount} used` : 'unused'}</span>
+            <span className="font-outfit text-[10px] text-text-muted-2">{c.usageCount ? `${c.usageCount} used` : 'unused'}</span>
             <span
-              className="w-[38px] shrink-0 text-right font-mono text-[11.5px]"
+              className="w-[38px] shrink-0 text-right font-outfit text-[11.5px]"
               style={{ color: c.totalReturn > 0 ? 'var(--brand-teal)' : c.usageCount > 0 ? 'var(--text-tertiary)' : 'var(--text-muted-4)' }}
             >
               {c.usageCount ? (c.totalReturn >= 0 ? `+${c.totalReturn}` : c.totalReturn) : '—'}

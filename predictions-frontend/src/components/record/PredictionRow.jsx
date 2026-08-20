@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import TeamCrest from '../ui/TeamCrest';
 import { calculatePoints, getPointsBreakdown } from '../../utils/pointsCalculation';
 import { callVerdict } from '../../utils/recordStats';
+import { CHIP_CONFIG } from '../../utils/chipManager';
 
 const BREAKDOWN_LABELS = {
   perfectPrediction: 'Exact scoreline called, scorers matched',
@@ -106,14 +107,14 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
     >
       {/* Collapsed header — always visible, toggles expansion */}
       <button onClick={() => setExpanded((e) => !e)} className="flex w-full items-center gap-3 px-4 py-3 text-left">
-        <span className="w-11 shrink-0 font-mono text-[10px] tracking-wide text-text-muted-4">
+        <span className="w-11 shrink-0 font-outfit text-[10px] tracking-wide text-text-muted-4">
           GW{prediction.gameweek}
         </span>
 
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <TeamCrest team={prediction.homeTeam} size={20} />
           <span className="truncate text-[13px] text-text-secondary">{prediction.homeTeam}</span>
-          <span className="font-mono text-[11px] text-text-muted-5">v</span>
+          <span className="font-outfit text-[11px] text-text-muted-5">v</span>
           <span className="truncate text-[13px] text-text-secondary">{prediction.awayTeam}</span>
           <TeamCrest team={prediction.awayTeam} size={20} />
         </span>
@@ -123,7 +124,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             <span className="font-dmSerif text-[15px] text-text-tertiary">
               {prediction.homeScore}–{prediction.awayScore}
             </span>
-            <span className="font-mono text-[10px] text-text-muted-5">vs</span>
+            <span className="font-outfit text-[10px] text-text-muted-5">vs</span>
             <span
               className="font-dmSerif text-[15px]"
               style={{ color: isSettled ? (verdict?.exact ? 'var(--brand-teal)' : 'var(--text-tertiary)') : 'var(--brand-amber)' }}
@@ -144,7 +145,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
       </button>
 
       {expanded && (
-        <div className="border-t border-dashed" style={{ borderColor: theme.border }}>
+        <div className="relative border-t border-dashed" style={{ borderColor: theme.border }}>
           {/* Ticket body — "YOU CALLED" / "RESULT" halves with a faux-perforated notch on sm+ */}
           <div className="relative grid grid-cols-1 sm:grid-cols-2">
             <span
@@ -157,7 +158,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             />
 
             <div className="flex flex-col items-center gap-2 px-5 py-4 text-center">
-              <span className="font-mono text-[9px] tracking-[0.13em] text-text-muted-4">YOU CALLED</span>
+              <span className="font-outfit text-[9px] tracking-[0.13em] text-text-muted-4">YOU CALLED</span>
               <div className="flex items-center gap-3">
                 <TeamCrest team={prediction.homeTeam} size={30} />
                 <span className="font-dmSerif text-[26px] leading-none text-[color:var(--text-primary)]">
@@ -169,7 +170,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             </div>
 
             <div className="flex flex-col items-center gap-2 border-t border-dashed px-5 py-4 text-center sm:border-t-0 sm:border-l" style={{ borderColor: theme.border }}>
-              <span className="font-mono text-[9px] tracking-[0.13em] text-text-muted-4">RESULT</span>
+              <span className="font-outfit text-[9px] tracking-[0.13em] text-text-muted-4">RESULT</span>
               {isSettled ? (
                 <>
                   <div className="flex items-center gap-3">
@@ -192,37 +193,39 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
 
           {isSettled && breakdown && Object.keys(breakdown).length > 0 && (
             <div className="flex flex-col gap-1.5 border-t border-dashed px-5 py-3" style={{ borderColor: theme.border }}>
-              <span className="font-mono text-[9px] tracking-wide text-text-muted-3">HOW THIS SCORED</span>
+              <span className="font-outfit text-[9px] tracking-wide text-text-muted-3">HOW THIS SCORED</span>
               <div className="flex flex-col gap-1">
                 {Object.entries(breakdown).map(([key, val]) => (
                   <div key={key} className="flex items-baseline justify-between gap-3 text-[12px]">
                     <span className="text-text-secondary">{BREAKDOWN_LABELS[key] || key}</span>
-                    <span className="font-mono text-text-tertiary">{val}</span>
+                    <span className="font-outfit text-text-tertiary">{val}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Chip footer strip */}
+          {/* Chip footer strip — human-readable chip names (CHIP_CONFIG), not raw camelCase ids */}
           {chips.length > 0 && (
             <div
               className="flex flex-wrap items-center gap-1.5 border-t border-dashed px-5 py-2.5"
               style={{ borderColor: theme.border, background: 'color-mix(in srgb, var(--surface-app) 40%, transparent)' }}
             >
-              <span className="font-mono text-[9px] tracking-wide text-text-muted-4">CHIPS</span>
+              <span className="font-outfit text-[9px] tracking-wide text-text-muted-4">CHIPS</span>
               {chips.map((c) => (
-                <span key={c} className="rounded-full border border-border-card px-2 py-0.5 font-mono text-[9.5px] text-brand-amber">
-                  {c}
+                <span key={c} className="rounded-full border border-border-card px-2 py-0.5 font-outfit text-[10.5px] text-brand-amber">
+                  {CHIP_CONFIG[c]?.name || c}
                 </span>
               ))}
             </div>
           )}
 
-          {/* Verdict stamp, corner-anchored over the ticket body */}
+          {/* Verdict stamp — anchored to *this* wrapper (now `relative`,
+              see above), not the root card, so it no longer overlaps the
+              collapsed header's points pill/chevron. */}
           {isSettled && (
             <span
-              className="pointer-events-none absolute right-4 top-3 rotate-[-8deg] rounded-md border-[2.5px] px-2 py-[3px] font-mono text-[10px] font-bold tracking-wider"
+              className="pointer-events-none absolute right-4 top-3 rotate-[-8deg] rounded-md border-[2.5px] px-2 py-[3px] font-outfit text-[10px] font-bold tracking-wider"
               style={{ borderColor: verdict?.colorVar, color: verdict?.colorVar }}
             >
               {VERDICT_LABELS[verdict?.verdict] || verdict?.verdict}
@@ -233,7 +236,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             <button
               type="button"
               onClick={() => onViewFull(prediction)}
-              className="flex w-full items-center justify-center gap-1.5 border-t px-4 py-2.5 font-mono text-[9.5px] tracking-[0.14em] text-text-muted-1 transition-colors hover:bg-surface-card-4 hover:text-brand-teal"
+              className="flex w-full items-center justify-center gap-1.5 border-t px-4 py-2.5 font-outfit text-[9.5px] tracking-[0.14em] text-text-muted-1 transition-colors hover:bg-black/15 hover:text-brand-teal focus-visible:bg-black/15 focus-visible:text-brand-teal focus-visible:outline-none"
               style={{ borderColor: theme.border }}
             >
               FULL PREDICTION <span aria-hidden="true">&rarr;</span>
