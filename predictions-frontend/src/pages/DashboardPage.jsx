@@ -115,8 +115,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Fixture preview card */}
-          <div className="mt-5 mb-[22px] w-full">
+          {/* Fixture preview card — fluid responsive width with subtle breathing room */}
+          <div className="mt-5 mb-6 w-[94%] mx-auto">
             <FixturePreviewCard
               fixture={selectedFixture}
               ceiling={selectedCeiling}
