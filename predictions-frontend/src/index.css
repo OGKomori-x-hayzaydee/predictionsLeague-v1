@@ -306,9 +306,24 @@ select {
   Plex Mono. Kept as its own rule (rather than deleting the className
   usages) so this is a single point of control instead of a sprawling
   find-and-replace across dozens of files.
+
+  Letter-spacing is capped here too: almost every `font-mono` usage pairs
+  it with a `tracking-*` utility (0.1em-0.16em is typical) that was tuned
+  for IBM Plex Mono's fixed-width grid, where uniform letter-spacing reads
+  as an even, rhythmic technical label. Outfit is proportional — the same
+  spacing value now lands unevenly between differently-shaped/differently-
+  wide characters, which reads as "still looks like a spaced-out mono
+  font" rather than clean Outfit (reported directly against real UI:
+  scorer-name pills, the fixtures reel counter/FILED pill, chip-name
+  badges). Overriding to a much smaller fixed value here — rather than
+  hand-editing every `tracking-*` class across ~50 files — keeps a
+  slightly tracked-out "label" feel for genuine kicker/status text
+  (SEASON, RANK, FILED, GAMEWEEK) without the uneven, over-spaced look on
+  the same class's other uses (people's names, chip names, sentences).
 */
 .font-mono {
   font-family: "Outfit", sans-serif !important;
+  letter-spacing: 0.02em !important;
 }
 
 @keyframes riseIn {
