@@ -1,6 +1,5 @@
 package com.komori.predictions.exception;
 
-import com.komori.predictions.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,8 +18,6 @@ import java.util.Map;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
-    private final EmailService emailService;
-
     @ExceptionHandler(AccountNotVerifiedException.class)
     public ResponseEntity<?> handleAccountNotVerified() {
         return buildResponse(HttpStatus.BAD_REQUEST, "Account not verified");
@@ -94,7 +91,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         log.error("Unexpected error occurred: {}", e.getMessage());
-        emailService.sendErrorEmail(e);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
     }
 

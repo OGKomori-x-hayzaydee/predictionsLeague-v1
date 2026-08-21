@@ -59,11 +59,11 @@ public class FixtureSchedulerService {
     }
 
     private List<Fixture> getFixturesForTheDay() {
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
+        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         while (fixtures == null) {
             log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
             apiService.updateFixtures();
-            fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
+            fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         }
 
         ZoneId zoneId = ZoneId.of("UTC");
@@ -81,10 +81,13 @@ public class FixtureSchedulerService {
             Map<Long, GameStatusAndScore> statusMap = apiService.getGamesStatus();
             if (statusMap.get(fixture.getId()).getGameStatus() == GameStatus.LIVE) {
                 log.info("{} vs {} is now live!", fixture.getHomeTeam(), fixture.getAwayTeam());
-                startGoalPolling(fixture);
 
                 ScheduledFuture<?> future = activePollers.remove(fixture.getId());
-                if (future != null) future.cancel(false);
+                if (future != null) {
+                    future.cancel(false);
+                }
+
+                startGoalPolling(fixture);
             }
         }, 0, 2, TimeUnit.MINUTES);
 
@@ -98,10 +101,10 @@ public class FixtureSchedulerService {
         }
 
         log.info("Starting goal polling for fixture {} vs {}", fixture.getHomeTeam(), fixture.getAwayTeam());
-        final ScheduledFuture<?>[] pollingTask = new ScheduledFuture<?>[1];
 
-        pollingTask[0] = scheduledExecutorService.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> pollingTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
             GameStatusAndScore gameStatusAndScore = apiService.getGamesStatus().get(fixture.getId());
+
             if (gameStatusAndScore.getGameStatus() == GameStatus.FINISHED) {
                 // Retrieve goalscorers
                 log.info("Retrieving goalscorers...");
@@ -126,16 +129,22 @@ public class FixtureSchedulerService {
 
                 // End the scheduler
                 log.info("Ending scheduler for fixture {}", fixture.getId());
-                pollingTask[0].cancel(false);
+
+                ScheduledFuture<?> future = activePollers.remove(fixture.getId());
+                if (future != null) {
+                    future.cancel(false);
+                }
             }
             else if (gameStatusAndScore.getGameStatus() == GameStatus.LIVE) {
                 updateFixtureInRedis(fixture, gameStatusAndScore);
             }
         }, 0, 5, TimeUnit.MINUTES);
+
+        activePollers.put(fixture.getId(), pollingTask);
     }
 
     private void updateFixtureInRedis(Fixture fixture, GameStatusAndScore gameStatusAndScore) {
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
+        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         if (fixtures == null) {
             log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
             apiService.updateFixtures();
@@ -169,12 +178,12 @@ public class FixtureSchedulerService {
                 .awayScorers(scorers.awayScorers())
                 .venue(fixture.getVenue())
                 .build();
-       return matchRepository.saveAndFlush(matchEntity);
+        return matchRepository.saveAndFlush(matchEntity);
     }
 
     private void incrementMatchdayIfLastFixture(Fixture fixture) {
         log.info("Checking current Matchday incrementing...");
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures",0,-1);
+        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
         if (fixtures == null) {
             log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
             apiService.updateFixtures();

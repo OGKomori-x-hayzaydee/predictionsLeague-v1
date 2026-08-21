@@ -11,12 +11,9 @@ import brevoModel.SendSmtpEmailTo;
 import com.komori.predictions.dto.request.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,38 +118,6 @@ public class EmailService {
 """.formatted(name);
 
         sendEmail("✅ Your password has been changed", htmlContent, List.of(new EmailRequest.NameAndEmail(name, toEmail)));
-    }
-
-    public void sendErrorEmail(Exception e) {
-        String subject = "Predictions League Server Error";
-        StringWriter stringWriter = new StringWriter();
-        e.printStackTrace(new PrintWriter(stringWriter));
-        String content = getContent(stringWriter);
-
-        sendEmail(subject, content, List.of(
-                new EmailRequest.NameAndEmail("Tega", "majorogkomori@gmail.com"),
-                new EmailRequest.NameAndEmail("Divine", "hayzaydeee@gmail.com")
-        ));
-    }
-
-    @NotNull
-    private static String getContent(StringWriter stringWriter) {
-        String stackTrace = stringWriter.toString();
-
-        return """
-        <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-            <p>Hello developer of the Predictions League!</p>
-        
-            <p>An error has occurred in your backend that needs to be addressed <b style="color: #db1d1d;">immediately</b>:</p>
-        
-            <p>%s</p>
-        
-            <p>Regards,<br>
-            Tega from the Predictions Team</p>
-          </body>
-        </html>
-        """.formatted(stackTrace);
     }
 
     private void sendEmail(String subject, String htmlContent, List<EmailRequest.NameAndEmail> nameAndEmails) {

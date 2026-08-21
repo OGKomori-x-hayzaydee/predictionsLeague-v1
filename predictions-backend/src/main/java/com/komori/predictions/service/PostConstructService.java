@@ -16,6 +16,8 @@ public class PostConstructService {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void updateUpcomingFixturesDaily() {
+        log.info("Checking that players are in database...");
+        apiService.loadPlayersIntoDatabase();
         log.info("Updating fixtures...");
         apiService.updateFixtures();
         log.info("Scheduling matches for the day...");

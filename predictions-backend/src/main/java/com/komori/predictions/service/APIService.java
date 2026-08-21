@@ -153,6 +153,12 @@ public class APIService {
 
     @Transactional
     public void loadPlayersIntoDatabase() {
+        if (playerRepository.count() != 0) {
+            return;
+        }
+
+        log.info("Players not found. Loading them in...");
+
         ResponseEntity<Squad> responseEntity = restTemplate.exchange(
                 squadListBaseUrl,
                 HttpMethod.GET,
