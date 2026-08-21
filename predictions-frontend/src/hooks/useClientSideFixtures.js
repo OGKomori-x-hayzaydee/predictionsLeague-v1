@@ -3,6 +3,7 @@
  * Combines external fixtures with user predictions client-side
  */
 
+import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useExternalFixtures } from './useExternalFixtures';
 import { clientSideDataService } from '../utils/clientSideDataMerging';
@@ -14,6 +15,69 @@ const HYBRID_QUERY_KEYS = {
   USER_PREDICTIONS: 'user-predictions',
   PREDICTION_STATUS: 'prediction-status'
 };
+
+const EMPTY_STATS = {
+  total: 0,
+  predicted: 0,
+  unpredicted: 0,
+  predictionRate: 0,
+  byCompetition: {},
+  byStatus: {}
+};
+
+const EMPTY_VALIDATION = {
+  validFixtures: 0,
+  invalidFixtures: 0,
+  fixtureErrors: [],
+  predictionErrors: [],
+  warnings: []
+};
+
+function mergeHybridFixtures(externalFixtures, predictions, { includeUnpredicted, sortByDate, filters }) {
+  if (!externalFixtures.length) {
+    return {
+      fixtures: [],
+      stats: EMPTY_STATS,
+      validation: EMPTY_VALIDATION,
+      meta: {
+        totalFixtures: 0,
+        predictedFixtures: 0,
+        predictionRate: 0,
+        processedAt: new Date().toISOString(),
+        dataQuality: 1,
+        isEmpty: true
+      }
+    };
+  }
+
+  let fixtures = clientSideDataService.dataMerging.mergeFixturesWithPredictions(
+    externalFixtures,
+    predictions,
+    { includeUnpredicted, sortByDate }
+  );
+
+  if (filters && Object.keys(filters).length > 0) {
+    fixtures = clientSideDataService.dataMerging.filterMergedFixtures(fixtures, filters);
+  }
+
+  const stats = clientSideDataService.dataMerging.calculatePredictionStats(fixtures);
+  const validation = clientSideDataService.dataValidation.validateMergedFixtures(fixtures);
+
+  return {
+    fixtures,
+    stats,
+    validation,
+    meta: {
+      totalFixtures: fixtures.length,
+      predictedFixtures: stats.predicted,
+      predictionRate: stats.predictionRate,
+      processedAt: new Date().toISOString(),
+      dataQuality: validation.totalFixtures
+        ? validation.validFixtures / validation.totalFixtures
+        : 1
+    }
+  };
+}
 
 /**
  * Hook for user predictions data
@@ -86,107 +150,33 @@ export const useClientSideFixtures = (options = {}) => {
     enabled
   });
 
-  // Combine the data using React Query
-  const hybridQuery = useQuery({
-    queryKey: [
-      HYBRID_QUERY_KEYS.HYBRID_FIXTURES, 
-      { filters }
-    ],
-    queryFn: async () => {
-      console.log('🔍 useClientSideFixtures - externalData:', externalData);
-      console.log('🔍 useClientSideFixtures - externalData?.fixtures:', externalData?.fixtures);
-      console.log('🔍 useClientSideFixtures - externalData?.fixtures?.length:', externalData?.fixtures?.length);
-      
-      const externalFixtures = externalData?.fixtures || [];
-      const predictions = userPredictions || [];
-      
-      console.log('📊 Processing:', { 
-        externalFixturesCount: externalFixtures.length, 
-        predictionsCount: predictions.length 
-      });
+  const filterKey = JSON.stringify(filters);
+  const merged = useMemo(() => {
+    if (userPredictions === undefined) return null;
+    return mergeHybridFixtures(
+      externalData?.fixtures || [],
+      userPredictions || [],
+      { includeUnpredicted, sortByDate, filters }
+    );
+  }, [externalData, userPredictions, includeUnpredicted, sortByDate, filterKey]);
 
-      // Handle empty external fixtures case
-      if (externalFixtures.length === 0) {
-        console.log('No external fixtures available, returning empty state');
-        return {
-          success: true,
-          data: {
-            fixtures: [],
-            stats: {
-              total: 0,
-              predicted: 0,
-              unpredicted: 0,
-              predictionRate: 0,
-              byCompetition: {},
-              byStatus: {}
-            },
-            validation: { validFixtures: 0, invalidFixtures: 0, fixtureErrors: [], predictionErrors: [], warnings: [] },
-            meta: {
-              totalFixtures: 0,
-              predictedFixtures: 0,
-              predictionRate: 0,
-              processedAt: new Date().toISOString(),
-              dataQuality: 1,
-              isEmpty: true
-            }
-          }
-        };
-      }
-
-      // Process the merged data
-      const result = await clientSideDataService.processMergedData(
-        externalFixtures,
-        predictions,
-        { includeUnpredicted, sortByDate }
-      );
-
-      // Apply additional filters if provided
-      if (Object.keys(filters).length > 0) {
-        const filteredFixtures = clientSideDataService.dataMerging.filterMergedFixtures(
-          result.data.fixtures,
-          filters
-        );
-
-        result.data.fixtures = filteredFixtures;
-        result.data.stats = clientSideDataService.dataMerging.calculatePredictionStats(filteredFixtures);
-        result.data.meta.totalFixtures = filteredFixtures.length;
-      }
-
-      return result;
-    },
-    enabled: enabled && !externalLoading && userPredictions !== undefined,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
-    refetchOnWindowFocus: false
-  });
-
-  // Determine loading state
-  const isLoading = externalLoading || predictionsLoading || hybridQuery.isLoading;
-  
-  // Determine error state
+  const isLoading = externalLoading || predictionsLoading || (enabled && merged === null);
   const hasError = externalIsError && !fallbackToSample;
-  const error = hasError ? externalError : hybridQuery.error;
+  const error = hasError ? externalError : null;
 
-  // Extract data
-  const data = hybridQuery.data?.success ? hybridQuery.data.data : null;
-  const fixtures = data?.fixtures || [];
-  const stats = data?.stats || null;
-  const validation = data?.validation || null;
-  const meta = data?.meta || null;
+  const fixtures = merged?.fixtures || [];
+  const stats = merged?.stats || null;
+  const validation = merged?.validation || null;
+  const meta = merged?.meta || null;
 
   return {
-    // Data
     fixtures,
     stats,
     validation,
     meta,
-    
-    // State
     isLoading,
-    isError: hasError || hybridQuery.isError,
+    isError: hasError,
     error,
-    
-    // Data quality indicators
     dataQuality: {
       externalAPIAvailable: !externalIsError,
       predictionsAPIAvailable: !predictionsError,
@@ -196,12 +186,10 @@ export const useClientSideFixtures = (options = {}) => {
       predictionRate: stats?.predictionRate || 0,
       validationScore: validation?.validFixtures / Math.max(validation?.totalFixtures, 1) || 0
     },
-    
-    // Raw data for debugging
     rawData: {
       external: externalData,
       predictions: userPredictions,
-      hybrid: hybridQuery.data
+      hybrid: merged
     }
   };
 };
@@ -296,21 +284,21 @@ export const useHybridFixturesUtils = () => {
   const queryClient = useQueryClient();
 
   const invalidateAllHybridData = () => {
-    queryClient.invalidateQueries([HYBRID_QUERY_KEYS.HYBRID_FIXTURES]);
-    queryClient.invalidateQueries([HYBRID_QUERY_KEYS.USER_PREDICTIONS]);
+    queryClient.invalidateQueries({ queryKey: [HYBRID_QUERY_KEYS.USER_PREDICTIONS] });
   };
 
   const invalidateUserPredictions = () => {
-    queryClient.invalidateQueries([HYBRID_QUERY_KEYS.USER_PREDICTIONS]);
+    queryClient.invalidateQueries({ queryKey: [HYBRID_QUERY_KEYS.USER_PREDICTIONS] });
   };
 
   const refreshHybridData = () => {
-    queryClient.refetchQueries([HYBRID_QUERY_KEYS.HYBRID_FIXTURES]);
+    queryClient.invalidateQueries({ queryKey: [HYBRID_QUERY_KEYS.USER_PREDICTIONS] });
+    queryClient.invalidateQueries({ queryKey: ['external-fixtures'] });
   };
 
   const clearHybridCache = () => {
-    queryClient.removeQueries([HYBRID_QUERY_KEYS.HYBRID_FIXTURES]);
-    queryClient.removeQueries([HYBRID_QUERY_KEYS.USER_PREDICTIONS]);
+    queryClient.removeQueries({ queryKey: [HYBRID_QUERY_KEYS.USER_PREDICTIONS] });
+    queryClient.removeQueries({ queryKey: ['external-fixtures'] });
   };
 
   const preloadHybridFixtures = async (options = {}) => {

@@ -1,4 +1,5 @@
 import { CHIP_HUES, DEFAULT_CHIP_HUE, chipStatusLabel } from './chipHues';
+import { hasSeasonCap } from '../../utils/chipStatus';
 
 const SEASON_END_GW = 38;
 
@@ -11,7 +12,7 @@ const SEASON_END_GW = 38;
  */
 export default function AllowanceRail({ availableChips, currentGameweek, open, onToggle }) {
   const weeksLeft = Math.max(SEASON_END_GW - currentGameweek, 0);
-  const withAllowance = availableChips.filter((c) => c.available || (c.remainingUses ?? 1) > 0);
+  const withAllowance = availableChips.filter((c) => c.available || (hasSeasonCap(c) && (c.remainingUses ?? 0) > 0) || !hasSeasonCap(c));
 
   if (!open) {
     return (
@@ -43,7 +44,7 @@ export default function AllowanceRail({ availableChips, currentGameweek, open, o
                   {status.text}
                 </span>
               </div>
-              {chip.seasonLimit != null ? (
+              {hasSeasonCap(chip) ? (
                 <span className="flex gap-[3px]">
                   {Array.from({ length: chip.seasonLimit }).map((_, i) => (
                     <span

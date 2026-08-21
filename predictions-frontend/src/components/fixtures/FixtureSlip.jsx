@@ -28,7 +28,7 @@ export default function FixtureSlip({
   // RESTING / MAIN VIEW (Picture 3 - when fixture is filed and resting in center)
   if (variant === 'resting' || variant === 'main') {
     return (
-      <div className="relative flex w-full max-w-2xl flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-6 shadow-2xl">
+      <div className="relative flex w-full max-w-[46.2rem] flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[1.65rem] shadow-2xl">
         {/* Top line */}
         <div className="flex items-baseline justify-between gap-2.5">
           <span className="font-outfit text-xs tracking-wider text-[#66748c]">
@@ -41,7 +41,7 @@ export default function FixtureSlip({
 
         {/* Headline + FILED stamp */}
         <div className="relative pr-20">
-          <h2 className="m-0 font-dmSerif text-3xl md:text-4xl leading-tight text-white" style={{ textWrap: 'pretty' }}>
+          <h2 className="m-0 font-dmSerif text-[2.0625rem] md:text-[2.475rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
             {headline}
           </h2>
           <span className="absolute right-0 top-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3.5 py-1 font-outfit text-sm font-bold tracking-wider text-[#5eead4]">
@@ -51,11 +51,11 @@ export default function FixtureSlip({
 
         {/* Crests + Scores */}
         <div className="flex items-center justify-center gap-4 py-2">
-          <TeamCrest team={homeTeam} size={40} />
-          <span className="font-dmSerif text-5xl md:text-6xl leading-none text-white">
+          <TeamCrest team={homeTeam} size={44} />
+          <span className="font-dmSerif text-[3.3rem] md:text-[4.125rem] leading-none text-white">
             {homeScore}–{awayScore}
           </span>
-          <TeamCrest team={awayTeam} size={40} />
+          <TeamCrest team={awayTeam} size={44} />
         </div>
 
         <div className="h-px bg-[#16203a]" />
@@ -90,7 +90,7 @@ export default function FixtureSlip({
 
           <div className="ml-auto flex flex-col items-end leading-none">
             <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">CEILING</span>
-            <span className="font-dmSerif text-3xl text-[#fcd34d]">{ceiling}</span>
+            <span className="font-dmSerif text-[2.0625rem] text-[#fcd34d]">{ceiling}</span>
           </div>
 
           {onEdit && (

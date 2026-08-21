@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import KickerLabel from '../ui/KickerLabel';
 import { useChips } from '../../hooks/useChips';
 import { CHIP_HUES, DEFAULT_CHIP_HUE, CHIP_BADGES } from './chipHues';
+import { hasSeasonCap } from '../../utils/chipStatus';
 
 /**
  * Real "left" label derived from the backend's own chip-status fields
@@ -13,8 +14,8 @@ function chipLeftLabel(chip) {
     if (chip.remainingGameweeks > 0) return `${chip.remainingGameweeks}gw cooldown`;
     return chip.reason || 'Unavailable';
   }
-  if (typeof chip.seasonLimit === 'number') {
-    const left = Math.max(chip.seasonLimit - (chip.usageCount ?? 0), 0);
+  if (hasSeasonCap(chip)) {
+    const left = chip.remainingUses ?? Math.max(chip.seasonLimit - (chip.usageCount ?? 0), 0);
     return `${left} left`;
   }
   return 'Available';

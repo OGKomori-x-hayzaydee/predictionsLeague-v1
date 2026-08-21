@@ -4,6 +4,7 @@ import KickerLabel from '../ui/KickerLabel';
 import LoadingState from '../common/LoadingState';
 import { computeChipAlmanac } from '../../utils/profileStats';
 import { CHIP_CONFIG } from '../../utils/chipManager';
+import { hasSeasonCap } from '../../utils/chipStatus';
 import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE } from './chipHues';
 import {
   CHIP_ALMANAC_COPY,
@@ -32,7 +33,7 @@ function bestWorstWeek(log) {
 
 function usedLabel(chip, allowance) {
   if (allowance != null) return `${chip.usageCount} of ${allowance}`;
-  if (chip.seasonLimit != null) return `${chip.usageCount} of ${chip.seasonLimit}`;
+  if (hasSeasonCap(chip)) return `${chip.usageCount} of ${chip.seasonLimit}`;
   return `${chip.usageCount} used`;
 }
 

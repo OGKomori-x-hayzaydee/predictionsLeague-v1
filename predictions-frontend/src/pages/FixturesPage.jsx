@@ -14,6 +14,9 @@ import { useNextMatch } from '../hooks/useNextMatch';
 import { useChipManagement } from '../context/ChipManagementContext';
 import useFilingSequence from '../hooks/useFilingSequence';
 import userPredictionsAPI from '../services/api/userPredictionsAPI';
+import { HYBRID_QUERY_KEYS } from '../hooks/useClientSideFixtures';
+import { CHIP_QUERY_KEYS } from '../hooks/useChips';
+import { extractMatchId, transformChipsFromBackend } from '../utils/backendMappings';
 import { calculateCeilingPoints } from '../utils/pointsCalculation';
 import {
   FILE_PHASES,
@@ -34,6 +37,41 @@ function formatKickoff(dateStr) {
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
 
+function chipsFromDraft(draft) {
+  return draft?.chip ? [draft.chip] : [];
+}
+
+function draftAsFiledPrediction(draft, fixture) {
+  const chips = chipsFromDraft(draft);
+  return {
+    matchId: extractMatchId(fixture) ?? fixture.id,
+    homeScore: draft.homeScore,
+    awayScore: draft.awayScore,
+    homeScorers: (draft.homeScorers || []).filter(Boolean),
+    awayScorers: (draft.awayScorers || []).filter(Boolean),
+    chips,
+    homeTeam: fixture.homeTeam,
+    awayTeam: fixture.awayTeam,
+    date: fixture.date,
+    matchDate: fixture.date,
+    status: 'pending',
+  };
+}
+
+function upsertUserPredictionCache(queryClient, prediction) {
+  queryClient.setQueryData([HYBRID_QUERY_KEYS.USER_PREDICTIONS, 'upcoming'], (prev) => {
+    const list = Array.isArray(prev) ? prev : [];
+    const matchId = Number(prediction.matchId);
+    const idx = list.findIndex((p) => Number(p.matchId) === matchId || (prediction.id && p.id === prediction.id));
+    if (idx >= 0) {
+      const next = [...list];
+      next[idx] = { ...next[idx], ...prediction };
+      return next;
+    }
+    return [...list, prediction];
+  });
+}
+
 /**
  * Fixtures Page — desktop editor with a corner-anchored live-preview slip
  * that morphs in place into the "FILED" ceremony (see FloatingSlipCard),
@@ -44,8 +82,7 @@ const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: 
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
-  const { getMatchChips } = useChipManagement();
-  const matchChips = getMatchChips();
+  const { availableChips } = useChipManagement();
 
   const {
     fixtures,
@@ -121,15 +158,19 @@ export default function FixturesPage() {
     awayScore: draft.awayScore,
     homeScorers: draft.homeScorers,
     awayScorers: draft.awayScorers,
-    chips: draft.chip ? [draft.chip] : [],
+    chips: chipsFromDraft(draft),
   });
 
   const restingPrediction = hasOptimisticFiling
     ? optimisticFiled.prediction
     : selectedFixture?.userPrediction;
-  const restingCeiling = restingPrediction ? calculateCeilingPoints(restingPrediction) : 0;
+  const restingCeiling = restingPrediction ? calculateCeilingPoints({
+    ...restingPrediction,
+    chips: restingPrediction.chips || chipsFromDraft(restingPrediction),
+  }) : 0;
 
-  const activePrediction = filedNow ? restingPrediction : draft;
+  const livePrediction = { ...draft, chips: chipsFromDraft(draft) };
+  const activePrediction = filedNow ? restingPrediction : livePrediction;
   const activeCeiling = filedNow ? restingCeiling : liveCeiling;
 
   // Drives the corner live-preview card: shown once there's something to
@@ -157,20 +198,20 @@ export default function FixturesPage() {
               awayScore: draft.awayScore,
               homeScorers: (draft.homeScorers || []).filter(Boolean),
               awayScorers: (draft.awayScorers || []).filter(Boolean),
-              chips: draft.chip ? [draft.chip] : [],
+              chips: chipsFromDraft(draft),
             },
             selectedFixture,
             !!selectedFixture.predicted
           ),
         {
-          // Runs synchronously right before the hook flips phase -> "stamp",
-          // so the resting-slip branch mounts in the same tick the stamp
-          // appears (its AI panel's mount-relative delay then lands exactly
-          // right — see AI_PANEL_DELAY_MS).
           onFiled: () => {
-            queryClient.invalidateQueries({ queryKey: ['user-predictions'] });
-            queryClient.invalidateQueries({ queryKey: ['hybrid-fixtures'] });
-            setOptimisticFiled({ id: selectedFixture.id, prediction: { ...draft } });
+            const filed = draftAsFiledPrediction(draft, selectedFixture);
+            upsertUserPredictionCache(queryClient, filed);
+            queryClient.invalidateQueries({ queryKey: [CHIP_QUERY_KEYS.STATUS] });
+            setOptimisticFiled({
+              id: selectedFixture.id,
+              prediction: { ...draft, chips: filed.chips },
+            });
           },
         }
       );
@@ -178,6 +219,16 @@ export default function FixturesPage() {
       if (!result?.success) {
         setEditorOpen(true);
         setSubmitError(result?.error?.message || 'Could not file this prediction.');
+      } else if (result.data) {
+        const filed = draftAsFiledPrediction(draft, selectedFixture);
+        const fromApi = result.data;
+        upsertUserPredictionCache(queryClient, {
+          ...filed,
+          ...fromApi,
+          chips: Array.isArray(fromApi.chips)
+            ? transformChipsFromBackend(fromApi.chips)
+            : filed.chips,
+        });
       }
     } catch (err) {
       setEditorOpen(true);
@@ -201,7 +252,7 @@ export default function FixturesPage() {
     onChangeHomeScorers: (v) => setDraft((d) => ({ ...d, homeScorers: v })),
     onChangeAwayScorers: (v) => setDraft((d) => ({ ...d, awayScorers: v })),
     onChangeChip: (v) => setDraft((d) => ({ ...d, chip: v })),
-    matchChips,
+    matchChips: availableChips,
     aiOpen,
     onToggleAi: () => setAiOpen((v) => !v),
   };
@@ -301,7 +352,7 @@ export default function FixturesPage() {
                     <FixtureEditor {...editorProps} />
                   ) : (
                     /* Resting Filed State */
-                    <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 py-2">
+                    <div className="mx-auto flex w-full max-w-[46.2rem] flex-col items-center gap-4 py-2">
                       <FixtureSlip
                         fixture={selectedFixture}
                         prediction={activePrediction}
@@ -358,7 +409,7 @@ export default function FixturesPage() {
 
             <FloatingSlipCard
               fixture={selectedFixture}
-              prediction={isFiling || previewVisible ? draft : restingPrediction}
+              prediction={isFiling || previewVisible ? livePrediction : restingPrediction}
               ceiling={isFiling || previewVisible ? liveCeiling : restingCeiling}
               filed={isPredicted}
               phase={filePhase}

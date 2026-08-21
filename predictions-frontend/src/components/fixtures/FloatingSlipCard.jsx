@@ -137,7 +137,7 @@ export default function FloatingSlipCard({
       />
 
       <motion.div
-        className="absolute right-6 top-5 z-50 w-[380px] max-w-[90vw]"
+        className="absolute right-6 top-5 z-50 w-[418px] max-w-[90vw]"
         initial={false}
         animate={getCardTarget(phase, shown, centerOffset)}
         transition={cardTransition}
@@ -145,7 +145,7 @@ export default function FloatingSlipCard({
       >
         <div
           ref={cardRef}
-          className={`relative flex flex-col gap-3 overflow-hidden rounded-2xl border bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[17px] pb-[19px] shadow-2xl transition-colors duration-500 ${
+          className={`relative flex flex-col gap-3 overflow-hidden rounded-2xl border bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[19px] pb-[21px] shadow-2xl transition-colors duration-500 ${
             showSlowHint ? 'ring-2 ring-[#fcd34d40] animate-pulse' : ''
           }`}
           style={{ borderColor: filed ? '#14b8a666' : '#22304a' }}
@@ -180,11 +180,11 @@ export default function FloatingSlipCard({
               </div>
 
               <div className="flex items-center justify-center gap-3.5 py-1">
-                <TeamCrest team={homeTeam} size={28} />
-                <span className="font-dmSerif text-4xl leading-none text-white">{homeScore}</span>
-                <span className="font-dmSerif text-lg text-[#2c3a53]">–</span>
-                <span className="font-dmSerif text-4xl leading-none text-white">{awayScore}</span>
-                <TeamCrest team={awayTeam} size={28} />
+                <TeamCrest team={homeTeam} size={31} />
+                <span className="font-dmSerif text-[2.75rem] leading-none text-white">{homeScore}</span>
+                <span className="font-dmSerif text-[1.2375rem] text-[#2c3a53]">–</span>
+                <span className="font-dmSerif text-[2.75rem] leading-none text-white">{awayScore}</span>
+                <TeamCrest team={awayTeam} size={31} />
               </div>
 
               <p className="m-0 pr-20 font-outfit text-xs leading-relaxed text-[#c8d2e0]" style={{ textWrap: 'pretty' }}>
@@ -206,7 +206,7 @@ export default function FloatingSlipCard({
 
               <div className="flex items-end justify-between">
                 <span className="text-xs text-[#8fa0b8]">If it lands exactly</span>
-                <span className="font-dmSerif text-3xl leading-none text-[#fcd34d]">{ceiling}</span>
+                <span className="font-dmSerif text-[2.0625rem] leading-none text-[#fcd34d]">{ceiling}</span>
               </div>
 
               <span className="font-outfit text-2xs leading-relaxed text-[#4f5b70]">
@@ -223,7 +223,7 @@ export default function FloatingSlipCard({
                   </span>
                   <span className="font-outfit text-2xs tracking-wide text-[#5eead4]">FILED</span>
                 </div>
-                <h2 className="m-0 mt-2.5 mr-[70px] font-dmSerif text-2xl leading-tight text-white" style={{ textWrap: 'pretty' }}>
+                <h2 className="m-0 mt-2.5 mr-[70px] font-dmSerif text-[1.65rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
                   {headline}
                 </h2>
                 {/* Decorative-only bounce — kept as a plain CSS keyframe
@@ -238,11 +238,11 @@ export default function FloatingSlipCard({
               </div>
 
               <div className="mt-1.5 flex items-center justify-center gap-3.5">
-                <TeamCrest team={homeTeam} size={28} />
-                <span className="font-dmSerif text-4xl leading-none text-white">
+                <TeamCrest team={homeTeam} size={31} />
+                <span className="font-dmSerif text-[2.75rem] leading-none text-white">
                   {homeScore}–{awayScore}
                 </span>
-                <TeamCrest team={awayTeam} size={28} />
+                <TeamCrest team={awayTeam} size={31} />
               </div>
 
               <div className="mt-1.5 h-px bg-[#16203a]" />
@@ -267,7 +267,7 @@ export default function FloatingSlipCard({
 
               <div className="mt-1.5 flex items-end justify-between">
                 <span className="text-xs text-[#8fa0b8]">If it lands exactly</span>
-                <span className="font-dmSerif text-3xl leading-none text-[#fcd34d]">{ceiling}</span>
+                <span className="font-dmSerif text-[2.0625rem] leading-none text-[#fcd34d]">{ceiling}</span>
               </div>
             </>
           )}

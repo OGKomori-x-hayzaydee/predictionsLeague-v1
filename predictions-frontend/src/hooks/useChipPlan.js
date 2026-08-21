@@ -6,8 +6,9 @@ const STORAGE_KEY = 'chip_plan_v1';
  * Local-only "intent" tracker for the Chips season planner. The backend has
  * no concept of reserving a chip ahead of time (chips are only recorded
  * when a prediction is actually filed, via the chip selector on the
- * Fixtures screen) — see plan §4/§6. This is a personal scratchpad the
- * gameweek's real chip selection doesn't depend on.
+ * Fixtures screen). This map must never be merged into makePrediction —
+ * it is a personal scratchpad; empty future-GW fixtures are expected
+ * because /fixtures only returns the current gameweek.
  */
 export function useChipPlan() {
   const [plan, setPlan] = useState(() => {

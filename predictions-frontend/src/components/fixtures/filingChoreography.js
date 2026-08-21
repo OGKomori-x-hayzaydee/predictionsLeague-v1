@@ -158,7 +158,7 @@ export const CARD_BOUNCE_TRANSITION = Object.freeze({
   ease: 'easeInOut',
 });
 
-// Desktop rail-reservation width (the docked card's ~380px + gutter) and
+// Desktop rail-reservation width (the docked card's ~418px + gutter) and
 // the transition used to smooth its resize via Framer Motion's `layout`
 // projection (FLIP: one reflow at each end, transform-interpolated in
 // between) rather than a per-frame `padding-right` CSS transition, which
@@ -169,7 +169,7 @@ export const CARD_BOUNCE_TRANSITION = Object.freeze({
 // with `align-items: stretch` keeps its own outer rect constant regardless
 // of its own padding value; it's only its children's available width that
 // changes.
-export const RAIL_WIDTH_PX = 366;
+export const RAIL_WIDTH_PX = 403;
 export const CONTENT_LAYOUT_TRANSITION = { duration: 0.46, ease: [0.4, 0, 0.2, 1] };
 
 // AI panel entrance (replaces the old `slideFromBehind` CSS keyframe —

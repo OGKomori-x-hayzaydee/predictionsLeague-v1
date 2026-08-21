@@ -1,4 +1,5 @@
 import { CHIP_HUES, DEFAULT_CHIP_HUE } from './chipHues';
+import { hasSeasonCap } from '../../utils/chipStatus';
 
 const CHIP_LIST = [
   { id: 'doubleDown', name: 'Double Down', tag: 'x2', desc: 'Doubles everything this match returns.' },
@@ -8,16 +9,19 @@ const CHIP_LIST = [
   { id: 'allInWeek', name: 'All-In Week', tag: 'AI', desc: 'Applies across all matches in GW.' },
 ];
 
-function chipLeftLabel(chipId, matchChips) {
-  const match = matchChips?.find((c) => (c.chipId || c.id) === chipId);
-  if (!match) return '1 left';
+function chipLeftLabel(chipId, statusChips) {
+  const match = statusChips?.find((c) => (c.chipId || c.id) === chipId);
+  if (!match) return 'available';
   if (match.available === false) {
     if (match.remainingGameweeks > 0) return `${match.remainingGameweeks}gw cooldown`;
     return match.reason || 'used';
   }
-  if (typeof match.seasonLimit === 'number') {
-    const left = Math.max(match.seasonLimit - (match.usageCount ?? 0), 0);
+  if (hasSeasonCap(match)) {
+    const left = match.remainingUses ?? Math.max(match.seasonLimit - (match.usageCount ?? 0), 0);
     return `${left} left`;
+  }
+  if (match.remainingGameweeks > 0) {
+    return `${match.remainingGameweeks}gw cooldown`;
   }
   return 'available';
 }
@@ -36,13 +40,15 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
         {CHIP_LIST.map((c) => {
           const isSelected = selected === c.id;
           const hue = CHIP_HUES[c.id] || DEFAULT_CHIP_HUE;
+          const statusChip = chips.find((chip) => (chip.chipId || chip.id) === c.id);
           const left = chipLeftLabel(c.id, chips);
-          const isUsed = left.includes('cooldown') || left.includes('used') || left.includes('0 left');
+          const isUsed = statusChip?.available === false;
 
           return (
             <button
               key={c.id}
               type="button"
+              disabled={isUsed && !isSelected}
               onClick={() => onToggle(isSelected ? null : c.id)}
               className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-left font-outfit transition-all ${
                 isSelected

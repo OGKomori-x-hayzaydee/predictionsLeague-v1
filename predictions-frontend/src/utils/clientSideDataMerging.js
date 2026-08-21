@@ -37,10 +37,10 @@ export const fixtureMatching = {
    */
   fixturesMatch(externalFixture, userPrediction) {
     // PRIMARY MATCHING: Match by fixture ID / matchId (most reliable)
-    if (externalFixture.id && userPrediction.matchId) {
-      if (externalFixture.id === userPrediction.matchId) {
-        return true;
-      }
+    const fixtureId = Number(externalFixture.matchId ?? externalFixture.id);
+    const predictionId = Number(userPrediction.matchId ?? userPrediction.id);
+    if (Number.isFinite(fixtureId) && Number.isFinite(predictionId) && fixtureId === predictionId) {
+      return true;
     }
 
     // SECONDARY MATCHING: Match by fixture key

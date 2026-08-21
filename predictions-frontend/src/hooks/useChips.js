@@ -43,82 +43,27 @@ export const useChipStatus = (options = {}) => {
       if (!result.success) {
         throw new Error(result.error?.message || 'Failed to fetch chip status');
       }
-      
-      // Merge backend data with frontend CHIP_CONFIG to add missing fields (scope, etc.)
-      const enhancedData = {
-        ...result.data,
-        chips: (result.data?.chips || []).map(backendChip => {
-          // Try direct match first, then try various conversions
-          let chipId = backendChip.chipId;
-          let config = CHIP_CONFIG[chipId];
-          
-          // If not found, try converting from various backend formats
-          if (!config && chipId) {
-            // Convert UPPER_SNAKE_CASE or snake_case to camelCase
-            const normalized = chipId
-              .toLowerCase()
-              .replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-            
-            config = CHIP_CONFIG[normalized];
-            if (config) {
-              chipId = normalized;
-            }
-          }
-          
-          if (!config) {
-            console.warn(`⚠️ Unknown chip from backend:`, backendChip.chipId);
-            return { ...backendChip, scope: 'unknown' };
-          }
-          
-          // Merge backend state with frontend config
-          return {
-            ...config,
-            ...backendChip,
-            id: chipId,
-            chipId,
-            // Map backend field name to frontend convention
-            usageCount: backendChip.seasonUsageCount || 0,
-            // Ensure critical fields from config aren't overwritten
-            scope: config.scope,
-            name: config.name,
-            description: config.description,
-            icon: config.icon,
-            color: config.color
-          };
-        })
-      };
-      
-      // Add Double Down - Always available, no backend tracking needed
-      const hasDoubleDown = enhancedData.chips.some(chip => 
-        chip.chipId === 'doubleDown' || chip.id === 'doubleDown'
-      );
-      
-      if (!hasDoubleDown) {
-        const doubleDownConfig = CHIP_CONFIG.doubleDown;
-        enhancedData.chips.push({
-          ...doubleDownConfig,
-          id: 'doubleDown',
-          chipId: 'doubleDown',
-          available: true,
-          reason: 'Available',
-          usageCount: 0,
-          seasonLimit: null,
-          remainingUses: null,
-          cooldownExpires: null,
-          remainingGameweeks: 0
-        });
-      }
-      
-      // Add logging to track chip status
-      console.log('🎯 CHIP DETAILS:', enhancedData.chips);
-      console.log('✅ Chip status fetched successfully', {
-        chipsCount: enhancedData.chips.length,
-        availableCount: enhancedData.chips.filter(c => c.available).length,
-        currentGameweek: enhancedData.currentGameweek,
-        currentSeason: enhancedData.currentSeason
+
+      // chipAPI already normalizes seasonLimit/remainingUses/ids.
+      // Re-assert static CHIP_CONFIG fields so backend 0 cannot overwrite unlimited.
+      const chips = (result.data?.chips || []).map((chip) => {
+        const config = CHIP_CONFIG[chip.chipId];
+        if (!config) return chip;
+        return {
+          ...chip,
+          scope: config.scope,
+          name: config.name,
+          description: config.description,
+          icon: config.icon,
+          color: config.color,
+          seasonLimit: chip.seasonLimit ?? config.seasonLimit ?? null,
+        };
       });
-      
-      return enhancedData;
+
+      return {
+        ...result.data,
+        chips,
+      };
     },
     enabled,
     refetchInterval,
@@ -146,12 +91,14 @@ export const useChips = () => {
    * Use this after prediction submission to update chip availability
    */
   const refresh = () => {
-    queryClient.invalidateQueries([CHIP_QUERY_KEYS.STATUS]);
+    queryClient.invalidateQueries({ queryKey: [CHIP_QUERY_KEYS.STATUS] });
     return refetch();
   };
 
-  // Calculate active gameweek chips
-  const currentGameweek = data?.currentGameweek || 1;
+  // Status payload often omits currentGameweek; callers should fall back
+  // to fixtures/dashboard season week rather than assuming GW 1.
+  const reportedGameweek = data?.currentGameweek;
+  const currentGameweek = reportedGameweek || 1;
   const activeGameweekChipIds = data?.chips 
     ? getActiveGameweekChips(data.chips, currentGameweek)
     : [];
@@ -162,7 +109,7 @@ export const useChips = () => {
   return {
     // Data
     chips: data?.chips || [],
-    currentGameweek,
+    currentGameweek: reportedGameweek ?? null,
     currentSeason: data?.currentSeason || '2025',
     
     // Active chip tracking (derived from cooldown state)
