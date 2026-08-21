@@ -29,20 +29,21 @@ function formatSlot(dateStr) {
 /** Scorer pill row — the same recipe as FixtureSlip's scorer pills, not a
  * bordered box, just flat pills wrapped per side. */
 function ScorerPills({ names }) {
-  if (!names.length) {
-    return <span className="font-outfit text-xs text-[#4f5b70]">no scorer named</span>;
-  }
   return (
-    <div className="flex flex-wrap justify-center gap-1.5">
-      {names.map((name) => (
-        <span
-          key={name}
-          className="flex items-center gap-2 rounded-full border border-[#1c2942] bg-[#0b1626] px-3 py-1 text-xs text-[#c8d2e0]"
-        >
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] border-brand-teal" />
-          {name}
-        </span>
-      ))}
+    <div className="flex min-h-[64px] w-full flex-wrap content-center justify-center gap-1.5">
+      {names.length > 0 ? (
+        names.map((name) => (
+          <span
+            key={name}
+            className="flex items-center gap-2 rounded-full border border-[#1c2942] bg-[#0b1626] px-3 py-1 text-sm text-[#c8d2e0]"
+          >
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] border-brand-teal" />
+            {name}
+          </span>
+        ))
+      ) : (
+        <span className="font-outfit text-sm text-[#4f5b70]">no scorer named</span>
+      )}
     </div>
   );
 }
@@ -51,7 +52,7 @@ function ChipStampTooltip({ chips, visible }) {
   if (!chips.length) return null;
   return (
     <div
-      className={`pointer-events-none absolute bottom-full right-0 z-20 mb-2 w-max max-w-[220px] rounded-[10px] border border-[#243247] bg-[#0b1424] px-3 py-2 shadow-[0_8px_20px_rgba(0,0,0,0.5)] transition-opacity duration-150 ${
+      className={`pointer-events-none absolute top-full right-0 z-20 mt-2 w-max max-w-[220px] rounded-[10px] border border-[#243247] bg-[#0b1424] px-3 py-2 shadow-[0_8px_20px_rgba(0,0,0,0.5)] transition-opacity duration-150 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
@@ -110,17 +111,17 @@ export default function FixturePreviewCardFoil({
   const stampSize = isMobile ? 46 : 60;
 
   return (
-    <div className="relative mx-auto w-full max-w-[820px] pb-3.5 pr-3.5">
+    <div className="relative mx-auto w-full max-w-[820px] pt-3.5 pr-3.5">
       <div
         className="relative overflow-visible rounded-[20px] border border-[#1c2942]"
         style={{ background: 'linear-gradient(180deg, #0a1120, #070d18)' }}
       >
         {/* Title plate — slot label + venue/kickoff only, no filed indicator */}
         <div className="flex flex-col items-center gap-1 border-b border-dashed border-white/10 px-7 pb-2.5 pt-3 text-center">
-          <span className="font-outfit text-2xs uppercase tracking-[0.16em] text-brand-teal">
+          <span className="font-outfit text-xs uppercase tracking-[0.16em] text-brand-teal">
             {formatSlot(date) || `${homeTeam} v ${awayTeam}`}
           </span>
-          <span className="font-outfit text-2xs text-[#66748c]">
+          <span className="font-outfit text-xs text-[#66748c]">
             {[venue, formatKickoff(date)].filter(Boolean).join(' · ')}
           </span>
         </div>
@@ -133,30 +134,30 @@ export default function FixturePreviewCardFoil({
           >
             <div className="flex w-full flex-col items-center gap-2.5">
               <TeamCrest team={homeTeam} size={crestSize} />
-              <span className="font-dmSerif text-xl leading-tight text-white">{homeTeam}</span>
+              <span className="font-dmSerif text-2xl leading-tight text-white">{homeTeam}</span>
               <ScorerPills names={homeScorers} />
             </div>
 
             <div className="flex flex-col items-center gap-1 self-center rounded-[12px] border border-[#1c2942] bg-[#050a13] px-8 py-3 shadow-[inset_0_2px_6px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-3">
-                <span className="font-dmSerif text-6xl leading-[0.9] text-white">{prediction.homeScore}</span>
-                <span className="font-dmSerif text-2xl leading-none text-[#4a5b78]">–</span>
-                <span className="font-dmSerif text-6xl leading-[0.9] text-white">{prediction.awayScore}</span>
+                <span className="font-dmSerif text-7xl leading-[0.9] text-white">{prediction.homeScore}</span>
+                <span className="font-dmSerif text-3xl leading-none text-[#4a5b78]">–</span>
+                <span className="font-dmSerif text-7xl leading-[0.9] text-white">{prediction.awayScore}</span>
               </div>
             </div>
 
             <div className="flex w-full flex-col items-center gap-2.5">
               <TeamCrest team={awayTeam} size={crestSize} />
-              <span className="font-dmSerif text-xl leading-tight text-white">{awayTeam}</span>
+              <span className="font-dmSerif text-2xl leading-tight text-white">{awayTeam}</span>
               <ScorerPills names={awayScorers} />
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5 px-7 py-6 text-center">
-            <span className="font-dmSerif text-2xl leading-tight text-white">
+            <span className="font-dmSerif text-3xl leading-tight text-white">
               Nothing filed on {homeTeam} v {awayTeam}
             </span>
-            <span className="max-w-[38em] font-outfit text-caption text-[#8896ad]" style={{ textWrap: 'pretty' }}>
+            <span className="max-w-[38em] font-outfit text-sm text-[#8896ad]" style={{ textWrap: 'pretty' }}>
               {deadlineLabel
                 ? `File a scoreline before the deadline (${deadlineLabel}) to put points on it.`
                 : 'File a scoreline before the deadline to put points on it.'}
@@ -175,14 +176,14 @@ export default function FixturePreviewCardFoil({
         >
           <span className="flex items-center gap-[9px]">
             <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[#818cf8]" />
-            <span className="font-outfit text-2xs uppercase tracking-[0.16em] text-[#66748c]">AI overview</span>
-            <span className="font-outfit text-2xs text-[#4f5b70]">coming soon</span>
+            <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#66748c]">AI overview</span>
+            <span className="font-outfit text-xs text-[#4f5b70]">coming soon</span>
             {isMobile && (
               <span className="ml-auto font-outfit text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
             )}
           </span>
           {(!isMobile || aiOpen) && (
-            <p className="m-0 font-outfit text-caption leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
+            <p className="m-0 font-outfit text-sm leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
               Predicted scorelines, head-to-head history and what the league is picking will land here
               once a live model is plugged in. For now, this one&rsquo;s on you.
             </p>
@@ -192,7 +193,7 @@ export default function FixturePreviewCardFoil({
         {/* Bottom row — highlighted ceiling points on the left, CTA centered */}
         <div className="grid grid-cols-3 items-center border-t border-[#1c2942] px-7 py-3">
           <div className="flex flex-col leading-none">
-            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
+            <span className="font-outfit text-xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
             <span className="font-dmSerif text-base text-brand-amber">
               {predicted ? `${ceiling} pts` : '—'}
             </span>
@@ -200,7 +201,7 @@ export default function FixturePreviewCardFoil({
           <button
             type="button"
             onClick={() => navigate('/fixtures')}
-            className="flex cursor-pointer items-center justify-self-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-caption font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
+            className="flex cursor-pointer items-center justify-self-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
             {predicted ? 'Edit in reel' : 'File in reel'}
             <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
@@ -215,7 +216,7 @@ export default function FixturePreviewCardFoil({
           sticker (reusing the shared ChipPile stacking), with a hover
           tooltip spelling out exactly which chip(s) and their effect. */}
       <div
-        className="absolute bottom-0 right-0 p-2"
+        className="absolute top-0 right-0 p-2"
         onMouseEnter={() => setChipHover(true)}
         onMouseLeave={() => setChipHover(false)}
       >
