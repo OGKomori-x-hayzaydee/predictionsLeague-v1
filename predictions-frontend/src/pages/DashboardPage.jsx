@@ -6,7 +6,6 @@ import StationRail from '../components/dashboard/StationRail';
 import FixturePreviewCard from '../components/dashboard/FixturePreviewCard';
 import SpinePreviewSwitcher, { useDashSpineVariant } from '../components/dashboard/SpinePreviewSwitcher';
 import ResultsCarousel from '../components/dashboard/ResultsCarousel';
-import { useDashResultsVariant } from '../components/dashboard/ResultsPreviewSwitcher';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardMobileSheet from '../components/dashboard/DashboardMobileSheet';
 import LoadingState from '../components/common/LoadingState';
@@ -20,7 +19,6 @@ export default function DashboardPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('this');
   const [spineVariant, setSpineVariant] = useDashSpineVariant();
-  const [resultsVariant, setResultsVariant] = useDashResultsVariant();
 
   const {
     stations,
@@ -138,8 +136,6 @@ export default function DashboardPage() {
             <ResultsCarousel
               predictions={lastGw.predictions}
               gameweek={lastGw.gameweek}
-              variant={resultsVariant}
-              onVariantChange={setResultsVariant}
               usingDemo={lastGw.usingDemo}
               hasReal={lastGw.hasReal}
               previewMode={lastGw.previewMode}

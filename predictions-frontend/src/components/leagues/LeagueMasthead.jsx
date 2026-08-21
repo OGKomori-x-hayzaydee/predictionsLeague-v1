@@ -6,7 +6,7 @@ import { ordinal, formatMonthYear } from '../../utils/leagueStats';
  * League masthead card — real overview + standings data (name, position,
  * points, member count, since, neighbours).
  */
-export default function LeagueMasthead({ overview, you, tone, memberCount, neighbours, move, onBack, onManage }) {
+export default function LeagueMasthead({ overview, you, tone, memberCount, neighbours, move, onBack }) {
   const position = you?.position;
   const points = you?.points ?? 0;
   const initials = overview?.name?.slice(0, 2).toUpperCase() || '??';
@@ -63,30 +63,17 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
           <span className="truncate font-outfit text-2xs tracking-widest text-text-muted-1">
             2025/26 · {memberCount} · SINCE {formatMonthYear(overview?.createdAt)}
           </span>
-          {(joinCode || onManage) && (
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
-              {joinCode && (
-                <button
-                  onClick={handleCopyCode}
-                  aria-label="Copy league join code"
-                  title="Copy join code"
-                  className="flex w-fit items-center gap-1.5 rounded-8 border border-border-control bg-surface-card-4/60 px-2 py-1 font-outfit text-2xs tracking-widest text-text-secondary transition-colors hover:text-text-primary"
-                >
-                  <span className="font-semibold tracking-[0.15em]" style={{ color: tone.var }}>{joinCode}</span>
-                  {copied ? <Check size={12} weight="bold" /> : <Copy size={12} weight="bold" />}
-                  <span>{copied ? 'COPIED' : 'COPY'}</span>
-                </button>
-              )}
-              {onManage && (
-                <button
-                  type="button"
-                  onClick={onManage}
-                  className="flex w-fit items-center rounded-8 border border-brand-teal/40 bg-brand-teal/10 px-2 py-1 font-outfit text-2xs tracking-widest text-brand-teal transition-colors hover:border-brand-teal/70"
-                >
-                  MANAGE
-                </button>
-              )}
-            </div>
+          {joinCode && (
+            <button
+              onClick={handleCopyCode}
+              aria-label="Copy league join code"
+              title="Copy join code"
+              className="mt-1 flex w-fit items-center gap-1.5 rounded-8 border border-border-control bg-surface-card-4/60 px-2 py-1 font-outfit text-2xs tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+            >
+              <span className="font-semibold tracking-[0.15em]" style={{ color: tone.var }}>{joinCode}</span>
+              {copied ? <Check size={12} weight="bold" /> : <Copy size={12} weight="bold" />}
+              <span>{copied ? 'COPIED' : 'COPY'}</span>
+            </button>
           )}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-0.5 md:hidden">

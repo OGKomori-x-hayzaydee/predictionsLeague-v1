@@ -34,7 +34,7 @@ function weekSlice(predictions, gameweek) {
  * `mobileGameweek` state rather than the shared `selectedGameweek` prop, so
  * defaulting it doesn't also force the desktop drawer open.
  */
-export default function SeasonTab({ predictions, stats, selectedGameweek, onSelectGameweek, onViewFull, previewMode = false }) {
+export default function SeasonTab({ predictions, stats, selectedGameweek, onSelectGameweek, previewMode = false }) {
   const { weekPredictions, weekTotal, weekExact } = weekSlice(predictions, selectedGameweek);
 
   const settledWeeks = stats.pointsByGameweek.length;
@@ -104,7 +104,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
                 weekPredictions.map((p) => (
-                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen onViewFull={onViewFull} />
+                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen />
                 ))
               )}
             </div>
@@ -202,7 +202,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
                 mobileWeekPredictions.map((p, i) => (
-                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen={i === 0} onViewFull={onViewFull} />
+                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen={i === 0} />
                 ))
               )}
             </div>

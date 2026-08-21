@@ -230,3 +230,11 @@ export function predictionAsReceiptPair(prediction) {
     prediction,
   };
 }
+
+export function recordSearchPath(prediction) {
+  const highlight = prediction?.matchId ?? prediction?.id ?? '';
+  const q = `${prediction?.homeTeam || ''} ${prediction?.awayTeam || ''}`.trim();
+  const params = new URLSearchParams({ tab: 'search', highlight: String(highlight) });
+  if (q) params.set('q', q);
+  return `/record?${params.toString()}`;
+}

@@ -5,7 +5,6 @@ import {
   buildResultView,
   BREAKDOWN_LABELS,
   pointsLabel,
-  scorerWasCorrect,
 } from '../../utils/matchResult';
 
 /**
@@ -21,6 +20,7 @@ export default function FixtureSlip({
   ceiling,
   variant = 'rail',
   onEdit,
+  onViewFull,
   gameweekLabel = 'GW24',
   density = 'full',
 }) {
@@ -34,6 +34,7 @@ export default function FixtureSlip({
         ceiling={ceiling}
         gameweekLabel={gameweekLabel}
         density={density}
+        onViewFull={onViewFull}
       />
     );
   }
@@ -187,15 +188,45 @@ export default function FixtureSlip({
   );
 }
 
-function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density }) {
+function ScorerPills({ names, empty, hitNames = [] }) {
+  if (!names.length) {
+    return <span className="font-outfit text-xs text-[#4f5b70]">{empty}</span>;
+  }
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {names.map((name, i) => {
+        const hit = hitNames.includes(name);
+        return (
+          <span
+            key={`${name}-${i}`}
+            className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs ${
+              hit
+                ? 'border-[#14b8a666] bg-[#0f766e22] text-[#5eead4]'
+                : 'border-[#1c2942] bg-[#0b1626] text-[#c8d2e0]'
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] ${
+                hit ? 'border-brand-teal bg-brand-teal' : 'border-[#4f5b70]'
+              }`}
+            />
+            {name}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density, onViewFull }) {
   const [ledgerOpen, setLedgerOpen] = useState(false);
   const { homeTeam, awayTeam } = fixture;
   const result = buildResultView(fixture, prediction);
   const compact = density === 'compact';
-  const actualScorers = [
-    ...(prediction?.actualHomeScorers || fixture?.actualHomeScorers || []),
-    ...(prediction?.actualAwayScorers || fixture?.actualAwayScorers || []),
-  ];
+  const actualNames = namedScorers(
+    prediction?.actualHomeScorers || fixture?.actualHomeScorers,
+    prediction?.actualAwayScorers || fixture?.actualAwayScorers,
+  );
   const called = namedScorers(prediction?.homeScorers, prediction?.awayScorers);
   const heroReady = result.actualHome != null && result.actualAway != null;
   const heroScore = heroReady ? `${result.actualHome}–${result.actualAway}` : '—';
@@ -292,50 +323,49 @@ function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density }) {
 
       <div className="h-px bg-[#16203a]" />
 
-      <div className="flex flex-wrap justify-center gap-2">
-        {called.length > 0 ? (
-          called.map((name, i) => {
-            const hit = scorerWasCorrect(name, prediction?.actualHomeScorers, prediction?.actualAwayScorers)
-              || actualScorers.includes(name);
-            return (
-              <span
-                key={`${name}-${i}`}
-                className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs ${
-                  hit
-                    ? 'border-[#14b8a666] bg-[#0f766e22] text-[#5eead4]'
-                    : 'border-[#1c2942] bg-[#0b1626] text-[#c8d2e0]'
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] ${
-                    hit ? 'border-brand-teal bg-brand-teal' : 'border-[#4f5b70]'
-                  }`}
-                />
-                {name}
-              </span>
-            );
-          })
-        ) : (
-          <span className="font-outfit text-xs text-[#4f5b70]">
-            {result.hasCall ? 'no scorers named' : 'nothing on file'}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-0">
+        <div className="flex flex-col items-center gap-2 sm:border-r sm:border-[#16203a] sm:pr-4">
+          <span className="font-outfit text-2xs tracking-[0.14em] text-[#5b667d]">CALLED</span>
+          <ScorerPills
+            names={called}
+            empty={result.hasCall ? 'no scorers named' : 'nothing on file'}
+            hitNames={actualNames}
+          />
+        </div>
+        <div className="flex flex-col items-center gap-2 sm:pl-4">
+          <span className="font-outfit text-2xs tracking-[0.14em] text-[#5b667d]">
+            {result.live ? 'LIVE' : 'ACTUAL'}
           </span>
-        )}
+          <ScorerPills
+            names={actualNames}
+            empty={result.awaiting || !heroReady ? 'awaiting scorers' : 'no scorers'}
+            hitNames={called}
+          />
+        </div>
       </div>
 
       <div className="h-px bg-[#16203a]" />
 
-      <div className="flex items-end gap-6">
-        <div className="ml-auto flex flex-col items-end leading-none">
-          <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">
-            {result.settled ? 'POINTS' : 'STAKED'}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="flex items-center gap-2 rounded-full border border-[#2a3a52] bg-[#0b1626] px-4 py-2">
+          <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">STAKED</span>
+          <span className="font-dmSerif text-xl leading-none text-[#fcd34d]">{ceiling ?? '—'}</span>
+        </span>
+        <span className="flex items-center gap-2 rounded-full border border-[#2a3a52] bg-[#0b1626] px-4 py-2">
+          <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">ACTUAL</span>
+          <span className="font-dmSerif text-xl leading-none" style={{ color: pointsFg }}>
+            {result.settled ? pointsLabel(result.points) : '—'}
           </span>
-          <span
-            className="font-dmSerif text-[2.0625rem]"
-            style={{ color: result.settled ? pointsFg : '#8a7a4a' }}
+        </span>
+        {onViewFull && (
+          <button
+            type="button"
+            onClick={onViewFull}
+            className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-brand-indigo-mid px-5 py-2.5 font-outfit text-xs font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
-            {result.settled ? pointsLabel(result.points) : (ceiling ?? '—')}
-          </span>
-        </div>
+            Full prediction
+          </button>
+        )}
       </div>
 
       {result.settled && breakdownEntries.length > 0 && (

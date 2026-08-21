@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
 import FixtureEditor from '../components/fixtures/FixtureEditor';
@@ -34,7 +35,7 @@ import {
   getBackdropTarget,
   BACKDROP_TRANSITION,
 } from '../components/fixtures/filingChoreography';
-import { buildResultView } from '../utils/matchResult';
+import { buildResultView, recordSearchPath } from '../utils/matchResult';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -97,6 +98,7 @@ function upsertUserPredictionCache(queryClient, prediction) {
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { availableChips, currentGameweek: chipGameweek, refreshChips } = useChipManagement();
 
   const {
@@ -448,6 +450,7 @@ export default function FixturesPage() {
                         ceiling={restingCeiling}
                         variant="scored"
                         gameweekLabel={gameweekLabel}
+                        onViewFull={() => navigate(recordSearchPath(restingPrediction || selectedFixture))}
                       />
                     </div>
                   ) : (
@@ -580,6 +583,7 @@ export default function FixturesPage() {
                 ceiling={restingCeiling}
                 variant="scored"
                 gameweekLabel={gameweekLabel}
+                onViewFull={() => navigate(recordSearchPath(restingPrediction || selectedFixture))}
               />
             ) : (
               <div className="flex flex-col gap-4">

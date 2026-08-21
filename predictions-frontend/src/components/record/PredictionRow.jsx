@@ -70,15 +70,12 @@ function ticketTheme(isSettled, verdict) {
  *     points pill, chevron).
  *   - Expanded: the full ticket — verdict-tinted wash, big crests, a
  *     "YOU CALLED" / "RESULT" split with a perforated notch between the
- *     halves, a rotated verdict stamp in the corner, a chip footer strip,
- *     and (only when `onViewFull` is supplied, i.e. from Season) a
- *     "Full prediction →" action that deep-links to this fixture's row in
- *     the Search tab.
+ *     halves, a rotated verdict stamp in the corner, and a chip footer strip.
  *
  * `highlighted` — true when this row is the target of that deep link: it
  * force-expands, scrolls itself into view, and glows briefly.
  */
-export default function PredictionRow({ prediction, defaultOpen = false, onViewFull, highlighted = false }) {
+export default function PredictionRow({ prediction, defaultOpen = false, highlighted = false }) {
   const [expanded, setExpanded] = useState(defaultOpen || highlighted);
   const rootRef = useRef(null);
 
@@ -230,17 +227,6 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             >
               {VERDICT_LABELS[verdict?.verdict] || verdict?.verdict}
             </span>
-          )}
-
-          {onViewFull && (
-            <button
-              type="button"
-              onClick={() => onViewFull(prediction)}
-              className="flex w-full items-center justify-center gap-1.5 border-t px-4 py-2.5 font-outfit text-3xs tracking-[0.14em] text-text-muted-1 transition-colors hover:bg-black/15 hover:text-brand-teal focus-visible:bg-black/15 focus-visible:text-brand-teal focus-visible:outline-none"
-              style={{ borderColor: theme.border }}
-            >
-              FULL PREDICTION <span aria-hidden="true">&rarr;</span>
-            </button>
           )}
         </div>
       )}

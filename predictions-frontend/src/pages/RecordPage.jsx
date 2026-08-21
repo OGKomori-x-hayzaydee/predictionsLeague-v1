@@ -69,19 +69,6 @@ export default function RecordPage() {
     setSelectedGameweek(null);
   };
 
-  // "Full prediction" (Season ticket card) -> Search tab, pre-queried to
-  // this exact fixture and auto-expanded/scrolled/glowing there — a real,
-  // bookmarkable deep link rather than local component state.
-  const handleViewFull = (prediction) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('tab', 'search');
-      next.set('q', `${prediction.homeTeam} ${prediction.awayTeam}`);
-      next.set('highlight', String(prediction.id ?? prediction.matchId ?? ''));
-      return next;
-    });
-  };
-
   // Scope for the sidebar/sheet: a single selected gameweek (Season tab
   // drawer open), career-wide (All-time tab), or the season default —
   // matches the prototype's slotFor()/buildRecord() scope switching, all
@@ -232,7 +219,6 @@ export default function RecordPage() {
                   stats={stats}
                   selectedGameweek={selectedGameweek}
                   onSelectGameweek={setSelectedGameweek}
-                  onViewFull={handleViewFull}
                   previewMode={previewMode}
                 />
               )}
