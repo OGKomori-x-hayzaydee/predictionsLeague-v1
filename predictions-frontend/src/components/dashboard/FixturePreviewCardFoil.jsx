@@ -115,12 +115,6 @@ export default function FixturePreviewCardFoil({
         className="relative overflow-visible rounded-[20px] border border-[#1c2942]"
         style={{ background: 'linear-gradient(180deg, #0a1120, #070d18)' }}
       >
-        {/* Corner brackets */}
-        <span className="pointer-events-none absolute left-2 top-2 h-3.5 w-3.5 border-l border-t border-[#33445e]" />
-        <span className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 border-r border-t border-[#33445e]" />
-        <span className="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 border-b border-l border-[#33445e]" />
-        <span className="pointer-events-none absolute bottom-2 right-2 h-3.5 w-3.5 border-b border-r border-[#33445e]" />
-
         {/* Title plate — slot label + venue/kickoff only, no filed indicator */}
         <div className="flex flex-col items-center gap-1 border-b border-dashed border-white/10 px-7 pb-2.5 pt-3 text-center">
           <span className="font-outfit text-2xs uppercase tracking-[0.16em] text-brand-teal">
@@ -199,7 +193,7 @@ export default function FixturePreviewCardFoil({
         <div className="grid grid-cols-3 items-center border-t border-[#1c2942] px-7 py-3">
           <div className="flex flex-col leading-none">
             <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
-            <span className="font-dmSerif text-2xl text-brand-amber">
+            <span className="font-dmSerif text-base text-brand-amber">
               {predicted ? `${ceiling} pts` : '—'}
             </span>
           </div>
