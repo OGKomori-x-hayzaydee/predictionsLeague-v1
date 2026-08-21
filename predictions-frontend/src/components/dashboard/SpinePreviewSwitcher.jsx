@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
 const STORAGE_KEY = 'dash-spine-variant';
-const VALID = ['A', 'B', 'D'];
+const VALID = ['A', 'C', 'B', 'D'];
 
 const OPTIONS = [
   { id: 'A', label: 'A · hyphen' },
+  { id: 'C', label: 'C · foil' },
   { id: 'B', label: 'B · seal' },
   { id: 'D', label: 'D · well' },
 ];
@@ -41,7 +42,7 @@ export default function SpinePreviewSwitcher({ value, onChange }) {
   return (
     <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
       <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#5b667d]">
-        Spine preview · A / B / D
+        Spine preview · A / C / B / D
       </span>
       <div
         role="group"

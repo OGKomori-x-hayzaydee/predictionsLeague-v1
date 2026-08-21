@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { CHIP_CONFIG } from '../../utils/chipManager';
-import { CHIP_HUES, CHIP_BADGES, CHIP_EFFECTS, DEFAULT_CHIP_HUE } from './chipHues';
 import { SpineHyphen, SpineSeal, SpineWell } from './fixturePreviewSpines';
+import { resolveFiledChips } from './resolveFiledChips';
+import FixturePreviewCardFoil from './FixturePreviewCardFoil';
+
+export { resolveFiledChips };
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -25,16 +27,6 @@ function formatSlot(dateStr) {
   if (day === 0) return hour < 15 ? 'Sunday Early' : 'Sunday Late';
   if (day === 1) return 'Monday Night';
   return d.toLocaleDateString(undefined, { weekday: 'long' });
-}
-
-function resolveFiledChips(chipIds) {
-  return chipIds.map((id) => ({
-    id,
-    name: CHIP_CONFIG[id]?.name || id,
-    tag: CHIP_BADGES[id] || CHIP_CONFIG[id]?.icon || '',
-    hue: CHIP_HUES[id] || DEFAULT_CHIP_HUE,
-    effect: CHIP_EFFECTS[id] || CHIP_CONFIG[id]?.description || '',
-  }));
 }
 
 function PreviewHeader({ homeTeam, awayTeam, venue, date, predicted, ceiling, onEdit }) {
@@ -138,7 +130,9 @@ function FiledSpine({ spineVariant, isMobile, homeTeam, awayTeam, prediction, ho
  * desktop lines 131-266, mobile lines 2257-2336).
  *
  * `spineVariant` picks the filed-score spine (A hyphen / B wax-seal / D well).
- * Unfiled copy is shared across all three.
+ * Unfiled copy is shared across those three. `C` (foil/collectible) is a
+ * full break from that shared header/footer/frame — it owns its own chrome
+ * end to end, so it's dispatched separately rather than through FiledSpine.
  */
 export default function FixturePreviewCard({
   fixture,
@@ -160,6 +154,19 @@ export default function FixturePreviewCard({
       >
         No fixture selected.
       </div>
+    );
+  }
+
+  if (spineVariant === 'C') {
+    return (
+      <FixturePreviewCardFoil
+        fixture={fixture}
+        ceiling={ceiling}
+        variant={variant}
+        aiOpen={aiOpen}
+        onToggleAi={onToggleAi}
+        deadlineLabel={deadlineLabel}
+      />
     );
   }
 
