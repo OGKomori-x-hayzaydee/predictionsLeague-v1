@@ -5,7 +5,7 @@ import FormBookPanel from './FormBookPanel';
 /**
  * Mobile Form book — by-member / by-fixture rails.
  */
-export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw }) {
+export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw, currentGameweek, settledGws }) {
   if (!formBook) return null;
   const { fixtures, rows, isSettled, gw } = formBook;
   const byMember = mobGrid === 'member';
@@ -19,12 +19,18 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
         >
           GAMEWEEK {gw} · {isSettled ? 'REVEALED' : 'OPEN, UNSCORED'}
         </span>
-        <span className="text-caption leading-relaxed text-text-secondary">
+        <span className="font-dmSerif text-xl leading-tight text-text-primary">
           {isSettled ? "Everyone's ten calls, side by side" : "Everyone's calls so far, nothing scored yet"}
         </span>
       </div>
 
-      <GwPicker options={gwOptions} value={selectedGw} onChange={setSelectedGw} />
+      <GwPicker
+        options={gwOptions}
+        value={selectedGw}
+        onChange={setSelectedGw}
+        currentGameweek={currentGameweek}
+        settledGws={settledGws}
+      />
 
       {fixtures.length === 0 ? (
         <p className="rounded-16 border border-border-base bg-surface-card p-4 text-caption text-text-muted-2">
@@ -32,13 +38,13 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
         </p>
       ) : (
         <>
-          <div className="flex rounded-11 border border-border-card bg-surface-card-4 p-0.5">
+          <div className="flex rounded-full border border-border-card bg-surface-card-4 p-1">
             {[{ id: 'member', label: 'BY MEMBER' }, { id: 'fixture', label: 'BY FIXTURE' }].map((t) => (
               <button
                 key={t.id}
                 onClick={() => setMobGrid(t.id)}
-                className={`min-h-10 flex-1 rounded-sm font-outfit text-2xs tracking-widest ${
-                  mobGrid === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
+                className={`min-h-10 flex-1 rounded-full font-outfit text-2xs tracking-widest ${
+                  mobGrid === t.id ? 'bg-brand-teal text-primary-800' : 'text-text-muted-2'
                 }`}
               >
                 {t.label}

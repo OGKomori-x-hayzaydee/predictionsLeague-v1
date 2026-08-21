@@ -41,7 +41,7 @@ export default function PositionChart({ series, line, gws, moveLabel, moveTone =
             {gws.length > 2 && <span>GW{gws[Math.floor((gws.length - 1) / 2)]}</span>}
             <span>GW{gws[gws.length - 1]}</span>
           </div>
-          <span className="text-2xs leading-relaxed text-text-muted-2">
+          <span className="text-caption leading-relaxed text-text-muted-2">
             Your position after every settled week. Lower is better.
           </span>
         </>

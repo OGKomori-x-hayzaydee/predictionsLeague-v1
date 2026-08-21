@@ -48,7 +48,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
           {member.gwTotal}
         </span>
         <div
-          className={`relative flex w-full items-start justify-center overflow-hidden rounded-t-6 border border-b-0 pt-2 ${PLINTH[i]} ${
+          className={`relative flex w-full items-start justify-center overflow-hidden rounded-t-9 border border-b-0 pt-2 ${PLINTH[i]} ${
             first
               ? 'border-brand-teal-mid/40 bg-gradient-to-b from-brand-teal-deep/25 to-surface-card-2'
               : 'border-border-base bg-surface-card-3'

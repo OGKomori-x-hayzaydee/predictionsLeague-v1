@@ -12,7 +12,10 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
   return (
     <div
       className="relative flex shrink-0 flex-col gap-4 overflow-hidden rounded-16 border p-4 md:gap-4 md:px-6 md:py-5"
-      style={{ background: `linear-gradient(135deg, ${tone.tint}, var(--surface-card))`, borderColor: `${tone.var}33` }}
+      style={{
+        background: `linear-gradient(135deg, ${tone.tint}, var(--surface-card))`,
+        borderColor: `color-mix(in srgb, ${tone.var} 28%, var(--border-base))`,
+      }}
     >
       <span
         className="pointer-events-none absolute -right-1.5 -top-6 select-none font-dmSerif text-8xl leading-none md:text-9xl"
@@ -43,7 +46,7 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
             {overview?.name}
           </span>
           <span className="truncate font-outfit text-2xs tracking-widest text-text-muted-1">
-            {memberCount} · SINCE {formatMonthYear(overview?.createdAt)}
+            2025/26 · {memberCount} · SINCE {formatMonthYear(overview?.createdAt)}
           </span>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-0.5 md:hidden">
@@ -81,18 +84,18 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
       <div className="relative hidden items-center gap-5 md:flex">
         <span className="flex min-w-0 flex-1 items-baseline gap-2">
           <span className="font-outfit text-2xs tracking-widest text-state-error">ABOVE</span>
-          <span className="min-w-0 flex-1 truncate text-caption text-text-secondary">
+          <span className="min-w-0 flex-1 truncate font-dmSerif text-sm text-text-secondary md:text-base">
             {neighbours.above ? (neighbours.above.displayName || neighbours.above.username) : 'nobody'}
           </span>
-          {neighbours.above && <span className="shrink-0 font-outfit text-caption text-state-error">+{neighbours.gapAbove}</span>}
+          {neighbours.above && <span className="shrink-0 font-outfit text-sm text-state-error">+{neighbours.gapAbove}</span>}
         </span>
         <span className="h-4 w-px shrink-0 bg-white/10" />
         <span className="flex min-w-0 flex-1 items-baseline gap-2">
           <span className="font-outfit text-2xs tracking-widest text-brand-teal">BELOW</span>
-          <span className="min-w-0 flex-1 truncate text-caption text-text-secondary">
+          <span className="min-w-0 flex-1 truncate font-dmSerif text-sm text-text-secondary md:text-base">
             {neighbours.below ? (neighbours.below.displayName || neighbours.below.username) : 'nobody'}
           </span>
-          {neighbours.below && <span className="shrink-0 font-outfit text-caption text-brand-teal">−{neighbours.gapBelow}</span>}
+          {neighbours.below && <span className="shrink-0 font-outfit text-sm text-brand-teal">−{neighbours.gapBelow}</span>}
         </span>
       </div>
 

@@ -252,6 +252,8 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
             gwOptions={lg.gwOptions}
             selectedGw={lg.selectedGw}
             setSelectedGw={lg.setSelectedGw}
+            currentGameweek={lg.currentGameweek}
+            settledGws={lg.settledGws}
             leagueName={overview.name}
           />
           <div className="px-4 pb-6 pt-3 md:hidden">
@@ -264,6 +266,8 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
               gwOptions={lg.gwOptions}
               selectedGw={lg.selectedGw}
               setSelectedGw={lg.setSelectedGw}
+              currentGameweek={lg.currentGameweek}
+              settledGws={lg.settledGws}
             />
           </div>
         </>

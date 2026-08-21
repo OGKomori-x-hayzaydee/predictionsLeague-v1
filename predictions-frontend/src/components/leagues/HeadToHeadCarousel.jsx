@@ -25,13 +25,13 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <KickerLabel>HEAD TO HEAD</KickerLabel>
-        <div className="flex gap-0.5 rounded-9 border border-border-card bg-surface-card-4 p-0.5">
+        <div className="flex gap-0.5 rounded-full border border-border-card bg-surface-card-4 p-1">
           {['tape', 'radar'].map((v) => (
             <button
               key={v}
               onClick={() => setVsVariant(v)}
-              className={`min-h-8 rounded-7 px-2.5 py-1 font-outfit text-3xs tracking-wide md:min-h-0 ${
-                vsVariant === v ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
+              className={`min-h-9 rounded-full px-3.5 py-1.5 font-outfit text-2xs tracking-wide ${
+                vsVariant === v ? 'bg-brand-teal text-primary-800' : 'text-text-muted-2'
               }`}
             >
               {v.toUpperCase()}
@@ -46,7 +46,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
             onClick={() => canPrev && setVsIdx(idx - 1)}
             disabled={!canPrev}
             aria-label="Previous rival"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30 md:size-7"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
           >
             &#8249;
           </button>
@@ -117,7 +117,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
             onClick={() => canNext && setVsIdx(idx + 1)}
             disabled={!canNext}
             aria-label="Next rival"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30 md:size-7"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
           >
             &#8250;
           </button>
