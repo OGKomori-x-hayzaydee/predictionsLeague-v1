@@ -27,7 +27,7 @@ export default function FormBookPanel({ formBook, sel }) {
             {memberPanel.initial}
           </span>
           <div className="flex min-w-0 flex-1 flex-col leading-tight">
-            <span className="truncate font-dmSerif text-lg text-text-primary md:text-xl">{memberPanel.name}</span>
+            <span className="truncate font-dmSerif text-lg text-text-primary md:text-2xl">{memberPanel.name}</span>
             <span className="font-outfit text-2xs text-text-muted-2">{memberPanel.sheetNote}</span>
           </div>
         </div>
@@ -36,7 +36,7 @@ export default function FormBookPanel({ formBook, sel }) {
           {memberPanel.stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-0.5 rounded-9 border border-border-card bg-surface-card-3 p-2.5">
               <span className="font-outfit text-3xs tracking-widest text-text-muted-2">{s.label}</span>
-              <span className="font-dmSerif text-lg leading-none md:text-2xl" style={{ color: s.fg }}>
+              <span className="font-dmSerif text-2xl leading-none" style={{ color: s.fg }}>
                 {s.val}
               </span>
             </div>
@@ -69,10 +69,10 @@ export default function FormBookPanel({ formBook, sel }) {
                   borderColor: s.isExact ? 'var(--color-brand-teal-mid)' : 'var(--border-hairline)',
                 }}
               >
-                <span className="min-w-0 truncate text-2xs text-text-secondary">{s.match}</span>
-                <span className="text-center font-outfit text-xs text-text-muted-2">{s.theirs}</span>
-                <span className="text-center font-outfit text-xs text-brand-teal">{s.yours}</span>
-                <span className="text-right font-outfit text-2xs text-text-muted-2">{s.pts}</span>
+                <span className="min-w-0 truncate text-caption text-text-secondary">{s.match}</span>
+                <span className="text-center font-outfit text-caption text-text-muted-2">{s.theirs}</span>
+                <span className="text-center font-outfit text-caption text-brand-teal">{s.yours}</span>
+                <span className="text-right font-outfit text-caption text-text-muted-2">{s.pts}</span>
               </div>
             ))}
           </div>
@@ -86,7 +86,7 @@ export default function FormBookPanel({ formBook, sel }) {
       <div className="flex min-h-0 flex-1 flex-col gap-3 md:gap-4">
         <div className="flex flex-col gap-1">
           <KickerLabel>HOW THE ROOM SPLIT</KickerLabel>
-          <span className="font-dmSerif text-lg leading-tight text-text-primary md:text-xl">{fixturePanel.title}</span>
+          <span className="font-dmSerif text-lg leading-tight text-text-primary md:text-2xl">{fixturePanel.title}</span>
           <span className="font-outfit text-2xs text-text-muted-2">{fixturePanel.state}</span>
         </div>
 
@@ -127,8 +127,8 @@ export default function FormBookPanel({ formBook, sel }) {
                     {c.initial}
                   </span>
                   <span className={`truncate text-caption ${c.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{c.name}</span>
-                  <span className="text-center font-outfit text-xs" style={{ color: vc?.fg || 'var(--text-muted-4)' }}>{c.call}</span>
-                  <span className="text-right font-outfit text-2xs text-text-muted-2">{c.pts}</span>
+                  <span className="text-center font-outfit text-caption" style={{ color: vc?.fg || 'var(--text-muted-4)' }}>{c.call}</span>
+                  <span className="text-right font-outfit text-caption text-text-muted-2">{c.pts}</span>
                 </div>
               );
             })}

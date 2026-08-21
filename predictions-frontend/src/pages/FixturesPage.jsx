@@ -224,7 +224,7 @@ export default function FixturesPage() {
 
   return (
     <div
-      className="relative flex h-[calc(100vh-2.75rem)] flex-col overflow-hidden animate-rise-in"
+      className="relative flex h-[calc(100vh-var(--shell-nav-h))] flex-col overflow-hidden animate-rise-in"
       style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}
     >
       {/* Top SlotBar */}

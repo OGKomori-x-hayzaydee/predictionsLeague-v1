@@ -1,6 +1,7 @@
 import TeamCrest from '../ui/TeamCrest';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
+import SegmentedControl from '../ui/SegmentedControl';
 
 /**
  * Mobile Form book — by-member / by-fixture rails.
@@ -38,19 +39,15 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
         </p>
       ) : (
         <>
-          <div className="flex rounded-full border border-border-card bg-surface-card-4 p-1">
-            {[{ id: 'member', label: 'BY MEMBER' }, { id: 'fixture', label: 'BY FIXTURE' }].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setMobGrid(t.id)}
-                className={`min-h-10 flex-1 rounded-full font-outfit text-2xs tracking-widest ${
-                  mobGrid === t.id ? 'bg-brand-teal text-primary-800' : 'text-text-muted-2'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            grow
+            value={mobGrid}
+            onChange={setMobGrid}
+            options={[
+              { id: 'member', label: 'BY MEMBER' },
+              { id: 'fixture', label: 'BY FIXTURE' },
+            ]}
+          />
 
           <span className="text-2xs text-text-muted-1">
             {byMember ? 'Tap a name to read their sheet against yours' : 'Tap a fixture to see how the room called it'}
