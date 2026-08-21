@@ -4,9 +4,8 @@
  * RecordPage.jsx's `previewMode` state), never shown by default. Every
  * screen that consumes real predictions (`userPredictionsAPI.getAllUserPredictions`)
  * can swap in `DEMO_PREDICTIONS` here instead, so Season/All-time/Search all
- * render identically whether the data is real or illustrative — the only
- * difference is the persistent "PREVIEW · Example data" banner RecordPage
- * renders around them.
+ * render identically whether the data is real or illustrative. RecordPage's
+ * preview button turns amber while this set is showing.
  *
  * Deliberately varied across EXACT / OUTCOME / MISSED verdicts, chip usage,
  * and gameweeks so every state (verdict colors, chip footer, "no scorer

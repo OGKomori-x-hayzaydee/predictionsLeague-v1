@@ -37,8 +37,7 @@ export default function RecordPage() {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
   // Opt-in only (see plan: "hybrid" data-gates + preview) — never shown by
-  // default, and always paired with an unmissable banner below so real vs.
-  // illustrative data is never ambiguous.
+  // default. The preview button's amber state is the only on-screen cue.
   const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
@@ -192,20 +191,6 @@ export default function RecordPage() {
           </button>
         )}
       </div>
-
-      {previewMode && (
-        <div className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-9 border border-brand-amber/40 bg-[color-mix(in_srgb,var(--brand-amber)_10%,transparent)] px-4 py-2.5 md:mx-[26px]">
-          <span className="font-outfit text-2xs tracking-[0.1em] text-brand-amber">
-            PREVIEW · Example data, not your real record
-          </span>
-          <button
-            onClick={() => setPreviewMode(false)}
-            className="shrink-0 font-outfit text-2xs tracking-wide text-brand-amber underline decoration-dotted underline-offset-2 hover:text-brand-amber-mid"
-          >
-            Exit preview
-          </button>
-        </div>
-      )}
 
       <div className="md:min-h-0 md:flex-1">
         {loading ? (
