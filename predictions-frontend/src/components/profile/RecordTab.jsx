@@ -2,6 +2,7 @@ import KickerLabel from '../ui/KickerLabel';
 import Card from '../ui/Card';
 import Sparkline from '../charts/Sparkline';
 import BarRow from '../charts/BarRow';
+import TeamCrestGrid from '../ui/TeamCrestGrid';
 import { computeTeamAccuracy } from '../../utils/profileStats';
 
 const BREAKDOWN_LABELS = [
@@ -15,24 +16,6 @@ const BREAKDOWN_LABELS = [
 
 const MIN_TEAM_SAMPLE = 3;
 
-function GroundRow({ team, tone }) {
-  const toneColor = tone === 'strong' ? 'var(--brand-teal)' : 'var(--state-error)';
-  return (
-    <div className="flex items-center gap-3 rounded-[10px] border border-border-card bg-surface-card-3/60 px-3.5 py-2.5">
-      <span className="h-6 w-[3px] shrink-0 rounded-full" style={{ background: toneColor }} />
-      <div className="flex min-w-0 flex-1 flex-col leading-tight">
-        <span className="truncate text-caption text-text-secondary">{team.team}</span>
-        <span className="font-mono text-2xs text-text-muted-2">
-          {team.predictions} call{team.predictions === 1 ? '' : 's'} · {team.correct} correct
-        </span>
-      </div>
-      <span className="shrink-0 font-dmSerif text-lg" style={{ color: toneColor }}>
-        {team.accuracy}%
-      </span>
-    </div>
-  );
-}
-
 /**
  * Spine.dc.html desktop lines 1476-1539 (rank chart + "where your points
  * come from" + "strongest and weakest ground"). The rank-through-season SVG
@@ -42,21 +25,45 @@ function GroundRow({ team, tone }) {
  * is rebuilt from real per-team accuracy (utils/profileStats.js#computeTeamAccuracy)
  * rather than the prototype's fabricated match-category buckets ("Home
  * favourites", "Derbies", etc.) which this app has no way to compute.
+ *
+ * Crest cells share the All-time tab's "Who you read well" language so the
+ * two team-accuracy views read as the same visualisation on different ground.
  */
 export default function RecordTab({ stats, predictions = [] }) {
   const maxPoints = Math.max(1, ...BREAKDOWN_LABELS.map(({ key }) => Math.abs(stats.breakdown[key]?.points ?? 0)));
 
   const teamAccuracy = computeTeamAccuracy(predictions).filter((t) => t.predictions >= MIN_TEAM_SAMPLE);
   const sortedDesc = [...teamAccuracy].sort((a, b) => b.accuracy - a.accuracy || b.predictions - a.predictions);
-  const strongest = sortedDesc.slice(0, 3);
+  const strongest = sortedDesc.slice(0, 3).map((t) => ({ ...t, tone: 'strong' }));
   const strongestTeams = new Set(strongest.map((t) => t.team));
-  const weakest = [...sortedDesc].reverse().filter((t) => !strongestTeams.has(t.team)).slice(0, 3);
+  const weakest = [...sortedDesc].reverse().filter((t) => !strongestTeams.has(t.team)).slice(0, 3).map((t) => ({ ...t, tone: 'weak' }));
+
+  const gw = stats.pointsByGameweek || [];
+  const mid = gw.length ? Math.floor((gw.length - 1) / 2) : 0;
+  const chartLabels = gw.length >= 2
+    ? [`GW ${gw[0].gameweek}`, gw.length > 2 ? `GW ${gw[mid].gameweek}` : null, `GW ${gw[gw.length - 1].gameweek}`].filter(Boolean)
+    : [];
 
   return (
     <div className="space-y-6">
       <Card className="p-5">
-        <KickerLabel as="div" className="mb-3">Points by gameweek</KickerLabel>
-        <Sparkline data={stats.pointsByGameweek.map((p) => p.points)} height={72} />
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <KickerLabel>Points by gameweek</KickerLabel>
+          {gw.length > 0 && (
+            <span className="font-outfit text-2xs tracking-[0.12em] text-brand-teal">
+              Average {stats.avgPerWeek} a week
+            </span>
+          )}
+        </div>
+        <Sparkline
+          data={gw.map((p) => p.points)}
+          height={96}
+          fill={false}
+          grid
+          glow
+          average={stats.avgPerWeek || undefined}
+          labels={chartLabels}
+        />
       </Card>
 
       <Card className="p-5">
@@ -86,21 +93,21 @@ export default function RecordTab({ stats, predictions = [] }) {
             {` ${MIN_TEAM_SAMPLE}`} fixtures involving the same side.
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-2">STRONGEST</span>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="flex flex-col gap-2.5">
+              <span className="font-outfit text-2xs tracking-[0.13em] text-brand-teal">STRONGEST</span>
               {strongest.length === 0 ? (
                 <p className="text-xs text-text-muted-3">Not enough data yet.</p>
               ) : (
-                strongest.map((t) => <GroundRow key={t.team} team={t} tone="strong" />)
+                <TeamCrestGrid teams={strongest} className="grid-cols-3" />
               )}
             </div>
-            <div className="flex flex-col gap-2">
-              <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-2">WEAKEST</span>
+            <div className="flex flex-col gap-2.5">
+              <span className="font-outfit text-2xs tracking-[0.13em] text-[color:var(--state-error-mid)]">WEAKEST</span>
               {weakest.length === 0 ? (
                 <p className="text-xs text-text-muted-3">Not enough data yet.</p>
               ) : (
-                weakest.map((t) => <GroundRow key={t.team} team={t} tone="weak" />)
+                <TeamCrestGrid teams={weakest} className="grid-cols-3" />
               )}
             </div>
           </div>

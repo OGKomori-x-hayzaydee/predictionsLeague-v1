@@ -1,15 +1,36 @@
 import { Lock, CalendarBlank, TrendUp } from '@phosphor-icons/react';
 import KickerLabel from '../ui/KickerLabel';
 import Card from '../ui/Card';
-import StatTile from '../ui/StatTile';
 import Sparkline from '../charts/Sparkline';
-import BarRow from '../charts/BarRow';
-import TeamCrest from '../ui/TeamCrest';
+import TeamCrestGrid from '../ui/TeamCrestGrid';
 import VisualizationsGate from './VisualizationsGate';
 import { computeTeamAccuracy } from '../../utils/profileStats';
 import { computeScorelineHitRates, computeBestWorstWeeks } from '../../utils/recordStats';
 
 const VIZ_THRESHOLD = 5;
+const CURRENT_SEASON = '2024/25';
+
+function ordinal(n) {
+  const v = n % 100;
+  const suffix = v >= 11 && v <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
+  return `${n}${suffix}`;
+}
+
+function weekCopy(predictions, week, avg, kind) {
+  if (!week) return '';
+  const settled = predictions.filter(
+    (p) => p.gameweek === week.gameweek && p.actualHomeScore != null && p.actualAwayScore != null
+  );
+  const exacts = settled.filter((p) => p.homeScore === p.actualHomeScore && p.awayScore === p.actualAwayScore).length;
+  const chips = settled.filter((p) => (p.chips || []).length > 0).length;
+  const delta = week.points - avg;
+  if (kind === 'best') {
+    const exactBit = exacts ? `${exacts} exact scoreline${exacts === 1 ? '' : 's'}` : `${settled.length} settled call${settled.length === 1 ? '' : 's'}`;
+    const chipBit = chips ? ` and ${chips} chip${chips === 1 ? '' : 's'} played` : '';
+    return `Your highest-scoring week on record — ${exactBit}${chipBit}, ${Math.abs(delta)} ${delta >= 0 ? 'above' : 'below'} your average of ${avg} a week.`;
+  }
+  return `A week that returned ${week.points} points from ${settled.length} call${settled.length === 1 ? '' : 's'} — ${Math.abs(delta)} below your average of ${avg}.`;
+}
 
 /**
  * Honest "locked" state for a section that needs more real history than
@@ -26,6 +47,39 @@ function DataGateTeaser({ icon, text }) {
       </span>
       <span aria-hidden="true" className="text-text-muted-4"><Lock size={18} /></span>
       <p className="max-w-[22em] text-caption leading-relaxed text-text-muted-3">{text}</p>
+    </div>
+  );
+}
+
+function HitRateRows({ rows }) {
+  return (
+    <div className="flex flex-col gap-3.5">
+      {rows.map((s) => (
+        <div key={s.type} className="flex flex-col gap-1.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-caption text-text-muted-2">{s.type}</span>
+            <span className="shrink-0 font-outfit text-sm text-text-primary">
+              {s.n ? (
+                <>
+                  {s.pct}%
+                  <span className="text-text-muted-3"> · {s.n} call{s.n === 1 ? '' : 's'}</span>
+                </>
+              ) : (
+                <span className="text-caption text-text-muted-4">no calls yet</span>
+              )}
+            </span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-surface-card-4">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${s.pct}%`,
+                background: `linear-gradient(90deg, ${s.color}, color-mix(in srgb, var(--brand-indigo) 70%, ${s.color}))`,
+              }}
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -60,6 +114,28 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
   const settledWeeks = stats.pointsByGameweek.length;
   const vizGated = !previewMode && settledWeeks < VIZ_THRESHOLD;
 
+  const latestRank = hasMultiSeason ? demoRankTrajectory[demoRankTrajectory.length - 1] : null;
+  const seasonRows = hasMultiSeason
+    ? [
+        ...demoSeasonHistory,
+        {
+          season: CURRENT_SEASON,
+          points: stats.seasonPoints,
+          avgPerWeek: stats.avgPerWeek,
+          rank: latestRank ?? 4,
+          totalTeams: demoSeasonHistory[0]?.totalTeams ?? 12,
+          current: true,
+        },
+      ]
+    : [];
+  const lifetimePts = seasonRows.reduce((t, s) => t + s.points, 0);
+
+  const gw = stats.pointsByGameweek;
+  const mid = gw.length ? Math.floor((gw.length - 1) / 2) : 0;
+  const chartLabels = gw.length >= 2
+    ? [`GW ${gw[0].gameweek}`, gw.length > 2 ? `GW ${gw[mid].gameweek}` : null, `GW ${gw[gw.length - 1].gameweek}`].filter(Boolean)
+    : [];
+
   if (vizGated) {
     return (
       <div className="flex flex-col gap-4">
@@ -73,62 +149,68 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="font-dmSerif text-2xl leading-tight text-text-primary md:text-3xl">
-        Every week you have ever filed
-      </h2>
-
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <StatTile label="Career points" value={stats.seasonPoints} accent="var(--color-brand-teal)" />
-        <StatTile label="Settled calls" value={stats.totalCompleted} />
-        <StatTile
-          label="Best week"
-          value={stats.bestWeek ? `+${stats.bestWeek.points}` : '—'}
-          note={stats.bestWeek ? `GW${stats.bestWeek.gameweek}` : undefined}
-        />
-        <StatTile label="Chips played" value={stats.chipsPlayed} />
-      </div>
+      <header className="flex flex-col gap-1">
+        <KickerLabel className="text-brand-teal">
+          {hasMultiSeason ? 'Three seasons on record' : `${settledWeeks} settled week${settledWeeks === 1 ? '' : 's'} on record`}
+        </KickerLabel>
+        <h2 className="font-dmSerif text-2xl leading-tight text-text-primary md:text-3xl">
+          Every week you have ever filed
+        </h2>
+      </header>
 
       <Card className="p-5">
-        <div className="mb-3 flex items-baseline justify-between">
-          <KickerLabel>Points per settled week</KickerLabel>
-          <span className="font-outfit text-2xs text-brand-teal">
-            {trend.length ? `AVERAGE ${stats.avgPerWeek} A WEEK` : ''}
-          </span>
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <KickerLabel>Points per week</KickerLabel>
+          {trend.length > 0 && (
+            <span className="font-outfit text-2xs tracking-[0.12em] text-brand-teal">
+              Average {stats.avgPerWeek} a week
+            </span>
+          )}
         </div>
-        <Sparkline data={trend} height={90} />
+        <Sparkline
+          data={trend}
+          height={128}
+          fill={false}
+          grid
+          glow
+          average={stats.avgPerWeek || undefined}
+          labels={chartLabels}
+        />
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card className="relative overflow-hidden p-5">
-          <KickerLabel as="div" className="mb-3">Season by season</KickerLabel>
+          <KickerLabel as="div" className="mb-4">Season by season</KickerLabel>
           {hasMultiSeason ? (
-            <div className="flex flex-col gap-3">
-              {demoSeasonHistory.map((s) => (
-                <div key={s.season} className="flex flex-col gap-1">
+            <div className="flex flex-col gap-3.5">
+              {seasonRows.map((s) => (
+                <div key={s.season} className="flex flex-col gap-1.5">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="flex items-baseline gap-2">
+                    <span className="flex min-w-0 flex-wrap items-baseline gap-2">
                       <span className="text-caption text-text-muted-2">{s.season}</span>
                       <span className="font-dmSerif text-xl text-text-primary">{s.points}</span>
                       <span className="text-xs text-text-muted-3">{s.avgPerWeek} a week</span>
                     </span>
-                    <span className="font-outfit text-2xs text-text-muted-3">
-                      {s.rank}
-                      {s.rank === 1 ? 'st' : s.rank === 2 ? 'nd' : s.rank === 3 ? 'rd' : 'th'} of {s.totalTeams}
+                    <span className="shrink-0 font-outfit text-2xs text-text-muted-3">
+                      {ordinal(s.rank)} of {s.totalTeams}
                     </span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-surface-card-4">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid"
-                      style={{ width: `${Math.round(((s.totalTeams - s.rank + 1) / s.totalTeams) * 100)}%` }}
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${Math.round(((s.totalTeams - s.rank + 1) / s.totalTeams) * 100)}%`,
+                        background: s.current
+                          ? 'linear-gradient(90deg, var(--brand-teal-mid), var(--brand-indigo))'
+                          : 'var(--brand-teal-mid)',
+                      }}
                     />
                   </div>
                 </div>
               ))}
-              <div className="mt-1 flex items-baseline justify-between border-t border-border-base pt-2">
+              <div className="mt-0.5 flex items-baseline justify-between border-t border-border-base pt-2.5">
                 <span className="font-outfit text-2xs tracking-wide text-text-muted-3">LIFETIME</span>
-                <span className="font-dmSerif text-xl text-brand-teal">
-                  {demoSeasonHistory.reduce((t, s) => t + s.points, 0) + stats.seasonPoints} pts
-                </span>
+                <span className="font-dmSerif text-xl text-brand-teal">{lifetimePts} pts</span>
               </div>
             </div>
           ) : (
@@ -140,88 +222,84 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
         </Card>
 
         <Card className="relative overflow-hidden p-5">
-          <div className="mb-3 flex items-baseline justify-between">
+          <div className="mb-4 flex items-baseline justify-between">
             <KickerLabel>Rank trajectory</KickerLabel>
-            {hasMultiSeason && <span className="font-outfit text-2xs text-brand-indigo">4TH OF 12</span>}
+            {hasMultiSeason && latestRank != null && (
+              <span className="font-outfit text-2xs tracking-[0.12em] text-brand-indigo">
+                {ordinal(latestRank).toUpperCase()} OF {seasonRows[0]?.totalTeams ?? 12}
+              </span>
+            )}
           </div>
           {hasMultiSeason ? (
             <div className="flex flex-col gap-2">
-              <Sparkline data={demoRankTrajectory.map((r) => -r)} height={70} stroke="var(--brand-indigo-mid)" fill={false} />
+              <Sparkline
+                data={demoRankTrajectory.map((r) => -r)}
+                height={128}
+                stroke="var(--brand-indigo)"
+                fill={false}
+                grid
+                glow
+              />
               {demoRankNote && <p className="text-2xs leading-relaxed text-text-muted-2">{demoRankNote}</p>}
             </div>
           ) : (
             <DataGateTeaser icon={<TrendUp size={96} />} text="Needs a full second season of results to plot a trend." />
           )}
         </Card>
-      </div>
 
-      <Card className="p-5">
-        <KickerLabel as="div" className="mb-3">Hit rate by scoreline type</KickerLabel>
-        <div className="space-y-3">
-          {scorelineHitRates.map((s) => (
-            <BarRow
-              key={s.type}
-              label={s.type}
-              value={s.pct}
-              max={100}
-              note={s.n ? `${s.pct}% · ${s.n} call${s.n === 1 ? '' : 's'}` : 'no calls yet'}
-              color={s.color}
-            />
-          ))}
-        </div>
-      </Card>
+        <Card className="p-5">
+          <KickerLabel as="div" className="mb-4">Hit rate by scoreline type</KickerLabel>
+          <HitRateRows rows={scorelineHitRates} />
+        </Card>
 
-      <Card className="p-5">
-        <div className="mb-3 flex items-baseline justify-between">
-          <KickerLabel>Who you read well</KickerLabel>
-          <span className="font-outfit text-3xs text-text-muted-4">SHARE OF CALLS CORRECT</span>
-        </div>
-        {teamAccuracy.length === 0 ? (
-          <p className="text-sm text-text-muted-2">Not enough settled predictions yet.</p>
-        ) : (
-          <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
-            {teamAccuracy.map((t) => {
-              const strong = t.accuracy >= 60;
-              return (
-                <div
-                  key={t.team}
-                  className="flex flex-col items-center gap-1.5 rounded-9 border px-1 py-2.5"
-                  style={{
-                    background: strong ? 'color-mix(in srgb, var(--brand-teal-deep) 15%, transparent)' : 'var(--surface-card-3)',
-                    borderColor: strong ? 'color-mix(in srgb, var(--brand-teal-mid) 35%, transparent)' : 'var(--border-base)',
-                  }}
-                  title={`${t.team} · ${t.accuracy}% of ${t.predictions} calls`}
-                >
-                  <TeamCrest team={t.team} size={20} />
-                  <span className="font-outfit text-2xs" style={{ color: strong ? 'var(--brand-teal)' : 'var(--text-muted-2)' }}>
-                    {t.accuracy}%
-                  </span>
-                </div>
-              );
-            })}
+        <Card className="p-5">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <KickerLabel>Who you read well</KickerLabel>
+            <span className="font-outfit text-3xs tracking-[0.12em] text-text-muted-4">SHARE OF CALLS CORRECT</span>
           </div>
-        )}
-      </Card>
+          {teamAccuracy.length === 0 ? (
+            <p className="text-sm text-text-muted-2">Not enough settled predictions yet.</p>
+          ) : (
+            <TeamCrestGrid teams={teamAccuracy} />
+          )}
+        </Card>
+      </div>
 
       {(best || worst) && (
         <div className="grid grid-cols-1 gap-3.5 pb-1.5 sm:grid-cols-2">
           <div
-            className="flex flex-col gap-1.5 rounded-md border p-4"
-            style={{ background: 'color-mix(in srgb, var(--brand-teal-deep) 12%, var(--surface-card))', borderColor: 'color-mix(in srgb, var(--brand-teal-mid) 40%, transparent)' }}
+            className="flex flex-col gap-1.5 rounded-md border border-border-card border-t-2 p-4"
+            style={{
+              borderTopColor: 'var(--brand-teal)',
+              background: 'linear-gradient(180deg, color-mix(in srgb, var(--brand-teal-deep) 16%, var(--surface-card)), var(--surface-card))',
+            }}
           >
             <KickerLabel className="text-brand-teal">Best week on record</KickerLabel>
             <span className="font-dmSerif text-xl leading-tight text-text-primary">
               {best ? `Gameweek ${best.gameweek} · ${best.points} points` : '—'}
             </span>
+            {best && (
+              <p className="text-caption leading-relaxed text-text-muted-2">
+                {weekCopy(predictions, best, stats.avgPerWeek, 'best')}
+              </p>
+            )}
           </div>
           <div
-            className="flex flex-col gap-1.5 rounded-md border p-4"
-            style={{ background: 'color-mix(in srgb, var(--state-error) 10%, var(--surface-card))', borderColor: 'color-mix(in srgb, var(--state-error-mid) 35%, transparent)' }}
+            className="flex flex-col gap-1.5 rounded-md border border-border-card border-t-2 p-4"
+            style={{
+              borderTopColor: 'var(--state-error)',
+              background: 'linear-gradient(180deg, color-mix(in srgb, var(--state-error) 14%, var(--surface-card)), var(--surface-card))',
+            }}
           >
             <KickerLabel className="text-[color:var(--state-error-mid)]">Worst week on record</KickerLabel>
             <span className="font-dmSerif text-xl leading-tight text-text-primary">
               {worst ? `Gameweek ${worst.gameweek} · ${worst.points} points` : '—'}
             </span>
+            {worst && (
+              <p className="text-caption leading-relaxed text-text-muted-2">
+                {weekCopy(predictions, worst, stats.avgPerWeek, 'worst')}
+              </p>
+            )}
           </div>
         </div>
       )}
