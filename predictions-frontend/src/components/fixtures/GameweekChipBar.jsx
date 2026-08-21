@@ -38,9 +38,6 @@ export default function GameweekChipBar({
         <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
           CHIPS · THE WHOLE GAMEWEEK
         </span>
-        <span className="font-outfit text-2xs text-[#8fa0b8]">
-          Applies to every match this GW, including slips already filed.
-        </span>
       </div>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {GW_CHIP_LIST.map((c) => {
