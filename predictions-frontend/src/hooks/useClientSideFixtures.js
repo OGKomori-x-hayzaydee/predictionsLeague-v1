@@ -84,7 +84,7 @@ function mergeHybridFixtures(externalFixtures, predictions, { includeUnpredicted
  */
 export const useUserPredictions = (options = {}) => {
   const {
-    status = 'upcoming',
+    status = 'all',
     enabled = true,
     staleTime = 2 * 60 * 1000, // 2 minutes
     cacheTime = 10 * 60 * 1000 // 10 minutes

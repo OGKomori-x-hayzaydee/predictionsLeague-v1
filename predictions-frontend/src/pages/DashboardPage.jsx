@@ -5,11 +5,14 @@ import StatTile from '../components/ui/StatTile';
 import StationRail from '../components/dashboard/StationRail';
 import FixturePreviewCard from '../components/dashboard/FixturePreviewCard';
 import SpinePreviewSwitcher, { useDashSpineVariant } from '../components/dashboard/SpinePreviewSwitcher';
+import ResultsCarousel from '../components/dashboard/ResultsCarousel';
+import { useDashResultsVariant } from '../components/dashboard/ResultsPreviewSwitcher';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardMobileSheet from '../components/dashboard/DashboardMobileSheet';
 import LoadingState from '../components/common/LoadingState';
 import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
+import useLastSettledGameweek from '../hooks/useLastSettledGameweek';
 import { useNextMatch } from '../hooks/useNextMatch';
 
 export default function DashboardPage() {
@@ -17,6 +20,7 @@ export default function DashboardPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('this');
   const [spineVariant, setSpineVariant] = useDashSpineVariant();
+  const [resultsVariant, setResultsVariant] = useDashResultsVariant();
 
   const {
     stations,
@@ -43,6 +47,7 @@ export default function DashboardPage() {
     leagues,
   } = useDashboardData();
   const { timeDisplay, isLive } = useNextMatch();
+  const lastGw = useLastSettledGameweek();
 
   const currentGameweek = essentialData?.season?.currentGameweek;
   const deadlineFormatted = essentialData?.season?.deadlineFormatted;
@@ -126,6 +131,20 @@ export default function DashboardPage() {
               variant="desktop"
               spineVariant={spineVariant}
               deadlineLabel={deadlineFormatted}
+            />
+          </div>
+
+          <div className="w-[94%] mx-auto">
+            <ResultsCarousel
+              predictions={lastGw.predictions}
+              gameweek={lastGw.gameweek}
+              variant={resultsVariant}
+              onVariantChange={setResultsVariant}
+              usingDemo={lastGw.usingDemo}
+              hasReal={lastGw.hasReal}
+              previewMode={lastGw.previewMode}
+              onTogglePreview={() => lastGw.setPreviewMode((v) => !v)}
+              isLoading={lastGw.isLoading}
             />
           </div>
         </div>

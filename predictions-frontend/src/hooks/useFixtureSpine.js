@@ -13,6 +13,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useFixtures } from './useFixtures';
 import { calculateCeilingPoints } from '../utils/pointsCalculation';
+import { reelPresentation } from '../utils/matchResult';
 
 export function useFixtureSpine() {
   const { fixtures, stats, isLoading, isError, error } = useFixtures();
@@ -35,6 +36,9 @@ export function useFixtureSpine() {
       fixtures.map((fixture, index) => {
         const predicted = !!fixture.predicted;
         const prediction = fixture.userPrediction;
+        const { scoreLabel, scoreTone } = reelPresentation(fixture, prediction, {
+          isSelected: index === effectiveIndex,
+        });
         return {
           id: fixture.id ?? `${fixture.homeTeam}-${fixture.awayTeam}-${fixture.date}`,
           index,
@@ -42,7 +46,8 @@ export function useFixtureSpine() {
           homeTeam: fixture.homeTeam,
           awayTeam: fixture.awayTeam,
           predicted,
-          scoreLabel: predicted && prediction ? `${prediction.homeScore}–${prediction.awayScore}` : null,
+          scoreLabel,
+          scoreTone,
           isSelected: index === effectiveIndex,
           onSelect: () => setSelectedIndex(index),
         };

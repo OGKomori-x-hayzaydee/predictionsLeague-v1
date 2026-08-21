@@ -9,6 +9,16 @@ function formatDay(dateStr) {
   return `${day} ${time}`;
 }
 
+function scoreToneClass(tone, predicted, isSelected) {
+  if (tone === 'exact') return 'text-brand-teal';
+  if (tone === 'outcome') return 'text-brand-indigo';
+  if (tone === 'miss' || tone === 'live') return 'text-brand-amber';
+  if (tone === 'filed') return 'text-brand-indigo';
+  if (predicted) return 'text-brand-indigo';
+  if (isSelected) return 'text-brand-teal';
+  return 'text-text-muted-5';
+}
+
 function plateClasses(isSelected, predicted) {
   if (isSelected) return 'bg-brand-teal/10 border-brand-teal-mid/40';
   if (predicted) return 'bg-surface-card-4 border-border-card';
@@ -16,9 +26,9 @@ function plateClasses(isSelected, predicted) {
 }
 
 function DesktopStation({ station }) {
-  const { homeTeam, awayTeam, predicted, scoreLabel, isSelected, onSelect, date } = station;
+  const { homeTeam, awayTeam, predicted, scoreLabel, scoreTone, isSelected, onSelect, date } = station;
   const dayColor = isSelected ? 'text-brand-teal' : 'text-text-muted-5';
-  const scoreColor = predicted ? 'text-brand-indigo' : isSelected ? 'text-brand-teal' : 'text-text-muted-5';
+  const scoreColor = scoreToneClass(scoreTone, predicted, isSelected);
   const tickW = isSelected ? 'w-[3px]' : 'w-[2px]';
   const tickH = isSelected ? 'h-[34px]' : predicted ? 'h-[22px]' : 'h-[12px]';
   const tickBg = isSelected ? 'bg-brand-teal' : predicted ? 'bg-brand-indigo-mid' : 'bg-border-control/60';
@@ -40,9 +50,9 @@ function DesktopStation({ station }) {
 }
 
 function MobileStation({ station }) {
-  const { homeTeam, awayTeam, predicted, scoreLabel, isSelected, onSelect, date } = station;
+  const { homeTeam, awayTeam, predicted, scoreLabel, scoreTone, isSelected, onSelect, date } = station;
   const dayColor = isSelected ? 'text-brand-teal' : 'text-text-muted-5';
-  const scoreColor = predicted ? 'text-brand-indigo' : 'text-text-muted-5';
+  const scoreColor = scoreToneClass(scoreTone, predicted, isSelected);
 
   return (
     <button

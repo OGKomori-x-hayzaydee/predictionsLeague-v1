@@ -138,7 +138,6 @@ const leagueAPI = {
         id: leagueId,
         name: updates.name,
         description: updates.description,
-        firstGameweek: updates.firstGameweek
       };
       
       const response = await api.put('/leagues/update', requestBody);

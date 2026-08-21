@@ -156,11 +156,16 @@ export const dataMerging = {
           chips: matchingPrediction.chips || [],
           submittedAt: matchingPrediction.submittedAt,
           status: matchingPrediction.status || 'pending',
+          points: matchingPrediction.points ?? null,
           // Actual results (from backend after match completion)
+          actualHomeScore: matchingPrediction.actualHomeScore ?? null,
+          actualAwayScore: matchingPrediction.actualAwayScore ?? null,
           actualHomeScorers: matchingPrediction.actualHomeScorers || null,
           actualAwayScorers: matchingPrediction.actualAwayScorers || null
         } : null,
-        // Also add actual scorers at fixture level for easier access
+        // Also add actuals at fixture level for easier access (FT still lives on fixture.homeScore)
+        actualHomeScore: matchingPrediction?.actualHomeScore ?? null,
+        actualAwayScore: matchingPrediction?.actualAwayScore ?? null,
         actualHomeScorers: matchingPrediction?.actualHomeScorers || null,
         actualAwayScorers: matchingPrediction?.actualAwayScorers || null,
         

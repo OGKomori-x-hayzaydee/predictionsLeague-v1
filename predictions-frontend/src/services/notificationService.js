@@ -77,6 +77,10 @@ export const NOTIFICATION_ACTIONS = {
   LEAGUE_JOIN: 'league_join',
   LEAGUE_LEAVE: 'league_leave',
   LEAGUE_INVITE: 'league_invite',
+  LEAGUE_UPDATE: 'league_update',
+  LEAGUE_PROMOTE: 'league_promote',
+  LEAGUE_REMOVE: 'league_remove',
+  LEAGUE_DELETE: 'league_delete',
   
   // Settings Actions
   THEME_CHANGE: 'theme_change',
@@ -267,6 +271,43 @@ class NotificationManager {
       message: `Invited ${inviteCount} ${inviteCount === 1 ? 'person' : 'people'} to "${leagueName}"`,
       icon: 'mail',
       metadata: { leagueName, inviteCount }
+    }),
+
+    updateSuccess: (leagueName) => this.notify({
+      type: NOTIFICATION_TYPES.SUCCESS,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_UPDATE,
+      message: `League "${leagueName}" updated`,
+      icon: 'settings',
+      metadata: { leagueName }
+    }),
+
+    promoteSuccess: (memberName) => this.notify({
+      type: NOTIFICATION_TYPES.SUCCESS,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_PROMOTE,
+      message: `${memberName} is now a league admin`,
+      icon: 'user-plus',
+      metadata: { memberName }
+    }),
+
+    removeSuccess: (memberName) => this.notify({
+      type: NOTIFICATION_TYPES.INFO,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_REMOVE,
+      message: `${memberName} removed from the league`,
+      icon: 'user-minus',
+      metadata: { memberName }
+    }),
+
+    deleteSuccess: (leagueName) => this.notify({
+      type: NOTIFICATION_TYPES.INFO,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_DELETE,
+      message: `Everyone removed from "${leagueName}"`,
+      icon: 'trash',
+      metadata: { leagueName },
+      trackAsActivity: false
     })
   };
 

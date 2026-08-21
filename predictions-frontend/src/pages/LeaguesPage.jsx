@@ -3,6 +3,7 @@ import { Ticket } from '@phosphor-icons/react';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
 import LeagueHome from '../components/leagues/LeagueHome';
+import LeagueManageView from '../components/leagues/LeagueManageView';
 import LeagueMasthead from '../components/leagues/LeagueMasthead';
 import Podium from '../components/leagues/Podium';
 import PositionChart from '../components/leagues/PositionChart';
@@ -29,6 +30,7 @@ const PREVIEW_BTN =
 export default function LeaguesPage() {
   const { myLeagues, isLoading, createLeague, refreshMyLeagues } = useLeagues();
   const [selected, setSelected] = useState(null);
+  const [managing, setManaging] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const { timeDisplay, isLive } = useNextMatch();
 
@@ -43,6 +45,17 @@ export default function LeaguesPage() {
   const togglePreview = () => {
     setPreviewMode((v) => !v);
     setSelected(null);
+    setManaging(false);
+  };
+
+  const openLeague = (league) => {
+    setSelected(league);
+    setManaging(false);
+  };
+
+  const backToHome = () => {
+    setSelected(null);
+    setManaging(false);
   };
 
   const previewButtonClass = `${PREVIEW_BTN} ${
@@ -63,11 +76,27 @@ export default function LeaguesPage() {
 
   return (
     <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
-      {selected ? (
+      {selected && managing && selected.isAdmin && !previewMode ? (
+        <LeagueManageView
+          key={`${selected.id}-manage`}
+          overview={selected}
+          onBack={() => setManaging(false)}
+          onUpdated={(patch) => {
+            setSelected((current) => (current ? { ...current, ...patch } : current));
+            refreshMyLeagues();
+          }}
+          onDeleted={() => {
+            setManaging(false);
+            setSelected(null);
+            refreshMyLeagues();
+          }}
+        />
+      ) : selected ? (
         <LeagueDetailView
           key={selected.id}
           overview={selected}
-          onBack={() => setSelected(null)}
+          onBack={backToHome}
+          onManage={selected.isAdmin && !previewMode ? () => setManaging(true) : undefined}
           deadline={deadline}
           previewMode={previewMode}
           onTogglePreview={togglePreview}
@@ -103,7 +132,7 @@ export default function LeaguesPage() {
             <LeagueHome
               myLeagues={leagues}
               isLoading={!previewMode && isLoading}
-              onOpen={setSelected}
+              onOpen={openLeague}
               onPreview={() => setPreviewMode(true)}
               previewMode={previewMode}
               {...joinCreate}
@@ -115,7 +144,7 @@ export default function LeaguesPage() {
   );
 }
 
-function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePreview, previewButtonClass }) {
+function LeagueDetailView({ overview, onBack, onManage, deadline, previewMode, onTogglePreview, previewButtonClass }) {
   const demoPack = previewMode ? getDemoLeaguePack(overview.id) : null;
   const lg = useLeagueDetail(previewMode ? null : overview.id, overview, demoPack);
   const tone = leagueTone(overview.id);
@@ -179,6 +208,7 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
           neighbours={neighbours}
           move={move}
           onBack={onBack}
+          onManage={onManage}
         />
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1 rounded-11 border border-border-card bg-surface-card-4 p-0.5">
@@ -208,7 +238,7 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
         <>
           <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="flex min-h-0 min-w-0 flex-col gap-3.5 overflow-y-auto px-6 py-5">
-              <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
+              <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} onManage={onManage} />
               <Podium
                 podium={lg.podium}
                 label={podiumLabel}

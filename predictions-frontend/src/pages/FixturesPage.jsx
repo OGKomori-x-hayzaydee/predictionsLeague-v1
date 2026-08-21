@@ -34,6 +34,7 @@ import {
   getBackdropTarget,
   BACKDROP_TRANSITION,
 } from '../components/fixtures/filingChoreography';
+import { buildResultView } from '../utils/matchResult';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -77,7 +78,7 @@ function draftAsFiledPrediction(draft, fixture, gwChipIds = []) {
 }
 
 function upsertUserPredictionCache(queryClient, prediction) {
-  queryClient.setQueryData([HYBRID_QUERY_KEYS.USER_PREDICTIONS, 'upcoming'], (prev) => {
+  queryClient.setQueryData([HYBRID_QUERY_KEYS.USER_PREDICTIONS, 'all'], (prev) => {
     const list = Array.isArray(prev) ? prev : [];
     const matchId = Number(prediction.matchId);
     const idx = list.findIndex((p) => Number(p.matchId) === matchId || (prediction.id && p.id === prediction.id));
@@ -166,7 +167,12 @@ export default function FixturesPage() {
     hasOptimisticFiling ||
     (selectedKey != null && filedMatchIds.has(selectedKey));
   const filedNow = isPredicted && !editorOpen;
-  const showEditor = !filedNow;
+  const resultView = selectedFixture
+    ? buildResultView(selectedFixture, hasOptimisticFiling ? optimisticFiled.prediction : selectedFixture.userPrediction)
+    : null;
+  const matchLocked = !!resultView?.kickedOff;
+  const showReceipt = matchLocked;
+  const showEditor = !filedNow && !matchLocked;
 
   const totalGoals = draft.homeScore + draft.awayScore;
   const filedChips = chipsFromDraft(draft, activeGwChipIds);
@@ -313,11 +319,29 @@ export default function FixturesPage() {
     }
   };
 
-  const statusPill = selectedFixture
-    ? isPredicted
-      ? { label: 'FILED', bg: '#0f766e26', border: '#14b8a666', fg: '#5eead4' }
-      : { label: 'OPEN', bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' }
-    : undefined;
+  const statusPill = (() => {
+    if (!selectedFixture) return undefined;
+    if (resultView?.live) {
+      return { label: resultView.stamp.label || 'LIVE', bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' };
+    }
+    if (resultView?.finished) {
+      const label = resultView.stamp.label || 'SCORED';
+      if (resultView.verdict?.verdict === 'EXACT') {
+        return { label, bg: '#0f766e26', border: '#14b8a666', fg: '#5eead4' };
+      }
+      if (resultView.verdict?.verdict === 'OUTCOME') {
+        return { label, bg: '#312e8126', border: '#6366f166', fg: '#818cf8' };
+      }
+      if (resultView.verdict?.verdict === 'MISSED') {
+        return { label, bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' };
+      }
+      return { label, bg: '#1c294226', border: '#2a3a52', fg: '#7f93ad' };
+    }
+    if (isPredicted) {
+      return { label: 'FILED', bg: '#0f766e26', border: '#14b8a666', fg: '#5eead4' };
+    }
+    return { label: 'OPEN', bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' };
+  })();
 
   const editorProps = {
     fixture: selectedFixture,
@@ -415,6 +439,17 @@ export default function FixturesPage() {
                 >
                   {showEditor ? (
                     <FixtureEditor {...editorProps} />
+                  ) : showReceipt ? (
+                    <div className="mx-auto flex w-full max-w-[46.2rem] flex-col items-center gap-4 py-2">
+                      <FixtureSlip
+                        fixture={selectedFixture}
+                        prediction={restingPrediction}
+                        filed={isPredicted}
+                        ceiling={restingCeiling}
+                        variant="scored"
+                        gameweekLabel={gameweekLabel}
+                      />
+                    </div>
                   ) : (
                     <div className="mx-auto flex w-full max-w-[46.2rem] flex-col items-center gap-4 py-2">
                       <FixtureSlip
@@ -537,6 +572,15 @@ export default function FixturesPage() {
                 </button>
                 {submitError && <p className="text-center text-xs text-state-error">{submitError}</p>}
               </div>
+            ) : showReceipt ? (
+              <FixtureSlip
+                fixture={selectedFixture}
+                prediction={restingPrediction}
+                filed={isPredicted}
+                ceiling={restingCeiling}
+                variant="scored"
+                gameweekLabel={gameweekLabel}
+              />
             ) : (
               <div className="flex flex-col gap-4">
                 <FixtureSlip

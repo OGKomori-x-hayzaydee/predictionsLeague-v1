@@ -141,7 +141,7 @@ export function isScheduledMatch(status) {
  * Check if match is finished
  */
 export function isFinishedMatch(status) {
-  return status === MATCH_STATUS.FINISHED;
+  return status === MATCH_STATUS.FINISHED || status === MATCH_STATUS.AWARDED;
 }
 
 /**
