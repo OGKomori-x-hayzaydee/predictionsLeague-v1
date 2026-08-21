@@ -59,9 +59,9 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
             </div>
 
             {vsVariant === 'tape' ? (
-              <div className="flex flex-col gap-2.5 md:gap-0">
+              <div className="flex flex-col gap-2.5 md:gap-1.5">
                 {current.tapeRows.map((r) => (
-                  <div key={r.label} className="flex flex-col gap-1 md:grid md:grid-cols-[3rem_1fr_9rem_1fr_3rem] md:items-center md:gap-2">
+                  <div key={r.label} className="flex flex-col gap-1 md:grid md:grid-cols-[3rem_minmax(0,1fr)_9rem_minmax(0,1fr)_3rem] md:items-center md:gap-2">
                     <div className="md:hidden">
                       <span className="block text-center font-outfit text-3xs tracking-widest text-text-muted-2">{r.label}</span>
                     </div>

@@ -102,8 +102,8 @@ export default function SlotBar({
         </div>
       )}
 
-      <div className="ml-auto flex shrink-0 items-center gap-3">
-        {right && <span className="whitespace-nowrap font-outfit text-2xs text-text-muted-2">{right}</span>}
+      <div className="ml-auto flex min-w-0 shrink items-center gap-3">
+        {right && <span className="min-w-0 truncate font-outfit text-2xs text-text-muted-2">{right}</span>}
         {deadline && (
           <span className="flex shrink-0 items-center gap-[7px] rounded-full border border-border-control bg-surface-card-4/70 px-[11px] py-[5px]">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-amber animate-[tick_2s_ease-in-out_infinite]" />

@@ -3,8 +3,8 @@ import { chipBadge } from '../../utils/leagueStats';
 
 const VISUAL_ORDER = [1, 0, 2];
 const PLINTH = ['h-24', 'h-16', 'h-12'];
-const AVATAR = ['size-10 text-base', 'size-8 text-caption', 'size-8 text-caption'];
-const PTS = ['text-3xl', 'text-2xl', 'text-2xl'];
+const AVATAR = ['size-10 text-base md:size-11', 'size-8 text-caption md:size-9', 'size-8 text-caption md:size-9'];
+const PTS = ['text-3xl', 'text-2xl md:text-3xl', 'text-2xl md:text-3xl'];
 
 /**
  * Gameweek podium — top 3 by the latest settled week's real points.
@@ -12,7 +12,7 @@ const PTS = ['text-3xl', 'text-2xl', 'text-2xl'];
 export default function Podium({ podium, label, note, bestCall, expandedUsername, onToggleExpand, onOpenInFormBook }) {
   if (!podium || podium.length === 0) {
     return (
-      <div className="flex flex-col gap-2 rounded-16 border border-border-base bg-surface-card p-5">
+      <div className="flex shrink-0 flex-col gap-2 rounded-16 border border-border-base bg-surface-card p-5">
         <KickerLabel>GAMEWEEK PODIUM</KickerLabel>
         <p className="text-2xs leading-relaxed text-text-muted-2">
           No settled gameweek yet — the podium fills in once your league's first results are scored.
@@ -33,7 +33,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
         key={member.username}
         onClick={() => onToggleExpand?.(member.username)}
         style={{ animation: `podiumRise .5s ${(VISUAL_ORDER.indexOf(i) * 0.08).toFixed(2)}s both cubic-bezier(.2,.8,.2,1)` }}
-        className="flex w-full flex-1 flex-col items-center gap-2 font-outfit md:w-40 md:flex-none"
+        className="flex w-24 shrink-0 flex-col items-center gap-2 font-outfit sm:w-32 md:w-40"
       >
         <span
           style={{ animation: first ? 'podiumGlow 2.6s ease-in-out infinite' : 'none' }}
@@ -75,7 +75,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
   };
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-16 border border-border-base bg-surface-card p-5 pb-4">
+    <div className="flex shrink-0 flex-col gap-2.5 overflow-hidden rounded-16 border border-border-base bg-surface-card p-5 pb-4">
       <KickerLabel>{label}</KickerLabel>
       <div className="flex items-end justify-center gap-2 border-b-2 border-border-card pt-2 md:gap-3.5">
         {VISUAL_ORDER.filter((i) => podium[i]).map((i) => tile(podium[i], i))}
@@ -106,7 +106,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
         </div>
       )}
 
-      {note && <span className="text-2xs leading-relaxed text-text-muted-2">{note}</span>}
+      {note && <span className="text-caption leading-relaxed text-text-muted-2">{note}</span>}
     </div>
   );
 }

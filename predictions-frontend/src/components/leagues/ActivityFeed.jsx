@@ -13,7 +13,7 @@ export default function ActivityFeed({ feed, className = '' }) {
             <span key={i} className="flex items-start gap-2.5 border-b border-border-hairline py-2.5 last:border-0">
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full" style={{ background: f.tone }} />
               <span className="flex-1 text-caption leading-relaxed text-text-muted-2">
-                <span className="text-text-secondary">{f.who}</span> {f.text}
+                <span className="font-dmSerif text-sm text-text-primary">{f.who}</span> {f.text}
               </span>
               <span className="shrink-0 font-outfit text-2xs text-text-muted-4">{f.time}</span>
             </span>

@@ -207,7 +207,7 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
       {lg.activeTab === 'overview' ? (
         <>
           <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_20rem]">
-            <div className="flex min-w-0 flex-col gap-4 overflow-y-auto px-6 py-5">
+            <div className="flex min-h-0 min-w-0 flex-col gap-3.5 overflow-y-auto px-6 py-5">
               <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
               <Podium
                 podium={lg.podium}
