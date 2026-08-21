@@ -2,6 +2,7 @@ import TeamCrest from '../ui/TeamCrest';
 import ScoreStepper from './ScoreStepper';
 import ScorerSelect from './ScorerSelect';
 import ChipSelector from './ChipSelector';
+import GameweekChipBar from './GameweekChipBar';
 import AiTeamReadPanel from './AiTeamReadPanel';
 
 function formatKickoff(dateStr) {
@@ -24,7 +25,12 @@ export default function FixtureEditor({
   onChangeHomeScorers,
   onChangeAwayScorers,
   onChangeChip,
-  matchChips,
+  matchChips = [],
+  gameweekChips = [],
+  activeGameweekChipIds = [],
+  currentGameweek,
+  stampingChipId,
+  onActivateGameweekChip,
   aiOpen,
   onToggleAi,
 }) {
@@ -108,9 +114,15 @@ export default function FixtureEditor({
         </div>
       </div>
 
-      {/* Chips Selector (Widened container) */}
-      <div className="w-full max-w-[76rem]">
+      <div className="flex w-full max-w-[76rem] flex-col gap-4">
         <ChipSelector chips={matchChips} selected={draft.chip} onToggle={onChangeChip} />
+        <GameweekChipBar
+          chips={gameweekChips}
+          activeIds={activeGameweekChipIds}
+          currentGameweek={currentGameweek}
+          busyId={stampingChipId}
+          onActivate={onActivateGameweekChip}
+        />
       </div>
 
       {/* AI Team Read Panel (Widened container) */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import SlotBar from '../components/ui/SlotBar';
@@ -19,11 +19,20 @@ import { CHIP_QUERY_KEYS } from '../hooks/useChips';
 import { extractMatchId, transformChipsFromBackend } from '../utils/backendMappings';
 import { calculateCeilingPoints } from '../utils/pointsCalculation';
 import {
+  inferActiveGameweekChipIds,
+  matchChipFromIds,
+  mergeMatchAndGameweekChips,
+} from '../utils/gameweekChipState';
+import { stampGameweekChipOnPending } from '../utils/stampGameweekChip';
+import { showToast } from '../services/notificationService';
+import {
   FILE_PHASES,
   RAIL_WIDTH_PX,
   CONTENT_LAYOUT_TRANSITION,
   AI_PANEL_VARIANTS,
   AI_PANEL_DELAY_MS,
+  getBackdropTarget,
+  BACKDROP_TRANSITION,
 } from '../components/fixtures/filingChoreography';
 
 function formatKickoff(dateStr) {
@@ -37,12 +46,20 @@ function formatKickoff(dateStr) {
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
 
-function chipsFromDraft(draft) {
-  return draft?.chip ? [draft.chip] : [];
+function chipsFromDraft(draft, gwChipIds = []) {
+  return mergeMatchAndGameweekChips(draft?.chip, gwChipIds);
 }
 
-function draftAsFiledPrediction(draft, fixture) {
-  const chips = chipsFromDraft(draft);
+function fixtureKey(fixture) {
+  if (!fixture) return null;
+  const matchId = extractMatchId(fixture);
+  if (matchId != null) return String(matchId);
+  if (fixture.id != null) return String(fixture.id);
+  return null;
+}
+
+function draftAsFiledPrediction(draft, fixture, gwChipIds = []) {
+  const chips = chipsFromDraft(draft, gwChipIds);
   return {
     matchId: extractMatchId(fixture) ?? fixture.id,
     homeScore: draft.homeScore,
@@ -54,6 +71,7 @@ function draftAsFiledPrediction(draft, fixture) {
     awayTeam: fixture.awayTeam,
     date: fixture.date,
     matchDate: fixture.date,
+    gameweek: fixture.gameweek,
     status: 'pending',
   };
 }
@@ -73,16 +91,12 @@ function upsertUserPredictionCache(queryClient, prediction) {
 }
 
 /**
- * Fixtures Page — desktop editor with a corner-anchored live-preview slip
- * that morphs in place into the "FILED" ceremony (see FloatingSlipCard),
- * matching Spine.dc.html's buildReel() choreography instead of a detached
- * centered modal. The phase machine itself (idle/center/stamp/return) and
- * its timings live in `useFilingSequence` + `filingChoreography.js` so this
- * component only has to react to `filePhase`, not re-derive it.
+ * Fixtures Page — desktop editor with an in-flow right-rail slip that
+ * lifts to center on file, stamps, and returns to the rail as FILED.
  */
 export default function FixturesPage() {
   const queryClient = useQueryClient();
-  const { availableChips } = useChipManagement();
+  const { availableChips, currentGameweek: chipGameweek, refreshChips } = useChipManagement();
 
   const {
     fixtures,
@@ -101,9 +115,6 @@ export default function FixturesPage() {
   const { essentialData } = useDashboardData();
   const { timeDisplay, isLive } = useNextMatch();
 
-  // Positioned ancestor `FloatingSlipCard` measures itself against, to
-  // compute a true pane-centered translate instead of a fixed vw/vh guess
-  // (see filingChoreography.js's getCardTarget doc comment).
   const paneRef = useRef(null);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -111,16 +122,11 @@ export default function FixturesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const { phase: filePhase, isSlow, isFiling, file, reset: resetFiling } = useFilingSequence();
-  // Optimistic "just filed" snapshot for the *currently open* fixture, so the
-  // resting-slip reveal isn't gated behind the invalidated queries' network
-  // round-trip — matching the prototype's instant local state flip.
   const [optimisticFiled, setOptimisticFiled] = useState(null);
+  const [filedMatchIds, setFiledMatchIds] = useState(() => new Set());
+  const [optimisticGwChips, setOptimisticGwChips] = useState([]);
+  const [stampingChipId, setStampingChipId] = useState(null);
 
-  // Navigation-interrupt fix: fixture switching (chevrons/reel strip) is
-  // disabled while `isFiling`, so by the time this effect can ever run for
-  // a *different* fixture, no filing sequence is in flight — `resetFiling`
-  // here is just a defensive clear of the idle phase state, not a mid-flight
-  // cancellation.
   useEffect(() => {
     const existing = selectedFixture?.userPrediction;
     setDraft({
@@ -128,7 +134,7 @@ export default function FixturesPage() {
       awayScore: existing?.awayScore ?? 0,
       homeScorers: existing?.homeScorers ?? [],
       awayScorers: existing?.awayScorers ?? [],
-      chip: existing?.chips?.[0] ?? null,
+      chip: matchChipFromIds(existing?.chips) ?? null,
     });
     setEditorOpen(false);
     setSubmitError(null);
@@ -136,29 +142,41 @@ export default function FixturesPage() {
     resetFiling();
   }, [selectedFixture?.id, resetFiling]);
 
-  const currentGameweek = essentialData?.season?.currentGameweek;
+  const currentGameweek = essentialData?.season?.currentGameweek || chipGameweek;
   const deadlineFormatted = essentialData?.season?.deadlineFormatted;
   const showDeadlineCountdown =
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
   const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : 'GW24';
 
-  // Guard against both sides being null/undefined at once (e.g. before
-  // fixtures have loaded) — `undefined === undefined` would otherwise read
-  // as a spurious match and crash the very next line on `optimisticFiled.prediction`.
+  const activeGwChipIds = useMemo(
+    () =>
+      inferActiveGameweekChipIds({
+        statusChips: availableChips,
+        fixtures,
+        currentGameweek,
+        optimisticIds: optimisticGwChips,
+      }),
+    [availableChips, fixtures, currentGameweek, optimisticGwChips]
+  );
+
+  const selectedKey = fixtureKey(selectedFixture);
   const hasOptimisticFiling = !!optimisticFiled && !!selectedFixture && optimisticFiled.id === selectedFixture.id;
-  const isPredicted = !!selectedFixture?.predicted || hasOptimisticFiling;
+  const isPredicted =
+    !!selectedFixture?.predicted ||
+    hasOptimisticFiling ||
+    (selectedKey != null && filedMatchIds.has(selectedKey));
   const filedNow = isPredicted && !editorOpen;
   const showEditor = !filedNow;
 
   const totalGoals = draft.homeScore + draft.awayScore;
-  const hasLivePrediction = totalGoals > 0 || draft.chip;
+  const filedChips = chipsFromDraft(draft, activeGwChipIds);
 
   const liveCeiling = calculateCeilingPoints({
     homeScore: draft.homeScore,
     awayScore: draft.awayScore,
     homeScorers: draft.homeScorers,
     awayScorers: draft.awayScorers,
-    chips: chipsFromDraft(draft),
+    chips: filedChips,
   });
 
   const restingPrediction = hasOptimisticFiling
@@ -166,27 +184,85 @@ export default function FixturesPage() {
     : selectedFixture?.userPrediction;
   const restingCeiling = restingPrediction ? calculateCeilingPoints({
     ...restingPrediction,
-    chips: restingPrediction.chips || chipsFromDraft(restingPrediction),
+    chips: restingPrediction.chips || filedChips,
   }) : 0;
 
-  const livePrediction = { ...draft, chips: chipsFromDraft(draft) };
+  const livePrediction = { ...draft, chips: filedChips };
   const activePrediction = filedNow ? restingPrediction : livePrediction;
   const activeCeiling = filedNow ? restingCeiling : liveCeiling;
 
-  // Drives the corner live-preview card: shown once there's something to
-  // preview pre-filing, or for the whole non-idle filing sequence — matches
-  // buildReel()'s `shown = (!filed && anyPicked) || phase !== "idle"`.
-  const previewVisible = !isPredicted && hasLivePrediction;
-  const railShown = previewVisible || isFiling;
+  const railShown = showEditor || isFiling;
+
+  const markFixtureFiled = useCallback((fixture, prediction) => {
+    const key = fixtureKey(fixture);
+    if (key) {
+      setFiledMatchIds((prev) => {
+        if (prev.has(key)) return prev;
+        const next = new Set(prev);
+        next.add(key);
+        return next;
+      });
+    }
+    setOptimisticFiled({
+      id: fixture.id,
+      prediction,
+    });
+  }, []);
+
+  const handleActivateGameweekChip = useCallback(
+    async (chipId) => {
+      if (!chipId || stampingChipId) return;
+      if (activeGwChipIds.includes(chipId)) return;
+      if (activeGwChipIds.length > 0) return;
+
+      setStampingChipId(chipId);
+      setOptimisticGwChips((prev) => (prev.includes(chipId) ? prev : [...prev, chipId]));
+      try {
+        const { stamped, attempted } = await stampGameweekChipOnPending({
+          chipId,
+          fixtures,
+          makePrediction: (payload, fixture, isEditing) =>
+            userPredictionsAPI.makePrediction(payload, fixture, isEditing),
+          onRowStamped: ({ fixture, chips }) => {
+            upsertUserPredictionCache(queryClient, {
+              matchId: extractMatchId(fixture) ?? fixture.id,
+              ...fixture.userPrediction,
+              chips,
+              homeTeam: fixture.homeTeam,
+              awayTeam: fixture.awayTeam,
+              date: fixture.date,
+              matchDate: fixture.date,
+              gameweek: fixture.gameweek,
+              status: 'pending',
+            });
+          },
+        });
+        queryClient.invalidateQueries({ queryKey: [CHIP_QUERY_KEYS.STATUS] });
+        refreshChips?.();
+        if (attempted > 0) {
+          showToast(
+            stamped > 0
+              ? `Applied to ${stamped} filed ${stamped === 1 ? 'slip' : 'slips'} this GW`
+              : 'Could not apply to filed slips',
+            stamped > 0 ? 'success' : 'error'
+          );
+        }
+      } catch (err) {
+        setOptimisticGwChips((prev) => prev.filter((id) => id !== chipId));
+        showToast(err?.message || 'Could not apply that chip', 'error');
+      } finally {
+        setStampingChipId(null);
+      }
+    },
+    [activeGwChipIds, fixtures, queryClient, refreshChips, stampingChipId]
+  );
 
   const handleSubmit = async () => {
     if (!selectedFixture || isFiling) return;
+    const editing = isPredicted;
+    const chipsToFile = filedChips;
     setSubmitting(true);
     setSubmitError(null);
-    // Close the editor immediately (prototype's `fixEditOpen:false` at t=0) —
-    // harmless pre-filing since `showEditor` stays true until `isPredicted`
-    // flips, but it's what lets the resting slip + AI panel be the thing
-    // revealed once the dim/card fade away at the end of the sequence.
     setEditorOpen(false);
 
     try {
@@ -198,20 +274,17 @@ export default function FixturesPage() {
               awayScore: draft.awayScore,
               homeScorers: (draft.homeScorers || []).filter(Boolean),
               awayScorers: (draft.awayScorers || []).filter(Boolean),
-              chips: chipsFromDraft(draft),
+              chips: chipsToFile,
             },
             selectedFixture,
-            !!selectedFixture.predicted
+            editing
           ),
         {
           onFiled: () => {
-            const filed = draftAsFiledPrediction(draft, selectedFixture);
+            const filed = draftAsFiledPrediction(draft, selectedFixture, activeGwChipIds);
             upsertUserPredictionCache(queryClient, filed);
             queryClient.invalidateQueries({ queryKey: [CHIP_QUERY_KEYS.STATUS] });
-            setOptimisticFiled({
-              id: selectedFixture.id,
-              prediction: { ...draft, chips: filed.chips },
-            });
+            markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips });
           },
         }
       );
@@ -219,16 +292,19 @@ export default function FixturesPage() {
       if (!result?.success) {
         setEditorOpen(true);
         setSubmitError(result?.error?.message || 'Could not file this prediction.');
-      } else if (result.data) {
-        const filed = draftAsFiledPrediction(draft, selectedFixture);
-        const fromApi = result.data;
-        upsertUserPredictionCache(queryClient, {
-          ...filed,
-          ...fromApi,
-          chips: Array.isArray(fromApi.chips)
-            ? transformChipsFromBackend(fromApi.chips)
-            : filed.chips,
-        });
+      } else {
+        const filed = draftAsFiledPrediction(draft, selectedFixture, activeGwChipIds);
+        markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips });
+        if (result.data) {
+          const fromApi = result.data;
+          upsertUserPredictionCache(queryClient, {
+            ...filed,
+            ...fromApi,
+            chips: Array.isArray(fromApi.chips)
+              ? transformChipsFromBackend(fromApi.chips)
+              : filed.chips,
+          });
+        }
       }
     } catch (err) {
       setEditorOpen(true);
@@ -252,7 +328,12 @@ export default function FixturesPage() {
     onChangeHomeScorers: (v) => setDraft((d) => ({ ...d, homeScorers: v })),
     onChangeAwayScorers: (v) => setDraft((d) => ({ ...d, awayScorers: v })),
     onChangeChip: (v) => setDraft((d) => ({ ...d, chip: v })),
-    matchChips: availableChips,
+    matchChips: availableChips.filter((chip) => chip.scope === 'match'),
+    gameweekChips: availableChips.filter((chip) => chip.scope === 'gameweek'),
+    activeGameweekChipIds: activeGwChipIds,
+    currentGameweek,
+    stampingChipId,
+    onActivateGameweekChip: handleActivateGameweekChip,
     aiOpen,
     onToggleAi: () => setAiOpen((v) => !v),
   };
@@ -265,12 +346,6 @@ export default function FixturesPage() {
         ? 'Review & file 0–0'
         : 'Review & file';
 
-  // Only animate the AI panel's entrance right after an active filing
-  // sequence (matches aiSlideAnimDesk/aiSlideAnimMob: "none" once idle so a
-  // normal page load into an already-filed fixture doesn't replay it).
-  // `initial` is only read once, at mount, so this correctly captures
-  // "was a filing sequence in flight when this panel first appeared?"
-  // without needing to be re-evaluated on every subsequent phase change.
   const aiPanelWasFiling = filePhase !== FILE_PHASES.IDLE;
 
   return (
@@ -278,7 +353,6 @@ export default function FixturesPage() {
       className="relative flex h-[calc(100vh-var(--shell-nav-h))] flex-col overflow-hidden animate-rise-in"
       style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}
     >
-      {/* Top SlotBar */}
       <div className="hidden md:block flex-none">
         <SlotBar
           kicker="THE REEL"
@@ -287,9 +361,6 @@ export default function FixturesPage() {
               ? {
                   counter: `${selectedIndex + 1} / ${fixtures.length}`,
                   title: selectedFixture ? `${selectedFixture.homeTeam} v ${selectedFixture.awayTeam}` : '',
-                  // Navigation-interrupt fix: briefly block fixture-switching
-                  // while a filing sequence is in flight, rather than letting
-                  // it hard-cut an in-progress API call + animation.
                   canPrev: canSelectPrev && !isFiling,
                   canNext: canSelectNext && !isFiling,
                   onPrev: selectPrev,
@@ -317,27 +388,15 @@ export default function FixturesPage() {
 
       {!isLoading && !isError && selectedFixture && (
         <>
-          {/* Desktop body — its own relative/overflow-hidden scope so the dim
-              + floating card only ever cover this fixture's content, never
-              the masthead/slotbar above it. */}
-          <div ref={paneRef} className="relative hidden md:flex flex-1 min-h-0 flex-col overflow-hidden">
-            {/*
-              Layout-thrash fix: this outer div's own paddingRight toggles
-              instantly (no CSS transition) between 0 and RAIL_WIDTH_PX — as
-              a `flex-1`/`stretch` element its own outer rect never changes
-              size, so that's cheap. The *smoothing* comes from Framer
-              Motion's `layout` prop on the two children below, whose
-              available width genuinely narrows in response: `layout`
-              measures their rect once before/after the change and
-              transform-interpolates between the two (one reflow at each
-              end, zero per-frame reflows during the ~460ms transition,
-              unlike the old continuous `padding-right` CSS transition).
-            */}
-            <div
-              className="flex flex-1 min-h-0 flex-col"
-              style={{ paddingRight: railShown ? RAIL_WIDTH_PX : 0 }}
-            >
-              {/* Scrollable content */}
+          <div ref={paneRef} className="relative hidden md:flex flex-1 min-h-0 overflow-hidden">
+            <motion.div
+              className="pointer-events-none absolute inset-0 z-40 bg-[#01030a]"
+              initial={false}
+              animate={getBackdropTarget(filePhase)}
+              transition={BACKDROP_TRANSITION}
+            />
+
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <motion.div
                 layout
                 transition={CONTENT_LAYOUT_TRANSITION}
@@ -351,7 +410,6 @@ export default function FixturesPage() {
                   {showEditor ? (
                     <FixtureEditor {...editorProps} />
                   ) : (
-                    /* Resting Filed State */
                     <div className="mx-auto flex w-full max-w-[46.2rem] flex-col items-center gap-4 py-2">
                       <FixtureSlip
                         fixture={selectedFixture}
@@ -378,7 +436,6 @@ export default function FixturesPage() {
                 </div>
               </motion.div>
 
-              {/* Fixed Bottom Footer Dock (Button + Contained Reel Strip) */}
               <motion.div
                 layout
                 transition={CONTENT_LAYOUT_TRANSITION}
@@ -407,20 +464,26 @@ export default function FixturesPage() {
               </motion.div>
             </div>
 
-            <FloatingSlipCard
-              fixture={selectedFixture}
-              prediction={isFiling || previewVisible ? livePrediction : restingPrediction}
-              ceiling={isFiling || previewVisible ? liveCeiling : restingCeiling}
-              filed={isPredicted}
-              phase={filePhase}
-              visible={previewVisible}
-              isSlow={isSlow}
-              gameweekLabel={gameweekLabel}
-              paneRef={paneRef}
-            />
+            {railShown && (
+              <div
+                className="relative z-50 flex shrink-0 flex-col overflow-visible pt-5 pr-6 pl-2"
+                style={{ width: RAIL_WIDTH_PX }}
+              >
+                <FloatingSlipCard
+                  fixture={selectedFixture}
+                  prediction={isFiling || showEditor ? livePrediction : restingPrediction}
+                  ceiling={isFiling || showEditor ? liveCeiling : restingCeiling}
+                  filed={isPredicted}
+                  phase={filePhase}
+                  visible={showEditor || isFiling}
+                  isSlow={isSlow}
+                  gameweekLabel={gameweekLabel}
+                  paneRef={paneRef}
+                />
+              </div>
+            )}
           </div>
 
-          {/* Mobile Layout */}
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-8 pt-3 md:hidden">
             <div className="flex items-center justify-between gap-2.5">
               <button
@@ -458,7 +521,11 @@ export default function FixturesPage() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting || isFiling}
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-indigo-mid px-6 py-3 font-outfit text-sm font-semibold text-white shadow-lg disabled:opacity-60"
+                  className={`flex cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-3 font-outfit text-sm font-semibold shadow-lg disabled:opacity-60 ${
+                    isPredicted
+                      ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4]'
+                      : 'bg-brand-indigo-mid text-white'
+                  }`}
                 >
                   {buttonLabel} &rarr;
                 </button>
@@ -466,13 +533,6 @@ export default function FixturesPage() {
               </div>
             ) : (
               <div className="flex flex-col gap-4">
-                {/* Mobile intentionally has no FloatingSlipCard/backdrop
-                    ceremony at all (unchanged from the pre-rewrite
-                    behaviour) — it relies on the disabled "Filing…" submit
-                    button through `center`, then a plain switch to this
-                    resting view once filed, with only the AI panel's
-                    entrance animated. Preserved as-is; not in scope to add
-                    a new mobile overlay as part of this port. */}
                 <FixtureSlip
                   fixture={selectedFixture}
                   prediction={activePrediction}
