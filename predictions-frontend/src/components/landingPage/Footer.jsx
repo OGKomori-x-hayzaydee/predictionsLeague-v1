@@ -93,7 +93,19 @@ export default function Footer() {
           viewport={{ once: true }}
         >
           <p>&copy; {currentYear} OGKomori x hayzaydee. All rights reserved.</p>
-          <p>Made with passion for football.</p>
+          <p>
+            Made with passion for football. Club crests and football data
+            provided by{" "}
+            <a
+              href="https://www.football-data.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-teal-light dark:hover:text-teal-dark"
+            >
+              Football-Data.org
+            </a>
+            .
+          </p>
         </motion.div>
       </Container>
     </footer>
