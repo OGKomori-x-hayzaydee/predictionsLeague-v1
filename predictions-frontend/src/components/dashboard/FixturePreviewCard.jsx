@@ -29,7 +29,7 @@ function formatSlot(dateStr) {
 
 function ScorerRow({ name, side = 'home' }) {
   return (
-    <span className="flex items-center gap-2 font-outfit text-[13.5px] text-[#c8d2e0]">
+    <span className="flex items-center gap-2 font-outfit text-caption text-[#c8d2e0]">
       {side === 'away' && (
         <span className="h-[7px] w-[7px] shrink-0 rounded-full border-[1.5px] border-brand-teal" />
       )}
@@ -89,25 +89,25 @@ export default function FixturePreviewCard({
       {/* Header bar — slot label + venue + kickoff + status + CTA */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#16203a] px-[22px] py-[13px]">
         <div className="flex items-center gap-[11px] text-xs">
-          <span className="font-outfit text-[11px] uppercase tracking-[0.14em] text-brand-teal">
+          <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-brand-teal">
             {formatSlot(date) || `${homeTeam} v ${awayTeam}`}
           </span>
           {venue && (
             <>
               <span className="h-3 w-px bg-[#233248]" />
-              <span className="font-outfit text-[12px] text-[#7c8aa2]">{venue}</span>
+              <span className="font-outfit text-xs text-[#7c8aa2]">{venue}</span>
             </>
           )}
           {date && (
             <>
               <span className="h-3 w-px bg-[#233248]" />
-              <span className="font-outfit text-[11px] text-[#66748c]">{formatKickoff(date)}</span>
+              <span className="font-outfit text-2xs text-[#66748c]">{formatKickoff(date)}</span>
             </>
           )}
         </div>
         <div className="flex items-center gap-3.5">
           <span
-            className={`whitespace-nowrap rounded-xs border px-[9px] py-1 font-outfit text-[10px] tracking-[0.12em] ${statusClasses}`}
+            className={`whitespace-nowrap rounded-xs border px-[9px] py-1 font-outfit text-2xs tracking-[0.12em] ${statusClasses}`}
           >
             {predicted ? 'FILED' : 'NOT FILED'}
           </span>
@@ -117,7 +117,7 @@ export default function FixturePreviewCard({
           <button
             type="button"
             onClick={() => navigate('/fixtures')}
-            className="flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-3.5 py-[9px] font-outfit text-[13px] font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
+            className="flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-3.5 py-[9px] font-outfit text-caption font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
             {predicted ? 'Edit in reel' : 'File in reel'}
             <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
@@ -138,7 +138,7 @@ export default function FixturePreviewCard({
           <div className="flex flex-col items-end gap-3 min-w-0">
             <div className="flex items-center gap-3.5">
               <div className="flex flex-col items-end gap-[3px]">
-                <span className="font-dmSerif text-[22px] leading-tight text-white whitespace-nowrap">
+                <span className="font-dmSerif text-2xl leading-tight text-white whitespace-nowrap">
                   {homeTeam}
                 </span>
               </div>
@@ -148,7 +148,7 @@ export default function FixturePreviewCard({
               {homeScorers.length > 0 ? (
                 homeScorers.map((name) => <ScorerRow key={name} name={name} side="home" />)
               ) : (
-                <span className="font-outfit text-[11px] text-[#4f5b70]">no scorer named</span>
+                <span className="font-outfit text-2xs text-[#4f5b70]">no scorer named</span>
               )}
             </div>
           </div>
@@ -156,17 +156,17 @@ export default function FixturePreviewCard({
           {/* Score centre */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-4">
-              <span className={`font-dmSerif leading-[0.9] text-white ${isMobile ? 'text-[42px]' : 'text-[62px]'}`}>
+              <span className={`font-dmSerif leading-[0.9] text-white ${isMobile ? 'text-5xl' : 'text-6xl'}`}>
                 {prediction.homeScore}
               </span>
-              <span className={`font-dmSerif text-[#4a5b78] leading-none ${isMobile ? 'text-xl' : 'text-[30px]'}`}>–</span>
-              <span className={`font-dmSerif leading-[0.9] text-white ${isMobile ? 'text-[42px]' : 'text-[62px]'}`}>
+              <span className={`font-dmSerif text-[#4a5b78] leading-none ${isMobile ? 'text-xl' : 'text-3xl'}`}>–</span>
+              <span className={`font-dmSerif leading-[0.9] text-white ${isMobile ? 'text-5xl' : 'text-6xl'}`}>
                 {prediction.awayScore}
               </span>
             </div>
             {chip && (
               <span
-                className="flex items-center gap-[7px] whitespace-nowrap rounded-full border px-2.5 py-1 font-outfit text-[10px] tracking-[0.1em]"
+                className="flex items-center gap-[7px] whitespace-nowrap rounded-full border px-2.5 py-1 font-outfit text-2xs tracking-[0.1em]"
                 style={{ background: `${chipHue}1f`, borderColor: `${chipHue}55`, color: chipHue }}
               >
                 {chip.name}
@@ -180,7 +180,7 @@ export default function FixturePreviewCard({
             <div className="flex items-center gap-3.5">
               <TeamCrest team={awayTeam} size={crestSize} />
               <div className="flex flex-col gap-[3px]">
-                <span className="font-dmSerif text-[22px] leading-tight text-white whitespace-nowrap">
+                <span className="font-dmSerif text-2xl leading-tight text-white whitespace-nowrap">
                   {awayTeam}
                 </span>
               </div>
@@ -189,17 +189,17 @@ export default function FixturePreviewCard({
               {awayScorers.length > 0 ? (
                 awayScorers.map((name) => <ScorerRow key={name} name={name} side="away" />)
               ) : (
-                <span className="font-outfit text-[11px] text-[#4f5b70]">no scorer named</span>
+                <span className="font-outfit text-2xs text-[#4f5b70]">no scorer named</span>
               )}
             </div>
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-1.5 px-7 py-[22px]">
-          <span className="font-dmSerif text-[25px] leading-tight text-white">
+          <span className="font-dmSerif text-2xl leading-tight text-white">
             Nothing filed on {homeTeam} v {awayTeam}
           </span>
-          <span className="max-w-[46em] font-outfit text-[13px] text-[#8896ad]" style={{ textWrap: 'pretty' }}>
+          <span className="max-w-[46em] font-outfit text-caption text-[#8896ad]" style={{ textWrap: 'pretty' }}>
             {deadlineLabel
               ? `The read below is the model's, not yours. File a scoreline before the deadline (${deadlineLabel}) to put points on it.`
               : 'File a scoreline before the deadline to put points on it.'}
@@ -217,17 +217,17 @@ export default function FixturePreviewCard({
           className={`flex items-center gap-[9px] text-left ${isMobile ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[#818cf8]" />
-          <span className="font-outfit text-[10px] uppercase tracking-[0.16em] text-[#66748c]">
+          <span className="font-outfit text-2xs uppercase tracking-[0.16em] text-[#66748c]">
             AI overview
           </span>
-          <span className="font-outfit text-[10px] text-[#4f5b70]">coming soon</span>
+          <span className="font-outfit text-2xs text-[#4f5b70]">coming soon</span>
           {isMobile && (
             <span className="ml-auto font-outfit text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
           )}
         </button>
         {(!isMobile || aiOpen) && (
           <p
-            className="m-0 max-w-lg font-outfit text-[12.5px] leading-relaxed text-[#8fa0b8]"
+            className="m-0 max-w-lg font-outfit text-caption leading-relaxed text-[#8fa0b8]"
             style={{ textWrap: 'pretty' }}
           >
             Predicted scorelines, head-to-head history and what the league is picking will land here

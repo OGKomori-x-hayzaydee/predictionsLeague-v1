@@ -107,26 +107,26 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
     >
       {/* Collapsed header — always visible, toggles expansion */}
       <button onClick={() => setExpanded((e) => !e)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">
-        <span className="w-11 shrink-0 font-outfit text-[10px] tracking-wide text-text-muted-4">
+        <span className="w-11 shrink-0 font-outfit text-2xs tracking-wide text-text-muted-4">
           GW{prediction.gameweek}
         </span>
 
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <TeamCrest team={prediction.homeTeam} size={22} />
           <span className="truncate text-sm text-text-secondary">{prediction.homeTeam}</span>
-          <span className="font-outfit text-[11px] text-text-muted-5">v</span>
+          <span className="font-outfit text-2xs text-text-muted-5">v</span>
           <span className="truncate text-sm text-text-secondary">{prediction.awayTeam}</span>
           <TeamCrest team={prediction.awayTeam} size={22} />
         </span>
 
         {!expanded && (
           <span className="hidden shrink-0 items-center gap-2.5 sm:flex">
-            <span className="font-dmSerif text-[15px] text-text-tertiary">
+            <span className="font-dmSerif text-base text-text-tertiary">
               {prediction.homeScore}–{prediction.awayScore}
             </span>
-            <span className="font-outfit text-[10px] text-text-muted-5">vs</span>
+            <span className="font-outfit text-2xs text-text-muted-5">vs</span>
             <span
-              className="font-dmSerif text-[15px]"
+              className="font-dmSerif text-base"
               style={{ color: isSettled ? (verdict?.exact ? 'var(--brand-teal)' : 'var(--text-tertiary)') : 'var(--brand-amber)' }}
             >
               {isSettled ? `${prediction.actualHomeScore}–${prediction.actualAwayScore}` : 'Open'}
@@ -158,32 +158,32 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             />
 
             <div className="flex flex-col items-center gap-2 px-5 py-4 text-center">
-              <span className="font-outfit text-[9px] tracking-[0.13em] text-text-muted-4">YOU CALLED</span>
+              <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">YOU CALLED</span>
               <div className="flex items-center gap-3">
                 <TeamCrest team={prediction.homeTeam} size={30} />
-                <span className="font-dmSerif text-[26px] leading-none text-[color:var(--text-primary)]">
+                <span className="font-dmSerif text-2xl leading-none text-[color:var(--text-primary)]">
                   {prediction.homeScore}–{prediction.awayScore}
                 </span>
                 <TeamCrest team={prediction.awayTeam} size={30} />
               </div>
-              <span className="text-[11.5px] leading-snug text-text-muted-3">{calledScorers}</span>
+              <span className="text-2xs leading-snug text-text-muted-3">{calledScorers}</span>
             </div>
 
             <div className="flex flex-col items-center gap-2 border-t border-dashed px-5 py-4 text-center sm:border-t-0 sm:border-l" style={{ borderColor: theme.border }}>
-              <span className="font-outfit text-[9px] tracking-[0.13em] text-text-muted-4">RESULT</span>
+              <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">RESULT</span>
               {isSettled ? (
                 <>
                   <div className="flex items-center gap-3">
                     <TeamCrest team={prediction.homeTeam} size={30} />
                     <span
-                      className="font-dmSerif text-[26px] leading-none"
+                      className="font-dmSerif text-2xl leading-none"
                       style={{ color: verdict?.exact ? 'var(--brand-teal)' : 'var(--text-primary)' }}
                     >
                       {prediction.actualHomeScore}–{prediction.actualAwayScore}
                     </span>
                     <TeamCrest team={prediction.awayTeam} size={30} />
                   </div>
-                  <span className="text-[11.5px] leading-snug text-text-muted-3">{resultScorers}</span>
+                  <span className="text-2xs leading-snug text-text-muted-3">{resultScorers}</span>
                 </>
               ) : (
                 <span className="mt-2 font-dmSerif text-lg text-brand-amber">Not played yet</span>
@@ -193,10 +193,10 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
 
           {isSettled && breakdown && Object.keys(breakdown).length > 0 && (
             <div className="flex flex-col gap-1.5 border-t border-dashed px-5 py-3" style={{ borderColor: theme.border }}>
-              <span className="font-outfit text-[9px] tracking-wide text-text-muted-3">HOW THIS SCORED</span>
+              <span className="font-outfit text-3xs tracking-wide text-text-muted-3">HOW THIS SCORED</span>
               <div className="flex flex-col gap-1">
                 {Object.entries(breakdown).map(([key, val]) => (
-                  <div key={key} className="flex items-baseline justify-between gap-3 text-[12px]">
+                  <div key={key} className="flex items-baseline justify-between gap-3 text-xs">
                     <span className="text-text-secondary">{BREAKDOWN_LABELS[key] || key}</span>
                     <span className="font-outfit text-text-tertiary">{val}</span>
                   </div>
@@ -211,9 +211,9 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
               className="flex flex-wrap items-center gap-1.5 border-t border-dashed px-5 py-2.5"
               style={{ borderColor: theme.border, background: 'color-mix(in srgb, var(--surface-app) 40%, transparent)' }}
             >
-              <span className="font-outfit text-[9px] tracking-wide text-text-muted-4">CHIPS</span>
+              <span className="font-outfit text-3xs tracking-wide text-text-muted-4">CHIPS</span>
               {chips.map((c) => (
-                <span key={c} className="rounded-full border border-border-card px-2 py-0.5 font-outfit text-[10.5px] text-brand-amber">
+                <span key={c} className="rounded-full border border-border-card px-2 py-0.5 font-outfit text-2xs text-brand-amber">
                   {CHIP_CONFIG[c]?.name || c}
                 </span>
               ))}
@@ -225,7 +225,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
               collapsed header's points pill/chevron. */}
           {isSettled && (
             <span
-              className="pointer-events-none absolute right-4 top-3 rotate-[-8deg] rounded-md border-[2.5px] px-2 py-[3px] font-outfit text-[10px] font-bold tracking-wider"
+              className="pointer-events-none absolute right-4 top-3 rotate-[-8deg] rounded-md border-[2.5px] px-2 py-[3px] font-outfit text-2xs font-bold tracking-wider"
               style={{ borderColor: verdict?.colorVar, color: verdict?.colorVar }}
             >
               {VERDICT_LABELS[verdict?.verdict] || verdict?.verdict}
@@ -236,7 +236,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, onViewF
             <button
               type="button"
               onClick={() => onViewFull(prediction)}
-              className="flex w-full items-center justify-center gap-1.5 border-t px-4 py-2.5 font-outfit text-[9.5px] tracking-[0.14em] text-text-muted-1 transition-colors hover:bg-black/15 hover:text-brand-teal focus-visible:bg-black/15 focus-visible:text-brand-teal focus-visible:outline-none"
+              className="flex w-full items-center justify-center gap-1.5 border-t px-4 py-2.5 font-outfit text-3xs tracking-[0.14em] text-text-muted-1 transition-colors hover:bg-black/15 hover:text-brand-teal focus-visible:bg-black/15 focus-visible:text-brand-teal focus-visible:outline-none"
               style={{ borderColor: theme.border }}
             >
               FULL PREDICTION <span aria-hidden="true">&rarr;</span>

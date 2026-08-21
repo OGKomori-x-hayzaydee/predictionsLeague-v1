@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { GearIcon } from '@radix-ui/react-icons';
+import { Gear } from '@phosphor-icons/react';
 import { NAV_ITEMS } from './navItems';
 import { useAuthState } from '../../hooks/useAuth';
 import useDashboardData from '../../hooks/useDashboardData';
@@ -44,7 +44,7 @@ export default function TopNav() {
           aria-label="predictionsLeague home"
         >
           <img src={logo} alt="" className="h-[21px]" />
-          <span className="font-dmSerif text-[15px] text-brand-teal-pale">predictionsLeague</span>
+          <span className="font-dmSerif text-base text-brand-teal-pale">predictionsLeague</span>
         </button>
 
         {/*
@@ -75,7 +75,7 @@ export default function TopNav() {
         <div className="flex shrink-0 items-center gap-[18px]">
           {points !== null && (
             <div className="flex flex-col items-end leading-tight">
-              <KickerLabel as="span" className="text-[9.5px] tracking-[0.12em] text-text-muted-4">
+              <KickerLabel as="span" className="text-3xs tracking-[0.12em] text-text-muted-4">
                 Season
               </KickerLabel>
               <span className="font-dmSerif text-base text-brand-teal-pale">{points}</span>
@@ -83,12 +83,12 @@ export default function TopNav() {
           )}
           {rank !== null && (
             <div className="flex flex-col items-end leading-tight">
-              <KickerLabel as="span" className="text-[9.5px] tracking-[0.12em] text-text-muted-4">
+              <KickerLabel as="span" className="text-3xs tracking-[0.12em] text-text-muted-4">
                 Rank
               </KickerLabel>
               <span className="font-dmSerif text-base text-text-primary">
                 {rank}
-                <span className="text-[11px] text-text-muted-3">/12</span>
+                <span className="text-2xs text-text-muted-3">/12</span>
               </span>
             </div>
           )}
@@ -102,7 +102,7 @@ export default function TopNav() {
                 : 'border-border-card text-text-muted-4 hover:border-brand-teal-mid/40 hover:text-brand-teal'
             }`}
           >
-            <GearIcon width={14} height={14} />
+            <Gear width={14} height={14} />
           </button>
 
           <NavLink to="/profile" aria-label="Profile">

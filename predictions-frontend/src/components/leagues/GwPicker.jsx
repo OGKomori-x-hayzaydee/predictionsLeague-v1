@@ -11,7 +11,7 @@ export default function GwPicker({ options, value, onChange, className = '' }) {
         <button
           key={gw}
           onClick={() => onChange(gw)}
-          className={`shrink-0 rounded-8 px-[10px] py-[6px] font-mono text-[10.5px] transition-colors md:min-h-0 min-h-9 ${
+          className={`shrink-0 rounded-8 px-[10px] py-[6px] font-mono text-2xs transition-colors md:min-h-0 min-h-9 ${
             gw === value ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-2 hover:text-text-primary'
           }`}
         >

@@ -6,7 +6,7 @@ export default function Sparkline({ data, width = 320, height = 64, stroke = 'va
   if (!data || data.length < 2) {
     return (
       <div
-        className="flex items-center justify-center font-mono text-[11px] text-text-muted-3"
+        className="flex items-center justify-center font-mono text-2xs text-text-muted-3"
         style={{ height }}
       >
         Not enough settled gameweeks yet

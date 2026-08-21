@@ -111,7 +111,7 @@ function LeagueDetailView({ overview, onBack }) {
             <button
               key={t.id}
               onClick={() => lg.setActiveTab(t.id)}
-              className={`min-h-[38px] flex-1 rounded-8 font-mono text-[10.5px] tracking-[0.1em] ${
+              className={`min-h-[38px] flex-1 rounded-8 font-mono text-2xs tracking-[0.1em] ${
                 lg.activeTab === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
               }`}
             >

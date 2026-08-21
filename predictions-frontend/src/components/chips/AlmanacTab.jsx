@@ -85,7 +85,7 @@ export default function AlmanacTab() {
               <div className="flex items-center gap-2.5">
                 <ChipToken tag={tag} hue={hue} size={30} muted={chip.usageCount === 0} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] text-text-secondary">{chip.name}</p>
+                  <p className="truncate text-caption text-text-secondary">{chip.name}</p>
                   <KickerLabel as="p" className="normal-case tracking-normal text-text-muted-4">
                     {chip.usageCount} used this season
                   </KickerLabel>
@@ -98,7 +98,7 @@ export default function AlmanacTab() {
                 )}
               </div>
               {(best || worst) && (
-                <div className="flex flex-col gap-1 border-t border-border-base pt-[9px] text-[11.5px] text-text-muted-2">
+                <div className="flex flex-col gap-1 border-t border-border-base pt-[9px] text-2xs text-text-muted-2">
                   {best && (
                     <span>
                       Best: GW{best.gameweek} · {best.points >= 0 ? '+' : ''}
@@ -121,7 +121,7 @@ export default function AlmanacTab() {
       {used.length > 0 && (
         <div className="flex flex-col gap-2 rounded-md border border-border-base bg-surface-header/60 p-[14px]">
           <KickerLabel>What the record says</KickerLabel>
-          <p className="text-[12.5px] leading-relaxed text-text-muted-2 [text-wrap:pretty]">
+          <p className="text-caption leading-relaxed text-text-muted-2 [text-wrap:pretty]">
             {totalUses} chip{totalUses === 1 ? '' : 's'} played this season, {auditTotal >= 0 ? '+' : ''}
             {auditTotal} points above what those predictions would have scored unboosted.
           </p>
@@ -133,8 +133,8 @@ export default function AlmanacTab() {
           <div key={c.id} className="flex flex-col gap-[7px] rounded-md border border-border-card bg-surface-card p-[13px]">
             <div className="flex items-center gap-2">
               <ChipToken tag={CHIP_TAGS[c.id] || c.icon} hue={CHIP_HUES[c.id] || DEFAULT_CHIP_HUE} size={26} />
-              <span className="flex-1 text-[13px] text-text-secondary">{c.name}</span>
-              <span className="font-mono text-[9px] tracking-[0.1em] text-text-muted-4">{c.scope === 'match' ? 'MATCH' : 'WEEK'}</span>
+              <span className="flex-1 text-caption text-text-secondary">{c.name}</span>
+              <span className="font-mono text-3xs tracking-[0.1em] text-text-muted-4">{c.scope === 'match' ? 'MATCH' : 'WEEK'}</span>
             </div>
             <span className="text-xs leading-relaxed text-text-muted-2 [text-wrap:pretty]">{c.description}</span>
           </div>
@@ -145,7 +145,7 @@ export default function AlmanacTab() {
         <KickerLabel>The rules</KickerLabel>
         {rules.map((r, i) => (
           <span key={i} className="flex gap-2 text-xs leading-relaxed text-text-muted-2">
-            <span className="shrink-0 font-mono text-[10px] text-text-muted-4">{i + 1}.</span>
+            <span className="shrink-0 font-mono text-2xs text-text-muted-4">{i + 1}.</span>
             {r}
           </span>
         ))}

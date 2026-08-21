@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Theme } from '@radix-ui/themes';
 import { ThemeProvider } from './context/ThemeContext';
 import { UserPreferencesProvider } from './context/UserPreferencesContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -119,9 +118,7 @@ function App() {
         <UserPreferencesProvider>
           <AuthProvider>
             <ChipManagementProvider>
-              <Theme>
-                <AppRouter />
-              </Theme>
+              <AppRouter />
             </ChipManagementProvider>
           </AuthProvider>
         </UserPreferencesProvider>

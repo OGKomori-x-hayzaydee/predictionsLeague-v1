@@ -1,5 +1,5 @@
 import React from "react";
-import { Container } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../../assets/logo.png";

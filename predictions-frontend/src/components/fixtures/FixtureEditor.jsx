@@ -93,7 +93,7 @@ export default function FixtureEditor({
           </div>
 
           {totalGoals === 0 && (
-            <span className="max-w-xs text-center font-outfit text-[0.6875rem] leading-relaxed tracking-wide text-[#4f5b70]">
+            <span className="max-w-xs text-center font-outfit text-2xs leading-relaxed tracking-wide text-[#4f5b70]">
               0–0 AS IT STANDS · A VALID CALL — SCORER SLOTS OPEN AS THE NUMBERS MOVE
             </span>
           )}

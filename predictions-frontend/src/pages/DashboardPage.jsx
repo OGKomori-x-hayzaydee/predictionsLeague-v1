@@ -84,13 +84,13 @@ export default function DashboardPage() {
               <h1 className="font-dmSerif text-4xl text-text-primary">
                 {fixturesLoading ? 'Loading your gameweek…' : `${filedCount} of ${total} filed`}
               </h1>
-              <span className="text-[13px] text-[#8896ad]">{openLine}</span>
+              <span className="text-caption text-[#8896ad]">{openLine}</span>
             </div>
             <div className="flex flex-none flex-col items-end gap-1.5">
-              <span className="font-outfit text-[10.5px] tracking-[0.13em] text-[#66748c]">
+              <span className="font-outfit text-2xs tracking-[0.13em] text-[#66748c]">
                 MAX ON THE TABLE
               </span>
-              <span className="font-dmSerif text-[29px] leading-none text-brand-amber">
+              <span className="font-dmSerif text-3xl leading-none text-brand-amber">
                 {tableMaxPoints}
                 <span className="text-sm text-[#8a7a4a]"> pts</span>
               </span>
@@ -132,10 +132,10 @@ export default function DashboardPage() {
       {/* Mobile — Spine.dc.html mobile dashboard lines 2215-2345 */}
       <div className="flex flex-col gap-4 px-4 pb-[26px] pt-4 md:hidden">
         <div className="flex flex-col gap-1">
-          <h1 className="font-dmSerif text-[25px] leading-tight text-text-primary">
+          <h1 className="font-dmSerif text-2xl leading-tight text-text-primary">
             {fixturesLoading ? 'Loading your gameweek…' : `${filedCount} of ${total} filed`}
           </h1>
-          <span className="text-[12.5px] text-text-muted-1">{openLine}</span>
+          <span className="text-caption text-text-muted-1">{openLine}</span>
         </div>
 
         <div className="relative h-[5px] overflow-hidden rounded-full bg-[#111c2e]">
@@ -188,7 +188,7 @@ export default function DashboardPage() {
           className="flex items-center justify-between rounded-[14px] border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
         >
           Rivals, chips in hand &amp; last gameweek
-          <span className="font-outfit text-[11px] text-brand-teal">VIEW &rsaquo;</span>
+          <span className="font-outfit text-2xs text-brand-teal">VIEW &rsaquo;</span>
         </button>
       </div>
 

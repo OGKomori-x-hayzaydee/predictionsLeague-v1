@@ -78,14 +78,14 @@ export default function RivalsSection({ leagues }) {
         {rows.map((m) => (
           <div key={m.id ?? m.username} className="flex cursor-pointer items-center gap-[10px]">
             <span
-              className={`w-3.5 shrink-0 font-outfit text-[11px] ${
+              className={`w-3.5 shrink-0 font-outfit text-2xs ${
                 m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-4'
               }`}
             >
               {m.position}
             </span>
             <span
-              className={`min-w-0 flex-1 truncate text-[13px] ${
+              className={`min-w-0 flex-1 truncate text-caption ${
                 m.isCurrentUser ? 'font-medium text-brand-teal' : 'text-text-secondary'
               }`}
             >

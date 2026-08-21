@@ -17,7 +17,8 @@ export const DEFAULT_CHIP_HUE = '#5eead4';
 
 /**
  * Compact badge codes for the sidebar chip stock (Spine.dc.html's CHIPS
- * table), distinct from CHIP_CONFIG's emoji `icon` used elsewhere in the app.
+ * table), distinct from CHIP_CONFIG's own (also short-text) `icon` field
+ * used elsewhere in the app.
  */
 export const CHIP_BADGES = {
   doubleDown: 'x2',

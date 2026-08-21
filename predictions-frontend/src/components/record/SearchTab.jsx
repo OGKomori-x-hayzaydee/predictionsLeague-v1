@@ -80,7 +80,7 @@ export default function SearchTab({ predictions, initialQuery = '', highlightId 
         <select
           value={outcome}
           onChange={(e) => setOutcome(e.target.value)}
-          className="rounded-9 border border-border-card bg-surface-card-4 px-3 py-2.5 font-outfit text-[11px] tracking-wide text-text-secondary outline-none sm:hidden"
+          className="rounded-9 border border-border-card bg-surface-card-4 px-3 py-2.5 font-outfit text-2xs tracking-wide text-text-secondary outline-none sm:hidden"
         >
           {OUTCOME_FILTERS.map((f) => (
             <option key={f.id} value={f.id}>
@@ -90,7 +90,7 @@ export default function SearchTab({ predictions, initialQuery = '', highlightId 
         </select>
       </div>
 
-      <span className="font-outfit text-[10.5px] text-text-muted-4">
+      <span className="font-outfit text-2xs text-text-muted-4">
         {filtered.length} call{filtered.length === 1 ? '' : 's'}
         {query ? ` matching “${query}”` : ''} · newest weeks first
       </span>

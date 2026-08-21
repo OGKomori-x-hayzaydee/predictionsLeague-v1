@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Button } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -79,12 +79,11 @@ export default function HeroSection() {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <Button
-                  className="bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 px-8 py-3 text-sm sm:text-base font-semibold font-outfit w-full sm:w-auto cursor-pointer"
-                  size="4"
+                <button
+                  className="rounded-md bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 px-8 py-3 text-sm sm:text-base font-semibold font-outfit w-full sm:w-auto cursor-pointer"
                 >
                   Get Started
-                </Button>
+                </button>
               </motion.div>
             </Link>
             <Link to="/howToPlay" className="w-full sm:w-auto">
@@ -93,13 +92,11 @@ export default function HeroSection() {
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <Button
-                  className="border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 px-8 py-3 text-sm sm:text-base font-outfit w-full sm:w-auto cursor-pointer transition-colors"
-                  size="4"
-                  variant="outline"
+                <button
+                  className="rounded-md border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 px-8 py-3 text-sm sm:text-base font-outfit w-full sm:w-auto cursor-pointer transition-colors"
                 >
                   How to Play
-                </Button>
+                </button>
               </motion.div>
             </Link>
           </motion.div>

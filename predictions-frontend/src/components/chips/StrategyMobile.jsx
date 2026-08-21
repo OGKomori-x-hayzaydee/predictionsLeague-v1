@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from '@phosphor-icons/react';
 import ChipToken from '../ui/ChipToken';
 import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE, chipStatusLabel } from './chipHues';
 import { whyCannotPlan } from './planRules';
@@ -47,15 +48,15 @@ export default function StrategyMobile({
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3 rounded-14 border border-border-base bg-surface-card-2 px-[15px] py-[13px]">
         <span className="flex flex-1 flex-col gap-0.5">
-          <span className="font-mono text-[10px] tracking-[0.13em] text-text-muted-2">YOUR PLAN</span>
-          <span className="text-[11.5px] text-text-muted-2">
+          <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-2">YOUR PLAN</span>
+          <span className="text-2xs text-text-muted-2">
             {plannedCount} chip{plannedCount === 1 ? '' : 's'} planned · {inHandCount} still in hand
           </span>
         </span>
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="font-mono text-[11px] tracking-[0.1em] text-text-muted-2">Chips in hand · tap one, then tap a week</span>
+        <span className="font-mono text-2xs tracking-[0.1em] text-text-muted-2">Chips in hand · tap one, then tap a week</span>
         <div className="flex gap-2 overflow-x-auto pb-0.5">
           {availableChips.map((chip) => {
             const hue = CHIP_HUES[chip.chipId] || DEFAULT_CHIP_HUE;
@@ -73,8 +74,8 @@ export default function StrategyMobile({
               >
                 <ChipToken tag={tag} hue={hue} size={28} />
                 <span className="flex flex-col gap-0.5 whitespace-nowrap">
-                  <span className="text-[12.5px] text-text-secondary">{chip.name}</span>
-                  <span className={`font-mono text-[9.5px] ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>{status.text}</span>
+                  <span className="text-caption text-text-secondary">{chip.name}</span>
+                  <span className={`font-mono text-3xs ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>{status.text}</span>
                 </span>
               </button>
             );
@@ -84,10 +85,10 @@ export default function StrategyMobile({
 
       {selectedChip && (
         <div className="flex items-center gap-[10px] rounded-md border border-brand-teal-mid/40 bg-brand-teal/10 px-[13px] py-[11px]">
-          <span className="flex-1 text-[12.5px] leading-snug text-brand-teal-tint">Placing {selectedChip.name} — tap a week below</span>
+          <span className="flex-1 text-caption leading-snug text-brand-teal-tint">Placing {selectedChip.name} — tap a week below</span>
           <button
             onClick={() => setSelectedChipId(null)}
-            className="rounded-full border border-border-card bg-surface-card-4 px-3 py-1.5 font-mono text-[9.5px] tracking-[0.1em] text-text-muted-1"
+            className="rounded-full border border-border-card bg-surface-card-4 px-3 py-1.5 font-mono text-3xs tracking-[0.1em] text-text-muted-1"
           >
             CANCEL
           </button>
@@ -116,7 +117,7 @@ export default function StrategyMobile({
                   {isCurrent && <span className="ml-1 text-brand-teal">NOW</span>}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
-                  <span className="font-mono text-[11px] tracking-[0.08em] text-text-muted-2">
+                  <span className="font-mono text-2xs tracking-[0.08em] text-text-muted-2">
                     {difficulty ? difficulty.style.label : 'FIXTURES TBD'}
                   </span>
                   <span className="flex h-[5px] overflow-hidden rounded-[3px] bg-surface-card-4">
@@ -129,7 +130,7 @@ export default function StrategyMobile({
                     />
                   </span>
                   {selectedChip && (
-                    <span className={`font-mono text-[11px] ${reason ? 'text-state-error' : 'text-brand-teal'}`}>
+                    <span className={`font-mono text-2xs ${reason ? 'text-state-error' : 'text-brand-teal'}`}>
                       {reason || `tap to place ${selectedChip.name}`}
                     </span>
                   )}
@@ -160,7 +161,7 @@ export default function StrategyMobile({
                                 {normalizeTeamName(f.homeTeam)} v {normalizeTeamName(f.awayTeam)}
                               </span>
                               {clash && (
-                                <span className="shrink-0 rounded-full border border-border-control px-2 py-0.5 font-mono text-[9px] text-text-muted-2">
+                                <span className="shrink-0 rounded-full border border-border-control px-2 py-0.5 font-mono text-3xs text-text-muted-2">
                                   CLASH
                                 </span>
                               )}
@@ -169,17 +170,17 @@ export default function StrategyMobile({
                         })}
                       </div>
                     ) : (
-                      <span className="text-[11.5px] text-text-muted-2">Fixtures for this gameweek aren&apos;t in yet.</span>
+                      <span className="text-2xs text-text-muted-2">Fixtures for this gameweek aren&apos;t in yet.</span>
                     )
                   ) : (
-                    <span className="text-[11.5px] text-text-muted-2">Fixtures for GW{gw} haven&apos;t been released yet.</span>
+                    <span className="text-2xs text-text-muted-2">Fixtures for GW{gw} haven&apos;t been released yet.</span>
                   )}
                   {plannedChip && (
                     <div className="flex items-center gap-[10px] rounded-12 border border-border-base bg-surface-app px-3 py-2.5">
                       <ChipToken tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon} hue={CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE} size={26} />
-                      <span className="flex-1 text-[12.5px] text-text-secondary">{plannedChip.name} planned this week</span>
-                      <button onClick={() => onRemove(gw)} className="font-mono text-[11px] text-text-muted-3" aria-label="Remove">
-                        ✕
+                      <span className="flex-1 text-caption text-text-secondary">{plannedChip.name} planned this week</span>
+                      <button onClick={() => onRemove(gw)} className="font-mono text-2xs text-text-muted-3" aria-label="Remove">
+                        <X size={12} />
                       </button>
                     </div>
                   )}
@@ -193,7 +194,7 @@ export default function StrategyMobile({
       {plannedCount > 0 && (
         <button
           onClick={onClear}
-          className="self-center rounded-full border border-border-control px-[22px] py-3 font-mono text-[11px] tracking-[0.1em] text-text-muted-2"
+          className="self-center rounded-full border border-border-control px-[22px] py-3 font-mono text-2xs tracking-[0.1em] text-text-muted-2"
         >
           CLEAR THE PLAN
         </button>

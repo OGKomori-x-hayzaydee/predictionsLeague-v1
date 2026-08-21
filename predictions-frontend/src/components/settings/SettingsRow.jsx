@@ -21,11 +21,11 @@ export default function SettingsRow({ label, detail, danger = false, kind, value
       }`}
     >
       <span className="flex min-w-0 flex-1 flex-col gap-[3px] leading-[1.45] md:gap-0">
-        <span className={`text-[13px] md:text-[13.5px] ${danger ? 'text-state-error-mid' : 'text-text-secondary'}`}>
+        <span className={`text-caption md:text-caption ${danger ? 'text-state-error-mid' : 'text-text-secondary'}`}>
           {label}
         </span>
         {detail && (
-          <span className="text-[11px] leading-[1.45] text-text-muted-3 [text-wrap:pretty] md:text-xs md:text-text-muted-1">
+          <span className="text-2xs leading-[1.45] text-text-muted-3 [text-wrap:pretty] md:text-xs md:text-text-muted-1">
             {detail}
           </span>
         )}

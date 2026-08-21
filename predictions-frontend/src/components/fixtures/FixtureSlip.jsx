@@ -83,13 +83,13 @@ export default function FixtureSlip({
         <div className="flex items-center gap-6">
           {ledger.map((row) => (
             <div key={row.label} className="flex flex-col leading-snug">
-              <span className="font-outfit text-[0.625rem] tracking-wider text-[#5b667d]">{row.label}</span>
+              <span className="font-outfit text-2xs tracking-wider text-[#5b667d]">{row.label}</span>
               <span className="font-outfit text-sm font-medium text-white">{row.value}</span>
             </div>
           ))}
 
           <div className="ml-auto flex flex-col items-end leading-none">
-            <span className="font-outfit text-[0.625rem] tracking-wider text-[#7f93ad]">CEILING</span>
+            <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">CEILING</span>
             <span className="font-dmSerif text-3xl text-[#fcd34d]">{ceiling}</span>
           </div>
 
@@ -112,11 +112,11 @@ export default function FixtureSlip({
     <div className="relative flex w-full flex-col gap-3 overflow-hidden rounded-xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-4 shadow-xl">
       {/* Top line */}
       <div className="flex items-baseline justify-between gap-2">
-        <span className="font-outfit text-[0.6875rem] tracking-wider text-[#66748c]">
+        <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
           THE SLIP · {gameweekLabel}
         </span>
         <span
-          className={`font-outfit text-[0.6875rem] tracking-wide ${
+          className={`font-outfit text-2xs tracking-wide ${
             filed ? 'text-[#5eead4]' : 'text-brand-amber-mid'
           }`}
         >
@@ -158,7 +158,7 @@ export default function FixtureSlip({
         <span className="font-dmSerif text-3xl leading-none text-[#fcd34d]">{ceiling}</span>
       </div>
 
-      <span className="font-outfit text-[0.625rem] leading-relaxed text-[#4f5b70]">
+      <span className="font-outfit text-2xs leading-relaxed text-[#4f5b70]">
         This slip is what gets filed. Review it, then sign it off.
       </span>
     </div>

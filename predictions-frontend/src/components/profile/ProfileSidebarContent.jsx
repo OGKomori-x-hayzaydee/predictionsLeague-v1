@@ -26,15 +26,15 @@ export default function ProfileSidebarContent({ chipAlmanac = [] }) {
     <div className="flex flex-col gap-2.5">
       <KickerLabel className="tracking-[0.16em]">Chip return, career</KickerLabel>
       {used.length === 0 ? (
-        <p className="text-[12px] text-text-muted-3">No chips played yet this season.</p>
+        <p className="text-xs text-text-muted-3">No chips played yet this season.</p>
       ) : (
         used.map((c) => (
           <span key={c.chipId} className="flex items-center gap-2.5">
-            <span className="w-5 shrink-0 font-mono text-[10px] text-text-muted-1">{CHIP_TAGS[c.chipId] || c.icon}</span>
-            <span className="flex-1 truncate text-[12.5px] text-text-tertiary">{c.name}</span>
-            <span className="shrink-0 font-mono text-[10px] text-text-muted-2">{c.usageCount} used</span>
+            <span className="w-5 shrink-0 font-mono text-2xs text-text-muted-1">{CHIP_TAGS[c.chipId] || c.icon}</span>
+            <span className="flex-1 truncate text-caption text-text-tertiary">{c.name}</span>
+            <span className="shrink-0 font-mono text-2xs text-text-muted-2">{c.usageCount} used</span>
             <span
-              className="w-[40px] shrink-0 text-right font-mono text-[11.5px]"
+              className="w-[40px] shrink-0 text-right font-mono text-2xs"
               style={{ color: c.totalReturn >= 0 ? 'var(--brand-teal)' : 'var(--state-error)' }}
             >
               {c.totalReturn >= 0 ? `+${c.totalReturn}` : c.totalReturn}

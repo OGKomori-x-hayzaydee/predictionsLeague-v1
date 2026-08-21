@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container } from "@radix-ui/themes";
+import Container from "../components/ui/Container";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import Navbar from "../components/landingPage/Navbar";

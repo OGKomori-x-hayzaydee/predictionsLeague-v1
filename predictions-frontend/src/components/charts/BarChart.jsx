@@ -1,7 +1,7 @@
 export default function BarChart({ data, labels, height = 96, color = 'var(--brand-teal)' }) {
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center font-mono text-[11px] text-text-muted-3" style={{ height }}>
+      <div className="flex items-center justify-center font-mono text-2xs text-text-muted-3" style={{ height }}>
         No settled gameweeks yet
       </div>
     );
@@ -20,7 +20,7 @@ export default function BarChart({ data, labels, height = 96, color = 'var(--bra
               style={{ height: barHeight, background: v < 0 ? 'var(--state-error)' : color }}
               title={String(v)}
             />
-            {labels && <span className="font-mono text-[8px] text-text-muted-3">{labels[i]}</span>}
+            {labels && <span className="font-mono text-3xs text-text-muted-3">{labels[i]}</span>}
           </div>
         );
       })}

@@ -17,10 +17,10 @@ export default function AllowanceRail({ availableChips, currentGameweek, open, o
     return (
       <button onClick={onToggle} className="flex h-[50px] w-full items-center gap-3 border-t border-border-base px-1 text-left">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-teal" />
-        <span className="font-mono text-[11px] text-text-muted-1">
+        <span className="font-mono text-2xs text-text-muted-1">
           {withAllowance.length} chip type{withAllowance.length === 1 ? '' : 's'} still usable · {weeksLeft} gameweeks left in the season
         </span>
-        <span className="ml-auto font-mono text-[10.5px] text-text-muted-4">ALLOWANCE</span>
+        <span className="ml-auto font-mono text-2xs text-text-muted-4">ALLOWANCE</span>
       </button>
     );
   }
@@ -28,8 +28,8 @@ export default function AllowanceRail({ availableChips, currentGameweek, open, o
   return (
     <div className="flex flex-col gap-3 border-t border-border-base py-4">
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[10px] tracking-[0.14em] text-text-muted-3">ALLOWANCE, REMAINING SEASON</span>
-        <button onClick={onToggle} className="ml-auto font-mono text-[10.5px] text-text-muted-4">HIDE</button>
+        <span className="font-mono text-2xs tracking-[0.14em] text-text-muted-3">ALLOWANCE, REMAINING SEASON</span>
+        <button onClick={onToggle} className="ml-auto font-mono text-2xs text-text-muted-4">HIDE</button>
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         {availableChips.map((chip) => {
@@ -39,7 +39,7 @@ export default function AllowanceRail({ availableChips, currentGameweek, open, o
             <div key={chip.chipId} className="flex flex-col gap-1.5 min-w-0">
               <div className="flex items-baseline gap-1.5">
                 <span className="truncate text-xs text-text-muted-1">{chip.name}</span>
-                <span className={`ml-auto shrink-0 font-mono text-[10.5px] ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>
+                <span className={`ml-auto shrink-0 font-mono text-2xs ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>
                   {status.text}
                 </span>
               </div>
@@ -60,7 +60,7 @@ export default function AllowanceRail({ availableChips, currentGameweek, open, o
           );
         })}
       </div>
-      <span className="font-mono text-[10.5px] text-text-muted-4">
+      <span className="font-mono text-2xs text-text-muted-4">
         Bright = usable now or has season allowance left · dark = on cooldown or exhausted
       </span>
     </div>

@@ -15,7 +15,7 @@ export default function PositionChart({ series, line, gws, moveLabel, moveTone =
         <KickerLabel>POSITION, WEEK BY WEEK</KickerLabel>
         {moveLabel && (
           <span
-            className={`font-mono text-[10.5px] ${
+            className={`font-mono text-2xs ${
               moveTone === 'up' ? 'text-brand-teal' : moveTone === 'down' ? 'text-state-error' : 'text-text-muted-2'
             }`}
           >
@@ -38,17 +38,17 @@ export default function PositionChart({ series, line, gws, moveLabel, moveTone =
               />
             </svg>
           </div>
-          <div className="flex justify-between font-mono text-[10px] text-text-muted-4">
+          <div className="flex justify-between font-mono text-2xs text-text-muted-4">
             <span>GW{gws[0]}</span>
             {gws.length > 2 && <span>GW{gws[Math.floor((gws.length - 1) / 2)]}</span>}
             <span>GW{gws[gws.length - 1]}</span>
           </div>
-          <span className="text-[11.5px] leading-relaxed text-text-muted-2">
+          <span className="text-2xs leading-relaxed text-text-muted-2">
             Your position after every settled week. Lower is better.
           </span>
         </>
       ) : (
-        <p className="text-[11.5px] leading-relaxed text-text-muted-2">
+        <p className="text-2xs leading-relaxed text-text-muted-2">
           {series && series.length === 1
             ? `Currently ${ordinal(series[0])} — the trend line fills in once a second gameweek settles.`
             : 'Not enough settled gameweeks yet to chart a trend.'}

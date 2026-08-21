@@ -36,7 +36,7 @@ export default function BottomTabBar() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <path d={ICON_PATHS[id]} />
           </svg>
-          <span className="whitespace-nowrap text-[8.5px] tracking-[0.02em]">{label}</span>
+          <span className="whitespace-nowrap text-3xs tracking-[0.02em]">{label}</span>
         </NavLink>
       ))}
     </nav>

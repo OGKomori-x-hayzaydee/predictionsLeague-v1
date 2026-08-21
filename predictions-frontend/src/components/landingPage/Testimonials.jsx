@@ -1,7 +1,7 @@
 import React from "react";
-import { Container } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { motion } from "framer-motion";
-import { StarFilledIcon } from "@radix-ui/react-icons";
+import { Star } from "@phosphor-icons/react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -94,8 +94,9 @@ export default function Testimonials() {
               {/* Star rating */}
               <div className="flex gap-1 mb-5">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <StarFilledIcon
+                  <Star
                     key={i}
+                    weight="fill"
                     className="w-4 h-4 text-amber-light dark:text-amber-dark"
                   />
                 ))}

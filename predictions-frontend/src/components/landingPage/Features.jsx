@@ -1,11 +1,11 @@
 import React from "react";
-import { Container } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { motion } from "framer-motion";
 import {
-  StarIcon,
-  LightningBoltIcon,
-  PersonIcon,
-} from "@radix-ui/react-icons";
+  Star,
+  Lightning,
+  User,
+} from "@phosphor-icons/react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -49,7 +49,7 @@ const features = [
     title: "Big Six Focus",
     description:
       "Concentrate on the most exciting matches featuring Manchester United, Manchester City, Liverpool, Chelsea, Arsenal, and Tottenham. Earn points for correct winners, exact scores, goalscorers, and special events like clean sheets and comebacks.",
-    icon: <StarIcon className="w-8 h-8" />,
+    icon: <Star className="w-8 h-8" />,
     accentColor: "teal",
     bullets: [
       "Multi-dimensional scoring system",
@@ -62,7 +62,7 @@ const features = [
     title: "Strategic Chips",
     description:
       "Deploy special chips like Double Down, Wildcard, and All-In Week to maximize your points at crucial moments throughout the season. Compete for prestigious end-of-season awards.",
-    icon: <LightningBoltIcon className="w-8 h-8" />,
+    icon: <Lightning className="w-8 h-8" />,
     accentColor: "indigo",
     bullets: [
       "Double Down & Wildcard chips",
@@ -75,7 +75,7 @@ const features = [
     title: "Compete with Friends",
     description:
       "Create private leagues to compete with friends, family, or colleagues in your own exclusive competition. Experience the excitement of live score updates and watch your points change as matches unfold.",
-    icon: <PersonIcon className="w-8 h-8" />,
+    icon: <User className="w-8 h-8" />,
     accentColor: "emerald",
     bullets: [
       "Private & public leagues",

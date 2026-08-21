@@ -39,10 +39,10 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
       <div className="flex min-h-0 flex-col px-6 pt-5">
         <div className="flex flex-none items-end justify-between gap-5">
           <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
-            <span className="font-mono text-[11px] tracking-[0.16em]" style={{ color: isSettled ? 'var(--color-brand-teal)' : 'var(--color-brand-amber)' }}>
+            <span className="font-mono text-2xs tracking-[0.16em]" style={{ color: isSettled ? 'var(--color-brand-teal)' : 'var(--color-brand-amber)' }}>
               GAMEWEEK {gw} · {isSettled ? 'REVEALED' : 'OPEN, UNSCORED'}
             </span>
-            <h2 className="font-dmSerif text-[29px] leading-tight text-text-primary">
+            <h2 className="font-dmSerif text-3xl leading-tight text-text-primary">
               {isSettled ? "Everyone's calls, side by side" : "Everyone's calls so far"}
             </h2>
           </div>
@@ -53,7 +53,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                 <button
                   key={m.id}
                   onClick={() => setMode(m.id)}
-                  className={`rounded-7 px-[11px] py-[6px] font-mono text-[11px] ${mode === m.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'}`}
+                  className={`rounded-7 px-[11px] py-[6px] font-mono text-2xs ${mode === m.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'}`}
                 >
                   {m.label}
                 </button>
@@ -67,7 +67,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
             className="grid flex-none items-end gap-[3px] border-b border-border-base pb-[6px]"
             style={{ gridTemplateColumns: `186px repeat(${fixtures.length}, minmax(0,1fr)) 58px` }}
           >
-            <span className="font-mono text-[10px] tracking-[0.13em] text-text-muted-2">MEMBER</span>
+            <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-2">MEMBER</span>
             {fixtures.map((f) => (
               <button
                 key={f.matchId}
@@ -78,12 +78,12 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                   <TeamCrest team={f.homeTeam} size={15} />
                   <TeamCrest team={f.awayTeam} size={15} />
                 </span>
-                <span className="font-mono text-[10px] text-text-muted-2">
+                <span className="font-mono text-2xs text-text-muted-2">
                   {f.actualHomeScore != null ? `${f.actualHomeScore}–${f.actualAwayScore}` : '—'}
                 </span>
               </button>
             ))}
-            <span className="text-right font-mono text-[10px] tracking-[0.1em] text-text-muted-2">{isSettled ? `GW${gw}` : 'STATUS'}</span>
+            <span className="text-right font-mono text-2xs tracking-[0.1em] text-text-muted-2">{isSettled ? `GW${gw}` : 'STATUS'}</span>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col gap-[3px] overflow-y-auto pr-1">
@@ -103,17 +103,17 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                     onClick={() => setSel({ type: 'member', id: r.username })}
                     className="flex min-w-0 items-center gap-[9px] p-[10px] text-left"
                   >
-                    <span className="w-4 font-mono text-[10.5px] text-text-muted-2">{r.position}</span>
+                    <span className="w-4 font-mono text-2xs text-text-muted-2">{r.position}</span>
                     <span
-                      className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[10.5px] font-semibold ${
+                      className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-2xs font-semibold ${
                         r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
                       }`}
                     >
                       {r.initial}
                     </span>
-                    <span className={`min-w-0 flex-1 truncate text-[13px] ${r.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{r.name}</span>
+                    <span className={`min-w-0 flex-1 truncate text-caption ${r.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{r.name}</span>
                     {!isSettled && (
-                      <span className={`font-mono text-[10px] ${r.filed === fixtures.length ? 'text-brand-teal' : 'text-brand-amber'}`}>
+                      <span className={`font-mono text-2xs ${r.filed === fixtures.length ? 'text-brand-teal' : 'text-brand-amber'}`}>
                         {r.filed}/{fixtures.length}
                       </span>
                     )}
@@ -139,15 +139,15 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                       <button
                         key={c.matchId}
                         onClick={() => c.filed && setSel({ type: 'fixture', id: c.matchId })}
-                        className="flex h-9 items-center justify-center gap-[3px] rounded-6 border font-mono text-[11.5px]"
+                        className="flex h-9 items-center justify-center gap-[3px] rounded-6 border font-mono text-2xs"
                         style={{ background: bg, borderColor: border, color: fg }}
                       >
                         {c.filed ? c.label : '—'}
-                        {c.chip && <span className="font-mono text-[9px] text-brand-amber">{c.chip}</span>}
+                        {c.chip && <span className="font-mono text-3xs text-brand-amber">{c.chip}</span>}
                       </button>
                     );
                   })}
-                  <span className="pr-[10px] text-right font-mono text-[12.5px] text-text-secondary">
+                  <span className="pr-[10px] text-right font-mono text-caption text-text-secondary">
                     {isSettled ? r.total : r.filed === fixtures.length ? 'in' : '—'}
                   </span>
                 </div>
@@ -156,11 +156,11 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
           </div>
 
           <div className="flex flex-none items-center gap-4 border-t border-border-base py-[14px]">
-            <span className="font-mono text-[10.5px] tracking-[0.1em] text-text-muted-2">{isSettled ? 'SCORED' : 'STATE'}</span>
+            <span className="font-mono text-2xs tracking-[0.1em] text-text-muted-2">{isSettled ? 'SCORED' : 'STATE'}</span>
             {legend.map((l) => (
               <span key={l.label} className="flex items-center gap-[7px]">
                 <span className="h-[11px] w-[11px] rounded-[3px] border" style={{ background: l.bg, borderColor: l.border }} />
-                <span className="text-[11.5px] text-text-muted-1">{l.label}</span>
+                <span className="text-2xs text-text-muted-1">{l.label}</span>
               </span>
             ))}
           </div>

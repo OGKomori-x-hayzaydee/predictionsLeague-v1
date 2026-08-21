@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Ticket } from '@phosphor-icons/react';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
 import SeasonTab from '../components/record/SeasonTab';
@@ -150,7 +151,7 @@ export default function RecordPage() {
         {hasRealHistory && (
           <button
             onClick={() => setPreviewMode((v) => !v)}
-            className={`mr-[22px] shrink-0 rounded-7 border px-2.5 py-1 font-outfit text-[10px] tracking-wide transition-colors ${
+            className={`mr-[22px] shrink-0 rounded-7 border px-2.5 py-1 font-outfit text-2xs tracking-wide transition-colors ${
               previewMode
                 ? 'border-brand-amber/50 text-brand-amber'
                 : 'border-border-card text-text-muted-3 hover:text-brand-teal'
@@ -171,7 +172,7 @@ export default function RecordPage() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 rounded-7 px-2.5 py-2 text-[13px] font-medium transition-colors ${
+              className={`flex-1 rounded-7 px-2.5 py-2 text-caption font-medium transition-colors ${
                 activeTab === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
               }`}
             >
@@ -187,19 +188,19 @@ export default function RecordPage() {
               previewMode ? 'border-brand-amber/50 text-brand-amber' : 'border-border-card text-text-muted-3'
             }`}
           >
-            🎟️
+            <Ticket size={14} />
           </button>
         )}
       </div>
 
       {previewMode && (
         <div className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-9 border border-brand-amber/40 bg-[color-mix(in_srgb,var(--brand-amber)_10%,transparent)] px-4 py-2.5 md:mx-[26px]">
-          <span className="font-outfit text-[10.5px] tracking-[0.1em] text-brand-amber">
+          <span className="font-outfit text-2xs tracking-[0.1em] text-brand-amber">
             PREVIEW · Example data, not your real record
           </span>
           <button
             onClick={() => setPreviewMode(false)}
-            className="shrink-0 font-outfit text-[10.5px] tracking-wide text-brand-amber underline decoration-dotted underline-offset-2 hover:text-brand-amber-mid"
+            className="shrink-0 font-outfit text-2xs tracking-wide text-brand-amber underline decoration-dotted underline-offset-2 hover:text-brand-amber-mid"
           >
             Exit preview
           </button>
@@ -215,7 +216,7 @@ export default function RecordPage() {
               aria-hidden="true"
               className="mb-1 flex h-14 w-14 items-center justify-center rounded-14 border border-dashed border-border-control text-2xl text-text-muted-4"
             >
-              🎟️
+              <Ticket size={28} />
             </span>
             <span className="font-dmSerif text-2xl text-text-primary">No predictions on record yet</span>
             <p className="max-w-sm text-sm text-text-muted-2">
@@ -231,7 +232,7 @@ export default function RecordPage() {
               </Link>
               <button
                 onClick={() => setPreviewMode(true)}
-                className="font-outfit text-[11px] tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
+                className="font-outfit text-2xs tracking-wide text-text-muted-2 underline decoration-dotted underline-offset-2 hover:text-brand-teal"
               >
                 Preview with example data →
               </button>
@@ -269,7 +270,7 @@ export default function RecordPage() {
                 className="mt-4 flex w-full items-center justify-between rounded-md border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary md:hidden"
               >
                 Hit rate, bands &amp; chip return
-                <span className="font-outfit text-[11px] text-brand-teal">VIEW &rsaquo;</span>
+                <span className="font-outfit text-2xs text-brand-teal">VIEW &rsaquo;</span>
               </button>
             </div>
 

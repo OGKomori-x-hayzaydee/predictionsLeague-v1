@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { DndContext, useDroppable } from '@dnd-kit/core';
+import { X } from '@phosphor-icons/react';
 import ChipToken from '../ui/ChipToken';
 import ChipTray from './ChipTray';
 import AllowanceRail from './AllowanceRail';
@@ -47,10 +48,10 @@ function WeekCard({ gw, isCurrent, isSelected, plannedChip, difficulty, onSelect
       <span className="flex w-6 flex-col justify-end overflow-hidden rounded-[3px] bg-surface-card-4" style={{ height: 64 }}>
         <span className="rounded-[3px]" style={{ height: `${barPct}%`, background: barColor }} />
       </span>
-      <span className="font-mono text-[9.5px] tracking-[0.06em]" style={{ color: active ? 'var(--text-primary)' : 'var(--text-muted-2)' }}>
+      <span className="font-mono text-3xs tracking-[0.06em]" style={{ color: active ? 'var(--text-primary)' : 'var(--text-muted-2)' }}>
         {label}
       </span>
-      {isCurrent && <span className="font-mono text-[8.5px] text-brand-teal">NOW</span>}
+      {isCurrent && <span className="font-mono text-3xs text-brand-teal">NOW</span>}
     </button>
   );
 }
@@ -60,7 +61,7 @@ function WeekFocus({ gw, isCurrentWeek, fixtures, plannedChip, availableChips, c
     <div className="flex flex-col gap-3 rounded-md border border-border-card bg-surface-card p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[11px] tracking-[0.16em] text-brand-teal">
+          <span className="font-mono text-2xs tracking-[0.16em] text-brand-teal">
             GAMEWEEK {gw}
             {difficulty ? ` · ${difficulty.style.label}` : ''}
           </span>
@@ -69,8 +70,8 @@ function WeekFocus({ gw, isCurrentWeek, fixtures, plannedChip, availableChips, c
           </h3>
         </div>
         {plannedChip && (
-          <button onClick={() => onRemove(gw)} className="shrink-0 font-mono text-xs text-text-muted-3 hover:text-state-error">
-            Remove ✕
+          <button onClick={() => onRemove(gw)} className="flex shrink-0 items-center gap-1 font-mono text-xs text-text-muted-3 hover:text-state-error">
+            Remove <X size={12} />
           </button>
         )}
       </div>
@@ -83,11 +84,11 @@ function WeekFocus({ gw, isCurrentWeek, fixtures, plannedChip, availableChips, c
               return (
                 <div key={f.id} className="flex items-center gap-2.5 rounded-9 border border-border-base bg-surface-card-2 px-3 py-2">
                   <TeamCrest team={normalizeTeamName(f.homeTeam)} size={16} />
-                  <span className="min-w-0 flex-1 truncate text-[12.5px] text-text-secondary">
+                  <span className="min-w-0 flex-1 truncate text-caption text-text-secondary">
                     {normalizeTeamName(f.homeTeam)} v {normalizeTeamName(f.awayTeam)}
                   </span>
                   {clash && (
-                    <span className="shrink-0 rounded-full border border-border-control px-2 py-0.5 font-mono text-[9px] tracking-[0.06em] text-text-muted-2">
+                    <span className="shrink-0 rounded-full border border-border-control px-2 py-0.5 font-mono text-3xs tracking-[0.06em] text-text-muted-2">
                       BIG SIX CLASH
                     </span>
                   )}
@@ -114,7 +115,7 @@ function WeekFocus({ gw, isCurrentWeek, fixtures, plannedChip, availableChips, c
               disabled={!!reason}
               onClick={() => onAssign(gw, chip.chipId)}
               title={reason || undefined}
-              className={`rounded-full border px-3 py-1.5 font-mono text-[11px] transition-colors ${
+              className={`rounded-full border px-3 py-1.5 font-mono text-2xs transition-colors ${
                 isPlanned
                   ? 'border-brand-teal-mid/50 bg-brand-teal/10 text-brand-teal'
                   : reason
@@ -178,10 +179,10 @@ export default function StrategyTab() {
       <div className="hidden flex-col gap-5 md:flex">
         <div className="flex items-end justify-between gap-6">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="font-mono text-[11px] tracking-[0.16em] text-brand-teal">
+            <span className="font-mono text-2xs tracking-[0.16em] text-brand-teal">
               {plannedCount === 0 ? `${weeks.length} WEEKS AHEAD · ${inHandCount} CHIPS IN HAND` : `${plannedCount} PLANNED · ${inHandCount} STILL IN HAND`}
             </span>
-            <h2 className="font-dmSerif text-[28px] leading-tight text-text-primary">
+            <h2 className="font-dmSerif text-3xl leading-tight text-text-primary">
               {plannedCount === 0 ? 'Which week deserves a chip?' : 'Your run-in, one chip at a time'}
             </h2>
           </div>
@@ -189,7 +190,7 @@ export default function StrategyTab() {
 
         <DndContext onDragEnd={handleDragEnd}>
           <div className="flex flex-col items-center gap-2">
-            <span className="font-mono text-[10px] tracking-[0.16em] text-text-muted-3">YOUR HAND</span>
+            <span className="font-mono text-2xs tracking-[0.16em] text-text-muted-3">YOUR HAND</span>
             <ChipTray chips={availableChips} />
           </div>
 
@@ -227,10 +228,10 @@ export default function StrategyTab() {
         {plannedCount > 0 && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px] tracking-[0.13em] text-text-muted-3">
+              <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-3">
                 YOUR PLAN · {plannedCount} CHIP{plannedCount === 1 ? '' : 'S'} ACROSS {plannedCount} WEEK{plannedCount === 1 ? '' : 'S'}
               </span>
-              <button onClick={clearAll} className="font-mono text-[10.5px] text-text-muted-2 hover:text-state-error">
+              <button onClick={clearAll} className="font-mono text-2xs text-text-muted-2 hover:text-state-error">
                 CLEAR THE PLAN
               </button>
             </div>
@@ -248,9 +249,9 @@ export default function StrategyTab() {
                       onClick={() => setSelectedGw(gw)}
                       className="flex items-center gap-3.5 rounded-11 border border-border-card bg-surface-card/60 px-[15px] py-3 text-left"
                     >
-                      <span className="w-11 font-mono text-[11.5px] text-brand-teal">GW{gw}</span>
-                      <span className="w-[190px] truncate text-[13.5px] text-text-secondary">{chip.name}</span>
-                      <span className="flex-1 text-[12.5px] text-text-muted-2">
+                      <span className="w-11 font-mono text-2xs text-brand-teal">GW{gw}</span>
+                      <span className="w-[190px] truncate text-caption text-text-secondary">{chip.name}</span>
+                      <span className="flex-1 text-caption text-text-muted-2">
                         {difficulty ? `${difficulty.style.label.toLowerCase()} week` : 'fixtures not out yet'}
                       </span>
                     </button>

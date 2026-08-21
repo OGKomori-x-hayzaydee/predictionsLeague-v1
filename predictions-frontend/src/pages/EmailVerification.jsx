@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Box, Container, Button } from '@radix-ui/themes';
-import { CheckIcon } from '@radix-ui/react-icons';
+import Container from '../components/ui/Container';
+import { Check } from '@phosphor-icons/react';
 import authAPI from '../services/api/authAPI';
 import Navbar from '../components/landingPage/Navbar';
 import Footer from '../components/landingPage/Footer';
@@ -133,7 +133,7 @@ export default function EmailVerification() {
   return (
     <>
       <Navbar />
-      <Box className="relative overflow-hidden bg-primary-500 min-h-screen">
+      <div className="relative overflow-hidden bg-primary-500 min-h-screen">
         {/* Background elements */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <motion.div
@@ -177,7 +177,7 @@ export default function EmailVerification() {
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <CheckIcon className="w-8 h-8 text-white" />
+                <Check className="w-8 h-8 text-white" />
               </motion.div>
               
               <motion.h1
@@ -268,7 +268,7 @@ export default function EmailVerification() {
 
           </motion.div>
         </Container>
-      </Box>
+      </div>
       <Footer />
     </>
   );

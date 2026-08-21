@@ -12,7 +12,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
     return (
       <div className="flex flex-col gap-[10px] rounded-16 border border-border-base bg-surface-card p-5">
         <KickerLabel>HEAD TO HEAD</KickerLabel>
-        <p className="text-[11.5px] leading-relaxed text-text-muted-2">
+        <p className="text-2xs leading-relaxed text-text-muted-2">
           Invite someone else into this league to see a head-to-head breakdown.
         </p>
       </div>
@@ -33,7 +33,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
             <button
               key={v}
               onClick={() => setVsVariant(v)}
-              className={`min-h-8 rounded-7 px-[11px] py-[5px] font-mono text-[9.5px] tracking-[0.08em] md:min-h-0 ${
+              className={`min-h-8 rounded-7 px-[11px] py-[5px] font-mono text-3xs tracking-[0.08em] md:min-h-0 ${
                 vsVariant === v ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
               }`}
             >
@@ -56,9 +56,9 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
 
           <div className="flex min-w-0 flex-1 flex-col gap-[13px] p-[10px_14px_14px]">
             <div className="flex items-center justify-between gap-2 border-b border-border-base pb-[9px]">
-              <span className="font-dmSerif text-[18px] text-brand-teal md:text-[23px]">You</span>
-              <span className="font-mono text-[10px] tracking-[0.2em] text-text-muted-5 md:text-[11px]">VS</span>
-              <span className="truncate font-dmSerif text-[18px] text-text-secondary md:text-[23px]">{current.name}</span>
+              <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
+              <span className="font-mono text-2xs tracking-[0.2em] text-text-muted-5 md:text-2xs">VS</span>
+              <span className="truncate font-dmSerif text-lg text-text-secondary md:text-2xl">{current.name}</span>
             </div>
 
             {vsVariant === 'tape' ? (
@@ -66,21 +66,21 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                 {current.tapeRows.map((r) => (
                   <div key={r.label} className="flex flex-col gap-[5px] md:grid md:grid-cols-[50px_1fr_142px_1fr_50px] md:items-center md:gap-[9px]">
                     <div className="md:hidden">
-                      <span className="block text-center font-mono text-[9.5px] tracking-[0.1em] text-text-muted-2">{r.label}</span>
+                      <span className="block text-center font-mono text-3xs tracking-[0.1em] text-text-muted-2">{r.label}</span>
                     </div>
-                    <span className="text-right font-mono text-[13px] md:text-[15px]" style={{ color: r.youFg }}>
+                    <span className="text-right font-mono text-caption md:text-base" style={{ color: r.youFg }}>
                       {r.you}
                     </span>
                     <span className="flex justify-end">
                       <span className="h-1.5 rounded-full transition-all" style={{ width: r.youW, background: r.youBar }} />
                     </span>
-                    <span className="hidden text-center font-mono text-[9.5px] tracking-[0.1em] text-text-muted-2 md:block">
+                    <span className="hidden text-center font-mono text-3xs tracking-[0.1em] text-text-muted-2 md:block">
                       {r.label}
                     </span>
                     <span className="flex">
                       <span className="h-1.5 rounded-full transition-all" style={{ width: r.themW, background: r.themBar }} />
                     </span>
-                    <span className="font-mono text-[13px] md:text-[15px]" style={{ color: r.themFg }}>
+                    <span className="font-mono text-caption md:text-base" style={{ color: r.themFg }}>
                       {r.them}
                     </span>
                   </div>
@@ -93,25 +93,25 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                   <div className="flex items-center gap-4 border-b border-border-base pb-[6px]">
                     <span className="flex items-center gap-[7px]">
                       <span className="h-[9px] w-[9px] rounded-[2px] bg-brand-teal" />
-                      <span className="text-[12.5px] text-text-secondary">You</span>
+                      <span className="text-caption text-text-secondary">You</span>
                     </span>
                     <span className="flex items-center gap-[7px]">
                       <span className="h-[9px] w-[9px] rounded-[2px] bg-[#f87171]" />
-                      <span className="text-[12.5px] text-text-secondary">{current.name}</span>
+                      <span className="text-caption text-text-secondary">{current.name}</span>
                     </span>
                   </div>
                   {current.radarRows.map((r) => (
                     <div key={r.label} className="grid grid-cols-[1fr_46px_46px] items-baseline gap-[10px]">
-                      <span className="font-mono text-[9.5px] tracking-[0.1em] text-text-muted-2">{r.label}</span>
-                      <span className="text-right font-mono text-[12.5px] text-brand-teal">{r.you}</span>
-                      <span className="text-right font-mono text-[12.5px] text-[#f87171]">{r.them}</span>
+                      <span className="font-mono text-3xs tracking-[0.1em] text-text-muted-2">{r.label}</span>
+                      <span className="text-right font-mono text-caption text-brand-teal">{r.you}</span>
+                      <span className="text-right font-mono text-caption text-[#f87171]">{r.them}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <span className="text-wrap-pretty border-t border-border-base pt-[9px] text-center text-[12.5px] leading-relaxed text-text-muted-2">
+            <span className="text-wrap-pretty border-t border-border-base pt-[9px] text-center text-caption leading-relaxed text-text-muted-2">
               {current.verdict}
             </span>
           </div>

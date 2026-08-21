@@ -1,3 +1,4 @@
+import { Lock, CalendarBlank, TrendUp } from '@phosphor-icons/react';
 import KickerLabel from '../ui/KickerLabel';
 import Card from '../ui/Card';
 import StatTile from '../ui/StatTile';
@@ -20,11 +21,11 @@ const VIZ_THRESHOLD = 5;
 function DataGateTeaser({ icon, text }) {
   return (
     <div className="relative flex min-h-[120px] flex-col items-center justify-center gap-2 overflow-hidden rounded-9 border border-dashed border-border-control px-4 py-6 text-center">
-      <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center text-6xl opacity-[0.04]">
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.04]">
         {icon}
       </span>
-      <span aria-hidden="true" className="text-lg text-text-muted-4">🔒</span>
-      <p className="max-w-[22em] text-[12.5px] leading-relaxed text-text-muted-3">{text}</p>
+      <span aria-hidden="true" className="text-text-muted-4"><Lock size={18} /></span>
+      <p className="max-w-[22em] text-caption leading-relaxed text-text-muted-3">{text}</p>
     </div>
   );
 }
@@ -62,7 +63,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
   if (vizGated) {
     return (
       <div className="flex flex-col gap-4">
-        <h2 className="font-dmSerif text-[25px] leading-tight text-text-primary md:text-[30px]">
+        <h2 className="font-dmSerif text-2xl leading-tight text-text-primary md:text-3xl">
           Every week you have ever filed
         </h2>
         <VisualizationsGate settledWeeks={settledWeeks} threshold={VIZ_THRESHOLD} />
@@ -72,7 +73,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="font-dmSerif text-[25px] leading-tight text-text-primary md:text-[30px]">
+      <h2 className="font-dmSerif text-2xl leading-tight text-text-primary md:text-3xl">
         Every week you have ever filed
       </h2>
 
@@ -90,7 +91,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
       <Card className="p-5">
         <div className="mb-3 flex items-baseline justify-between">
           <KickerLabel>Points per settled week</KickerLabel>
-          <span className="font-outfit text-[10.5px] text-brand-teal">
+          <span className="font-outfit text-2xs text-brand-teal">
             {trend.length ? `AVERAGE ${stats.avgPerWeek} A WEEK` : ''}
           </span>
         </div>
@@ -106,11 +107,11 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
                 <div key={s.season} className="flex flex-col gap-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="flex items-baseline gap-2">
-                      <span className="text-[13px] text-text-muted-2">{s.season}</span>
+                      <span className="text-caption text-text-muted-2">{s.season}</span>
                       <span className="font-dmSerif text-xl text-text-primary">{s.points}</span>
-                      <span className="text-[12px] text-text-muted-3">{s.avgPerWeek} a week</span>
+                      <span className="text-xs text-text-muted-3">{s.avgPerWeek} a week</span>
                     </span>
-                    <span className="font-outfit text-[10px] text-text-muted-3">
+                    <span className="font-outfit text-2xs text-text-muted-3">
                       {s.rank}
                       {s.rank === 1 ? 'st' : s.rank === 2 ? 'nd' : s.rank === 3 ? 'rd' : 'th'} of {s.totalTeams}
                     </span>
@@ -124,7 +125,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
                 </div>
               ))}
               <div className="mt-1 flex items-baseline justify-between border-t border-border-base pt-2">
-                <span className="font-outfit text-[10px] tracking-wide text-text-muted-3">LIFETIME</span>
+                <span className="font-outfit text-2xs tracking-wide text-text-muted-3">LIFETIME</span>
                 <span className="font-dmSerif text-xl text-brand-teal">
                   {demoSeasonHistory.reduce((t, s) => t + s.points, 0) + stats.seasonPoints} pts
                 </span>
@@ -132,7 +133,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
             </div>
           ) : (
             <DataGateTeaser
-              icon="📅"
+              icon={<CalendarBlank size={96} />}
               text="Unlocks once you've completed 2 full seasons — this one's still in progress."
             />
           )}
@@ -141,15 +142,15 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
         <Card className="relative overflow-hidden p-5">
           <div className="mb-3 flex items-baseline justify-between">
             <KickerLabel>Rank trajectory</KickerLabel>
-            {hasMultiSeason && <span className="font-outfit text-[10.5px] text-brand-indigo">4TH OF 12</span>}
+            {hasMultiSeason && <span className="font-outfit text-2xs text-brand-indigo">4TH OF 12</span>}
           </div>
           {hasMultiSeason ? (
             <div className="flex flex-col gap-2">
               <Sparkline data={demoRankTrajectory.map((r) => -r)} height={70} stroke="var(--brand-indigo-mid)" fill={false} />
-              {demoRankNote && <p className="text-[11.5px] leading-relaxed text-text-muted-2">{demoRankNote}</p>}
+              {demoRankNote && <p className="text-2xs leading-relaxed text-text-muted-2">{demoRankNote}</p>}
             </div>
           ) : (
-            <DataGateTeaser icon="📈" text="Needs a full second season of results to plot a trend." />
+            <DataGateTeaser icon={<TrendUp size={96} />} text="Needs a full second season of results to plot a trend." />
           )}
         </Card>
       </div>
@@ -173,7 +174,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
       <Card className="p-5">
         <div className="mb-3 flex items-baseline justify-between">
           <KickerLabel>Who you read well</KickerLabel>
-          <span className="font-outfit text-[9.5px] text-text-muted-4">SHARE OF CALLS CORRECT</span>
+          <span className="font-outfit text-3xs text-text-muted-4">SHARE OF CALLS CORRECT</span>
         </div>
         {teamAccuracy.length === 0 ? (
           <p className="text-sm text-text-muted-2">Not enough settled predictions yet.</p>
@@ -192,7 +193,7 @@ export default function AllTimeTab({ predictions, stats, previewMode = false, de
                   title={`${t.team} · ${t.accuracy}% of ${t.predictions} calls`}
                 >
                   <TeamCrest team={t.team} size={20} />
-                  <span className="font-outfit text-[10px]" style={{ color: strong ? 'var(--brand-teal)' : 'var(--text-muted-2)' }}>
+                  <span className="font-outfit text-2xs" style={{ color: strong ? 'var(--brand-teal)' : 'var(--text-muted-2)' }}>
                     {t.accuracy}%
                   </span>
                 </div>

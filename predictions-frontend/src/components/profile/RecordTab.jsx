@@ -21,8 +21,8 @@ function GroundRow({ team, tone }) {
     <div className="flex items-center gap-3 rounded-[10px] border border-border-card bg-surface-card-3/60 px-3.5 py-2.5">
       <span className="h-6 w-[3px] shrink-0 rounded-full" style={{ background: toneColor }} />
       <div className="flex min-w-0 flex-1 flex-col leading-tight">
-        <span className="truncate text-[12.5px] text-text-secondary">{team.team}</span>
-        <span className="font-mono text-[10px] text-text-muted-2">
+        <span className="truncate text-caption text-text-secondary">{team.team}</span>
+        <span className="font-mono text-2xs text-text-muted-2">
           {team.predictions} call{team.predictions === 1 ? '' : 's'} · {team.correct} correct
         </span>
       </div>
@@ -88,7 +88,7 @@ export default function RecordTab({ stats, predictions = [] }) {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <span className="font-mono text-[10px] tracking-[0.13em] text-text-muted-2">STRONGEST</span>
+              <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-2">STRONGEST</span>
               {strongest.length === 0 ? (
                 <p className="text-xs text-text-muted-3">Not enough data yet.</p>
               ) : (
@@ -96,7 +96,7 @@ export default function RecordTab({ stats, predictions = [] }) {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <span className="font-mono text-[10px] tracking-[0.13em] text-text-muted-2">WEAKEST</span>
+              <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-2">WEAKEST</span>
               {weakest.length === 0 ? (
                 <p className="text-xs text-text-muted-3">Not enough data yet.</p>
               ) : (

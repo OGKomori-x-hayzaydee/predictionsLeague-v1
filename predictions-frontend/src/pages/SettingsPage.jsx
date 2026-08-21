@@ -78,8 +78,8 @@ export default function SettingsPage() {
         />
         <div className="mx-auto flex w-[780px] max-w-full flex-col gap-[22px] px-4 py-[30px]">
           <div className="flex flex-col gap-1.5">
-            <h2 className="font-dmSerif text-[30px] leading-[1.1] text-text-primary">{active.head}</h2>
-            <p className="max-w-[46em] text-[13.5px] leading-[1.6] text-text-muted-2 [text-wrap:pretty]">{active.sub}</p>
+            <h2 className="font-dmSerif text-3xl leading-[1.1] text-text-primary">{active.head}</h2>
+            <p className="max-w-[46em] text-caption leading-[1.6] text-text-muted-2 [text-wrap:pretty]">{active.sub}</p>
           </div>
           <Active profile={profile} loading={profileLoading} />
         </div>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
           slot bar on mobile (foundation spec §6.1); tab context is an in-content pill strip. */}
       <div className="flex flex-col gap-[13px] px-4 pb-6 pt-4 md:hidden">
         <div className="flex flex-col gap-[5px]">
-          <h2 className="font-dmSerif text-[23px] leading-[1.15] text-text-primary">{active.head}</h2>
+          <h2 className="font-dmSerif text-2xl leading-[1.15] text-text-primary">{active.head}</h2>
           <span className="text-xs leading-[1.6] text-text-muted-2 [text-wrap:pretty]">{active.sub}</span>
         </div>
 
@@ -98,7 +98,7 @@ export default function SettingsPage() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`min-w-[74px] flex-1 shrink-0 whitespace-nowrap rounded-sm px-1.5 py-[9px] font-mono text-[9.5px] tracking-[0.08em] transition-colors ${
+              className={`min-w-[74px] flex-1 shrink-0 whitespace-nowrap rounded-sm px-1.5 py-[9px] font-mono text-3xs tracking-[0.08em] transition-colors ${
                 t.id === activeTab ? 'bg-surface-nav-active text-brand-teal' : 'bg-transparent text-text-muted-2'
               }`}
             >

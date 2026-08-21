@@ -30,8 +30,8 @@ export default function FixtureReelStrip({ stations, locked = false }) {
   return (
     <div className="flex flex-col gap-1.5 w-full max-w-[76rem] mx-auto">
       <div className="flex items-center justify-between">
-        <span className="font-outfit text-[0.625rem] tracking-widest text-[#5b667d]">THE REEL</span>
-        <span className="font-outfit text-[0.625rem] tracking-widest text-[#5b667d]">
+        <span className="font-outfit text-2xs tracking-widest text-[#5b667d]">THE REEL</span>
+        <span className="font-outfit text-2xs tracking-widest text-[#5b667d]">
           {totalPoints > 0 ? `${totalPoints} pts staked across ${filedCount} filed` : `${filedCount} of ${stations.length} filed`}
         </span>
       </div>
@@ -63,7 +63,7 @@ export default function FixtureReelStrip({ stations, locked = false }) {
                 locked ? '' : 'cursor-pointer hover:border-[#2b4162]'
               } ${bgClass} ${borderClass}`}
             >
-              <span className="font-outfit text-[0.625rem] tracking-wider" style={{ color: dayColor }}>
+              <span className="font-outfit text-2xs tracking-wider" style={{ color: dayColor }}>
                 {formatDay(s.date)}
               </span>
               <div className="flex items-center justify-center gap-1.5 py-0.5">

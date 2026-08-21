@@ -52,7 +52,7 @@ function ScorerSlot({ team, value, players, taken, align, onPick }) {
                     className="h-3 animate-[shimmer_1.1s_linear_infinite] rounded-xs bg-[linear-gradient(90deg,#131f33,#1e2d45,#131f33)]"
                   />
                 ))}
-                <span className="mt-1 font-outfit text-[0.625rem] tracking-[0.1em] text-[#4f5b70]">
+                <span className="mt-1 font-outfit text-2xs tracking-[0.1em] text-[#4f5b70]">
                   LOADING SQUAD…
                 </span>
               </div>
@@ -79,7 +79,7 @@ function ScorerSlot({ team, value, players, taken, align, onPick }) {
                       }`}
                     >
                       <span className="min-w-0 flex-1 truncate">{p.name}</span>
-                      <span className={`shrink-0 font-outfit text-[0.625rem] ${dup ? 'text-[#5b667d]' : 'text-[#818cf8]'}`}>
+                      <span className={`shrink-0 font-outfit text-2xs ${dup ? 'text-[#5b667d]' : 'text-[#818cf8]'}`}>
                         {dup ? 'already' : p.position || ''}
                       </span>
                     </button>
@@ -96,7 +96,7 @@ function ScorerSlot({ team, value, players, taken, align, onPick }) {
                     className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left font-outfit text-xs text-[#8fa0b8] transition-colors hover:bg-[#132238]"
                   >
                     <span className="min-w-0 flex-1 truncate">{o.name}</span>
-                    <span className="shrink-0 font-outfit text-[0.625rem] text-[#4f5b70]">{o.meta}</span>
+                    <span className="shrink-0 font-outfit text-2xs text-[#4f5b70]">{o.meta}</span>
                   </button>
                 ))}
               </>

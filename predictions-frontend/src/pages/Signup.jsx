@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Box, Container, Button } from "@radix-ui/themes";
+import Container from "../components/ui/Container";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  EyeOpenIcon,
-  EyeClosedIcon,
-  CheckIcon,
-} from "@radix-ui/react-icons";
+  Eye,
+  EyeSlash,
+  Check,
+} from "@phosphor-icons/react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
@@ -350,7 +350,7 @@ export default function Signup() {
   return (
     <>
       <Navbar />
-      <Box className="relative overflow-hidden bg-white dark:bg-primary-800 min-h-screen transition-colors duration-300">
+      <div className="relative overflow-hidden bg-white dark:bg-primary-800 min-h-screen transition-colors duration-300">
         {/* Background elements */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-50 via-white to-white dark:from-primary-700/40 dark:via-primary-800 dark:to-primary-800" />
@@ -408,7 +408,7 @@ export default function Signup() {
                             : "bg-slate-100 dark:bg-primary-600/80 text-slate-400 dark:text-indigo-200"
                         }`}
                       >
-                        {formStep > step ? <CheckIcon /> : index + 1}
+                        {formStep > step ? <Check /> : index + 1}
                       </div>
                       <div className="text-xs mt-1 text-light-text-secondary dark:text-slate-300 font-outfit">
                         {step === 1 ? "details" : "preferences"}
@@ -534,7 +534,7 @@ export default function Signup() {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-light dark:text-teal-dark hover:opacity-70 transition-opacity"
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                        {showPassword ? <EyeSlash /> : <Eye />}
                       </button>
                     </div>
                     {errors.password && (
@@ -681,14 +681,13 @@ export default function Signup() {
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     className="w-full sm:w-auto"
                   >
-                    <Button
+                    <button
                       type="button"
                       onClick={handlePrevStep}
                       className="w-full px-4 py-2.5 sm:py-2 border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-md font-outfit transition-colors cursor-pointer"
-                      size="4"
                     >
                       back
-                    </Button>
+                    </button>
                   </motion.div>
                 )}
 
@@ -698,18 +697,17 @@ export default function Signup() {
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   className="w-full sm:w-auto sm:flex-1"
                 >
-                  <Button
+                  <button
                     type="submit"
                     className="w-full bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 hover:opacity-90 font-bold font-outfit py-2.5 sm:py-3 px-6 rounded-md transition-opacity cursor-pointer"
                     disabled={isLoading}
-                    size="4"
                   >
                     {isLoading
                       ? "creating account..."
                       : formStep === 3
                       ? "create account"
                       : "verify email"}
-                  </Button>
+                  </button>
                 </motion.div>
               </div>
             </form>
@@ -727,7 +725,7 @@ export default function Signup() {
             </motion.div>
           </motion.div>
         </Container>
-      </Box>
+      </div>
       <Footer />
     </>
   );

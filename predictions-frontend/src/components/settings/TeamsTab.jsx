@@ -25,10 +25,10 @@ export default function TeamsTab() {
 
   return (
     <div className="flex flex-col gap-[10px] md:gap-[10px]">
-      <span className="hidden font-mono text-[10px] tracking-[0.14em] text-text-muted-2 md:inline">
+      <span className="hidden font-mono text-2xs tracking-[0.14em] text-text-muted-2 md:inline">
         FOLLOWING · {followed.length} OF {FOLLOW_CAP}
       </span>
-      <span className="text-[11.5px] leading-[1.55] text-text-muted-2 [text-wrap:pretty] md:hidden">
+      <span className="text-2xs leading-[1.55] text-text-muted-2 [text-wrap:pretty] md:hidden">
         Followed teams pin their fixtures to the top of the reel. It changes ordering only, never scoring.
       </span>
 
@@ -48,12 +48,12 @@ export default function TeamsTab() {
               <TeamCrest team={team} size={22} className={`shrink-0 ${isFollowed ? '' : 'opacity-50 grayscale'}`} />
               <span className="flex min-w-0 flex-1 flex-col gap-0.5 md:flex-row md:items-center md:justify-between">
                 <span
-                  className={`truncate text-[12.5px] md:text-[13px] ${isFollowed ? 'text-text-secondary' : 'text-text-muted-2'}`}
+                  className={`truncate text-caption md:text-caption ${isFollowed ? 'text-text-secondary' : 'text-text-muted-2'}`}
                 >
                   {team}
                 </span>
                 <span
-                  className={`shrink-0 font-mono text-[8.5px] tracking-[0.1em] md:text-[10px] ${
+                  className={`shrink-0 font-mono text-3xs tracking-[0.1em] md:text-2xs ${
                     isFollowed ? 'text-brand-teal' : 'text-text-muted-5'
                   }`}
                 >

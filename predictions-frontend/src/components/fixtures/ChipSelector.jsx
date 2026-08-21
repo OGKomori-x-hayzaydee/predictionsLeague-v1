@@ -62,7 +62,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
                   }}
                 >
                   <div
-                    className="flex w-6 h-6 items-center justify-center rounded-full bg-[#08111f] font-outfit text-[0.6875rem] font-bold"
+                    className="flex w-6 h-6 items-center justify-center rounded-full bg-[#08111f] font-outfit text-2xs font-bold"
                     style={{
                       border: `1.5px solid ${isSelected ? '#fcd34d' : hue}`,
                       color: isSelected ? '#fcd34d' : hue,
@@ -72,7 +72,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
                   </div>
                 </div>
                 <span
-                  className="font-outfit text-[0.625rem]"
+                  className="font-outfit text-2xs"
                   style={{ color: isSelected ? '#fcd34d' : isUsed ? '#5b667d' : '#8fa0b8' }}
                 >
                   {left}
@@ -88,7 +88,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
                 >
                   {c.name}
                 </span>
-                <span className="text-[0.6875rem] leading-snug text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
+                <span className="text-2xs leading-snug text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
                   {c.desc}
                 </span>
               </div>

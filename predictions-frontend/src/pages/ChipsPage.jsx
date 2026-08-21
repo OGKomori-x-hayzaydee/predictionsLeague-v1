@@ -33,8 +33,8 @@ export default function ChipsPage() {
           context is an in-content pill strip, matching Settings/Record. */}
       <div className="flex flex-col gap-[14px] px-4 pt-4 md:hidden">
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[9.5px] tracking-[0.14em] text-brand-teal">CHIPS</span>
-          <h2 className="font-dmSerif text-[23px] leading-[1.15] text-text-primary [text-wrap:pretty]">
+          <span className="font-mono text-3xs tracking-[0.14em] text-brand-teal">CHIPS</span>
+          <h2 className="font-dmSerif text-2xl leading-[1.15] text-text-primary [text-wrap:pretty]">
             {activeTab === 'strategy' ? 'Plan your run-in' : 'Your chip audit'}
           </h2>
         </div>
@@ -44,7 +44,7 @@ export default function ChipsPage() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 rounded-sm px-1.5 py-2 font-mono text-[10.5px] tracking-[0.1em] transition-colors ${
+              className={`flex-1 rounded-sm px-1.5 py-2 font-mono text-2xs tracking-[0.1em] transition-colors ${
                 t.id === activeTab ? 'bg-surface-nav-active text-brand-teal' : 'bg-transparent text-text-muted-2'
               }`}
             >

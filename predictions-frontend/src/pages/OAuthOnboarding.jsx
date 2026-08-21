@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
-import { Box, Container, Button } from '@radix-ui/themes';
+import Container from '../components/ui/Container';
+import { Check } from '@phosphor-icons/react';
 
 export default function OAuthOnboarding() {
   const [formData, setFormData] = useState({
@@ -110,7 +111,7 @@ export default function OAuthOnboarding() {
   };
 
   return (
-    <Box className="relative overflow-hidden bg-primary-500 min-h-screen">
+    <div className="relative overflow-hidden bg-primary-500 min-h-screen">
       {/* Background elements */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.div 
@@ -222,21 +223,19 @@ export default function OAuthOnboarding() {
               whileTap={{ scale: 0.98 }}
               className="flex justify-center"
             >
-              <Button 
-                type="submit" 
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 mx-auto" 
+              <button
+                type="submit"
+                className="w-full rounded-md bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 mx-auto"
                 disabled={isLoading}
-                size="4"
-                color="indigo"
               >
                 {isLoading ? "completing profile..." : "complete profile"}
-              </Button>
+              </button>
             </motion.div>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-white/50 text-sm font-outfit">
-              your google account is already verified ✓
+            <p className="flex items-center justify-center gap-1.5 text-white/50 text-sm font-outfit">
+              your google account is already verified <Check className="inline w-3.5 h-3.5" />
             </p>
             {(oauthData.email || sessionStorage.getItem('oauth_user_email')) && (
               <p className="text-teal-300/70 text-xs font-outfit mt-1">
@@ -246,6 +245,6 @@ export default function OAuthOnboarding() {
           </div>
         </motion.div>
       </Container>
-    </Box>
+    </div>
   );
 }

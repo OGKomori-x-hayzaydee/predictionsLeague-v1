@@ -31,8 +31,8 @@ function DraggableChip({ chip, size, onFocus }) {
       title={disabled ? status.text : `Drag ${chip.name} onto a gameweek`}
     >
       <ChipToken tag={tag} hue={hue} size={size} muted={disabled} />
-      <span className="text-center text-[12.5px] leading-tight text-text-secondary">{chip.name}</span>
-      <span className={`font-mono text-[10px] ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>{status.text}</span>
+      <span className="text-center text-caption leading-tight text-text-secondary">{chip.name}</span>
+      <span className={`font-mono text-2xs ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>{status.text}</span>
     </div>
   );
 }

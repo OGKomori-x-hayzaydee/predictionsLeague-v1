@@ -18,7 +18,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
     return (
       <div className="flex flex-col gap-2 rounded-16 border border-border-base bg-surface-card p-5">
         <KickerLabel>GAMEWEEK PODIUM</KickerLabel>
-        <p className="text-[11.5px] leading-relaxed text-text-muted-2">
+        <p className="text-2xs leading-relaxed text-text-muted-2">
           No settled gameweek yet — the podium fills in once your league's first results are scored.
         </p>
       </div>
@@ -52,7 +52,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
         >
           {(member.displayName || member.username).charAt(0).toUpperCase()}
         </span>
-        <span className="max-w-full truncate text-[12.5px] text-text-secondary">{name}</span>
+        <span className="max-w-full truncate text-caption text-text-secondary">{name}</span>
         <span
           style={{ fontSize: PTS_SIZE[i] }}
           className={`font-dmSerif leading-none ${member.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}
@@ -69,7 +69,7 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
         >
           <span
             style={{ animation: first ? 'podiumFloat 2.4s ease-in-out infinite' : 'none' }}
-            className={`font-dmSerif text-[30px] leading-none ${first ? 'text-brand-teal' : 'text-text-muted-5'}`}
+            className={`font-dmSerif text-3xl leading-none ${first ? 'text-brand-teal' : 'text-text-muted-5'}`}
           >
             {place}
           </span>
@@ -101,25 +101,25 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
           </KickerLabel>
           {expandedBest ? (
             <>
-              <p className="text-[13px] leading-relaxed text-text-secondary">
+              <p className="text-caption leading-relaxed text-text-secondary">
                 {expandedMember.isCurrentUser ? 'You' : (expandedMember.displayName || expandedMember.username).split(' ')[0]} called{' '}
                 {expandedBest.homeTeam} v {expandedBest.awayTeam} for +{expandedBest.points}
                 {chipBadge(expandedBest.chips) ? ` with ${chipBadge(expandedBest.chips).name}` : ''} in GW{expandedBest.gw}.
               </p>
               <button
                 onClick={() => onOpenInFormBook?.(expandedMember.username)}
-                className="self-start font-mono text-[10.5px] tracking-[0.06em] text-brand-teal"
+                className="self-start font-mono text-2xs tracking-[0.06em] text-brand-teal"
               >
                 OPEN IN FORM BOOK →
               </button>
             </>
           ) : (
-            <p className="text-[13px] leading-relaxed text-text-muted-2">No settled calls on record yet this season.</p>
+            <p className="text-caption leading-relaxed text-text-muted-2">No settled calls on record yet this season.</p>
           )}
         </div>
       )}
 
-      {note && <span className="text-[11.5px] leading-relaxed text-text-muted-2">{note}</span>}
+      {note && <span className="text-2xs leading-relaxed text-text-muted-2">{note}</span>}
     </div>
   );
 }

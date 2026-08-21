@@ -58,7 +58,7 @@ export const CHIP_CONFIG = {
     name: "Scorer Focus",
     type: "match",
     description: "Doubles all points from goalscorer predictions in one match",
-    icon: "⚽",
+    icon: "S+",
     color: "green",
     cooldown: 5, // Can't use for 5 gameweeks after usage
     seasonLimit: null,
@@ -69,7 +69,7 @@ export const CHIP_CONFIG = {
     name: "Defense++",
     type: "gameweek",
     description: "Earn +5 bonus points per correctly predicted clean sheet across your predictions (applied after multipliers)",
-    icon: "🛡️",
+    icon: "D+",
     color: "blue",
     cooldown: 5, // Can't use for 5 gameweeks after usage
     seasonLimit: null,
@@ -80,7 +80,7 @@ export const CHIP_CONFIG = {
     name: "All-In Week",
     type: "gameweek",
     description: "Doubles the entire gameweek score (including deductions)",
-    icon: "🎯",
+    icon: "AI",
     color: "red",
     cooldown: 0, // No cooldown
     seasonLimit: 4, // Can only use 4 times per season

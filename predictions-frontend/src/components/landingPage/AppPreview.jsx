@@ -1,25 +1,25 @@
 import React from "react";
-import { Container } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { motion } from "framer-motion";
 import {
-  HomeIcon,
-  CalendarIcon,
-  StackIcon,
-  BarChartIcon,
-  PersonIcon,
-  GearIcon,
-  ExitIcon,
-  CaretUpIcon,
-  ClockIcon,
-  MagicWandIcon,
-  TargetIcon,
-  LightningBoltIcon,
-  RocketIcon,
-  ChevronRightIcon,
-  PlusIcon,
-  EyeOpenIcon,
-  DoubleArrowUpIcon,
-} from "@radix-ui/react-icons";
+  House,
+  CalendarBlank,
+  Stack,
+  ChartBar,
+  User,
+  Gear,
+  SignOut,
+  CaretUp,
+  Clock,
+  MagicWand,
+  Target,
+  Lightning,
+  Rocket,
+  CaretRight,
+  Plus,
+  Eye,
+  CaretDoubleUp,
+} from "@phosphor-icons/react";
 import { useTheme } from "../../hooks/useTheme";
 import logo from "../../assets/logo.png";
 import arsenalLogo from "../../assets/clubs/arsenal.svg";
@@ -43,12 +43,12 @@ const fadeUp = {
 
 // --- Data for the mockup ---
 const menuItems = [
-  { label: "Dashboard", icon: <HomeIcon />, active: true },
-  { label: "Fixtures", icon: <CalendarIcon /> },
-  { label: "My Predictions", icon: <StackIcon /> },
-  { label: "My Leagues", icon: <BarChartIcon /> },
-  { label: "My Profile", icon: <PersonIcon /> },
-  { label: "Settings", icon: <GearIcon /> },
+  { label: "Dashboard", icon: <House />, active: true },
+  { label: "Fixtures", icon: <CalendarBlank /> },
+  { label: "My Predictions", icon: <Stack /> },
+  { label: "My Leagues", icon: <ChartBar /> },
+  { label: "My Profile", icon: <User /> },
+  { label: "Settings", icon: <Gear /> },
 ];
 
 const statCards = [
@@ -56,7 +56,7 @@ const statCards = [
     title: "Weekly Points",
     value: "42",
     subtitle: "This week",
-    icon: <MagicWandIcon />,
+    icon: <MagicWand />,
     accent: "purple",
     trend: { value: "+8", direction: "up" },
   },
@@ -64,21 +64,21 @@ const statCards = [
     title: "Accuracy Rate",
     value: "68%",
     subtitle: "18 correct predictions",
-    icon: <TargetIcon />,
+    icon: <Target />,
     accent: "teal",
   },
   {
     title: "Available Chips",
     value: "3",
     subtitle: "1 on cooldown",
-    icon: <LightningBoltIcon />,
+    icon: <Lightning />,
     accent: "amber",
   },
   {
     title: "Global Rank",
     value: "#42",
     subtitle: "Top 5% worldwide",
-    icon: <RocketIcon />,
+    icon: <Rocket />,
     accent: "blue",
   },
 ];
@@ -194,7 +194,7 @@ function MockSidebar({ dark }) {
         }`}
       >
         <span className="mr-2 [&>svg]:w-3 [&>svg]:h-3">
-          <ExitIcon />
+          <SignOut />
         </span>
         Logout
       </div>
@@ -231,7 +231,7 @@ function MockStatusBar({ dark }) {
           >
             <span>Rank: #42</span>
             <span className={`flex items-center ml-1 ${dark ? "text-green-400" : "text-green-600"}`}>
-              <CaretUpIcon className="w-2 h-2" /> 3
+              <CaretUp className="w-2 h-2" /> 3
             </span>
           </div>
         </div>
@@ -284,7 +284,7 @@ function MockStatusBar({ dark }) {
               dark ? "text-teal-200" : "text-teal-600"
             }`}
           >
-            <ClockIcon className="w-2.5 h-2.5 mr-0.5" /> 2d 14h
+            <Clock className="w-2.5 h-2.5 mr-0.5" /> 2d 14h
           </span>
         </div>
       </div>
@@ -343,7 +343,7 @@ function MockStatCard({ stat, dark }) {
                 : "bg-emerald-50 text-emerald-600"
             }`}
           >
-            <DoubleArrowUpIcon className="w-2 h-2" />
+            <CaretDoubleUp className="w-2 h-2" />
             {stat.trend.value}
           </span>
         )}
@@ -403,7 +403,7 @@ function MockMatchRow({ match, dark }) {
                     : "bg-emerald-50 text-emerald-600 border-emerald-200"
                 }`}
               >
-                <LightningBoltIcon className="w-2 h-2" />
+                <Lightning className="w-2 h-2" />
                 Predicted
               </span>
             )}
@@ -415,12 +415,12 @@ function MockMatchRow({ match, dark }) {
             } font-outfit`}
           >
             <span className="flex items-center gap-0.5">
-              <CalendarIcon className="w-2.5 h-2.5" />
+              <CalendarBlank className="w-2.5 h-2.5" />
               <span className="hidden sm:inline">{match.date}</span>
               <span className="sm:hidden">{match.date.split(" ").slice(1).join(" ")}</span>
             </span>
             <span className="flex items-center gap-0.5">
-              <ClockIcon className="w-2.5 h-2.5" />
+              <Clock className="w-2.5 h-2.5" />
               {match.time}
             </span>
             <span
@@ -447,13 +447,13 @@ function MockMatchRow({ match, dark }) {
         >
           {match.predicted ? (
             <>
-              <EyeOpenIcon className="w-2.5 h-2.5 hidden sm:block" />
+              <Eye className="w-2.5 h-2.5 hidden sm:block" />
               <span className="hidden sm:inline">View</span>
               <span className="sm:hidden text-2xs">View</span>
             </>
           ) : (
             <>
-              <PlusIcon className="w-2.5 h-2.5 hidden sm:block" />
+              <Plus className="w-2.5 h-2.5 hidden sm:block" />
               <span className="hidden sm:inline">Predict</span>
               <span className="sm:hidden text-2xs">+</span>
             </>
@@ -482,7 +482,7 @@ function MockLeaguesPanel({ dark }) {
               : "bg-teal-50 border-teal-200"
           }`}
         >
-          <BarChartIcon
+          <ChartBar
             className={`w-2.5 h-2.5 ${dark ? "text-teal-400" : "text-teal-600"}`}
           />
         </div>
@@ -698,7 +698,7 @@ export default function AppPreview() {
                                 : "bg-teal-50 border-teal-200"
                             }`}
                           >
-                            <CalendarIcon
+                            <CalendarBlank
                               className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${
                                 dark ? "text-teal-400" : "text-teal-600"
                               }`}
@@ -723,7 +723,7 @@ export default function AppPreview() {
                         >
                           <span className="hidden sm:inline">View all</span>
                           <span className="sm:hidden">All</span>
-                          <ChevronRightIcon className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                          <CaretRight className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
                         </div>
                       </div>
 

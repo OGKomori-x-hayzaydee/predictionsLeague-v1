@@ -4,8 +4,8 @@
  * ~line 4030-4036). Kept local to chips (mirrors components/fixtures/
  * chipHues.js and components/dashboard/chipHues.js) rather than added to
  * utils/chipManager.js's CHIP_CONFIG (whose own `color`/`icon` fields use
- * generic names + emoji for a different purpose elsewhere in the app) to
- * avoid touching that shared file.
+ * generic names + short text tags for a different purpose elsewhere in the
+ * app) to avoid touching that shared file.
  */
 export const CHIP_HUES = {
   doubleDown: '#5eead4',
@@ -17,9 +17,10 @@ export const CHIP_HUES = {
 
 export const DEFAULT_CHIP_HUE = '#5eead4';
 
-// Short poker-chip token labels (CHIPS[].tag in the prototype) — fit inside
-// a small circular token where CHIP_CONFIG's emoji icons ("🛡️", "🎯") read
-// poorly at 10-13px.
+// Short poker-chip token labels (CHIPS[].tag in the prototype) — the
+// canonical short tag for each chip, used ahead of CHIP_CONFIG's own
+// (also short-text, non-emoji) `icon` field wherever a chip needs to fit
+// inside a small circular token at 10-13px.
 export const CHIP_TAGS = {
   doubleDown: '×2',
   wildcard: '×3',

@@ -16,12 +16,12 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
     <div className="flex flex-col gap-3 md:hidden">
       <div className="flex flex-col gap-[5px]">
         <span
-          className="font-mono text-[10px] tracking-[0.12em]"
+          className="font-mono text-2xs tracking-[0.12em]"
           style={{ color: isSettled ? 'var(--color-brand-teal)' : 'var(--color-brand-amber)' }}
         >
           GAMEWEEK {gw} · {isSettled ? 'REVEALED' : 'OPEN, UNSCORED'}
         </span>
-        <span className="text-[12.5px] leading-relaxed text-text-secondary">
+        <span className="text-caption leading-relaxed text-text-secondary">
           {isSettled ? "Everyone's calls, side by side" : "Everyone's calls so far, nothing scored yet"}
         </span>
       </div>
@@ -29,7 +29,7 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
       <GwPicker options={gwOptions} value={selectedGw} onChange={setSelectedGw} />
 
       {fixtures.length === 0 ? (
-        <p className="rounded-16 border border-border-base bg-surface-card p-4 text-[12.5px] text-text-muted-2">
+        <p className="rounded-16 border border-border-base bg-surface-card p-4 text-caption text-text-muted-2">
           No calls filed yet for this gameweek.
         </p>
       ) : (
@@ -39,7 +39,7 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
               <button
                 key={t.id}
                 onClick={() => setMobGrid(t.id)}
-                className={`min-h-[38px] flex-1 rounded-8 font-mono text-[10.5px] tracking-[0.1em] ${
+                className={`min-h-[38px] flex-1 rounded-8 font-mono text-2xs tracking-[0.1em] ${
                   mobGrid === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
                 }`}
               >
@@ -48,7 +48,7 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
             ))}
           </div>
 
-          <span className="text-[11.5px] text-text-muted-1">
+          <span className="text-2xs text-text-muted-1">
             {byMember ? 'Tap a name to read their sheet against yours' : 'Tap a fixture to see how the room called it'}
           </span>
 
@@ -67,16 +67,16 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
                     }}
                   >
                     <span
-                      className={`flex h-[34px] w-[34px] items-center justify-center rounded-full text-[14px] ${
+                      className={`flex h-[34px] w-[34px] items-center justify-center rounded-full text-sm ${
                         r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
                       }`}
                     >
                       {r.initial}
                     </span>
-                    <span className="max-w-full truncate text-[11.5px]" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
+                    <span className="max-w-full truncate text-2xs" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
                       {r.name}
                     </span>
-                    <span className="font-mono text-[9.5px] text-text-muted-1">#{r.position}</span>
+                    <span className="font-mono text-3xs text-text-muted-1">#{r.position}</span>
                   </button>
                 );
               })}
@@ -99,10 +99,10 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
                       <TeamCrest team={f.homeTeam} size={20} />
                       <TeamCrest team={f.awayTeam} size={20} />
                     </span>
-                    <span className="text-center text-[11px] leading-tight" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
+                    <span className="text-center text-2xs leading-tight" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
                       {f.homeTeam} v {f.awayTeam}
                     </span>
-                    <span className="font-mono text-[10.5px] text-text-muted-1">
+                    <span className="font-mono text-2xs text-text-muted-1">
                       {f.actualHomeScore != null ? `${f.actualHomeScore}–${f.actualAwayScore}` : 'open'}
                     </span>
                   </button>

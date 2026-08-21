@@ -82,10 +82,10 @@ export default function ProfilePage() {
           <div className="flex items-start gap-5">
             <Avatar name={profile?.username || 'You'} size={64} />
             <div className="flex min-w-0 flex-col gap-1.5">
-              <h1 className="font-dmSerif text-[26px] leading-tight text-text-primary">
+              <h1 className="font-dmSerif text-2xl leading-tight text-text-primary">
                 {profile?.username || 'Your profile'}
               </h1>
-              <p className="text-[13px] leading-relaxed text-text-muted-1">{bioLine}</p>
+              <p className="text-caption leading-relaxed text-text-muted-1">{bioLine}</p>
               {favouriteTeam && (
                 <span className="mt-0.5 flex w-fit items-center gap-1.5 rounded-full border border-border-card bg-surface-card-4 px-2.5 py-1 text-xs text-text-tertiary">
                   Follows {favouriteTeam}

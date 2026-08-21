@@ -60,7 +60,7 @@ export default function SlotBar({
           >
             &#8249;
           </button>
-          <span className="min-w-[52px] text-center font-outfit text-[11px] tracking-[0.14em] text-brand-teal">
+          <span className="min-w-[52px] text-center font-outfit text-2xs tracking-[0.14em] text-brand-teal">
             {reelNav.counter}
           </span>
           <button
@@ -75,7 +75,7 @@ export default function SlotBar({
           <span className="whitespace-nowrap text-sm text-text-secondary">{reelNav.title}</span>
           {reelNav.status && (
             <span
-              className="whitespace-nowrap rounded-xs border px-[9px] py-[3px] font-outfit text-[10px] tracking-[0.1em]"
+              className="whitespace-nowrap rounded-xs border px-[9px] py-[3px] font-outfit text-2xs tracking-[0.1em]"
               style={{ borderColor: reelNav.status.border, color: reelNav.status.fg, background: reelNav.status.bg }}
             >
               {reelNav.status.label}
@@ -103,11 +103,11 @@ export default function SlotBar({
       )}
 
       <div className="ml-auto flex shrink-0 items-center gap-3">
-        {right && <span className="whitespace-nowrap font-outfit text-[11px] text-text-muted-2">{right}</span>}
+        {right && <span className="whitespace-nowrap font-outfit text-2xs text-text-muted-2">{right}</span>}
         {deadline && (
           <span className="flex shrink-0 items-center gap-[7px] rounded-full border border-border-control bg-surface-card-4/70 px-[11px] py-[5px]">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-amber animate-[tick_2s_ease-in-out_infinite]" />
-            <span className="whitespace-nowrap font-outfit text-[10.5px] text-brand-amber">{deadline} to deadline</span>
+            <span className="whitespace-nowrap font-outfit text-2xs text-brand-amber">{deadline} to deadline</span>
           </span>
         )}
       </div>

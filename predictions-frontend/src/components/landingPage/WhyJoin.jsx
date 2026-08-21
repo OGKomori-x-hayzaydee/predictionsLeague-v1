@@ -1,16 +1,15 @@
 import React, { useEffect } from "react";
-import { Box, Container } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { 
-  StarIcon, 
-  BarChartIcon, 
-  LightningBoltIcon, 
-  PersonIcon, 
-  UpdateIcon,
-  MagicWandIcon, 
-   
-} from '@radix-ui/react-icons';
+import {
+  Star,
+  ChartBar,
+  Lightning,
+  User,
+  ArrowsClockwise,
+  MagicWand,
+} from '@phosphor-icons/react';
 
 export default function WhyJoin() {
   // Features with Radix icons
@@ -19,37 +18,37 @@ export default function WhyJoin() {
       title: "'Big Six' focus",
       description:
         "concentrate on the most exciting matches featuring Manchester United, Manchester City, Liverpool, Chelsea, Arsenal, and Tottenham.",
-      icon: <StarIcon className="w-8 h-8" />,
+      icon: <Star className="w-8 h-8" />,
     },
     {
       title: "multi-dimensional scoring",
       description:
         "earn points for correct winners, exact scores, goalscorers, and special events like clean sheets and comebacks.",
-      icon: <BarChartIcon className="w-8 h-8" />,
+      icon: <ChartBar className="w-8 h-8" />,
     },
     {
       title: "strategic gameplay",
       description:
         "use special 'chips' like Double Down, Wildcard, and All-In Week to maximize your points at crucial moments.",
-      icon: <LightningBoltIcon className="w-8 h-8" />,
+      icon: <Lightning className="w-8 h-8" />,
     },
     {
       title: "private leagues",
       description:
         "create private leagues to compete with friends, family, or colleagues in your own exclusive competition.",
-      icon: <PersonIcon className="w-8 h-8" />,
+      icon: <User className="w-8 h-8" />,
     },
     {
       title: "real-time updates",
       description:
         "experience the excitement of live score updates and see your points change as matches unfold.",
-      icon: <UpdateIcon className="w-8 h-8" />,
+      icon: <ArrowsClockwise className="w-8 h-8" />,
     },
     {
       title: "seasonal awards",
       description:
         "compete for prestigious end-of-season awards like Prediction Champion, Oracle Award, and Goalscorer Guru.",
-      icon: <MagicWandIcon className="w-8 h-8" />,
+      icon: <MagicWand className="w-8 h-8" />,
     },
   ];
 
@@ -90,8 +89,8 @@ export default function WhyJoin() {
   };
 
   return (
-    <Box className="bg-gradient-to-b from-primary-500 to-primary-600 py-24">
-      <Container size="3">
+    <div className="bg-gradient-to-b from-primary-500 to-primary-600 py-24">
+      <Container size={3}>
         <motion.div 
           className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -161,6 +160,6 @@ export default function WhyJoin() {
         
 
       </Container>
-    </Box>
+    </div>
   );
 }

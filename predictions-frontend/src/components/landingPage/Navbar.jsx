@@ -1,8 +1,8 @@
 import React, { useState, useEffect, memo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Container, Button } from "@radix-ui/themes";
+import Container from "../ui/Container";
 import { motion, AnimatePresence } from "framer-motion";
-import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
+import { Sun, Moon } from "@phosphor-icons/react";
 import { useTheme } from "../../hooks/useTheme";
 import logo from "../../assets/logo.png";
 
@@ -118,9 +118,9 @@ const Navbar = memo(() => {
               aria-label="Toggle theme"
             >
               {isDarkMode ? (
-                <SunIcon className="w-5 h-5" />
+                <Sun className="w-5 h-5" />
               ) : (
-                <MoonIcon className="w-5 h-5" />
+                <Moon className="w-5 h-5" />
               )}
             </motion.button>
             <motion.button
@@ -170,9 +170,9 @@ const Navbar = memo(() => {
               aria-label="Toggle theme"
             >
               {isDarkMode ? (
-                <SunIcon className="w-4 h-4" />
+                <Sun className="w-4 h-4" />
               ) : (
-                <MoonIcon className="w-4 h-4" />
+                <Moon className="w-4 h-4" />
               )}
             </motion.button>
 
@@ -182,9 +182,9 @@ const Navbar = memo(() => {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Button className="bg-indigo-light dark:bg-indigo-dark hover:opacity-90 text-white px-5 transition-opacity">
+                  <button className="rounded-md bg-indigo-light dark:bg-indigo-dark hover:opacity-90 text-white px-5 py-2 transition-opacity">
                     Log In
-                  </Button>
+                  </button>
                 </motion.div>
               </NavLink>
             </motion.div>
@@ -195,9 +195,9 @@ const Navbar = memo(() => {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Button className="border border-indigo-light dark:border-indigo-dark bg-transparent hover:bg-indigo-light/10 dark:hover:bg-indigo-dark/10 text-indigo-light dark:text-indigo-dark transition-colors">
+                  <button className="rounded-md border border-indigo-light dark:border-indigo-dark bg-transparent hover:bg-indigo-light/10 dark:hover:bg-indigo-dark/10 text-indigo-light dark:text-indigo-dark px-5 py-2 transition-colors">
                     Sign Up
-                  </Button>
+                  </button>
                 </motion.div>
               </NavLink>
             </motion.div>
@@ -222,17 +222,17 @@ const Navbar = memo(() => {
 
                 <NavLink to="/login" onClick={() => setIsMenuOpen(false)}>
                   <motion.div whileTap={{ scale: 0.97 }}>
-                    <Button className="bg-indigo-light dark:bg-indigo-dark text-white w-full my-1">
+                    <button className="rounded-md bg-indigo-light dark:bg-indigo-dark text-white px-5 py-2 w-full my-1">
                       Log In
-                    </Button>
+                    </button>
                   </motion.div>
                 </NavLink>
 
                 <NavLink to="/signup" onClick={() => setIsMenuOpen(false)}>
                   <motion.div whileTap={{ scale: 0.97 }}>
-                    <Button className="border border-indigo-light dark:border-indigo-dark bg-transparent text-indigo-light dark:text-indigo-dark w-full my-1">
+                    <button className="rounded-md border border-indigo-light dark:border-indigo-dark bg-transparent text-indigo-light dark:text-indigo-dark px-5 py-2 w-full my-1">
                       Sign Up
-                    </Button>
+                    </button>
                   </motion.div>
                 </NavLink>
               </div>

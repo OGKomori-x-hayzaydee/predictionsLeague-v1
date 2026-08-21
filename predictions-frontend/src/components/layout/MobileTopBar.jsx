@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { GearIcon } from '@radix-ui/react-icons';
+import { Gear } from '@phosphor-icons/react';
 import { useAuthState } from '../../hooks/useAuth';
 import Avatar from '../ui/Avatar';
 import logo from '../../assets/logo.png';
@@ -32,7 +32,7 @@ export default function MobileTopBar() {
   return (
     <header className="sticky top-0 z-30 flex h-[52px] items-center gap-[9px] border-b border-border-hairline bg-surface-header px-3.5 md:hidden">
       <img src={logo} alt="" className="h-4 shrink-0" />
-      <h1 className="min-w-0 flex-1 truncate font-dmSerif text-[15px] text-text-primary">{title}</h1>
+      <h1 className="min-w-0 flex-1 truncate font-dmSerif text-base text-text-primary">{title}</h1>
 
       <div className="flex shrink-0 items-center">
         <button
@@ -42,7 +42,7 @@ export default function MobileTopBar() {
             isSettingsPage ? 'text-brand-teal' : 'text-text-muted-1'
           }`}
         >
-          <GearIcon width={19} height={19} />
+          <Gear width={19} height={19} />
         </button>
         <NavLink
           to="/profile"

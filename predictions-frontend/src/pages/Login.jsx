@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Box, Container, Button } from "@radix-ui/themes";
+import Container from "../components/ui/Container";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { EyeOpenIcon, EyeClosedIcon } from "@radix-ui/react-icons";
+import { Eye, EyeSlash } from "@phosphor-icons/react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/landingPage/Navbar";
 import Footer from "../components/landingPage/Footer";
@@ -92,7 +92,7 @@ export default function Login() {
     <>
       <Navbar />
       <OAuthStatusHandler />
-      <Box className="relative overflow-hidden bg-white dark:bg-primary-800 min-h-screen transition-colors duration-300">
+      <div className="relative overflow-hidden bg-white dark:bg-primary-800 min-h-screen transition-colors duration-300">
         {/* Background elements */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-50 via-white to-white dark:from-primary-700/40 dark:via-primary-800 dark:to-primary-800" />
@@ -203,7 +203,7 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    {showPassword ? <EyeClosedIcon /> : <EyeOpenIcon />}
+                    {showPassword ? <EyeSlash /> : <Eye />}
                   </button>
                 </div>
                 {validationErrors.password && (
@@ -222,14 +222,13 @@ export default function Login() {
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 className="flex justify-center"
               >
-                <Button
+                <button
                   type="submit"
-                  className="w-full bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 hover:opacity-90 font-bold font-outfit py-3 mx-auto cursor-pointer transition-opacity"
+                  className="w-full rounded-md bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 hover:opacity-90 font-bold font-outfit py-3 mx-auto cursor-pointer transition-opacity"
                   disabled={isLoading}
-                  size="4"
                 >
                   {isLoading ? "logging in..." : "log in"}
-                </Button>
+                </button>
               </motion.div>
             </motion.form>
 
@@ -252,7 +251,7 @@ export default function Login() {
             </motion.div>
           </motion.div>
         </Container>
-      </Box>
+      </div>
       <Footer />
     </>
   );

@@ -26,7 +26,7 @@ const RULES = [
 export default function ScoringTab() {
   return (
     <div className="flex flex-col gap-[10px] md:gap-[10px]">
-      <span className="hidden font-mono text-[10px] tracking-[0.14em] text-text-muted-2 md:inline">
+      <span className="hidden font-mono text-2xs tracking-[0.14em] text-text-muted-2 md:inline">
         WHAT A CALL IS WORTH
       </span>
 
@@ -36,12 +36,12 @@ export default function ScoringTab() {
             key={s.label}
             className="flex gap-[13px] rounded-14 border border-border-base bg-surface-card-3 p-[13px] md:items-center md:gap-[14px] md:rounded-11 md:border-border-card md:p-4"
           >
-            <span className={`w-[42px] shrink-0 font-dmSerif text-2xl leading-none md:w-[52px] md:text-[26px] ${s.fg}`}>
+            <span className={`w-[42px] shrink-0 font-dmSerif text-2xl leading-none md:w-[52px] md:text-2xl ${s.fg}`}>
               {s.val}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-              <span className="text-[12.5px] text-text-secondary [text-wrap:pretty] md:text-[13px]">{s.label}</span>
-              <span className="text-[11px] leading-[1.5] text-text-muted-3 [text-wrap:pretty] md:text-[11.5px] md:text-text-muted-2">
+              <span className="text-caption text-text-secondary [text-wrap:pretty] md:text-caption">{s.label}</span>
+              <span className="text-2xs leading-[1.5] text-text-muted-3 [text-wrap:pretty] md:text-2xs md:text-text-muted-2">
                 {s.note}
               </span>
             </span>
@@ -54,7 +54,7 @@ export default function ScoringTab() {
         <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-1">House rules</KickerLabel>
         {RULES.map((text, i) => (
           <span key={text} className="flex gap-[9px] text-xs leading-[1.55] text-text-muted-1">
-            <span className="shrink-0 font-mono text-[10px] text-text-muted-5">{i + 1}.</span>
+            <span className="shrink-0 font-mono text-2xs text-text-muted-5">{i + 1}.</span>
             {text}
           </span>
         ))}
@@ -66,8 +66,8 @@ export default function ScoringTab() {
         </KickerLabel>
         {RULES.map((text, i) => (
           <span key={text} className="flex items-start gap-[11px] border-b border-border-base py-[10px] last:border-b-0">
-            <span className="w-[18px] shrink-0 font-mono text-[10.5px] text-text-muted-5">{i + 1}.</span>
-            <span className="flex-1 text-[13px] leading-[1.55] text-text-muted-1">{text}</span>
+            <span className="w-[18px] shrink-0 font-mono text-2xs text-text-muted-5">{i + 1}.</span>
+            <span className="flex-1 text-caption leading-[1.55] text-text-muted-1">{text}</span>
           </span>
         ))}
       </div>

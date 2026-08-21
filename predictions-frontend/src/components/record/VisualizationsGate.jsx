@@ -1,3 +1,5 @@
+import { ChartBar } from '@phosphor-icons/react';
+
 /**
  * Centralized "not enough real history yet" message for Season/All-time's
  * aggregate visualizations — replaces what used to be several small,
@@ -18,9 +20,9 @@ export default function VisualizationsGate({ settledWeeks, threshold = 5 }) {
     <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-14 border border-dashed border-border-control px-6 py-10 text-center">
       <span
         aria-hidden="true"
-        className="flex h-14 w-14 items-center justify-center rounded-14 border border-border-card bg-surface-card-3 text-2xl"
+        className="flex h-14 w-14 items-center justify-center rounded-14 border border-border-card bg-surface-card-3 text-brand-teal"
       >
-        📊
+        <ChartBar size={28} />
       </span>
       <span className="font-dmSerif text-xl text-text-primary">
         {settledWeeks === 0

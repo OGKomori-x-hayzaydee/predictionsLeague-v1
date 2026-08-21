@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircledIcon, 
-  ExclamationTriangleIcon, 
-  InfoCircledIcon,
-  UpdateIcon,
-  CrossCircledIcon
-} from '@radix-ui/react-icons';
+import {
+  CheckCircle,
+  Warning,
+  Info,
+  ArrowsClockwise,
+  XCircle
+} from '@phosphor-icons/react';
 import authService from '../../services/auth/AuthService';
 
 const StatusIcon = ({ type, className = "w-6 h-6" }) => {
   const icons = {
-    success: CheckCircledIcon,
-    error: CrossCircledIcon,
-    warning: ExclamationTriangleIcon,
-    info: InfoCircledIcon,
-    loading: UpdateIcon,
+    success: CheckCircle,
+    error: XCircle,
+    warning: Warning,
+    info: Info,
+    loading: ArrowsClockwise,
   };
   
-  const Icon = icons[type] || InfoCircledIcon;
+  const Icon = icons[type] || Info;
   const spinClass = type === 'loading' ? 'animate-spin' : '';
   
   return <Icon className={`${className} ${spinClass}`} />;
@@ -184,7 +184,7 @@ const StatusMessage = ({ status, onClose, onRetry }) => {
               onClick={onClose}
               className="text-white/50 hover:text-white/70 transition-colors"
             >
-              <CrossCircledIcon className="w-5 h-5" />
+              <XCircle className="w-5 h-5" />
             </button>
           )}
         </div>

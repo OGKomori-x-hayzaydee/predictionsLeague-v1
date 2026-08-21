@@ -67,7 +67,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
       {/* Desktop */}
       <div className="hidden flex-col gap-4 md:flex">
         <div className="flex items-end justify-between gap-4">
-          <h2 className="font-dmSerif text-[30px] leading-tight text-text-primary">
+          <h2 className="font-dmSerif text-3xl leading-tight text-text-primary">
             {selectedGameweek
               ? `Gameweek ${selectedGameweek}, call by call`
               : settledWeeks
@@ -75,7 +75,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 : 'No settled gameweeks yet'}
           </h2>
           {!selectedGameweek && settledWeeks > 0 && (
-            <span className="hidden shrink-0 text-right font-outfit text-[10px] leading-relaxed text-text-muted-5 md:block">
+            <span className="hidden shrink-0 text-right font-outfit text-2xs leading-relaxed text-text-muted-5 md:block">
               CLICK A WEEK
               <br />
               TO OPEN ITS CALLS
@@ -89,12 +89,12 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
           <div className="flex flex-col gap-3 overflow-hidden rounded-14 border border-border-card bg-surface-card p-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="font-dmSerif text-lg text-brand-teal-pale">Gameweek {selectedGameweek}</span>
-              <span className="font-outfit text-[10.5px] tracking-wide text-text-muted-2">
+              <span className="font-outfit text-2xs tracking-wide text-text-muted-2">
                 {weekTotal} PTS · {weekExact} EXACT
               </span>
               <button
                 onClick={() => onSelectGameweek(null)}
-                className="ml-auto font-outfit text-[10px] tracking-wide text-text-muted-4 hover:text-text-secondary"
+                className="ml-auto font-outfit text-2xs tracking-wide text-text-muted-4 hover:text-text-secondary"
               >
                 CLOSE
               </button>
@@ -129,7 +129,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
             </div>
 
             <div className="flex min-h-[110px] items-center justify-center rounded-14 border border-dashed border-border-control">
-              <span className="px-4 text-center text-[13.5px] text-text-muted-4">
+              <span className="px-4 text-center text-caption text-text-muted-4">
                 Select a week on the ridge to unfold its calls here.
               </span>
             </div>
@@ -140,10 +140,10 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
       {/* Mobile */}
       <div className="flex flex-col gap-4 md:hidden">
         <div className="flex flex-col gap-1">
-          <span className="font-outfit text-[10px] tracking-[0.14em] text-brand-teal">
+          <span className="font-outfit text-2xs tracking-[0.14em] text-brand-teal">
             SEASON · {settledWeeks} WEEK{settledWeeks === 1 ? '' : 'S'} SETTLED
           </span>
-          <h2 className="font-dmSerif text-[25px] leading-tight text-text-primary">
+          <h2 className="font-dmSerif text-2xl leading-tight text-text-primary">
             {settledWeeks
               ? `${stats.seasonPoints} points across ${settledWeeks} settled week${settledWeeks === 1 ? '' : 's'}`
               : 'No settled gameweeks yet'}
@@ -166,7 +166,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 </button>
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="font-dmSerif text-lg text-text-primary">Gameweek {mobileGw}</span>
-                  <span className="font-outfit text-[9.5px] tracking-wide text-text-muted-4">
+                  <span className="font-outfit text-3xs tracking-wide text-text-muted-4">
                     {mobileWeekPredictions.length} CALLS FILED · {mobileWeekExact} EXACT
                   </span>
                 </div>
@@ -192,7 +192,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
 
               <GameweekRidge weeks={stats.pointsByGameweek} selected={mobileGw} onSelect={(gw) => gw && setMobileGw(gw)} />
 
-              <span className="text-center text-[11.5px] leading-snug text-text-muted-4">
+              <span className="text-center text-2xs leading-snug text-text-muted-4">
                 Tap the ridge or step with the arrows to change week · tap a call to open its full card.
               </span>
             </div>
