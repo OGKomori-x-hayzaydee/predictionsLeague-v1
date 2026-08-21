@@ -142,7 +142,7 @@ export default function RecordPage() {
   const slotRight = hasHistory ? `${stats.totalCompleted} calls filed · ${stats.seasonPoints} pts` : undefined;
 
   return (
-    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-2.75rem)] md:overflow-hidden">
+    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
       <div className="hidden items-center md:flex">
         <div className="flex-1">
           <SlotBar kicker="My Record" tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} right={slotRight} />

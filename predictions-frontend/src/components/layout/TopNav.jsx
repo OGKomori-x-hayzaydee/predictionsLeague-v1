@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Gear } from '@phosphor-icons/react';
 import { NAV_ITEMS } from './navItems';
@@ -9,10 +9,9 @@ import Avatar from '../ui/Avatar';
 import logo from '../../assets/logo.png';
 
 /**
- * Desktop app masthead (foundation spec §5.1). 56px tall normally; on the
- * Fixtures page it auto-hides to 44px @ 42% opacity until hovered, matching
- * the prototype's barWake/barSleep behavior (S.wake there, local `wake`
- * state here since this app has no global page-state object).
+ * Desktop app masthead. 64px tall normally; on Fixtures it auto-hides to
+ * 52px @ 42% opacity until hovered (barWake/barSleep). Sets --shell-nav-h
+ * so page bodies lock to the remaining viewport.
  */
 export default function TopNav() {
   const navigate = useNavigate();
@@ -29,12 +28,18 @@ export default function TopNav() {
   const points = essentialData?.user?.points ?? essentialData?.stats?.weeklyPoints?.value ?? null;
   const rank = essentialData?.stats?.globalRank?.value ?? null;
 
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--shell-nav-h', dim ? '52px' : '4rem');
+    return () => root.style.removeProperty('--shell-nav-h');
+  }, [dim]);
+
   return (
     <header
       onMouseEnter={() => setWake(true)}
       onMouseLeave={() => setWake(false)}
       className={`sticky top-0 z-30 hidden border-b border-border-hairline bg-surface-header transition-[height,opacity] duration-300 ease-in-out md:block ${
-        dim ? 'h-11 opacity-[0.42]' : 'h-14 opacity-100'
+        dim ? 'h-[52px] opacity-[0.42]' : 'h-16 opacity-100'
       }`}
     >
       <div className="flex h-full items-center gap-[26px] px-[22px]">
@@ -43,24 +48,17 @@ export default function TopNav() {
           className="flex shrink-0 items-center gap-[9px]"
           aria-label="predictionsLeague home"
         >
-          <img src={logo} alt="" className="h-[21px]" />
-          <span className="font-dmSerif text-base text-brand-teal-pale">predictionsLeague</span>
+          <img src={logo} alt="" className="h-7" />
+          <span className="font-dmSerif text-lg text-brand-teal-pale">predictionsLeague</span>
         </button>
 
-        {/*
-          Flex-centered (not absolute+translate-centered) so the nav shares
-          space with the logo and season/rank/avatar blocks instead of
-          ignoring their width — true viewport-centering caused this to
-          overlap the right-hand stats block at common desktop widths.
-          overflow-x-auto is a safety net if it ever still doesn't fit.
-        */}
-        <nav className="flex min-w-0 flex-1 items-center justify-center gap-[3px] overflow-x-auto">
+        <nav className="flex min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto">
           {NAV_ITEMS.map(({ id, label, path }) => (
             <NavLink
               key={id}
               to={path}
               className={({ isActive }) =>
-                `whitespace-nowrap rounded-sm px-3 py-[7px] font-outfit text-sm transition-colors ${
+                `whitespace-nowrap rounded-9 px-4 py-2 font-outfit text-base transition-colors ${
                   isActive
                     ? 'bg-surface-nav-active text-brand-teal'
                     : 'text-text-muted-1 hover:text-brand-teal'
@@ -75,20 +73,20 @@ export default function TopNav() {
         <div className="flex shrink-0 items-center gap-[18px]">
           {points !== null && (
             <div className="flex flex-col items-end leading-tight">
-              <KickerLabel as="span" className="text-3xs tracking-[0.12em] text-text-muted-4">
+              <KickerLabel as="span" className="text-2xs tracking-[0.12em] text-text-muted-4">
                 Season
               </KickerLabel>
-              <span className="font-dmSerif text-base text-brand-teal-pale">{points}</span>
+              <span className="font-dmSerif text-lg text-brand-teal-pale">{points}</span>
             </div>
           )}
           {rank !== null && (
             <div className="flex flex-col items-end leading-tight">
-              <KickerLabel as="span" className="text-3xs tracking-[0.12em] text-text-muted-4">
+              <KickerLabel as="span" className="text-2xs tracking-[0.12em] text-text-muted-4">
                 Rank
               </KickerLabel>
-              <span className="font-dmSerif text-base text-text-primary">
+              <span className="font-dmSerif text-lg text-text-primary">
                 {rank}
-                <span className="text-2xs text-text-muted-3">/12</span>
+                <span className="text-caption text-text-muted-3">/12</span>
               </span>
             </div>
           )}
@@ -96,21 +94,19 @@ export default function TopNav() {
           <button
             onClick={() => navigate('/settings')}
             aria-label="Settings"
-            className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-sm border bg-transparent transition-colors ${
+            className={`flex size-9 shrink-0 items-center justify-center rounded-9 border bg-transparent transition-colors ${
               isSettingsPage
                 ? 'border-brand-teal-mid/40 text-brand-teal'
                 : 'border-border-card text-text-muted-4 hover:border-brand-teal-mid/40 hover:text-brand-teal'
             }`}
           >
-            <Gear width={14} height={14} />
+            <Gear size={18} />
           </button>
 
           <NavLink to="/profile" aria-label="Profile">
-            {/* `!` forces these to win over Avatar's own baked-in bg/text
-                classes regardless of Tailwind's generated rule order. */}
             <Avatar
               name={username || user?.firstName || 'You'}
-              size={30}
+              size={36}
               className={isProfilePage ? '!bg-brand-teal-deep !text-white' : '!bg-brand-indigo-mid !text-white'}
             />
           </NavLink>

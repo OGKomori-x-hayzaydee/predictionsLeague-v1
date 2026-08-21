@@ -3,6 +3,7 @@ import TeamCrest from '../ui/TeamCrest';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import FormBookCellCard from './FormBookCellCard';
+import SegmentedControl from '../ui/SegmentedControl';
 import { verdictColors } from '../../utils/leagueStats';
 
 /**
@@ -36,9 +37,10 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
       ];
 
   const cols = `minmax(9rem,11.5rem) repeat(${fixtures.length}, minmax(0,1fr)) 3.5rem`;
+  const fixtureSel = sel?.type === 'fixture' ? sel.id : null;
 
   return (
-    <div className="relative hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_21rem]">
+    <div className="relative hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_25rem]">
       <div className="flex min-h-0 flex-col px-6 pt-5">
         <div className="flex flex-none items-end justify-between gap-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -54,27 +56,22 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                 : "Everyone's calls so far, nothing scored yet"}
             </h2>
           </div>
-          <div className="flex flex-none items-center gap-3">
+          <div className="flex flex-none items-center gap-2.5">
             <GwPicker
               options={gwOptions}
               value={selectedGw}
-              onChange={(gw) => { setSelectedGw(gw); setCard(null); }}
+              onChange={(nextGw) => { setSelectedGw(nextGw); setCard(null); }}
               currentGameweek={currentGameweek}
               settledGws={settledGws}
             />
-            <div className="flex gap-0.5 rounded-full border border-border-card bg-surface-card-4 p-1">
-              {[{ id: 'score', label: 'SCORES' }, { id: 'points', label: 'POINTS' }].map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setMode(m.id)}
-                  className={`min-h-9 rounded-full px-3.5 py-1.5 font-outfit text-2xs tracking-wide ${
-                    mode === m.id ? 'bg-brand-teal text-primary-800' : 'text-text-muted-2'
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              value={mode}
+              onChange={setMode}
+              options={[
+                { id: 'score', label: 'SCORES' },
+                { id: 'points', label: 'POINTS' },
+              ]}
+            />
           </div>
         </div>
 
@@ -85,17 +82,16 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
           >
             <span className="font-outfit text-2xs tracking-widest text-text-muted-2">MEMBER</span>
             {fixtures.map((f) => {
-              const on = sel?.type === 'fixture' && sel.id === f.matchId;
+              const on = fixtureSel === f.matchId;
               return (
                 <button
                   key={f.matchId}
                   onClick={() => { setSel({ type: 'fixture', id: f.matchId }); setCard(null); }}
-                  className={`relative flex flex-col items-center gap-1 rounded-9 py-1.5 ${on ? 'bg-brand-teal-deep/20' : ''}`}
+                  className={`flex flex-col items-center gap-1 rounded-6 py-1 ${on ? 'bg-surface-card-2' : ''}`}
                 >
-                  {on && <span className="absolute inset-x-0 -bottom-1.5 h-0.5 bg-brand-teal" />}
                   <span className="flex gap-0.5">
-                    <TeamCrest team={f.homeTeam} size={16} className="size-4" />
-                    <TeamCrest team={f.awayTeam} size={16} className="size-4" />
+                    <TeamCrest team={f.homeTeam} size={16} className="size-4" tint={on ? 'var(--color-brand-teal)' : undefined} />
+                    <TeamCrest team={f.awayTeam} size={16} className="size-4" tint={on ? 'var(--color-brand-teal)' : undefined} />
                   </span>
                   <span className={`font-outfit text-2xs ${on ? 'text-brand-teal' : 'text-text-muted-2'}`}>
                     {f.actualHomeScore != null ? `${f.actualHomeScore}–${f.actualAwayScore}` : '—'}
@@ -140,22 +136,32 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                   </button>
                   {r.cells.map((c) => {
                     const vc = c.filed ? verdictColors(!isSettled ? (r.isCurrentUser ? 'exact' : null) : c.verdict) : null;
-                    const bg = !c.filed
-                      ? 'var(--surface-card-4)'
-                      : !isSettled
-                        ? r.isCurrentUser
-                          ? 'color-mix(in srgb, var(--color-brand-teal) 15%, transparent)'
-                          : 'var(--surface-card-3)'
-                        : vc.bg;
-                    const border = !c.filed
-                      ? 'var(--border-hairline)'
-                      : !isSettled
-                        ? r.isCurrentUser
-                          ? 'var(--color-brand-teal-mid)'
-                          : 'var(--border-card)'
-                        : vc.border;
-                    const fg = !c.filed ? 'var(--text-muted-5)' : !isSettled ? (r.isCurrentUser ? 'var(--color-brand-teal)' : 'var(--text-secondary)') : vc.fg;
-                    const colOn = sel?.type === 'fixture' && sel.id === c.matchId;
+                    const dim = fixtureSel != null && fixtureSel !== c.matchId;
+                    const bg = dim
+                      ? '#0a111d'
+                      : !c.filed
+                        ? 'var(--surface-card-4)'
+                        : !isSettled
+                          ? r.isCurrentUser
+                            ? 'color-mix(in srgb, var(--color-brand-teal) 15%, transparent)'
+                            : 'var(--surface-card-3)'
+                          : vc.bg;
+                    const border = dim
+                      ? '#141f31'
+                      : !c.filed
+                        ? 'var(--border-hairline)'
+                        : !isSettled
+                          ? r.isCurrentUser
+                            ? 'var(--color-brand-teal-mid)'
+                            : 'var(--border-card)'
+                          : vc.border;
+                    const fg = dim
+                      ? 'var(--text-muted-5)'
+                      : !c.filed
+                        ? 'var(--text-muted-5)'
+                        : !isSettled
+                          ? (r.isCurrentUser ? 'var(--color-brand-teal)' : 'var(--text-secondary)')
+                          : vc.fg;
                     return (
                       <button
                         key={c.matchId}
@@ -164,19 +170,9 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                           setSel({ type: 'fixture', id: c.matchId });
                           setCard({ username: r.username, matchId: c.matchId });
                         }}
-                        className="relative flex h-10 items-center justify-center gap-0.5 rounded-9 border font-outfit text-caption"
-                        style={{
-                          background: colOn ? 'color-mix(in srgb, var(--color-brand-teal) 12%, transparent)' : bg,
-                          borderColor: colOn ? 'var(--color-brand-teal-mid)' : border,
-                          color: fg,
-                        }}
+                        className="flex h-9 items-center justify-center gap-0.5 rounded-6 border font-outfit text-caption"
+                        style={{ background: bg, borderColor: border, color: fg }}
                       >
-                        {colOn && (
-                          <>
-                            <span className="absolute inset-y-1 left-0 w-0.5 rounded-full bg-brand-teal" />
-                            <span className="absolute inset-y-1 right-0 w-0.5 rounded-full bg-brand-teal" />
-                          </>
-                        )}
                         {c.filed ? c.label : '—'}
                         {c.chip && <span className="font-outfit text-3xs text-brand-amber">{c.chip}</span>}
                       </button>

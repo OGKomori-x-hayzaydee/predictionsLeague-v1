@@ -1,5 +1,6 @@
 import KickerLabel from '../ui/KickerLabel';
 import RadarChart from '../ui/RadarChart';
+import SegmentedControl from '../ui/SegmentedControl';
 
 /**
  * Head-to-head TAPE/RADAR carousel — one card per league rival.
@@ -25,19 +26,14 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <KickerLabel>HEAD TO HEAD</KickerLabel>
-        <div className="flex gap-0.5 rounded-full border border-border-card bg-surface-card-4 p-1">
-          {['tape', 'radar'].map((v) => (
-            <button
-              key={v}
-              onClick={() => setVsVariant(v)}
-              className={`min-h-9 rounded-full px-3.5 py-1.5 font-outfit text-2xs tracking-wide ${
-                vsVariant === v ? 'bg-brand-teal text-primary-800' : 'text-text-muted-2'
-              }`}
-            >
-              {v.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          value={vsVariant}
+          onChange={setVsVariant}
+          options={[
+            { id: 'tape', label: 'TAPE' },
+            { id: 'radar', label: 'RADAR' },
+          ]}
+        />
       </div>
 
       <div className="overflow-hidden rounded-16 border border-border-base bg-surface-card">

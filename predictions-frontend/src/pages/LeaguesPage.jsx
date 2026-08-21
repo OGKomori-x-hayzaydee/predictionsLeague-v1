@@ -24,7 +24,7 @@ const DETAIL_TABS = [
 ];
 
 const PREVIEW_BTN =
-  'shrink-0 rounded-7 border px-2.5 py-1 font-outfit text-2xs tracking-wide transition-colors';
+  'shrink-0 rounded-7 border px-3 py-1.5 font-outfit text-caption tracking-wide transition-colors';
 
 export default function LeaguesPage() {
   const { myLeagues, isLoading, createLeague, refreshMyLeagues } = useLeagues();
@@ -62,7 +62,7 @@ export default function LeaguesPage() {
   };
 
   return (
-    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-2.75rem)] md:overflow-hidden">
+    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
       {selected ? (
         <LeagueDetailView
           key={selected.id}
@@ -75,17 +75,17 @@ export default function LeaguesPage() {
         />
       ) : (
         <>
-          <div className="hidden items-center md:flex">
-            <div className="flex-1">
-              <SlotBar
-                kicker="LEAGUES"
-                right={leagues.length ? `${leagues.length} league${leagues.length === 1 ? '' : 's'} · best ${ordinal(best?.position)}` : undefined}
-                deadline={deadline}
-              />
-            </div>
-            <button onClick={togglePreview} className={`mr-5 ${previewButtonClass}`}>
-              {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
-            </button>
+          <div className="hidden md:block">
+            <SlotBar
+              kicker="LEAGUES"
+              right={leagues.length ? `${leagues.length} league${leagues.length === 1 ? '' : 's'} · best ${ordinal(best?.position)}` : undefined}
+              deadline={deadline}
+              trailing={
+                <button onClick={togglePreview} className={previewButtonClass}>
+                  {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
+                </button>
+              }
+            />
           </div>
 
           <div className="flex items-center justify-between gap-2 px-4 pt-4 md:hidden">
@@ -153,21 +153,21 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="hidden items-center md:flex">
-        <div className="flex-1">
-          <SlotBar
-            kicker="ALL LEAGUES"
-            onBack={onBack}
-            tabs={DETAIL_TABS}
-            activeTab={lg.activeTab}
-            onTabChange={lg.setActiveTab}
-            right={slotRight}
-            deadline={deadline}
-          />
-        </div>
-        <button onClick={onTogglePreview} className={`mr-5 ${previewButtonClass}`}>
-          {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
-        </button>
+      <div className="hidden md:block">
+        <SlotBar
+          kicker="ALL LEAGUES"
+          onBack={onBack}
+          tabs={DETAIL_TABS}
+          activeTab={lg.activeTab}
+          onTabChange={lg.setActiveTab}
+          right={slotRight}
+          deadline={deadline}
+          trailing={
+            <button onClick={onTogglePreview} className={previewButtonClass}>
+              {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
+            </button>
+          }
+        />
       </div>
 
       <div className="flex flex-col gap-3 px-4 pt-4 md:hidden">
@@ -206,7 +206,7 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
 
       {lg.activeTab === 'overview' ? (
         <>
-          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_24rem]">
             <div className="flex min-h-0 min-w-0 flex-col gap-3.5 overflow-y-auto px-6 py-5">
               <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
               <Podium

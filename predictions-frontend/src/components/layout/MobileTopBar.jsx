@@ -30,9 +30,9 @@ export default function MobileTopBar() {
   const isSettingsPage = segment === 'settings';
 
   return (
-    <header className="sticky top-0 z-30 flex h-[52px] items-center gap-[9px] border-b border-border-hairline bg-surface-header px-3.5 md:hidden">
-      <img src={logo} alt="" className="h-4 shrink-0" />
-      <h1 className="min-w-0 flex-1 truncate font-dmSerif text-base text-text-primary">{title}</h1>
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-[9px] border-b border-border-hairline bg-surface-header px-3.5 md:hidden">
+      <img src={logo} alt="" className="h-5 shrink-0" />
+      <h1 className="min-w-0 flex-1 truncate font-dmSerif text-lg text-text-primary">{title}</h1>
 
       <div className="flex shrink-0 items-center">
         <button
