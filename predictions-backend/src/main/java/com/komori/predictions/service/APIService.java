@@ -3,15 +3,13 @@ package com.komori.predictions.service;
 import com.komori.predictions.dto.enumerated.GameStatus;
 import com.komori.predictions.dto.request.GameStatusAndScore;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
-import com.komori.predictions.dto.response.*;
+import com.komori.predictions.dto.response.Fixture;
 import com.komori.predictions.dto.response.fpl.FixtureDetails;
 import com.komori.predictions.dto.response.fpl.Squad;
 import com.komori.predictions.entity.PlayerEntity;
 import com.komori.predictions.entity.TeamEntity;
 import com.komori.predictions.repository.PlayerRepository;
 import com.komori.predictions.repository.TeamRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +32,6 @@ public class APIService {
     private String fixtureListBaseUrl;
     @Value("${app.squad-list-base-url}")
     private String squadListBaseUrl;
-    @PersistenceContext
-    private final EntityManager entityManager;
     private final RestTemplate restTemplate;
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
@@ -177,7 +173,7 @@ public class APIService {
 
         List<PlayerEntity> playerEntities = players.stream()
                 .map(player -> {
-                    TeamEntity team = entityManager.getReference(TeamEntity.class, player.getTeam());
+                    TeamEntity team = teamRepository.findByTeamId(player.getTeam());
                     return new PlayerEntity(player, team);
                 })
                 .toList();
