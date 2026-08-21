@@ -21,16 +21,16 @@ import {
  * PredictionEntity rows behind LeaguePredictionSummary are enough to derive
  * the same shape of insight honestly).
  */
-export default function useLeagueDetail(leagueId, overview) {
-  const [standings, setStandings] = useState(null);
-  const [standingsLoading, setStandingsLoading] = useState(true);
-  const [currentGameweek, setCurrentGameweek] = useState(null);
-  const [predictionsByGw, setPredictionsByGw] = useState({});
-  const [gwOrder, setGwOrder] = useState([]);
-  const [seasonLoading, setSeasonLoading] = useState(true);
+export default function useLeagueDetail(leagueId, overview, demoPack = null) {
+  const [standings, setStandings] = useState(demoPack?.standings ?? null);
+  const [standingsLoading, setStandingsLoading] = useState(!demoPack);
+  const [currentGameweek, setCurrentGameweek] = useState(demoPack?.currentGameweek ?? null);
+  const [predictionsByGw, setPredictionsByGw] = useState(demoPack?.predictionsByGw ?? {});
+  const [gwOrder, setGwOrder] = useState(demoPack?.gwOrder ?? []);
+  const [seasonLoading, setSeasonLoading] = useState(!demoPack);
 
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedGw, setSelectedGwState] = useState(null);
+  const [selectedGw, setSelectedGwState] = useState(demoPack?.selectedGw ?? demoPack?.currentGameweek ?? null);
   const [mode, setMode] = useState('score');
   const [sel, setSel] = useState(null); // { type: 'member' | 'fixture', id }
   const [vsIdx, setVsIdx] = useState(0);
@@ -39,9 +39,23 @@ export default function useLeagueDetail(leagueId, overview) {
   const [mobGrid, setMobGrid] = useState('member');
   const [scopeOpen, setScopeOpen] = useState(false);
 
-  // Standings — real, always fetched.
+  // Preview pack short-circuits every fetch — same shapes as the live
+  // standings + per-gameweek prediction summaries, so the reducers below
+  // don't know or care which source filled the state.
   useEffect(() => {
-    if (!leagueId) return;
+    if (!demoPack) return;
+    setStandings(demoPack.standings);
+    setStandingsLoading(false);
+    setPredictionsByGw(demoPack.predictionsByGw);
+    setGwOrder(demoPack.gwOrder);
+    setCurrentGameweek(demoPack.currentGameweek);
+    setSeasonLoading(false);
+    setSelectedGwState(demoPack.selectedGw ?? demoPack.currentGameweek);
+  }, [demoPack]);
+
+  // Standings — real, always fetched (skipped in preview).
+  useEffect(() => {
+    if (demoPack || !leagueId) return;
     let cancelled = false;
     setStandingsLoading(true);
     leagueAPI
@@ -54,23 +68,24 @@ export default function useLeagueDetail(leagueId, overview) {
       .catch(() => !cancelled && setStandings([]))
       .finally(() => !cancelled && setStandingsLoading(false));
     return () => { cancelled = true; };
-  }, [leagueId]);
+  }, [leagueId, demoPack]);
 
   // Current gameweek — reused from the same essential-data endpoint the
   // Dashboard uses, so this hook doesn't invent its own notion of "now".
   useEffect(() => {
+    if (demoPack) return;
     let cancelled = false;
     dashboardAPI
       .getEssentialData()
       .then((data) => !cancelled && setCurrentGameweek(data?.season?.currentGameweek ?? null))
       .catch(() => !cancelled && setCurrentGameweek(null));
     return () => { cancelled = true; };
-  }, []);
+  }, [demoPack]);
 
   // A bounded window of real per-gameweek prediction summaries for the
   // whole league, fetched once standings + currentGameweek are known.
   useEffect(() => {
-    if (!leagueId || !currentGameweek) return;
+    if (demoPack || !leagueId || !currentGameweek) return;
     const first = overview?.firstGameweek || 1;
     const start = Math.max(first, currentGameweek - MAX_HISTORY_GAMEWEEKS + 1);
     const order = [];
@@ -91,7 +106,7 @@ export default function useLeagueDetail(leagueId, overview) {
       })
       .finally(() => !cancelled && setSeasonLoading(false));
     return () => { cancelled = true; };
-  }, [leagueId, currentGameweek, overview?.firstGameweek]);
+  }, [leagueId, currentGameweek, overview?.firstGameweek, demoPack]);
 
   // Default the grid's gameweek scope to "now" once we know it.
   useEffect(() => {

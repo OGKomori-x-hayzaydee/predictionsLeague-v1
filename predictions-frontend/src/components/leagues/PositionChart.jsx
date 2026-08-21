@@ -2,20 +2,18 @@ import KickerLabel from '../ui/KickerLabel';
 import { ordinal } from '../../utils/leagueStats';
 
 /**
- * "Your position, week by week" — real rank-over-time series computed by
- * useLeagueDetail from every settled gameweek's actual points totals
- * (utils/leagueStats.computeStandingsHistory), not a fabricated history.
+ * Rank-over-time series from every settled gameweek's actual points totals.
  */
 export default function PositionChart({ series, line, gws, moveLabel, moveTone = 'muted', tone = 'var(--color-brand-teal)' }) {
   const hasData = series && series.length >= 2;
 
   return (
-    <div className="flex flex-col gap-[10px] rounded-16 border border-border-base bg-surface-card p-5">
+    <div className="flex flex-col gap-2.5 rounded-16 border border-border-base bg-surface-card p-5">
       <div className="flex items-baseline justify-between gap-3">
         <KickerLabel>POSITION, WEEK BY WEEK</KickerLabel>
         {moveLabel && (
           <span
-            className={`font-mono text-2xs ${
+            className={`font-outfit text-2xs ${
               moveTone === 'up' ? 'text-brand-teal' : moveTone === 'down' ? 'text-state-error' : 'text-text-muted-2'
             }`}
           >
@@ -26,7 +24,7 @@ export default function PositionChart({ series, line, gws, moveLabel, moveTone =
 
       {hasData ? (
         <>
-          <div className="relative h-[84px] md:h-[112px]">
+          <div className="relative h-20 md:h-28">
             <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
               <polyline
                 points={line}
@@ -38,7 +36,7 @@ export default function PositionChart({ series, line, gws, moveLabel, moveTone =
               />
             </svg>
           </div>
-          <div className="flex justify-between font-mono text-2xs text-text-muted-4">
+          <div className="flex justify-between font-outfit text-2xs text-text-muted-4">
             <span>GW{gws[0]}</span>
             {gws.length > 2 && <span>GW{gws[Math.floor((gws.length - 1) / 2)]}</span>}
             <span>GW{gws[gws.length - 1]}</span>

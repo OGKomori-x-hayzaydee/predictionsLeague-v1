@@ -3,9 +3,7 @@ import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 
 /**
- * Mobile Form book — by-member / by-fixture panel replacement for the
- * desktop 12×N grid (mobile-leagues-plan.md §"Form book"), real data from
- * the same `formBook` object as the desktop grid.
+ * Mobile Form book — by-member / by-fixture rails.
  */
 export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw }) {
   if (!formBook) return null;
@@ -14,15 +12,15 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
 
   return (
     <div className="flex flex-col gap-3 md:hidden">
-      <div className="flex flex-col gap-[5px]">
+      <div className="flex flex-col gap-1">
         <span
-          className="font-mono text-2xs tracking-[0.12em]"
+          className="font-outfit text-2xs tracking-widest"
           style={{ color: isSettled ? 'var(--color-brand-teal)' : 'var(--color-brand-amber)' }}
         >
           GAMEWEEK {gw} · {isSettled ? 'REVEALED' : 'OPEN, UNSCORED'}
         </span>
         <span className="text-caption leading-relaxed text-text-secondary">
-          {isSettled ? "Everyone's calls, side by side" : "Everyone's calls so far, nothing scored yet"}
+          {isSettled ? "Everyone's ten calls, side by side" : "Everyone's calls so far, nothing scored yet"}
         </span>
       </div>
 
@@ -34,12 +32,12 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
         </p>
       ) : (
         <>
-          <div className="flex rounded-11 border border-border-card bg-surface-card-4 p-[3px]">
+          <div className="flex rounded-11 border border-border-card bg-surface-card-4 p-0.5">
             {[{ id: 'member', label: 'BY MEMBER' }, { id: 'fixture', label: 'BY FIXTURE' }].map((t) => (
               <button
                 key={t.id}
                 onClick={() => setMobGrid(t.id)}
-                className={`min-h-[38px] flex-1 rounded-8 font-mono text-2xs tracking-[0.1em] ${
+                className={`min-h-10 flex-1 rounded-sm font-outfit text-2xs tracking-widest ${
                   mobGrid === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
                 }`}
               >
@@ -53,21 +51,21 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
           </span>
 
           {byMember ? (
-            <div className="flex gap-[7px] overflow-x-auto pb-1">
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
               {rows.map((r) => {
                 const on = sel?.type === 'member' && sel.id === r.username;
                 return (
                   <button
                     key={r.username}
                     onClick={() => setSel({ type: 'member', id: r.username })}
-                    className="flex min-h-[88px] w-[66px] shrink-0 flex-col items-center gap-[6px] rounded-14 border p-[10px_6px]"
+                    className="flex min-h-24 w-16 shrink-0 flex-col items-center gap-1.5 rounded-14 border px-1.5 py-2.5"
                     style={{
                       background: on ? 'color-mix(in srgb, var(--color-brand-teal) 15%, transparent)' : 'var(--surface-card-2)',
                       borderColor: on ? 'var(--color-brand-teal-mid)' : 'var(--border-base)',
                     }}
                   >
                     <span
-                      className={`flex h-[34px] w-[34px] items-center justify-center rounded-full text-sm ${
+                      className={`flex size-8 items-center justify-center rounded-full text-sm ${
                         r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
                       }`}
                     >
@@ -76,33 +74,33 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
                     <span className="max-w-full truncate text-2xs" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
                       {r.name}
                     </span>
-                    <span className="font-mono text-3xs text-text-muted-1">#{r.position}</span>
+                    <span className="font-outfit text-3xs text-text-muted-1">#{r.position}</span>
                   </button>
                 );
               })}
             </div>
           ) : (
-            <div className="flex gap-[7px] overflow-x-auto pb-1">
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
               {fixtures.map((f) => {
                 const on = sel?.type === 'fixture' && sel.id === f.matchId;
                 return (
                   <button
                     key={f.matchId}
                     onClick={() => setSel({ type: 'fixture', id: f.matchId })}
-                    className="flex min-h-[100px] w-[92px] shrink-0 flex-col items-center gap-[6px] rounded-14 border p-[11px_8px]"
+                    className="flex min-h-24 w-24 shrink-0 flex-col items-center gap-1.5 rounded-14 border px-2 py-2.5"
                     style={{
                       background: on ? 'color-mix(in srgb, var(--color-brand-teal) 15%, transparent)' : 'var(--surface-card-2)',
                       borderColor: on ? 'var(--color-brand-teal-mid)' : 'var(--border-base)',
                     }}
                   >
-                    <span className="flex items-center gap-[5px]">
-                      <TeamCrest team={f.homeTeam} size={20} />
-                      <TeamCrest team={f.awayTeam} size={20} />
+                    <span className="flex items-center gap-1">
+                      <TeamCrest team={f.homeTeam} size={20} className="size-5" />
+                      <TeamCrest team={f.awayTeam} size={20} className="size-5" />
                     </span>
                     <span className="text-center text-2xs leading-tight" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
                       {f.homeTeam} v {f.awayTeam}
                     </span>
-                    <span className="font-mono text-2xs text-text-muted-1">
+                    <span className="font-outfit text-2xs text-text-muted-1">
                       {f.actualHomeScore != null ? `${f.actualHomeScore}–${f.actualAwayScore}` : 'open'}
                     </span>
                   </button>
@@ -111,7 +109,7 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
             </div>
           )}
 
-          <div className="flex flex-col gap-3 rounded-16 border border-border-base bg-surface-card p-[14px]">
+          <div className="flex flex-col gap-3 rounded-16 border border-border-base bg-surface-card p-3.5">
             <FormBookPanel formBook={formBook} sel={sel} />
           </div>
         </>

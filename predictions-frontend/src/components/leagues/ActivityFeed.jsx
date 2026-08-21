@@ -1,23 +1,21 @@
 import KickerLabel from '../ui/KickerLabel';
 
 /**
- * Recent activity — real join events (LeagueStanding.joinedAt) and chip
- * plays (LeaguePredictionSummary.chips/predictedAt) from the fetched
- * gameweek window, newest first (utils/leagueStats.buildActivityFeed).
+ * Recent activity — join events and chip plays, newest first.
  */
 export default function ActivityFeed({ feed, className = '' }) {
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
-      <KickerLabel className="tracking-[0.16em]">RECENT ACTIVITY</KickerLabel>
+      <KickerLabel>RECENT ACTIVITY</KickerLabel>
       {feed && feed.length > 0 ? (
-        <div className="flex flex-col gap-0.5 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
           {feed.map((f, i) => (
-            <span key={i} className="flex items-start gap-[10px] border-b border-border-hairline py-[11px] last:border-0">
-              <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: f.tone }} />
+            <span key={i} className="flex items-start gap-2.5 border-b border-border-hairline py-2.5 last:border-0">
+              <span className="mt-1.5 size-1.5 shrink-0 rounded-full" style={{ background: f.tone }} />
               <span className="flex-1 text-caption leading-relaxed text-text-muted-2">
                 <span className="text-text-secondary">{f.who}</span> {f.text}
               </span>
-              <span className="shrink-0 font-mono text-2xs text-text-muted-4">{f.time}</span>
+              <span className="shrink-0 font-outfit text-2xs text-text-muted-4">{f.time}</span>
             </span>
           ))}
         </div>
