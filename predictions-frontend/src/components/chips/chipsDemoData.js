@@ -45,7 +45,7 @@ export const CHIP_ALMANAC_COPY = {
     forWhat: 'Best on a fixture you expect to call exactly, not merely correctly.',
   },
   wildcard: {
-    explain: 'Triples a single fixture. It cannot share a match with Double Down.',
+    explain: 'Triples a single fixture. It can share a match with Double Down.',
     forWhat: 'One swing a season. A soft home win with two obvious scorers.',
   },
   scorerFocus: {
@@ -64,8 +64,8 @@ export const CHIP_ALMANAC_COPY = {
 
 /** Spine.dc.html RULES — Almanac "The rules, plainly". */
 export const CHIP_ALMANAC_RULES = [
-  'Two chips to a match at most — never two multipliers on the same one.',
-  'One gameweek chip a week. Defence++ and All-In Week cannot share.',
+  'Stack as many chips on a match as cooldowns and caps allow, including both multipliers.',
+  'Defence++ and All-In Week can both be on in the same gameweek; each spreads to every slip you file.',
   'Multipliers scale scorer points as well as the result, so they reward exact calls.',
   'Defence++ settles before any multiplier is applied.',
   'A chip is reserved when you plan it and only spent when you file that gameweek.',

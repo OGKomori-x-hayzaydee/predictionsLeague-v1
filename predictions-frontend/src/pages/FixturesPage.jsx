@@ -20,7 +20,7 @@ import { extractMatchId, transformChipsFromBackend } from '../utils/backendMappi
 import { calculateCeilingPoints } from '../utils/pointsCalculation';
 import {
   inferActiveGameweekChipIds,
-  matchChipFromIds,
+  matchChipsFromIds,
   mergeMatchAndGameweekChips,
 } from '../utils/gameweekChipState';
 import { stampGameweekChipOnPending } from '../utils/stampGameweekChip';
@@ -44,10 +44,10 @@ function formatKickoff(dateStr) {
   return `${day} ${time}`;
 }
 
-const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chip: null };
+const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chips: [] };
 
 function chipsFromDraft(draft, gwChipIds = []) {
-  return mergeMatchAndGameweekChips(draft?.chip, gwChipIds);
+  return mergeMatchAndGameweekChips(draft?.chips, gwChipIds);
 }
 
 function fixtureKey(fixture) {
@@ -134,7 +134,7 @@ export default function FixturesPage() {
       awayScore: existing?.awayScore ?? 0,
       homeScorers: existing?.homeScorers ?? [],
       awayScorers: existing?.awayScorers ?? [],
-      chip: matchChipFromIds(existing?.chips) ?? null,
+      chips: matchChipsFromIds(existing?.chips),
     });
     setEditorOpen(false);
     setSubmitError(null);
@@ -213,7 +213,6 @@ export default function FixturesPage() {
     async (chipId) => {
       if (!chipId || stampingChipId) return;
       if (activeGwChipIds.includes(chipId)) return;
-      if (activeGwChipIds.length > 0) return;
 
       setStampingChipId(chipId);
       setOptimisticGwChips((prev) => (prev.includes(chipId) ? prev : [...prev, chipId]));
@@ -327,7 +326,14 @@ export default function FixturesPage() {
     onChangeAwayScore: (v) => setDraft((d) => ({ ...d, awayScore: v })),
     onChangeHomeScorers: (v) => setDraft((d) => ({ ...d, homeScorers: v })),
     onChangeAwayScorers: (v) => setDraft((d) => ({ ...d, awayScorers: v })),
-    onChangeChip: (v) => setDraft((d) => ({ ...d, chip: v })),
+    onToggleMatchChip: (chipId) =>
+      setDraft((d) => {
+        const cur = Array.isArray(d.chips) ? d.chips : [];
+        return {
+          ...d,
+          chips: cur.includes(chipId) ? cur.filter((id) => id !== chipId) : [...cur, chipId],
+        };
+      }),
     matchChips: availableChips.filter((chip) => chip.scope === 'match'),
     gameweekChips: availableChips.filter((chip) => chip.scope === 'gameweek'),
     activeGameweekChipIds: activeGwChipIds,

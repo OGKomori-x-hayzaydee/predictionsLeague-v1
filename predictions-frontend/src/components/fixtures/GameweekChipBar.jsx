@@ -32,8 +32,6 @@ export default function GameweekChipBar({
   busyId = null,
   onActivate,
 }) {
-  const otherActiveId = activeIds.find(Boolean) || null;
-
   return (
     <div className="flex w-full flex-col gap-2">
       <div className="flex flex-col gap-0.5">
@@ -51,9 +49,8 @@ export default function GameweekChipBar({
           const statusChip = chips.find((chip) => (chip.chipId || chip.id) === c.id);
           const left = gwChipLeftLabel(c.id, chips, { active: isSelected, currentGameweek });
           const isSpent = !isSelected && statusChip?.available === false;
-          const blockedByOther = !isSelected && otherActiveId && otherActiveId !== c.id;
           const isBusy = busyId === c.id;
-          const disabled = isSpent || blockedByOther || !!busyId;
+          const disabled = isSpent || !!busyId;
 
           return (
             <button
@@ -67,7 +64,7 @@ export default function GameweekChipBar({
               className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-left font-outfit transition-all ${
                 isSelected
                   ? 'border-[#fcd34d] bg-[#0d1c2ecc] shadow-[0_0_0_2px_#fcd34d33]'
-                  : isSpent || blockedByOther
+                  : isSpent
                     ? 'border-[#1c2942] bg-[#080e1a80] opacity-60'
                     : 'border-[#1c2942] bg-[#080e1ab8] hover:border-[#2f4160]'
               }`}
@@ -107,9 +104,7 @@ export default function GameweekChipBar({
                   {c.name}
                 </span>
                 <span className="text-2xs leading-snug text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
-                  {blockedByOther
-                    ? 'One gameweek chip a week.'
-                    : c.desc}
+                  {c.desc}
                 </span>
               </div>
             </button>

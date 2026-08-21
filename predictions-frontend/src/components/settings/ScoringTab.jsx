@@ -15,8 +15,8 @@ const SCORING = [
 // Verbatim from the app's chip-settlement rules (RULES array, Spine script ~line
 // 4795) — identical to what the current app's ScoringTab already showed.
 const RULES = [
-  'Two chips to a match at most — never two multipliers on the same one.',
-  'One gameweek chip a week. Defence++ and All-In Week cannot share.',
+  'Stack as many chips on a match as cooldowns and caps allow, including both multipliers.',
+  'Defence++ and All-In Week can both be on in the same gameweek; each spreads to every slip you file.',
   'Multipliers scale scorer points as well as the result, so they reward exact calls.',
   'Defence++ settles before any multiplier is applied.',
   'A chip is reserved when you plan it and only spent when you file that gameweek.',

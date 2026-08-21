@@ -24,7 +24,7 @@ export default function FixtureEditor({
   onChangeAwayScore,
   onChangeHomeScorers,
   onChangeAwayScorers,
-  onChangeChip,
+  onToggleMatchChip,
   matchChips = [],
   gameweekChips = [],
   activeGameweekChipIds = [],
@@ -115,7 +115,7 @@ export default function FixtureEditor({
       </div>
 
       <div className="flex w-full max-w-[76rem] flex-col gap-4">
-        <ChipSelector chips={matchChips} selected={draft.chip} onToggle={onChangeChip} />
+        <ChipSelector chips={matchChips} selected={draft.chips} onToggle={onToggleMatchChip} />
         <GameweekChipBar
           chips={gameweekChips}
           activeIds={activeGameweekChipIds}

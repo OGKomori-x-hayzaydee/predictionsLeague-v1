@@ -15,22 +15,10 @@ export function hasPredictedCleanSheet(prediction) {
 }
 
 /**
- * Check if a chip should be applied to a prediction based on its requirements
- * @param {string} chipId - Chip ID (camelCase)
- * @param {Object} prediction - Prediction object
- * @returns {Object} - { applicable: boolean, reason?: string }
+ * Whether a chip may sit on a prediction row. Defence++ is always attachable;
+ * scoring no-ops it on non-clean-sheet calls.
  */
-export function isChipApplicableToPrediction(chipId, prediction) {
-  // Defense++ only applies to predictions with a clean sheet
-  if (chipId === 'defensePlusPlus') {
-    const hasCleanSheet = hasPredictedCleanSheet(prediction);
-    return {
-      applicable: hasCleanSheet,
-      reason: hasCleanSheet ? null : 'Defense++ only applies to clean sheet predictions (0-X or X-0)'
-    };
-  }
-  
-  // All other chips are always applicable
+export function isChipApplicableToPrediction(_chipId, _prediction) {
   return { applicable: true };
 }
 

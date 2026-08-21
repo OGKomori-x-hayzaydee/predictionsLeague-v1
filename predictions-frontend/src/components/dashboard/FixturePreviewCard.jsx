@@ -69,9 +69,13 @@ export default function FixturePreviewCard({
 
   const { homeTeam, awayTeam, venue, date, predicted } = fixture;
   const prediction = fixture.userPrediction;
-  const chipId = prediction?.chips?.[0];
-  const chip = chipId ? CHIP_CONFIG[chipId] : null;
-  const chipHue = chipId ? CHIP_HUES[chipId] || DEFAULT_CHIP_HUE : null;
+  const chipIds = (prediction?.chips || []).filter(Boolean);
+  const filedChips = chipIds.map((id) => ({
+    id,
+    name: CHIP_CONFIG[id]?.name || id,
+    icon: CHIP_CONFIG[id]?.icon,
+    hue: CHIP_HUES[id] || DEFAULT_CHIP_HUE,
+  }));
 
   const homeScorers = (prediction?.homeScorers || []).filter(Boolean);
   const awayScorers = (prediction?.awayScorers || []).filter(Boolean);
@@ -164,14 +168,19 @@ export default function FixturePreviewCard({
                 {prediction.awayScore}
               </span>
             </div>
-            {chip && (
-              <span
-                className="flex items-center gap-[7px] whitespace-nowrap rounded-full border px-2.5 py-1 font-outfit text-2xs tracking-[0.1em]"
-                style={{ background: `${chipHue}1f`, borderColor: `${chipHue}55`, color: chipHue }}
-              >
-                {chip.name}
-                <span className="opacity-75">{chip.icon}</span>
-              </span>
+            {filedChips.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {filedChips.map((chip) => (
+                  <span
+                    key={chip.id}
+                    className="flex items-center gap-[7px] whitespace-nowrap rounded-full border px-2.5 py-1 font-outfit text-2xs tracking-[0.1em]"
+                    style={{ background: `${chip.hue}1f`, borderColor: `${chip.hue}55`, color: chip.hue }}
+                  >
+                    {chip.name}
+                    {chip.icon ? <span className="opacity-75">{chip.icon}</span> : null}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
 

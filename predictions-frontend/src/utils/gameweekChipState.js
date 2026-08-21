@@ -1,13 +1,15 @@
 import { isGameweekChip, isMatchChip } from './chipManager';
 
-export function matchChipFromIds(chipIds = []) {
-  if (!Array.isArray(chipIds)) return null;
-  return chipIds.find(isMatchChip) ?? null;
+export function matchChipsFromIds(chipIds = []) {
+  if (!Array.isArray(chipIds)) return [];
+  return [...new Set(chipIds.filter(isMatchChip))];
 }
 
-export function mergeMatchAndGameweekChips(matchChip, gwChipIds = []) {
+export function mergeMatchAndGameweekChips(matchChipIds = [], gwChipIds = []) {
   const next = [];
-  if (matchChip && isMatchChip(matchChip)) next.push(matchChip);
+  for (const id of matchChipIds || []) {
+    if (isMatchChip(id) && !next.includes(id)) next.push(id);
+  }
   for (const id of gwChipIds || []) {
     if (isGameweekChip(id) && !next.includes(id)) next.push(id);
   }

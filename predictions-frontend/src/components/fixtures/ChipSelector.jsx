@@ -28,15 +28,17 @@ function chipLeftLabel(chipId, statusChips) {
  * Chip selector grid — matching Spine.dc.html lines 438-456.
  * Sized in rem/em units.
  */
-export default function ChipSelector({ chips = [], selected, onToggle }) {
+export default function ChipSelector({ chips = [], selected = [], onToggle }) {
+  const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+
   return (
     <div className="flex w-full flex-col gap-2">
       <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
-        CHIPS · ONE PER MATCH
+        CHIPS · THIS MATCH
       </span>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         {CHIP_LIST.map((c) => {
-          const isSelected = selected === c.id;
+          const isSelected = selectedIds.includes(c.id);
           const hue = CHIP_HUES[c.id] || DEFAULT_CHIP_HUE;
           const statusChip = chips.find((chip) => (chip.chipId || chip.id) === c.id);
           const left = chipLeftLabel(c.id, chips);
@@ -47,7 +49,7 @@ export default function ChipSelector({ chips = [], selected, onToggle }) {
               key={c.id}
               type="button"
               disabled={isUsed && !isSelected}
-              onClick={() => onToggle(isSelected ? null : c.id)}
+              onClick={() => onToggle(c.id)}
               className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-left font-outfit transition-all ${
                 isSelected
                   ? 'border-[#fcd34d] bg-[#0d1c2ecc] shadow-[0_0_0_2px_#fcd34d33]'
