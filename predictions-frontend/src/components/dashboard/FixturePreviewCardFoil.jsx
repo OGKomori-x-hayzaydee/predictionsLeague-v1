@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TeamCrest from '../ui/TeamCrest';
 import ChipPile from './ChipPile';
 import { resolveFiledChips } from './resolveFiledChips';
+import { isFinishedMatch } from '../../utils/fixtureUtils';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -203,7 +204,11 @@ export default function FixturePreviewCardFoil({
             onClick={() => navigate('/fixtures')}
             className="flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
-            {predicted ? 'Edit in reel' : 'File in reel'}
+            {isFinishedMatch(fixture.status)
+              ? 'View in reel'
+              : predicted
+                ? 'Edit in reel'
+                : 'File in reel'}
             <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
               <path d="M3 7.5h8.5M8 4l3.5 3.5L8 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
