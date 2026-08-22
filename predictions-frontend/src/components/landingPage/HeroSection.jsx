@@ -1,106 +1,44 @@
-import React from "react";
-import Container from "../ui/Container";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-
-const heroStagger = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
+import { Link } from 'react-router-dom';
+import Container from '../ui/Container';
+import Button from '../ui/buttons/Button';
+import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion';
 
 export default function HeroSection() {
+  const reduce = usePrefersReducedMotion();
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-white dark:bg-primary-800 overflow-hidden transition-colors duration-300">
-      {/* Subtle radial gradient background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-50 via-white to-white dark:from-primary-700/40 dark:via-primary-800 dark:to-primary-800" />
-
+    <section className="relative flex min-h-dvh items-center overflow-hidden bg-surface-app pt-24">
       <Container size="4" className="relative z-10 px-4 sm:px-6">
-        <motion.div
-          className="max-w-4xl mx-auto text-center"
-          initial="hidden"
-          animate="visible"
-          variants={heroStagger}
-        >
-          {/* Season badge */}
-          <motion.div className="mb-5 sm:mb-8" variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-900/30 text-teal-light dark:text-teal-dark text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-full font-outfit border border-teal-200 dark:border-teal-800/50">
-              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-teal-light dark:bg-teal-dark animate-pulse" />
-              2025/26 Season
-            </span>
-          </motion.div>
-
-          {/* Main heading */}
-          <motion.h1
-            className="text-light-text dark:text-white text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-dmSerif mb-4 sm:mb-6 md:mb-8 leading-[1.1] sm:leading-[1.05]"
-            variants={fadeUp}
-          >
-            Welcome to{" "}
-            <span className="text-teal-light dark:text-teal-dark">
-              predictionsLeague
-            </span>
-          </motion.h1>
-
-          {/* Subheading */}
-          <motion.p
-            className="text-light-text-secondary dark:text-slate-300 font-outfit text-sm sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed px-2 sm:px-0"
-            variants={fadeUp}
-          >
-            The ultimate Premier League prediction game focused on the Big Six.
-            Predict match outcomes, deploy strategic chips, and compete with
-            friends for glory.
-          </motion.p>
-
-          {/* CTA buttons */}
-          <motion.div
-            className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0"
-            variants={fadeUp}
-          >
-            <Link to="/signup" className="w-full sm:w-auto">
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <button
-                  className="rounded-md bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 px-8 py-3 text-sm sm:text-base font-semibold font-outfit w-full sm:w-auto cursor-pointer"
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+          <div className="relative w-full max-w-lg">
+            <div className="rounded-lg border border-border-card bg-surface-card p-6 shadow-card sm:p-8">
+              <p className="font-outfit text-xs uppercase tracking-[0.14em] text-brand-teal">Saturday 15:00 · GW8</p>
+              <div className="mt-6 flex items-center justify-between gap-3">
+                <span className="min-w-0 flex-1 text-left font-dmSerif text-2xl text-text-primary sm:text-3xl">Arsenal</span>
+                <span className="font-dmSerif text-6xl leading-none text-text-primary sm:text-7xl">2–1</span>
+                <span className="min-w-0 flex-1 text-right font-dmSerif text-2xl text-text-primary sm:text-3xl">Chelsea</span>
+              </div>
+              <div className="mt-6 flex items-end justify-between border-t border-dashed border-border-hairline pt-4">
+                <span className="text-left text-xs text-text-muted">Saka · Havertz · Ceiling 18</span>
+                <span
+                  className={`${reduce ? '' : 'animate-[stampIn_0.5s_ease-out_both] '}rotate-[-8deg] rounded-sm border-[3px] border-brand-teal px-3 py-1 text-sm font-semibold tracking-[0.14em] text-brand-teal`}
                 >
-                  Get Started
-                </button>
-              </motion.div>
-            </Link>
-            <Link to="/howToPlay" className="w-full sm:w-auto">
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <button
-                  className="rounded-md border border-slate-300 dark:border-white/20 bg-transparent text-light-text dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 px-8 py-3 text-sm sm:text-base font-outfit w-full sm:w-auto cursor-pointer transition-colors"
-                >
-                  How to Play
-                </button>
-              </motion.div>
-            </Link>
-          </motion.div>
-        </motion.div>
+                  FILED
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <h1 className="mt-10 font-dmSerif text-4xl leading-[1.05] text-text-primary sm:text-6xl">
+            Matchday ledger
+          </h1>
+          <p className="mt-4 max-w-xl font-outfit text-base leading-relaxed text-text-muted sm:text-lg">
+            File the scoreline. Stamp it. Premier League predictions as slips and chips — not a generic fantasy board.
+          </p>
+          <Link to="/signup" className="mt-8">
+            <Button size="lg">Open your ledger</Button>
+          </Link>
+        </div>
       </Container>
     </section>
   );

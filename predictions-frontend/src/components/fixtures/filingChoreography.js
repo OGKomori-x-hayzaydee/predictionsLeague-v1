@@ -50,8 +50,8 @@ export const SLOW_NETWORK_GRACE_MS = 650;
 // t=520ms (FILING_TIMINGS.center) — so these are re-based to be relative
 // to *that* mount instant instead: 980 - 520 = 460ms, 1500 - 520 = 980ms.
 export const AI_PANEL_DELAY_MS = Object.freeze({
-  desktop: 460,
-  mobile: 980,
+  desktop: 0,
+  mobile: 0,
 });
 
 export function isFilingActive(phase) {
@@ -75,7 +75,7 @@ export function isCentredPhase(phase) {
  */
 export function getBackdropTarget(phase) {
   if (phase === FILE_PHASES.CENTER) return { opacity: 0.66 };
-  if (phase === FILE_PHASES.STAMP) return { opacity: 1 };
+  if (phase === FILE_PHASES.STAMP) return { opacity: 0.62 };
   return { opacity: 0 };
 }
 
@@ -149,7 +149,7 @@ export const CARD_BOUNCE_TRANSITION = Object.freeze({
 
 // Desktop rail width (the in-flow right column) and the transition used
 // to smooth its appearance via Framer Motion's `layout` projection.
-export const RAIL_WIDTH_PX = 403;
+export const RAIL_WIDTH_PX = null;
 export const CONTENT_LAYOUT_TRANSITION = { duration: 0.46, ease: [0.4, 0, 0.2, 1] };
 
 // AI panel entrance (replaces the old `slideFromBehind` CSS keyframe —

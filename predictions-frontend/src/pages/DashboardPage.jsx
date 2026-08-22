@@ -1,20 +1,19 @@
 import { useState } from 'react';
 import SlotBar from '../components/ui/SlotBar';
 import KickerLabel from '../components/ui/KickerLabel';
-import StatTile from '../components/ui/StatTile';
 import StationRail from '../components/dashboard/StationRail';
 import FixturePreviewCardFoil from '../components/dashboard/FixturePreviewCardFoil';
 import ResultsCarousel from '../components/dashboard/ResultsCarousel';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardMobileSheet from '../components/dashboard/DashboardMobileSheet';
 import LoadingState from '../components/common/LoadingState';
+import PageSkeleton from '../components/ui/PageSkeleton';
 import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
 import useLastSettledGameweek from '../hooks/useLastSettledGameweek';
 import { useNextMatch } from '../hooks/useNextMatch';
 
 export default function DashboardPage() {
-  const [aiOpen, setAiOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const {
@@ -60,68 +59,51 @@ export default function DashboardPage() {
       ? `GW${ledgerGameweek} total ${ledgerTotal} · best week GW${ledgerBestGameweek} on ${ledgerBestTotal}`
       : `GW${ledgerGameweek} total ${ledgerTotal} pts`;
 
-  return (
-    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
-      <div className="hidden md:block">
-        <SlotBar
-          kicker={currentGameweek ? `GAMEWEEK ${currentGameweek}` : 'GAMEWEEK'}
-          right={`${filedCount} of ${total} filed`}
-          deadline={showDeadlineCountdown ? timeDisplay : undefined}
-        />
-      </div>
+  if (fixturesLoading && !selectedFixture) {
+    return <PageSkeleton rail />;
+  }
 
-      {/* Desktop — foundation spec §5.3, dash grid 1fr 400px */}
-      <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[1fr_400px] md:items-stretch">
-        <div className="flex min-h-0 min-w-0 flex-col gap-0 overflow-y-auto px-6 pb-12 pt-5">
-          <div className="flex items-end justify-between gap-6">
-            <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
-              <h1 className="font-dmSerif text-4xl text-text-primary">
-                {fixturesLoading ? 'Loading your gameweek…' : `${filedCount} of ${total} filed`}
-              </h1>
-              <span className="text-caption text-[#8896ad]">{openLine}</span>
-            </div>
-            <div className="flex flex-none flex-col items-end gap-1.5">
-              <span className="font-outfit text-2xs tracking-[0.13em] text-[#66748c]">
-                MAX ON THE TABLE
-              </span>
-              <span className="font-dmSerif text-3xl leading-none text-brand-amber">
-                {tableMaxPoints}
-                <span className="text-sm text-[#8a7a4a]"> pts</span>
-              </span>
-            </div>
+  return (
+    <div className="flex flex-col animate-rise-in lg:h-[calc(100dvh-var(--shell-nav-h))] lg:overflow-hidden">
+      <SlotBar
+        kicker={currentGameweek ? `GAMEWEEK ${currentGameweek}` : 'GAMEWEEK'}
+        right={`${filedCount} of ${total} filed`}
+        deadline={showDeadlineCountdown ? timeDisplay : undefined}
+      />
+
+      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,var(--rail-max))] lg:items-stretch">
+        <div className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto px-6 pb-12 pt-5">
+          <div className="flex items-end justify-between gap-4">
+            <p className="text-sm text-text-muted">{openLine}</p>
+            {showDeadlineCountdown && (
+              <span className="font-outfit text-sm text-brand-amber">{timeDisplay} to deadline</span>
+            )}
           </div>
 
-          {/* Progress bar */}
-          <div className="relative mt-4 h-[5px] overflow-hidden rounded-full bg-[#111c2e]">
+          <div className="relative h-1 overflow-hidden rounded-full bg-surface-track">
             <div
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid transition-all"
+              className="absolute inset-0 rounded-full bg-brand-teal-mid transition-all"
               style={{ width: `${progressPct}%` }}
             />
-            <div className="absolute top-0 bottom-0 w-[60px] bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[sweep_3.4s_linear_infinite]" />
           </div>
 
-          {/* Station rail — compact */}
-          <div className="mt-[22px]">
+          <div>
             {fixturesLoading ? (
-              <LoadingState message="Loading fixtures..." />
+              <LoadingState compact message="Loading fixtures..." />
             ) : (
               <StationRail stations={stations} variant="desktop" />
             )}
           </div>
 
-          {/* Fixture preview card — fluid responsive width with subtle breathing room */}
-          <div className="mt-5 w-[94%] mx-auto">
-            <FixturePreviewCardFoil
-              fixture={selectedFixture}
-              ceiling={selectedCeiling}
-              variant="desktop"
-              deadlineLabel={deadlineFormatted}
-            />
-          </div>
+          <FixturePreviewCardFoil
+            fixture={selectedFixture}
+            ceiling={selectedCeiling}
+            variant="desktop"
+            deadlineLabel={deadlineFormatted}
+            tableMax={tableMaxPoints}
+          />
 
-          <hr className="mt-6 h-px border-0 bg-border-base" />
-
-          <div className="mt-6 w-[94%] mx-auto">
+          <div className="mt-2">
             <ResultsCarousel
               predictions={lastGw.predictions}
               gameweek={lastGw.gameweek}
@@ -133,39 +115,28 @@ export default function DashboardPage() {
         <DashboardSidebar ledger={ledger} ledgerFooter={ledgerFooter} ledgerLoading={ledgerLoading} leagues={leagues} />
       </div>
 
-      {/* Mobile — Spine.dc.html mobile dashboard lines 2215-2345 */}
-      <div className="flex flex-col gap-4 px-4 pb-[26px] pt-4 md:hidden">
+      <div className="flex flex-col gap-4 px-4 pb-6 pt-4 lg:hidden">
+        {showDeadlineCountdown && (
+          <p className="text-sm text-brand-amber">{timeDisplay} to deadline</p>
+        )}
         <div className="flex flex-col gap-1">
-          <h1 className="font-dmSerif text-2xl leading-tight text-text-primary">
-            {fixturesLoading ? 'Loading your gameweek…' : `${filedCount} of ${total} filed`}
-          </h1>
-          <span className="text-caption text-text-muted-1">{openLine}</span>
+          <p className="font-outfit text-xs uppercase tracking-[0.14em] text-brand-teal">
+            {fixturesLoading ? 'Loading your gameweek' : `${filedCount} of ${total} filed`}
+          </p>
+          <span className="text-caption text-text-secondary">{openLine}</span>
         </div>
 
-        <div className="relative h-[5px] overflow-hidden rounded-full bg-[#111c2e]">
+        <div className="relative h-1 overflow-hidden rounded-full bg-surface-track">
           <div
-            className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid"
+            className="absolute inset-0 rounded-full bg-brand-teal-mid"
             style={{ width: `${progressPct}%` }}
           />
         </div>
 
-        <StatTile
-          label="Max on the table"
-          value={
-            <>
-              {tableMaxPoints}
-              <span className="ml-1 text-xs text-[#8a7a4a]">pts</span>
-            </>
-          }
-          accent="var(--color-brand-amber)"
-        />
-
         <div className="flex flex-col gap-2">
-          <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-4">
-            This gameweek
-          </KickerLabel>
+          <KickerLabel>This gameweek</KickerLabel>
           {fixturesLoading ? (
-            <LoadingState message="Loading fixtures..." />
+            <LoadingState compact message="Loading fixtures..." />
           ) : (
             <StationRail
               stations={stations}
@@ -182,17 +153,17 @@ export default function DashboardPage() {
           fixture={selectedFixture}
           ceiling={selectedCeiling}
           variant="mobile"
-          aiOpen={aiOpen}
-          onToggleAi={() => setAiOpen((v) => !v)}
           deadlineLabel={deadlineFormatted}
+          tableMax={tableMaxPoints}
         />
 
         <button
+          type="button"
           onClick={() => setSheetOpen(true)}
-          className="flex items-center justify-between rounded-[14px] border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
+          className="flex min-h-11 items-center justify-between rounded-lg border border-border-card bg-surface-card px-4 py-3 text-sm text-text-secondary"
         >
-          Rivals, chips in hand &amp; last gameweek
-          <span className="font-outfit text-2xs text-brand-teal">VIEW &rsaquo;</span>
+          Ledger, chips &amp; rivals
+          <span className="font-outfit text-xs text-brand-teal">VIEW ›</span>
         </button>
       </div>
 

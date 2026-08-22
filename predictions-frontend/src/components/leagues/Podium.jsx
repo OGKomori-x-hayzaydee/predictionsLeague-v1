@@ -34,17 +34,16 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
         key={member.username}
         onClick={() => onToggleExpand?.(member.username)}
         style={{ animation: `podiumRise .5s ${(VISUAL_ORDER.indexOf(i) * 0.08).toFixed(2)}s both cubic-bezier(.2,.8,.2,1)` }}
-        className="flex w-24 shrink-0 flex-col items-center gap-2 font-outfit sm:w-32 md:w-40"
+        className="flex w-24 shrink-0 flex-col items-center gap-2 font-outfit focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal sm:w-32 md:w-40"
       >
         <span
-          style={{ animation: first ? 'podiumGlow 2.6s ease-in-out infinite' : 'none' }}
+            style={{ animation: first && member.isCurrentUser ? 'podiumGlow 2.6s ease-in-out 1' : 'none' }}
           className="inline-flex"
         >
           <Avatar
             name={member.displayName || member.username}
             src={member.avatar}
             size={AVATAR_SIZE[i]}
-            animateFallback={false}
             className={member.isCurrentUser ? 'ring-2 ring-brand-teal' : ''}
           />
         </span>
@@ -60,20 +59,10 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
           }`}
         >
           <span
-            style={{ animation: first ? 'podiumFloat 2.4s ease-in-out infinite' : 'none' }}
-            className={`font-dmSerif text-3xl leading-none ${first ? 'text-brand-teal' : 'text-text-muted-5'}`}
+            className={`font-dmSerif text-3xl leading-none ${first ? 'text-brand-teal' : 'text-text-disabled'}`}
           >
             {place}
           </span>
-          {first && (
-            <span
-              className="absolute inset-y-0 left-0 w-1/3"
-              style={{
-                background: 'linear-gradient(100deg,transparent,rgba(255,255,255,.17),transparent)',
-                animation: 'podiumShine 3.4s ease-in-out infinite',
-              }}
-            />
-          )}
         </div>
       </button>
     );

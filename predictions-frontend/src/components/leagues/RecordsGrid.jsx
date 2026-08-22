@@ -17,7 +17,7 @@ export default function RecordsGrid({ records }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-2.5">
       {records.map((r) => (
         <div key={r.label} className="flex flex-col gap-1.5 rounded-16 border border-border-base bg-surface-card p-4 md:p-5">
           <span className="font-outfit text-2xs tracking-widest text-text-muted-4">{r.label}</span>
@@ -25,7 +25,7 @@ export default function RecordsGrid({ records }) {
             <span className="font-dmSerif text-3xl leading-none text-brand-teal md:text-4xl">{r.val}</span>
             <span className="flex min-w-0 items-center gap-2">
               {r.who && (
-                <Avatar name={r.who} src={r.avatar} size={22} animateFallback={false} />
+                <Avatar name={r.who} src={r.avatar} size={22} />
               )}
               <span className="truncate font-dmSerif text-lg text-text-secondary">{r.who}</span>
             </span>

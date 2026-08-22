@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Ticket } from '@phosphor-icons/react';
 import SlotBar from '../components/ui/SlotBar';
-import LoadingState from '../components/common/LoadingState';
+import PageSkeleton from '../components/ui/PageSkeleton';
 import LeagueHome from '../components/leagues/LeagueHome';
 import LeagueManageView from '../components/leagues/LeagueManageView';
 import LeagueMasthead from '../components/leagues/LeagueMasthead';
@@ -12,6 +12,8 @@ import RecordsGrid from '../components/leagues/RecordsGrid';
 import ActivityFeed from '../components/leagues/ActivityFeed';
 import FormBookGrid from '../components/leagues/FormBookGrid';
 import FormBookMobile from '../components/leagues/FormBookMobile';
+import StandingsTable from '../components/leagues/StandingsTable';
+import SegmentedControl from '../components/ui/SegmentedControl';
 import useLeagues from '../hooks/useLeagues';
 import useLeagueDetail from '../hooks/useLeagueDetail';
 import { useNextMatch } from '../hooks/useNextMatch';
@@ -25,9 +27,6 @@ const DETAIL_TABS = [
 ];
 
 const MANAGE_TAB = { id: 'manage', label: 'Manage' };
-
-const PREVIEW_BTN =
-  'shrink-0 rounded-7 border px-3 py-1.5 font-outfit text-caption tracking-wide transition-colors';
 
 export default function LeaguesPage() {
   const { myLeagues, isLoading, createLeague, refreshMyLeagues } = useLeagues();
@@ -52,10 +51,6 @@ export default function LeaguesPage() {
 
   const backToHome = () => setSelected(null);
 
-  const previewButtonClass = `${PREVIEW_BTN} ${
-    previewMode ? 'border-brand-amber/50 text-brand-amber' : 'border-border-card text-text-muted-3 hover:text-brand-teal'
-  }`;
-
   const joinCreate = {
     onJoin: async (code) => {
       await leagueAPI.joinLeague(code);
@@ -69,7 +64,7 @@ export default function LeaguesPage() {
   };
 
   return (
-    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
+    <div className="flex flex-col animate-rise-in lg:h-[calc(100dvh-var(--shell-nav-h))] lg:overflow-hidden">
       {selected ? (
         <LeagueDetailView
           key={selected.id}
@@ -87,32 +82,26 @@ export default function LeaguesPage() {
           deadline={deadline}
           previewMode={previewMode}
           onTogglePreview={togglePreview}
-          previewButtonClass={previewButtonClass}
         />
       ) : (
         <>
-          <div className="hidden md:block">
-            <SlotBar
-              kicker="LEAGUES"
-              right={leagues.length ? `${leagues.length} league${leagues.length === 1 ? '' : 's'} · best ${ordinal(best?.position)}` : undefined}
-              deadline={deadline}
-              trailing={
-                <button onClick={togglePreview} className={previewButtonClass}>
-                  {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
-                </button>
-              }
-            />
-          </div>
+          <SlotBar
+            kicker="LEAGUES"
+            right={leagues.length ? `${leagues.length} league${leagues.length === 1 ? '' : 's'} · best ${ordinal(best?.position)}` : undefined}
+            deadline={deadline}
+          />
 
-          <div className="flex items-center justify-between gap-2 px-4 pt-4 md:hidden">
+          <div className="flex items-center justify-between gap-2 px-4 pt-4 lg:hidden">
             <span className="font-outfit text-3xs tracking-widest text-brand-teal">LEAGUES</span>
-            <button
-              onClick={togglePreview}
-              aria-label="Toggle preview with example data"
-              className={`rounded-9 border p-2.5 ${previewMode ? 'border-brand-amber/50 text-brand-amber' : 'border-border-card text-text-muted-3'}`}
-            >
-              <Ticket size={14} />
-            </button>
+            {previewMode && (
+              <button
+                onClick={togglePreview}
+                aria-label="Exit example data"
+                className="inline-flex size-11 items-center justify-center rounded-md border border-brand-amber/50 text-brand-amber"
+              >
+                <Ticket size={14} />
+              </button>
+            )}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -131,7 +120,7 @@ export default function LeaguesPage() {
   );
 }
 
-function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, deadline, previewMode, onTogglePreview, previewButtonClass }) {
+function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, deadline, previewMode, onTogglePreview }) {
   const demoPack = previewMode ? getDemoLeaguePack(overview.id) : null;
   const lg = useLeagueDetail(previewMode ? null : overview.id, overview, demoPack);
   const tone = leagueTone(overview.id);
@@ -171,7 +160,7 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <SlotBar kicker="ALL LEAGUES" onBack={onBack} deadline={deadline} />
-        <LoadingState message="Loading league…" />
+        <PageSkeleton />
       </div>
     );
   }
@@ -180,24 +169,23 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="hidden md:block">
-        <SlotBar
-          kicker="ALL LEAGUES"
-          onBack={onBack}
-          tabs={tabs}
-          activeTab={lg.activeTab}
-          onTabChange={setTab}
-          right={slotRight}
-          deadline={deadline}
-          trailing={
-            <button onClick={onTogglePreview} className={previewButtonClass}>
-              {previewMode ? 'EXIT PREVIEW' : 'PREVIEW EXAMPLE DATA'}
-            </button>
-          }
-        />
-      </div>
+      <SlotBar
+        kicker="ALL LEAGUES"
+        onBack={onBack}
+        tabs={tabs}
+        activeTab={lg.activeTab}
+        onTabChange={setTab}
+        right={slotRight}
+        deadline={deadline}
+      />
 
-      <div className="flex flex-col gap-3 px-4 pt-4 md:hidden">
+      {previewMode && (
+        <div className="border-b border-brand-amber/40 bg-brand-amber/10 px-4 py-2 text-center font-outfit text-2xs tracking-wide text-brand-amber">
+          EXAMPLE DATA
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 px-4 pt-4 lg:hidden">
         {lg.activeTab === 'manage' ? (
           <div className="flex items-start gap-3">
             <button
@@ -226,52 +214,32 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
           />
         )}
         <div className="flex items-center gap-2">
-          <div className="flex min-w-0 flex-1 rounded-11 border border-border-card bg-surface-card-4 p-0.5">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`min-h-10 flex-1 rounded-sm font-outfit text-2xs tracking-widest ${
-                  lg.activeTab === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
-                }`}
-              >
-                {t.label.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={onTogglePreview}
-            aria-label="Toggle preview with example data"
-            className={`shrink-0 rounded-9 border p-2.5 ${previewMode ? 'border-brand-amber/50 text-brand-amber' : 'border-border-card text-text-muted-3'}`}
-          >
-            <Ticket size={14} />
-          </button>
+          <SegmentedControl
+            grow
+            className="min-w-0 flex-1"
+            value={lg.activeTab}
+            onChange={setTab}
+            options={tabs}
+          />
+          {previewMode && (
+            <button
+              onClick={onTogglePreview}
+              aria-label="Exit example data"
+              className="shrink-0 inline-flex size-11 items-center justify-center rounded-md border border-brand-amber/50 text-brand-amber"
+            >
+              <Ticket size={14} />
+            </button>
+          )}
         </div>
       </div>
 
       {lg.activeTab === 'overview' ? (
         <>
-          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_24rem]">
-            <div className="flex min-h-0 min-w-0 flex-col gap-3.5 overflow-y-auto px-6 py-5">
-              <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
-              <Podium
-                podium={lg.podium}
-                label={podiumLabel}
-                note={podiumNote}
-                bestCall={lg.bestCall}
-                expandedUsername={lg.podiumExpand}
-                onToggleExpand={(u) => lg.setPodiumExpand(lg.podiumExpand === u ? null : u)}
-                onOpenInFormBook={openInFormBook}
-              />
-              <HeadToHeadCarousel rivals={lg.rivals} vsIdx={lg.vsIdx} setVsIdx={lg.setVsIdx} vsVariant={lg.vsVariant} setVsVariant={lg.setVsVariant} />
-              <PositionChart series={lg.positionSeries} line={lg.positionLine} gws={lg.settledGws} moveLabel={move.label} moveTone={move.tone} tone={tone.var} />
-              <RecordsGrid records={lg.records} />
+          <div className="hidden min-h-0 flex-1 overflow-y-auto px-6 py-5 lg:flex lg:flex-col lg:gap-3.5">
+            <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
+            <div className="overflow-hidden rounded-md border border-border-card bg-surface-card">
+              <StandingsTable standings={lg.standings} />
             </div>
-            <ActivityFeed feed={lg.feed} className="min-h-0 border-l border-border-hairline bg-surface-bar p-5" />
-          </div>
-
-          <div className="flex flex-col gap-3 px-4 pb-6 pt-3 md:hidden">
-            <PositionChart series={lg.positionSeries} line={lg.positionLine} gws={lg.settledGws} moveLabel={move.label} moveTone={move.tone} tone={tone.var} />
             <Podium
               podium={lg.podium}
               label={podiumLabel}
@@ -281,9 +249,43 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
               onToggleExpand={(u) => lg.setPodiumExpand(lg.podiumExpand === u ? null : u)}
               onOpenInFormBook={openInFormBook}
             />
-            <RecordsGrid records={lg.records} />
             <HeadToHeadCarousel rivals={lg.rivals} vsIdx={lg.vsIdx} setVsIdx={lg.setVsIdx} vsVariant={lg.vsVariant} setVsVariant={lg.setVsVariant} />
-            <ActivityFeed feed={lg.feed} className="rounded-16 border border-border-base bg-surface-card p-3.5" />
+            <details className="rounded-md border border-border-card bg-surface-card p-4">
+              <summary className="min-h-11 cursor-pointer font-outfit text-sm text-text-secondary">Position over time</summary>
+              <div className="mt-3">
+                <PositionChart series={lg.positionSeries} line={lg.positionLine} gws={lg.settledGws} moveLabel={move.label} moveTone={move.tone} tone={tone.var} />
+              </div>
+            </details>
+            <RecordsGrid records={lg.records} />
+            {lg.feed?.length > 0 && (
+              <details className="rounded-md border border-border-card bg-surface-card p-4">
+                <summary className="min-h-11 cursor-pointer font-outfit text-sm text-text-secondary">Activity</summary>
+                <ActivityFeed feed={lg.feed} className="mt-3" />
+              </details>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 px-4 pb-6 pt-3 lg:hidden">
+            <Podium
+              podium={lg.podium}
+              label={podiumLabel}
+              note={podiumNote}
+              bestCall={lg.bestCall}
+              expandedUsername={lg.podiumExpand}
+              onToggleExpand={(u) => lg.setPodiumExpand(lg.podiumExpand === u ? null : u)}
+              onOpenInFormBook={openInFormBook}
+            />
+            <div className="overflow-hidden rounded-md border border-border-card bg-surface-card">
+              <StandingsTable standings={lg.standings} />
+            </div>
+            <HeadToHeadCarousel rivals={lg.rivals} vsIdx={lg.vsIdx} setVsIdx={lg.setVsIdx} vsVariant={lg.vsVariant} setVsVariant={lg.setVsVariant} />
+            <RecordsGrid records={lg.records} />
+            {lg.feed?.length > 0 && (
+              <details className="rounded-md border border-border-card bg-surface-card p-3.5">
+                <summary className="min-h-11 cursor-pointer font-outfit text-sm text-text-secondary">Activity</summary>
+                <ActivityFeed feed={lg.feed} className="mt-3" />
+              </details>
+            )}
           </div>
         </>
       ) : lg.activeTab === 'manage' && canManage ? (
@@ -307,7 +309,7 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
             settledGws={lg.settledGws}
             leagueName={overview.name}
           />
-          <div className="px-4 pb-6 pt-3 md:hidden">
+          <div className="px-4 pb-6 pt-3 lg:hidden">
             <FormBookMobile
               formBook={lg.formBook}
               sel={lg.sel}

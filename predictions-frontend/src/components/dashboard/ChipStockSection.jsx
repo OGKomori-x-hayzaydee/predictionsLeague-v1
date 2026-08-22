@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import ChipToken from '../ui/ChipToken';
 import KickerLabel from '../ui/KickerLabel';
 import { useChips } from '../../hooks/useChips';
 import { CHIP_HUES, DEFAULT_CHIP_HUE, CHIP_BADGES } from './chipHues';
@@ -44,13 +45,13 @@ export default function ChipStockSection() {
               onClick={() => navigate('/chips')}
               className="flex cursor-pointer items-center gap-[10px] text-left"
             >
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] font-outfit text-xs font-semibold"
-                style={{ background: `${hue}1f`, border: `1px solid ${hue}55`, color: hue }}
-              >
-                {CHIP_BADGES[chip.id] || chip.icon}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-sm text-[#b6c1d1]">{chip.name}</span>
+              <ChipToken
+                tag={CHIP_BADGES[chip.id] || chip.icon}
+                hue={hue}
+                size={28}
+                muted={chip.available === false}
+              />
+              <span className="min-w-0 flex-1 truncate text-sm text-text-secondary">{chip.name}</span>
               <span
                 className={`shrink-0 font-outfit text-xs ${
                   chip.available === false ? 'text-brand-amber-mid' : 'text-text-muted-3'

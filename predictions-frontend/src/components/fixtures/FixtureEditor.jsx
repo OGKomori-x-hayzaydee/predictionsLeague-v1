@@ -39,7 +39,7 @@ export default function FixtureEditor({
   return (
     <div className="flex w-full flex-col items-center gap-2.5">
       {/* Header Kickoff + Venue */}
-      <span className="font-outfit text-xs tracking-widest text-[#8fa6bf]">
+      <span className="font-outfit text-xs tracking-widest text-text-muted">
         {formatKickoff(fixture.date)} · {fixture.venue || 'Stadium'}
       </span>
 
@@ -48,7 +48,7 @@ export default function FixtureEditor({
         {/* Home Side (Right Aligned) */}
         <div className="flex flex-col items-end gap-1.5 text-right pt-1 min-w-0">
           <TeamCrest team={fixture.homeTeam} size={56} />
-          <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
+          <span className="font-dmSerif text-3xl md:text-4xl leading-tight tracking-tight text-text-primary">
             {fixture.homeTeam}
           </span>
         </div>
@@ -76,7 +76,7 @@ export default function FixtureEditor({
             </div>
 
             {/* Dash */}
-            <span className="pt-7 md:pt-9 font-dmSerif text-3xl md:text-4xl text-[#2c3a53] leading-none">–</span>
+            <span className="pt-7 md:pt-9 font-dmSerif text-3xl md:text-4xl leading-none text-text-disabled">–</span>
 
             {/* Away Score Stepper */}
             <div className="flex w-32 md:w-36 flex-col items-center gap-0.5">
@@ -99,7 +99,7 @@ export default function FixtureEditor({
           </div>
 
           {totalGoals === 0 && (
-            <span className="max-w-xs text-center font-outfit text-2xs leading-relaxed tracking-wide text-[#4f5b70]">
+            <span className="max-w-xs text-center font-outfit text-2xs leading-relaxed tracking-wide text-text-muted">
               0–0 AS IT STANDS · A VALID CALL — SCORER SLOTS OPEN AS THE NUMBERS MOVE
             </span>
           )}
@@ -108,7 +108,7 @@ export default function FixtureEditor({
         {/* Away Side (Left Aligned) */}
         <div className="flex flex-col items-start gap-1.5 pt-1 min-w-0">
           <TeamCrest team={fixture.awayTeam} size={56} />
-          <span className="font-dmSerif text-3xl md:text-4xl leading-tight text-white tracking-tight">
+          <span className="font-dmSerif text-3xl md:text-4xl leading-tight tracking-tight text-text-primary">
             {fixture.awayTeam}
           </span>
         </div>
@@ -117,7 +117,7 @@ export default function FixtureEditor({
       <div className="grid w-full max-w-[76rem] grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,3fr)_auto_minmax(0,2fr)] lg:gap-x-4">
         <ChipSelector chips={matchChips} selected={draft.chips} onToggle={onToggleMatchChip} />
         <div
-          className="h-px w-full bg-[#1c2942] lg:h-auto lg:w-px lg:self-stretch"
+          className="h-px w-full bg-border-card lg:h-auto lg:w-px lg:self-stretch"
           aria-hidden
         />
         <GameweekChipBar

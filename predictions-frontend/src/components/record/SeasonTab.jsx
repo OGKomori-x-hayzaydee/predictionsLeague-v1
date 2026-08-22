@@ -3,10 +3,7 @@ import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import StatTile from '../ui/StatTile';
 import GameweekRidge from './GameweekRidge';
 import PredictionRow from './PredictionRow';
-import VisualizationsGate from './VisualizationsGate';
 import { calculatePoints } from '../../utils/pointsCalculation';
-
-const VIZ_THRESHOLD = 5;
 
 function weekSlice(predictions, gameweek) {
   const weekPredictions = gameweek
@@ -39,8 +36,6 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
   const { weekPredictions, weekTotal, weekExact } = weekSlice(predictions, selectedGameweek);
 
   const settledWeeks = stats.pointsByGameweek.length;
-  const vizGated = !previewMode && settledWeeks < VIZ_THRESHOLD;
-  const best = stats.bestWeek;
   const weeks = stats.pointsByGameweek; // ascending by gameweek
   const latestWeek = weeks.length ? weeks[weeks.length - 1].gameweek : null;
 
@@ -66,7 +61,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
   return (
     <div className="flex flex-col gap-4">
       {/* Desktop */}
-      <div className="hidden flex-col gap-4 md:flex">
+      <div className="hidden flex-col gap-4 lg:flex">
         <div className="flex items-end justify-between gap-4">
           <h2 className="font-dmSerif text-3xl leading-tight text-text-primary">
             {selectedGameweek
@@ -104,42 +99,23 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
               {weekPredictions.length === 0 ? (
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
-                weekPredictions.map((p) => (
-                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen />
+                weekPredictions.map((p, i) => (
+                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen={i === 0} />
                 ))
               )}
             </div>
           </div>
-        ) : vizGated ? (
-          <VisualizationsGate settledWeeks={settledWeeks} threshold={VIZ_THRESHOLD} />
         ) : (
-          <>
-            <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
-              <StatTile label="Season points" value={stats.seasonPoints} accent="var(--color-brand-teal)" />
-              <StatTile
-                label="Best week"
-                value={best ? `+${best.points}` : '—'}
-                note={best ? `Gameweek ${best.gameweek}` : undefined}
-              />
-              <StatTile
-                label="Exact scorelines"
-                value={stats.exactCalls}
-                note={`of ${stats.totalCompleted} calls filed`}
-              />
-              <StatTile label="Average week" value={stats.avgPerWeek} />
-            </div>
-
-            <div className="flex min-h-[110px] items-center justify-center rounded-14 border border-dashed border-border-control">
-              <span className="px-4 text-center text-caption text-text-muted-4">
-                Select a week on the ridge to unfold its calls here.
-              </span>
-            </div>
-          </>
+          <div className="flex min-h-[110px] items-center justify-center rounded-14 border border-dashed border-border-control">
+            <span className="px-4 text-center text-caption text-text-muted-4">
+              Select a week on the ridge to unfold its calls here.
+            </span>
+          </div>
         )}
       </div>
 
       {/* Mobile */}
-      <div className="flex flex-col gap-4 md:hidden">
+      <div className="flex flex-col gap-4 lg:hidden">
         <div className="flex flex-col gap-1">
           <span className="font-outfit text-2xs tracking-[0.14em] text-brand-teal">
             SEASON · {settledWeeks} WEEK{settledWeeks === 1 ? '' : 'S'} SETTLED
@@ -152,7 +128,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
         </div>
 
         {settledWeeks === 0 ? (
-          <VisualizationsGate settledWeeks={settledWeeks} threshold={VIZ_THRESHOLD} />
+          <p className="text-sm text-text-muted">No settled gameweeks yet — your diary fills in once a week is scored.</p>
         ) : (
           <>
             <div className="flex flex-col gap-3 rounded-14 border border-border-card bg-surface-card p-4">

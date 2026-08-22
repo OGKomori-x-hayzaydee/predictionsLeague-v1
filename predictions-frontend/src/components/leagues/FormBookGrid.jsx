@@ -18,7 +18,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
 
   if (fixtures.length === 0) {
     return (
-      <div className="hidden min-h-0 flex-1 flex-col items-center justify-center gap-2 px-6 text-center md:flex">
+      <div className="hidden min-h-0 flex-1 flex-col items-center justify-center gap-2 px-6 text-center lg:flex">
         <span className="font-dmSerif text-xl text-text-primary">No calls filed yet for GW{gw}</span>
         <p className="max-w-sm text-sm text-text-muted-2">Once anyone in this league files a prediction for this gameweek, the form book fills in here.</p>
       </div>
@@ -37,11 +37,11 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
         { label: 'Not filed yet', bg: 'var(--surface-card-4)', border: 'var(--border-hairline)' },
       ];
 
-  const cols = `minmax(9rem,11.5rem) repeat(${fixtures.length}, minmax(0,1fr)) 3.5rem`;
+  const cols = `minmax(9rem,11.5rem) repeat(${fixtures.length}, minmax(3.5rem,4.5rem)) 3.5rem`;
   const fixtureSel = sel?.type === 'fixture' ? sel.id : null;
 
   return (
-    <div className="relative hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_25rem]">
+    <div className="relative hidden min-h-0 flex-1 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,var(--rail-max))]">
       <div className="flex min-h-0 flex-col px-6 pt-5">
         <div className="flex flex-none items-end justify-between gap-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -76,12 +76,13 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
           </div>
         </div>
 
-        <div className="mt-4 flex min-h-0 flex-1 flex-col gap-1">
+        <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-x-auto">
+          <div className="min-w-max flex min-h-0 flex-1 flex-col gap-1">
           <div
             className="grid flex-none items-end gap-0.5 border-b border-border-base pb-1.5"
             style={{ gridTemplateColumns: cols }}
           >
-            <span className="font-outfit text-2xs tracking-widest text-text-muted-2">MEMBER</span>
+            <span className="sticky left-0 z-[1] bg-surface-card font-outfit text-2xs tracking-widest text-text-muted-2">MEMBER</span>
             {fixtures.map((f) => {
               const on = fixtureSel === f.matchId;
               return (
@@ -118,14 +119,13 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                 >
                   <button
                     onClick={() => { setSel({ type: 'member', id: r.username }); setCard(null); }}
-                    className="flex min-w-0 items-center gap-2 p-2.5 text-left"
+                    className="sticky left-0 z-[1] flex min-w-0 items-center gap-2 bg-surface-card p-2.5 text-left"
                   >
                     <span className="w-4 font-outfit text-2xs text-text-muted-2">{r.position}</span>
                     <Avatar
                       name={r.name}
                       src={r.avatar}
                       size={24}
-                      animateFallback={false}
                       className={r.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
                     />
                     <span className={`min-w-0 flex-1 truncate text-sm ${r.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{r.name}</span>
@@ -139,7 +139,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                     const vc = c.filed ? verdictColors(!isSettled ? (r.isCurrentUser ? 'exact' : null) : c.verdict) : null;
                     const dim = fixtureSel != null && fixtureSel !== c.matchId;
                     const bg = dim
-                      ? '#0a111d'
+                      ? 'var(--surface-app)'
                       : !c.filed
                         ? 'var(--surface-card-4)'
                         : !isSettled
@@ -148,7 +148,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                             : 'var(--surface-card-3)'
                           : vc.bg;
                     const border = dim
-                      ? '#141f31'
+                      ? 'var(--border-base)'
                       : !c.filed
                         ? 'var(--border-hairline)'
                         : !isSettled
@@ -171,7 +171,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                           setSel({ type: 'fixture', id: c.matchId });
                           setCard({ username: r.username, matchId: c.matchId });
                         }}
-                        className="flex h-9 items-center justify-center gap-0.5 rounded-6 border font-outfit text-caption"
+                        className="flex min-h-11 items-center justify-center gap-0.5 rounded-md border font-outfit text-caption"
                         style={{ background: bg, borderColor: border, color: fg }}
                       >
                         {c.filed ? c.label : '—'}
@@ -195,6 +195,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                 <span className="text-caption text-text-muted-1">{l.label}</span>
               </span>
             ))}
+          </div>
           </div>
         </div>
       </div>

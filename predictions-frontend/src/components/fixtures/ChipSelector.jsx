@@ -1,10 +1,11 @@
-import { CHIP_HUES, DEFAULT_CHIP_HUE } from './chipHues';
+import ChipToken from '../ui/ChipToken';
+import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE } from './chipHues';
 import { hasSeasonCap } from '../../utils/chipStatus';
 
 const CHIP_LIST = [
-  { id: 'doubleDown', name: 'Double Down', tag: 'x2', desc: 'Doubles everything this match returns.' },
-  { id: 'wildcard', name: 'Wildcard', tag: 'x3', desc: 'Triples one match. One a season.' },
-  { id: 'scorerFocus', name: 'Scorer Focus', tag: 'S+', desc: 'Each named scorer pays 4 instead of 2.' },
+  { id: 'doubleDown', name: 'Double Down', desc: 'Doubles everything this match returns.' },
+  { id: 'wildcard', name: 'Wildcard', desc: 'Triples one match. One a season.' },
+  { id: 'scorerFocus', name: 'Scorer Focus', desc: 'Each named scorer pays 4 instead of 2.' },
 ];
 
 function chipLeftLabel(chipId, statusChips) {
@@ -33,7 +34,7 @@ export default function ChipSelector({ chips = [], selected = [], onToggle }) {
 
   return (
     <div className="flex min-w-0 w-full flex-col gap-2">
-      <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
+      <span className="font-outfit text-xs uppercase tracking-[0.16em] text-text-muted">
         CHIPS · THIS MATCH
       </span>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:grid-cols-3">
@@ -52,49 +53,37 @@ export default function ChipSelector({ chips = [], selected = [], onToggle }) {
               onClick={() => onToggle(c.id)}
               className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-left font-outfit transition-all ${
                 isSelected
-                  ? 'border-[#fcd34d] bg-[#0d1c2ecc] shadow-[0_0_0_2px_#fcd34d33]'
+                  ? 'border-brand-amber bg-brand-amber/10 shadow-[0_0_0_2px_color-mix(in_srgb,var(--brand-amber)_20%,transparent)]'
                   : isUsed
-                    ? 'border-[#1c2942] bg-[#080e1a80] opacity-60'
-                    : 'border-[#1c2942] bg-[#080e1ab8] hover:border-[#2f4160]'
+                    ? 'border-border-card bg-surface-header/50 opacity-60'
+                    : 'border-border-card bg-surface-card hover:border-border-control'
               }`}
             >
-              {/* Token badge */}
-              <div className="flex flex-col items-center gap-1 shrink-0">
-                <div
-                  className="flex w-9 h-9 items-center justify-center rounded-full"
-                  style={{
-                    background: `repeating-conic-gradient(${isSelected ? '#fcd34d' : hue} 0deg 18deg, #08111f 18deg 36deg)`,
-                    boxShadow: isSelected ? `0 0 0.75rem #fcd34d40` : 'none',
-                  }}
-                >
-                  <div
-                    className="flex w-6 h-6 items-center justify-center rounded-full bg-[#08111f] font-outfit text-2xs font-bold"
-                    style={{
-                      border: `1.5px solid ${isSelected ? '#fcd34d' : hue}`,
-                      color: isSelected ? '#fcd34d' : hue,
-                    }}
-                  >
-                    {c.tag}
-                  </div>
-                </div>
+              <div className="flex shrink-0 flex-col items-center gap-1">
+                <ChipToken
+                  tag={CHIP_TAGS[c.id]}
+                  hue={isSelected ? 'var(--brand-amber)' : hue}
+                  size={36}
+                  muted={isUsed && !isSelected}
+                />
                 <span
-                  className="font-outfit text-2xs"
-                  style={{ color: isSelected ? '#fcd34d' : isUsed ? '#5b667d' : '#8fa0b8' }}
+                  className={`font-outfit text-2xs ${
+                    isSelected ? 'text-brand-amber' : 'text-text-muted'
+                  }`}
                 >
                   {left}
                 </span>
               </div>
 
-              {/* Info */}
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span
                   className={`text-xs font-semibold leading-tight ${
-                    isSelected ? 'text-[#fcd34d]' : 'text-white'
+                    isSelected ? 'text-brand-amber' : 'text-text-primary'
                   }`}
                 >
                   {c.name}
                 </span>
-                <span className="text-2xs leading-snug text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
+                <span className="text-2xs leading-snug text-text-muted [text-wrap:pretty]">
                   {c.desc}
                 </span>
               </div>

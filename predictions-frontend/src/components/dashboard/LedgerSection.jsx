@@ -28,8 +28,8 @@ export default function LedgerSection({ ledger, footer, isLoading }) {
           >
             <span className="h-[26px] w-[2px] shrink-0 rounded-sm" style={{ background: entry.mark }} />
             <span className="flex min-w-0 flex-1 flex-col leading-[1.25]">
-              <span className="truncate text-sm text-[#dbe3ee]">{entry.match}</span>
-              <span className="font-outfit text-xs text-[#66748c]">{entry.detail}</span>
+              <span className="truncate text-sm text-text-secondary">{entry.match}</span>
+              <span className="font-outfit text-xs text-text-muted">{entry.detail}</span>
             </span>
             <span className="shrink-0 font-dmSerif text-xl" style={{ color: entry.mark }}>
               {entry.pts > 0 ? `+${entry.pts}` : entry.pts}
@@ -37,7 +37,7 @@ export default function LedgerSection({ ledger, footer, isLoading }) {
           </button>
         ))}
       </div>
-      {footer && <span className="font-outfit text-xs text-[#4f5b70]">{footer}</span>}
+      {footer && <span className="font-outfit text-xs text-text-disabled">{footer}</span>}
     </div>
   );
 }

@@ -2,38 +2,38 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Container from '../components/ui/Container';
-import { Check } from '@phosphor-icons/react';
 import authAPI from '../services/api/authAPI';
 import Navbar from '../components/landingPage/Navbar';
-import Footer from '../components/landingPage/Footer';
+import Button from '../components/ui/buttons/Button';
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
+
+const OTP_LENGTH = 6;
 
 export default function EmailVerification() {
-  const [otp, setOtp] = useState('');
+  const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(''));
   const [errors, setErrors] = useState({});
   const [isVerifying, setIsVerifying] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  
-  // Prevent multiple OTP sends
+
   const hasInitialized = useRef(false);
-  
+  const inputRefs = useRef([]);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  
-  // Determine flow type and email (only for regular signup now)
+  const reduceMotion = usePrefersReducedMotion();
+
   const flowType = searchParams.get('flow') || 'signup';
   const email = searchParams.get('email') || location.state?.email || '';
   const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const otp = digits.join('');
 
   useEffect(() => {
-    // Prevent multiple initializations
     if (hasInitialized.current) return;
     hasInitialized.current = true;
-    
-    // OAuth users don't need email verification - redirect them away
+
     if (flowType === 'oauth') {
-      console.log('OAuth user detected in email verification - redirecting to finish onboarding');
       navigate('/auth/finish-onboarding', { replace: true });
       return;
     }
@@ -45,77 +45,105 @@ export default function EmailVerification() {
     }
 
     setUserEmail(email);
-
-    // Auto-send OTP when component mounts (only once)
     sendOtp();
-  }, [email, navigate, flowType]); // Keep dependencies but use ref guard
+  }, [email, navigate, flowType]);
 
   const sendOtp = async () => {
     try {
-      console.log('📧 Sending OTP to:', email);
       setIsOtpSent(false);
-      
+
       await authAPI.sendVerifyOtp({
         email: email,
-        type: 'email_verification'
+        type: 'email_verification',
       });
-      
+
       setIsOtpSent(true);
-    } catch (error) {
+    } catch {
       setErrors({ submit: 'Failed to send verification code. Please try again.' });
     }
   };
 
-  const handleChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6); // Only allow 6 digits
-    console.log('EmailVerification - OTP input changed:', value);
-    setOtp(value);
-    
-    // Clear errors when user starts typing
-    if (errors.otp) {
-      setErrors(prev => ({ ...prev, otp: null }));
+  const applyDigits = (next) => {
+    setDigits(next);
+    if (errors.otp || errors.submit) {
+      setErrors({});
     }
+  };
+
+  const handleDigitChange = (index, value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (!cleaned) {
+      const next = [...digits];
+      next[index] = '';
+      applyDigits(next);
+      return;
+    }
+
+    if (cleaned.length > 1) {
+      const chars = cleaned.slice(0, OTP_LENGTH).split('');
+      const next = Array(OTP_LENGTH).fill('');
+      chars.forEach((char, i) => {
+        next[i] = char;
+      });
+      applyDigits(next);
+      inputRefs.current[Math.min(chars.length, OTP_LENGTH - 1)]?.focus();
+      return;
+    }
+
+    const next = [...digits];
+    next[index] = cleaned.slice(-1);
+    applyDigits(next);
+    if (index < OTP_LENGTH - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index, event) => {
+    if (event.key === 'Backspace' && !digits[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (event) => {
+    event.preventDefault();
+    const text = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    if (!text) return;
+    const next = Array(OTP_LENGTH).fill('');
+    text.split('').forEach((char, i) => {
+      next[i] = char;
+    });
+    applyDigits(next);
+    inputRefs.current[Math.min(text.length, OTP_LENGTH - 1)]?.focus();
   };
 
   const validateOtp = () => {
     const newErrors = {};
-    
+
     if (!otp) {
-      newErrors.otp = "Verification code is required";
+      newErrors.otp = 'Verification code is required';
     } else if (!/^\d{6}$/.test(otp)) {
-      newErrors.otp = "Please enter a valid 6-digit code";
+      newErrors.otp = 'Please enter a valid 6-digit code';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log('EmailVerification - Submit triggered');
-    console.log('EmailVerification - OTP state:', otp);
-    console.log('EmailVerification - OTP length:', otp.length);
-    console.log('EmailVerification - Email:', email);
-    
+
     if (!validateOtp()) return;
 
     setIsVerifying(true);
-    
+
     try {
-      const verifyData = {
+      await authAPI.verifyOtp({
         email: email,
         otp: otp,
-        type: 'email_verification'
-      };
-      
-      console.log('EmailVerification - Sending verify request with data:', verifyData);
-      
-      await authAPI.verifyOtp(verifyData);
-      
+        type: 'email_verification',
+      });
+
       setIsVerifying(false);
-      
-      // Navigate to appropriate destination
       navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error('EmailVerification - Verify error:', error);
@@ -125,151 +153,92 @@ export default function EmailVerification() {
   };
 
   const handleResendOtp = async () => {
+    setDigits(Array(OTP_LENGTH).fill(''));
+    setErrors((prev) => ({ ...prev, otp: null }));
     await sendOtp();
-    setOtp(''); // Clear current OTP input
-    setErrors({}); // Clear any errors
+    inputRefs.current[0]?.focus();
   };
 
   return (
     <>
       <Navbar />
-      <div className="relative overflow-hidden bg-primary-500 min-h-screen">
-        {/* Background elements */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
+      <div className="relative min-h-dvh overflow-hidden bg-surface-app">
+        <Container size="2" className="relative z-10 mt-20 pb-16 pt-32">
           <motion.div
-            className="absolute top-40 left-10 w-64 h-64 rounded-full bg-teal-500/20 blur-3xl"
-            animate={{
-              x: [0, 10, -10, 0],
-              y: [0, 15, 5, 0],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 15,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute bottom-40 right-10 w-72 h-72 rounded-full bg-indigo-500/20 blur-3xl"
-            animate={{
-              x: [0, -20, 20, 0],
-              y: [0, 20, -10, 0],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 20,
-              ease: "easeInOut",
-            }}
-          />
-        </div>
-
-        <Container size="2" className="relative z-10 pt-32 pb-16 mt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="bg-primary-500/60 backdrop-blur-md rounded-xl overflow-hidden shadow-lg border border-primary-400/20 p-8 max-w-md mx-auto"
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            animate={reduceMotion ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mx-auto max-w-md overflow-hidden rounded-lg border border-border-card bg-surface-card p-8 shadow-card"
           >
-            {/* Header */}
-            <div className="text-center mb-8">
-              <motion.div
-                className="w-16 h-16 mx-auto mb-4 bg-teal-600 rounded-full flex items-center justify-center"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Check className="w-8 h-8 text-white" />
-              </motion.div>
-              
-              <motion.h1
-                className="text-teal-100 text-2xl font-bold font-dmSerif mb-2"
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
+            <div className="mb-8 text-center">
+              <h1 className="mb-2 font-dmSerif text-2xl font-bold text-text-primary">
                 verify your email
-              </motion.h1>
-              
-              <motion.div
-                className="text-white/70 font-outfit text-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
+              </h1>
+              <div className="font-outfit text-sm text-text-muted">
                 <p className="mb-1">we've sent a 6-digit verification code to</p>
-                <p className="text-teal-300 font-medium">{userEmail}</p>
-              </motion.div>
+                <p className="font-medium text-brand-teal-deep">{userEmail}</p>
+              </div>
             </div>
 
-            {/* Error message */}
             {(errors.submit || errors.otp) && (
-              <div className="bg-red-900/30 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg mb-6">
+              <div className="mb-6 rounded-lg border border-state-error/30 bg-state-error/10 px-4 py-3 font-outfit text-sm text-state-error">
                 {errors.submit || errors.otp}
               </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label
-                  htmlFor="otp"
-                  className="block text-teal-200 text-sm font-medium mb-2 font-outfit"
-                >
+                <label className="mb-2 block font-outfit text-sm font-medium text-text-secondary">
                   verification code
                 </label>
-                <div
-                  className={`bg-primary-600/50 rounded-md border ${
-                    errors.otp ? "border-red-500" : "border-primary-400/30"
-                  } focus-within:border-teal-500 transition-colors`}
-                >
-                  <input
-                    id="otp"
-                    name="otp"
-                    type="text"
-                    value={otp}
-                    onChange={handleChange}
-                    placeholder="enter 6-digit code"
-                    maxLength="6"
-                    className="w-full px-3 py-3 bg-transparent text-white font-outfit placeholder-white/40 outline-none text-center text-lg tracking-wider"
-                    autoComplete="one-time-code"
-                  />
+                <div className="flex justify-between gap-2">
+                  {digits.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {
+                        inputRefs.current[index] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                      pattern="[0-9]*"
+                      maxLength={index === 0 ? OTP_LENGTH : 1}
+                      value={digit}
+                      onChange={(e) => handleDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      aria-label={`Digit ${index + 1} of ${OTP_LENGTH}`}
+                      className={`h-12 w-10 rounded-md border bg-surface-elevated text-center font-dmSerif text-xl text-text-primary outline-none transition-colors sm:h-14 sm:w-12 sm:text-2xl ${
+                        errors.otp
+                          ? 'border-state-error focus:border-state-error'
+                          : 'border-border-control focus:border-brand-teal'
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
 
-              {/* Submit button */}
-              <motion.div 
-                whileHover={{ scale: 1.02 }} 
-                whileTap={{ scale: 0.98 }}
-                className="w-full"
-              >
-                <button
-                  type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-outfit"
-                  disabled={isVerifying || !otp}
-                >
-                  {isVerifying ? "verifying..." : "verify email"}
-                </button>
-              </motion.div>
+              <Button type="submit" loading={isVerifying} disabled={!otp} className="w-full">
+                {isVerifying ? 'verifying...' : 'verify email'}
+              </Button>
 
-              {/* Resend link */}
               <div className="text-center">
-                <p className="text-white/70 font-outfit text-sm mb-2">
+                <p className="mb-2 font-outfit text-sm text-text-muted">
                   didn't receive the code?
                 </p>
                 <button
                   type="button"
                   onClick={handleResendOtp}
-                  className="text-teal-300 hover:text-teal-200 font-outfit text-sm font-medium underline disabled:opacity-50"
+                  className="font-outfit text-sm font-medium text-brand-teal-deep underline disabled:opacity-50"
                   disabled={!isOtpSent || isVerifying}
                 >
                   resend code
                 </button>
               </div>
             </form>
-
           </motion.div>
         </Container>
       </div>
-      <Footer />
     </>
   );
 }

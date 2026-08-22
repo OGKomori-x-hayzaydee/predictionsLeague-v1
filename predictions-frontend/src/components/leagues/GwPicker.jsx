@@ -54,7 +54,7 @@ export default function GwPicker({ options, value, onChange, currentGameweek, se
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="flex min-h-10 items-center gap-2.5 rounded-full border border-border-control bg-surface-card-4 px-3.5 py-2 font-outfit text-caption tracking-wide text-brand-teal"
+        className="flex min-h-11 items-center gap-2.5 rounded-full border border-border-control bg-surface-card-4 px-3.5 py-2 font-outfit text-caption tracking-wide text-brand-teal"
       >
         <span className="size-1.5 shrink-0 rounded-full bg-brand-teal" />
         <span>{CURRENT_SEASON} · GW{value}</span>
@@ -117,8 +117,8 @@ export default function GwPicker({ options, value, onChange, currentGameweek, se
                     onClick={() => canPick && pick(gw)}
                     className="rounded-6 py-1.5 text-center font-outfit text-caption"
                     style={{
-                      background: isSel ? 'var(--brand-teal-deep)' : isLive ? '#123240' : 'transparent',
-                      color: isSel ? '#04211d' : isLive ? '#8fd6cc' : 'var(--text-muted-5)',
+                      background: isSel ? 'var(--brand-teal-deep)' : isLive ? 'var(--surface-nav-active)' : 'transparent',
+                      color: isSel ? 'var(--surface-app)' : isLive ? 'var(--brand-teal)' : 'var(--text-muted)',
                     }}
                   >
                     {gw}

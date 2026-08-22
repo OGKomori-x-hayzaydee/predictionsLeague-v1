@@ -9,7 +9,7 @@ export default function StandingsTable({ standings }) {
           className={`flex items-center gap-3 px-4 py-2.5 ${m.isCurrentUser ? 'bg-brand-teal/5' : ''}`}
         >
           <span className="w-6 font-outfit text-xs text-text-muted-2">{m.position}</span>
-          <Avatar name={m.displayName || m.username} src={m.avatar} size={26} animateFallback={false} />
+          <Avatar name={m.displayName || m.username} src={m.avatar} size={26} />
           <span className={`flex-1 truncate text-sm ${m.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>
             {m.displayName || m.username}
             {m.isAdmin && <span className="ml-1 text-text-muted-3">· admin</span>}

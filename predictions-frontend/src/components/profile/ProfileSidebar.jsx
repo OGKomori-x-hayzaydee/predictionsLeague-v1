@@ -9,7 +9,7 @@ import ProfileSidebarContent from './ProfileSidebarContent';
  */
 export default function ProfileSidebar(props) {
   return (
-    <div className="hidden min-h-0 flex-col gap-[18px] overflow-y-auto border-l border-border-hairline bg-surface-bar px-5 py-[22px] md:flex">
+    <div className="hidden min-h-0 flex-col gap-[18px] overflow-y-auto border-l border-border-hairline bg-surface-bar px-5 py-[22px] lg:flex">
       <ProfileSidebarContent {...props} />
     </div>
   );

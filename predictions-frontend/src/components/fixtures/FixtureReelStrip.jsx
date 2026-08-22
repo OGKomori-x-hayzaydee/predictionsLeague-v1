@@ -13,19 +13,19 @@ function formatDay(dateStr) {
 function toneClass(tone, isSelected) {
   switch (tone) {
     case SCORE_TONE.exact:
-      return 'text-[#5eead4]';
+      return 'text-brand-teal';
     case SCORE_TONE.outcome:
-      return 'text-[#818cf8]';
+      return 'text-brand-indigo';
     case SCORE_TONE.miss:
-      return 'text-[#fbbf24]';
+      return 'text-brand-amber';
     case SCORE_TONE.live:
-      return 'text-[#fbbf24]';
+      return 'text-brand-amber';
     case SCORE_TONE.filed:
-      return 'text-[#5eead4]';
+      return 'text-brand-teal';
     case SCORE_TONE.editing:
-      return 'text-[#fcd34d]';
+      return 'text-brand-amber';
     default:
-      return isSelected ? 'text-[#fcd34d]' : 'text-[#5b667d]';
+      return isSelected ? 'text-brand-amber' : 'text-text-muted';
   }
 }
 
@@ -33,15 +33,15 @@ function markClass(tone, isSelected) {
   switch (tone) {
     case SCORE_TONE.exact:
     case SCORE_TONE.filed:
-      return 'bg-[#14b8a6]';
+      return 'bg-brand-teal-mid';
     case SCORE_TONE.outcome:
-      return 'bg-[#6366f1]';
+      return 'bg-brand-indigo-mid';
     case SCORE_TONE.miss:
     case SCORE_TONE.live:
     case SCORE_TONE.editing:
-      return 'bg-[#fcd34d]';
+      return 'bg-brand-amber';
     default:
-      return isSelected ? 'bg-[#fcd34d]' : 'bg-[#1e2a3f]';
+      return isSelected ? 'bg-brand-amber' : 'bg-border-base';
   }
 }
 
@@ -64,28 +64,27 @@ export default function FixtureReelStrip({ stations, locked = false }) {
   const totalPoints = stations.reduce((sum, s) => sum + (s.predicted ? (s.ceiling || 15) : 0), 0);
 
   return (
-    <div className="flex flex-col gap-1.5 w-full max-w-[76rem] mx-auto">
+    <div className="mx-auto flex w-full max-w-[76rem] flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="font-outfit text-2xs tracking-widest text-[#5b667d]">THE REEL</span>
-        <span className="font-outfit text-2xs tracking-widest text-[#5b667d]">
+        <span className="font-outfit text-2xs tracking-widest text-text-muted">THE REEL</span>
+        <span className="font-outfit text-2xs tracking-widest text-text-muted">
           {totalPoints > 0 ? `${totalPoints} pts staked across ${filedCount} filed` : `${filedCount} of ${stations.length} filed`}
         </span>
       </div>
 
-      <div className="flex items-stretch gap-2">
+      <div className="flex items-stretch gap-2 overflow-x-auto">
         {stations.map((s) => {
           const isSelected = s.isSelected;
           const isPredicted = s.predicted;
           const label = s.scoreLabel || (isSelected ? 'editing' : 'open');
           const scoreColor = toneClass(s.scoreTone, isSelected);
           const markColor = markClass(s.scoreTone, isSelected);
-          const dayColor = isSelected ? '#5eead4' : '#7f93ad';
-          const bgClass = isSelected ? 'bg-[#0d1c2ecc]' : isPredicted ? 'bg-[#0b1424b8]' : 'bg-[#080e1a80]';
+          const bgClass = isSelected ? 'bg-surface-card' : isPredicted ? 'bg-surface-card/70' : 'bg-surface-header/50';
           const borderClass = isSelected
-            ? 'border-[#14b8a699] shadow-[0_0_0_1px_#14b8a633]'
+            ? 'border-brand-teal-mid'
             : isPredicted
-              ? 'border-[#1e3450]'
-              : 'border-[#16203a]';
+              ? 'border-border-base'
+              : 'border-border-card';
 
           return (
             <button
@@ -95,11 +94,11 @@ export default function FixtureReelStrip({ stations, locked = false }) {
               disabled={locked}
               aria-disabled={locked}
               title={locked ? 'Finish filing this prediction before switching fixtures' : undefined}
-              className={`flex min-w-0 flex-1 flex-col gap-1 overflow-hidden rounded-lg border p-2 font-outfit transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
-                locked ? '' : 'cursor-pointer hover:border-[#2b4162]'
+              className={`flex min-w-[7.5rem] shrink-0 flex-col gap-1 overflow-hidden rounded-lg border p-2 font-outfit transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                locked ? '' : 'cursor-pointer hover:border-border-control'
               } ${bgClass} ${borderClass}`}
             >
-              <span className="font-outfit text-2xs tracking-wider" style={{ color: dayColor }}>
+              <span className={`font-outfit text-2xs tracking-wider ${isSelected ? 'text-brand-teal' : 'text-text-muted'}`}>
                 {formatDay(s.date)}
               </span>
               <div className="flex items-center justify-center gap-1.5 py-0.5">

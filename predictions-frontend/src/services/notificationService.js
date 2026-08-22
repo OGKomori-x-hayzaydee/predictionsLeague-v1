@@ -427,7 +427,7 @@ class NotificationManager {
       border: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'};
       background: ${isDark ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)'};
       color: ${isDark ? '#f8fafc' : '#0f172a'};
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Outfit', system-ui, sans-serif;
       transform: translateX(100%);
       opacity: 0;
       transition: all 0.3s ease-out;

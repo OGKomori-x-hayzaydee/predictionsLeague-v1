@@ -1,135 +1,55 @@
-import React from "react";
-import Container from "../ui/Container";
-import { motion } from "framer-motion";
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Container from '../ui/Container';
+import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
-
-const stagger = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const steps = [
-  {
-    number: "01",
-    title: "Sign Up",
-    description:
-      "Create your free account in seconds. Set up your profile with your favourite team and start making predictions right away.",
-  },
-  {
-    number: "02",
-    title: "Make Predictions",
-    description:
-      "Predict scores, goalscorers, and match outcomes for Big Six fixtures. Deploy strategic chips to maximise your points.",
-  },
-  {
-    number: "03",
-    title: "Climb the Ranks",
-    description:
-      "Compete in public and private leagues. Track your progress on the leaderboard and earn end-of-season awards.",
-  },
+const STEPS = [
+  { n: '01', title: 'Open the slip', body: 'Big Six fixtures land on the desk as filing slips — not a fixture dump.' },
+  { n: '02', title: 'Call the line', body: 'Home, away, scorers. The stamp waits until you file.' },
+  { n: '03', title: 'Week locks', body: 'Chips sit on the slip. Deadlines close 45 minutes before kickoff.' },
 ];
 
 export default function HowItWorks() {
+  const reduce = usePrefersReducedMotion();
+
   return (
-    <section className="py-20 md:py-28 lg:py-32 bg-white dark:bg-primary-800 transition-colors duration-300">
+    <section className="bg-surface-app py-16 md:py-24">
       <Container size="4" className="px-6">
-        {/* Section header */}
-        <motion.div
-          className="text-center mb-20"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={fadeUp}
-        >
-          <p className="font-outfit text-xs uppercase tracking-[0.2em] text-teal-light dark:text-teal-dark mb-4">
-            Getting Started
-          </p>
-          <h2 className="font-dmSerif text-3xl md:text-4xl lg:text-5xl text-light-text dark:text-white mb-4">
-            Three simple steps
-          </h2>
-          <p className="font-outfit text-base md:text-lg text-light-text-secondary dark:text-slate-300 max-w-2xl mx-auto">
-            Getting started with predictionsLeague is easy. Begin your
-            prediction journey in minutes.
-          </p>
-        </motion.div>
+        <p className="font-outfit text-xs uppercase tracking-[0.14em] text-brand-teal">The week</p>
+        <h2 className="mt-2 font-dmSerif text-3xl text-text-primary md:text-4xl">File, then stamp</h2>
+        <p className="mt-3 max-w-xl text-text-muted">
+          Same motion as the foil above — pick a fixture, write the scoreline, lock the week.
+        </p>
 
-        {/* Steps with timeline */}
-        <motion.div
-          className="relative"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={stagger}
-        >
-          {/* Desktop connecting line */}
+        <div className="relative mt-10">
           <motion.div
-            className="hidden md:block absolute top-12 left-[16.67%] right-[16.67%] h-[2px]"
-            initial={{ scaleX: 0 }}
+            className="absolute top-4 right-[12%] left-[12%] hidden h-px bg-brand-teal/35 md:block"
+            initial={reduce ? false : { scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
-            transition={{
-              duration: 1.2,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              delay: 0.5,
-            }}
-            viewport={{ once: true }}
-            style={{ transformOrigin: "left" }}
-          >
-            <div className="w-full h-full bg-gradient-to-r from-teal-light via-indigo-light to-emerald-light dark:from-teal-dark dark:via-indigo-dark dark:to-emerald-dark opacity-30" />
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                className="relative text-center"
-                variants={fadeUp}
-              >
-                {/* Mobile connecting line */}
-                {index < steps.length - 1 && (
-                  <div className="md:hidden absolute left-1/2 top-24 w-[2px] h-12 -translate-x-1/2">
-                    <div className="w-full h-full bg-gradient-to-b from-teal-light/30 to-indigo-light/30 dark:from-teal-dark/30 dark:to-indigo-dark/30" />
-                  </div>
-                )}
-
-                {/* Number circle */}
-                <motion.div
-                  className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-teal-light to-indigo-light dark:from-teal-dark dark:to-indigo-dark flex items-center justify-center mb-8 relative z-10"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <span className="text-white dark:text-primary-800 text-3xl font-bold font-dmSerif">
-                    {step.number}
-                  </span>
-                </motion.div>
-
-                {/* Content */}
-                <h3 className="font-dmSerif text-xl md:text-2xl text-light-text dark:text-white mb-3">
-                  {step.title}
-                </h3>
-                <p className="font-outfit text-base text-light-text-secondary dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
-                  {step.description}
-                </p>
-              </motion.div>
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ transformOrigin: 'left' }}
+          />
+          <ol className="grid gap-8 md:grid-cols-3 md:gap-6">
+            {STEPS.map((step) => (
+              <li key={step.n} className="relative">
+                <span className="font-dmSerif text-3xl text-brand-teal">{step.n}</span>
+                <h3 className="mt-2 font-dmSerif text-xl text-text-primary">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-text-muted">{step.body}</p>
+              </li>
             ))}
-          </div>
-        </motion.div>
+          </ol>
+        </div>
+
+        <p className="mt-10 font-outfit text-sm text-text-muted">
+          Want the numbers?{' '}
+          <Link
+            to="/howToPlay#scoring"
+            className="text-brand-teal underline decoration-brand-teal/40 underline-offset-4 hover:text-brand-teal-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal"
+          >
+            Scoring ledger
+          </Link>
+        </p>
       </Container>
     </section>
   );

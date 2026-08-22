@@ -19,18 +19,18 @@ export default function SettingsRow({
   onClick,
   size = 'md',
 }) {
-  const clickable = kind === 'value' && !!onClick;
+  const clickable = (kind === 'value' && !!onClick) || kind === 'toggle';
   const Wrapper = clickable ? 'button' : 'div';
   const large = size === 'lg';
 
   return (
     <Wrapper
-      onClick={onClick}
+      onClick={kind === 'toggle' ? () => onToggle?.(!checked) : onClick}
       type={clickable ? 'button' : undefined}
-      className={`flex w-full items-center text-left ${
+      className={`flex w-full items-center text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal ${
         large
-          ? 'min-h-[4.75rem] gap-4 rounded-[16px] border border-border-base bg-surface-card-3 px-5 py-[18px] md:min-h-0 md:gap-5 md:rounded-14 md:bg-surface-header/60 md:px-6 md:py-5'
-          : 'min-h-16 gap-3 rounded-14 border border-border-base bg-surface-card-3 px-[13px] py-[13px] md:min-h-0 md:gap-[14px] md:rounded-12 md:bg-surface-header/60 md:px-[17px] md:py-[15px]'
+          ? 'min-h-11 gap-4 rounded-md border border-border-base bg-surface-card-3 px-5 py-[18px] md:gap-5 md:bg-surface-header/60 md:px-6 md:py-5'
+          : 'min-h-11 gap-3 rounded-md border border-border-base bg-surface-card-3 px-[13px] py-[13px] md:gap-[14px] md:bg-surface-header/60 md:px-[17px] md:py-[15px]'
       } ${clickable ? 'cursor-pointer transition-colors hover:border-border-control' : ''}`}
     >
       <span className={`flex min-w-0 flex-1 flex-col leading-[1.45] ${large ? 'gap-1 md:gap-0.5' : 'gap-[3px] md:gap-0'}`}>
@@ -55,10 +55,6 @@ export default function SettingsRow({
           role="switch"
           aria-checked={checked}
           tabIndex={0}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle?.(!checked);
-          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
@@ -66,15 +62,15 @@ export default function SettingsRow({
               onToggle?.(!checked);
             }
           }}
-          className={`flex shrink-0 cursor-pointer items-center rounded-full border p-0.5 transition-colors ${
-            large ? 'h-8 w-[52px] md:h-7 md:w-12' : 'h-7 w-[46px] md:h-6 md:w-11'
+          className={`flex shrink-0 cursor-pointer items-center rounded-full border p-0.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal ${
+            large ? 'h-11 w-14' : 'h-11 w-12'
           } ${
             checked ? 'justify-end border-brand-teal-mid bg-brand-teal-deep' : 'justify-start border-border-dropdown bg-surface-card-4'
           }`}
         >
           <span
             className={`rounded-full transition-colors ${
-              large ? 'h-6 w-6 md:h-5 md:w-5' : 'h-[22px] w-[22px] md:h-[18px] md:w-[18px]'
+              large ? 'h-6 w-6' : 'h-[22px] w-[22px]'
             } ${checked ? 'bg-brand-teal-tint' : 'bg-border-control'}`}
           />
         </span>

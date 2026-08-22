@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import ChipToken from '../ui/ChipToken';
 import KickerLabel from '../ui/KickerLabel';
-import LoadingState from '../common/LoadingState';
+import PageSkeleton from '../ui/PageSkeleton';
 import { computeChipAlmanac } from '../../utils/profileStats';
 import { CHIP_CONFIG } from '../../utils/chipManager';
 import { hasSeasonCap } from '../../utils/chipStatus';
@@ -152,7 +152,7 @@ function ExplainCard({ chip, focused }) {
  * blurbs and the numbered rules are the prototype's copy. Clicking a
  * debrief row focuses the matching explain card (`chFocus`).
  */
-export default function AlmanacTab({ predictions, previewMode = false, onBackToPlan, loading = false }) {
+export default function AlmanacTab({ predictions, previewMode = false, onBackToPlan, loading = false, onPreview }) {
   const [focusId, setFocusId] = useState('doubleDown');
 
   const rows = useMemo(() => {
@@ -188,17 +188,22 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
           : '';
   const habits = buildHabits(rows, auditTotal, totalUses);
 
-  if (loading) return <LoadingState message="Loading chip history..." />;
+  if (loading) return <PageSkeleton rail />;
 
   return (
     <>
       {/* Desktop — Spine.dc.html 1289-1356 */}
-      <div className="hidden min-h-0 md:grid md:h-full md:grid-cols-[1fr_340px]">
+      <div className="hidden min-h-0 lg:grid lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(16rem,var(--rail-max))]">
         <div className="flex min-h-0 min-w-0 flex-col gap-[15px] overflow-y-auto px-[26px] py-[22px]">
           <div className="flex items-end justify-between gap-5">
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <KickerLabel className="text-brand-teal">The debrief · chips already spent</KickerLabel>
               <h2 className="font-dmSerif text-[28px] leading-[1.14] text-text-primary [text-wrap:pretty]">{leadLine}</h2>
+              {used.length === 0 && onPreview && !previewMode && (
+                <button type="button" onClick={onPreview} className="mt-2 text-left font-outfit text-2xs tracking-wide text-text-muted underline decoration-dotted hover:text-brand-teal">
+                  Preview with example data →
+                </button>
+              )}
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
               <KickerLabel>Net, season to date</KickerLabel>
@@ -266,7 +271,7 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
       </div>
 
       {/* Mobile — Spine.dc.html 2979-3032 */}
-      <div className="flex flex-col gap-[13px] px-4 pb-6 pt-4 md:hidden">
+      <div className="flex flex-col gap-[13px] px-4 pb-6 pt-4 lg:hidden">
         <div className="flex items-end gap-3 rounded-14 border border-border-card bg-surface-card-2 px-[15px] py-3.5">
           <span className="flex-1 font-dmSerif text-lg leading-snug text-text-primary [text-wrap:pretty]">{leadLine}</span>
           <span className={`font-dmSerif text-2xl leading-none ${auditTotal >= 0 ? 'text-brand-teal' : 'text-state-error'}`}>

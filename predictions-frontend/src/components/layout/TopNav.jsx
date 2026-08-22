@@ -5,14 +5,10 @@ import { NAV_ITEMS } from './navItems';
 import { useAuthState } from '../../hooks/useAuth';
 import useDashboardData from '../../hooks/useDashboardData';
 import Avatar from '../ui/Avatar';
+import IconButton from '../ui/buttons/IconButton';
 import logo from '../../assets/logo.png';
 import { readProfileOverrides } from '../../utils/profileOverrides';
 
-/**
- * Desktop app masthead. 64px tall normally; on Fixtures it auto-hides to
- * 52px @ 42% opacity until hovered (barWake/barSleep). Sets --shell-nav-h
- * so page bodies lock to the remaining viewport.
- */
 export default function TopNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -30,27 +26,47 @@ export default function TopNav() {
   const displayName = overrides.username || username || user?.firstName || 'You';
 
   useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)');
+    const apply = () => {
+      if (mq.matches && isFixturesPage) setWake(true);
+    };
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, [isFixturesPage]);
+
+  useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--shell-nav-h', dim ? '52px' : '4rem');
+    root.style.setProperty('--shell-nav-h', dim ? '3.25rem' : '4rem');
     return () => root.style.removeProperty('--shell-nav-h');
   }, [dim]);
 
   return (
     <header
       onMouseEnter={() => setWake(true)}
-      onMouseLeave={() => setWake(false)}
-      className={`sticky top-0 z-30 hidden border-b border-border-hairline bg-surface-header transition-[height,opacity] duration-300 ease-in-out md:block ${
-        dim ? 'h-[52px] opacity-[0.42]' : 'h-16 opacity-100'
+      onMouseLeave={() => {
+        if (!window.matchMedia('(pointer: coarse)').matches) setWake(false);
+      }}
+      onFocusCapture={() => setWake(true)}
+      onBlurCapture={(e) => {
+        if (window.matchMedia('(pointer: coarse)').matches) return;
+        if (!e.currentTarget.contains(e.relatedTarget)) setWake(false);
+      }}
+      className={`sticky top-0 z-30 hidden border-b border-border-hairline bg-surface-header transition-[height,opacity] duration-300 ease-in-out lg:block ${
+        dim
+          ? 'h-[3.25rem] opacity-[0.42] hover:h-16 hover:opacity-100 focus-within:h-16 focus-within:opacity-100 [@media(pointer:coarse)]:h-16 [@media(pointer:coarse)]:opacity-100'
+          : 'h-16 opacity-100'
       }`}
     >
-      <div className="flex h-full items-center gap-[26px] px-[22px]">
+      <div className="flex h-full items-center gap-6 px-6">
         <button
+          type="button"
           onClick={() => navigate('/dashboard')}
-          className="flex shrink-0 items-center gap-[9px]"
+          className="flex shrink-0 items-center gap-2"
           aria-label="predictionsLeague home"
         >
           <img src={logo} alt="" className="h-7" />
-          <span className="font-dmSerif text-lg text-brand-teal-pale">predictionsLeague</span>
+          <span className="font-dmSerif text-lg text-brand-teal">predictionsLeague</span>
         </button>
 
         <nav className="flex min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto">
@@ -59,10 +75,10 @@ export default function TopNav() {
               key={id}
               to={path}
               className={({ isActive }) =>
-                `whitespace-nowrap rounded-9 px-4 py-2 font-outfit text-base no-underline transition-colors ${
+                `whitespace-nowrap rounded-md px-4 py-2 font-outfit text-base no-underline transition-colors ${
                   isActive
                     ? 'bg-surface-nav-active text-brand-teal hover:text-brand-teal'
-                    : 'text-white hover:text-brand-teal-pale'
+                    : 'text-text-muted hover:text-brand-teal'
                 }`
               }
             >
@@ -71,24 +87,22 @@ export default function TopNav() {
           ))}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-[18px]">
-          <button
+        <div className="flex shrink-0 items-center gap-2">
+          <IconButton
+            label="Settings"
             onClick={() => navigate('/settings')}
-            aria-label="Settings"
-            className={`flex size-9 shrink-0 items-center justify-center rounded-9 border bg-transparent transition-colors ${
-              isSettingsPage
-                ? 'border-brand-teal-mid/40 text-brand-teal'
-                : 'border-white/35 text-white hover:border-brand-teal-mid/40 hover:text-brand-teal'
-            }`}
+            active={isSettingsPage}
+            className="border border-border-control"
           >
             <Gear size={22} weight="bold" />
-          </button>
+          </IconButton>
 
-          <NavLink to="/profile" aria-label="Profile">
+          <NavLink to="/profile" aria-label="Profile" className="flex size-11 items-center justify-center">
             <Avatar
               name={displayName}
               src={avatarSrc}
               size={36}
+              className={isProfilePage ? 'ring-[1.5px] ring-brand-teal' : ''}
             />
           </NavLink>
         </div>

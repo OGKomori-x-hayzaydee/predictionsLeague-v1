@@ -14,7 +14,7 @@ const CHIP_TAGS = {
  * CAREER"). The prototype's right rail also carries a Leagues list, a
  * Honours mini-widget and "Career Markers" timeline, but those all need
  * data this app doesn't have yet (league standings history, an honours
- * system, freeform milestone events) — see HonoursTab's deferral note.
+ * system, freeform milestone events).
  * Fabricating them would violate the "no fake history" rule, so this rail
  * only ships the one section that's genuinely computable from the user's
  * real prediction history (utils/profileStats.js#computeChipAlmanac).

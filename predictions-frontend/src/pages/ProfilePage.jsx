@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import SlotBar from '../components/ui/SlotBar';
+import SegmentedControl from '../components/ui/SegmentedControl';
 import StatTile from '../components/ui/StatTile';
 import Avatar from '../components/ui/Avatar';
 import RecordTab from '../components/profile/RecordTab';
 import TendencyTab from '../components/profile/TendencyTab';
-import HonoursTab from '../components/profile/HonoursTab';
 import ProfileSidebar from '../components/profile/ProfileSidebar';
 import ProfileSidebarContent from '../components/profile/ProfileSidebarContent';
-import LoadingState from '../components/common/LoadingState';
+import PageSkeleton from '../components/ui/PageSkeleton';
 import userAPI from '../services/api/userAPI';
 import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { computeProfileStats, computeChipAlmanac } from '../utils/profileStats';
@@ -17,7 +17,6 @@ import { mergeProfile } from '../utils/profileOverrides';
 const TABS = [
   { id: 'record', label: 'Record' },
   { id: 'tendency', label: 'Tendency' },
-  { id: 'honours', label: 'Honours' },
 ];
 
 export default function ProfilePage() {
@@ -45,12 +44,7 @@ export default function ProfilePage() {
   const chipAlmanac = useMemo(() => computeChipAlmanac(predictions), [predictions]);
 
   if (loading) {
-    return (
-      <div className="animate-rise-in">
-        <SlotBar kicker="Profile" />
-        <LoadingState message="Loading profile..." />
-      </div>
-    );
+    return <PageSkeleton rail />;
   }
 
   const favouriteTeam = profile?.favouriteTeam ? normalizeTeamName(profile.favouriteTeam) : null;
@@ -78,7 +72,11 @@ export default function ProfilePage() {
         right={`${stats.totalCompleted} predictions settled`}
       />
 
-      <div className="md:grid md:min-h-0 md:grid-cols-[1fr_330px] md:items-stretch">
+      <div className="px-4 pt-4 lg:hidden">
+        <SegmentedControl grow value={activeTab} onChange={setActiveTab} options={TABS} />
+      </div>
+
+      <div className="lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,var(--rail-max))] lg:items-stretch">
         <div className="min-w-0 px-4 py-5 md:px-[26px] md:py-[22px]">
           <div className="flex items-start gap-5">
             <Avatar name={profile?.username || 'You'} src={profile?.profilePicture} size={64} />
@@ -95,7 +93,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-[18px] grid grid-cols-2 gap-[9px] sm:grid-cols-5">
+          <div className="mt-[18px] grid grid-cols-2 gap-[9px] md:grid-cols-3 lg:grid-cols-5">
             <StatTile label="Season points" value={stats.seasonPoints} />
             <StatTile label="Exact calls" value={stats.exactCalls} note={`${stats.exactCallsPct}% of total`} />
             <StatTile label="Avg / week" value={stats.avgPerWeek} />
@@ -115,10 +113,9 @@ export default function ProfilePage() {
           <div className="mt-[18px]">
             {activeTab === 'record' && <RecordTab stats={stats} predictions={predictions} />}
             {activeTab === 'tendency' && <TendencyTab predictions={predictions} />}
-            {activeTab === 'honours' && <HonoursTab />}
           </div>
 
-          <div className="mt-4 rounded-md border border-border-card bg-surface-card p-4 md:hidden">
+          <div className="mt-4 rounded-md border border-border-card bg-surface-card p-4 lg:hidden">
             <ProfileSidebarContent chipAlmanac={chipAlmanac} />
           </div>
         </div>

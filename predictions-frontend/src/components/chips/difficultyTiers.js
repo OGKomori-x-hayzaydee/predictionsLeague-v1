@@ -33,12 +33,9 @@ export const BIG_SIX = ['Arsenal', 'Chelsea', 'Liverpool', 'Man City', 'Man Unit
 
 const TIER_ORDER = ['soft', 'ok', 'firm', 'hard'];
 
-// Literal hex from spec §1.8 — "ok" has no existing semantic token (a
-// one-off lime accent, same category as the spec's other one-off colors),
-// the rest map onto tokens already ported to index.css.
 export const TIER_STYLE = {
   soft: { color: 'var(--brand-teal)', label: 'SOFT' },
-  ok: { color: '#a3e635', label: 'OK' },
+  ok: { color: 'var(--brand-teal-pale)', label: 'OK' },
   firm: { color: 'var(--brand-amber)', label: 'FIRM' },
   hard: { color: 'var(--state-error)', label: 'HARD' },
 };

@@ -3,9 +3,7 @@
  * etc) — the v2 prototype's recurring recipe: a segmented conic-gradient
  * rim in the chip's hue around a solid inner circle whose border/text is
  * also the hue color (Spine.dc.html lines 1103-1104, 1120, 1230 etc, at
- * sizes from 21px to 56px). New shared primitive rather than reusing
- * ui/TokenBadge (whose inner-circle border is a fixed neutral token, not
- * hue-colored) — see chips screen scope notes.
+ * sizes from 21px to 56px). Shared primitive for chip grids and rails.
  */
 export default function ChipToken({ tag, hue = 'var(--brand-teal)', size = 40, muted = false, dashed = false, className = '', style }) {
   const inner = Math.round(size * 0.72);

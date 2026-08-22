@@ -29,13 +29,16 @@ import { stampGameweekChipOnPending } from '../utils/stampGameweekChip';
 import { showToast } from '../services/notificationService';
 import {
   FILE_PHASES,
-  RAIL_WIDTH_PX,
   CONTENT_LAYOUT_TRANSITION,
   AI_PANEL_VARIANTS,
-  AI_PANEL_DELAY_MS,
   getBackdropTarget,
   BACKDROP_TRANSITION,
 } from '../components/fixtures/filingChoreography';
+import Button from '../components/ui/buttons/Button';
+import IconButton from '../components/ui/buttons/IconButton';
+import PageError from '../components/ui/PageError';
+import EmptyState from '../components/ui/EmptyState';
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion';
 import { buildResultView, recordSearchPath } from '../utils/matchResult';
 
 function formatKickoff(dateStr) {
@@ -48,6 +51,29 @@ function formatKickoff(dateStr) {
 }
 
 const EMPTY_DRAFT = { homeScore: 0, awayScore: 0, homeScorers: [], awayScorers: [], chips: [] };
+
+const STAMP_TONES = {
+  teal: {
+    bg: 'color-mix(in srgb, var(--brand-teal) 15%, transparent)',
+    border: 'color-mix(in srgb, var(--brand-teal-mid) 40%, transparent)',
+    fg: 'var(--brand-teal)',
+  },
+  indigo: {
+    bg: 'color-mix(in srgb, var(--brand-indigo) 15%, transparent)',
+    border: 'color-mix(in srgb, var(--brand-indigo-mid) 40%, transparent)',
+    fg: 'var(--brand-indigo)',
+  },
+  muted: {
+    bg: 'color-mix(in srgb, var(--text-muted) 15%, transparent)',
+    border: 'var(--border-card)',
+    fg: 'var(--text-muted)',
+  },
+  amber: {
+    bg: 'color-mix(in srgb, var(--brand-amber) 15%, transparent)',
+    border: 'color-mix(in srgb, var(--brand-amber) 40%, transparent)',
+    fg: 'var(--brand-amber)',
+  },
+};
 
 function chipsFromDraft(draft, gwChipIds = []) {
   return mergeMatchAndGameweekChips(draft?.chips, gwChipIds);
@@ -123,10 +149,18 @@ export default function FixturesPage() {
   const paneRef = useRef(null);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(true);
+  const [aiOpen, setAiOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const { phase: filePhase, isSlow, isFiling, file, reset: resetFiling } = useFilingSequence();
+  const reduceMotion = usePrefersReducedMotion();
+  const layoutTransition = reduceMotion || isFiling ? { duration: 0 } : CONTENT_LAYOUT_TRANSITION;
+  const backdropTransition = reduceMotion ? { duration: 0 } : BACKDROP_TRANSITION;
+  const aiTransition = {
+    duration: reduceMotion ? 0 : 0.5,
+    ease: 'easeOut',
+    delay: 0,
+  };
   const [optimisticFiled, setOptimisticFiled] = useState(null);
   const [filedMatchIds, setFiledMatchIds] = useState(() => new Set());
   const [optimisticGwChips, setOptimisticGwChips] = useState([]);
@@ -329,34 +363,39 @@ export default function FixturesPage() {
   const statusPill = (() => {
     if (!selectedFixture) return undefined;
     if (resultView?.live) {
-      return { label: resultView.stamp.label || 'LIVE', bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' };
+      return { label: resultView.stamp.label || 'LIVE', ...STAMP_TONES.amber };
     }
     if (resultView?.finished) {
       const label = resultView.stamp.label || 'SCORED';
       if (resultView.verdict?.verdict === 'EXACT') {
-        return { label, bg: '#0f766e26', border: '#14b8a666', fg: '#5eead4' };
+        return { label, ...STAMP_TONES.teal };
       }
       if (resultView.verdict?.verdict === 'OUTCOME') {
-        return { label, bg: '#312e8126', border: '#6366f166', fg: '#818cf8' };
+        return { label, ...STAMP_TONES.indigo };
       }
       if (resultView.verdict?.verdict === 'MISSED') {
-        return { label, bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' };
+        return { label, ...STAMP_TONES.amber };
       }
-      return { label, bg: '#1c294226', border: '#2a3a52', fg: '#7f93ad' };
+      return { label, ...STAMP_TONES.muted };
     }
     if (isPredicted) {
-      return { label: 'FILED', bg: '#0f766e26', border: '#14b8a666', fg: '#5eead4' };
+      return { label: 'FILED', ...STAMP_TONES.teal };
     }
-    return { label: 'OPEN', bg: '#78350f26', border: '#b4530966', fg: '#fbbf24' };
+    return { label: 'OPEN', ...STAMP_TONES.amber };
   })();
+
+  const collapseAiOnEdit = (updater) => {
+    setAiOpen(false);
+    setDraft(updater);
+  };
 
   const editorProps = {
     fixture: selectedFixture,
     draft,
-    onChangeHomeScore: (v) => setDraft((d) => ({ ...d, homeScore: v })),
-    onChangeAwayScore: (v) => setDraft((d) => ({ ...d, awayScore: v })),
-    onChangeHomeScorers: (v) => setDraft((d) => ({ ...d, homeScorers: v })),
-    onChangeAwayScorers: (v) => setDraft((d) => ({ ...d, awayScorers: v })),
+    onChangeHomeScore: (v) => collapseAiOnEdit((d) => ({ ...d, homeScore: v })),
+    onChangeAwayScore: (v) => collapseAiOnEdit((d) => ({ ...d, awayScore: v })),
+    onChangeHomeScorers: (v) => collapseAiOnEdit((d) => ({ ...d, homeScorers: v })),
+    onChangeAwayScorers: (v) => collapseAiOnEdit((d) => ({ ...d, awayScorers: v })),
     onToggleMatchChip: (chipId) =>
       setDraft((d) => {
         const cur = Array.isArray(d.chips) ? d.chips : [];
@@ -387,10 +426,9 @@ export default function FixturesPage() {
 
   return (
     <div
-      className="relative flex h-[calc(100vh-var(--shell-nav-h))] flex-col overflow-hidden animate-rise-in"
-      style={{ background: 'radial-gradient(58% 64% at 50% 0%, #1a2740 0%, #0a0f1a 55%, #05070c 100%)' }}
+      className="relative flex h-[calc(100dvh-var(--shell-nav-h))] flex-col overflow-hidden animate-rise-in bg-surface-app"
     >
-      <div className="hidden md:block flex-none">
+      <div className="hidden lg:block flex-none">
         <SlotBar
           kicker="THE REEL"
           reelNav={
@@ -414,29 +452,30 @@ export default function FixturesPage() {
       {isLoading && <LoadingState message="Loading fixtures..." />}
 
       {!isLoading && isError && (
-        <p className="px-6 py-10 text-center text-sm text-text-muted-2">
-          Couldn&apos;t load fixtures{error?.message ? `: ${error.message}` : '.'}
-        </p>
+        <PageError
+          title="Couldn't load fixtures"
+          body={error?.message || 'Try again in a moment.'}
+        />
       )}
 
       {!isLoading && !isError && !selectedFixture && (
-        <p className="px-6 py-10 text-center text-sm text-text-muted-2">No fixtures to predict right now.</p>
+        <EmptyState kicker="THE REEL" title="No fixtures to predict right now." />
       )}
 
       {!isLoading && !isError && selectedFixture && (
         <>
-          <div ref={paneRef} className="relative hidden md:flex flex-1 min-h-0 overflow-hidden">
+          <div ref={paneRef} className="relative hidden lg:flex flex-1 min-h-0 overflow-hidden">
             <motion.div
-              className="pointer-events-none absolute inset-0 z-40 bg-[#01030a]"
+              className="pointer-events-none absolute inset-0 z-40 bg-surface-inverse"
               initial={false}
               animate={getBackdropTarget(filePhase)}
-              transition={BACKDROP_TRANSITION}
+              transition={backdropTransition}
             />
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <motion.div
-                layout
-                transition={CONTENT_LAYOUT_TRANSITION}
+                layout={!isFiling && !reduceMotion}
+                transition={layoutTransition}
                 className="flex flex-1 min-h-0 flex-col overflow-y-auto px-6 py-2"
               >
                 <div
@@ -476,7 +515,7 @@ export default function FixturesPage() {
                         initial={aiPanelWasFiling ? 'hidden' : false}
                         animate="visible"
                         variants={AI_PANEL_VARIANTS}
-                        transition={{ duration: 0.5, ease: 'easeOut', delay: AI_PANEL_DELAY_MS.desktop / 1000 }}
+                        transition={aiTransition}
                       >
                         <AiTeamReadPanel open={aiOpen} onToggle={() => setAiOpen((v) => !v)} />
                       </motion.div>
@@ -486,26 +525,23 @@ export default function FixturesPage() {
               </motion.div>
 
               <motion.div
-                layout
-                transition={CONTENT_LAYOUT_TRANSITION}
-                className="flex flex-none flex-col gap-2.5 border-t border-[#16203180] bg-[#050b14cc] px-6 py-3 backdrop-blur-md"
+                layout={!isFiling && !reduceMotion}
+                transition={layoutTransition}
+                className="flex flex-none flex-col gap-2.5 border-t border-border-hairline bg-surface-header/90 px-6 py-3 backdrop-blur-md"
               >
                 <div className="w-full max-w-[76rem] mx-auto flex flex-col gap-2.5">
                   {showEditor && (
                     <div className="flex flex-col items-center justify-center">
                       {submitError && <p className="mb-1 text-xs text-state-error">{submitError}</p>}
-                      <button
-                        type="button"
+                      <Button
                         onClick={handleSubmit}
                         disabled={submitting || isFiling}
-                        className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
-                          isPredicted
-                            ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
-                            : 'bg-brand-indigo-mid text-white shadow-lg hover:bg-brand-indigo-hover'
-                        }`}
+                        loading={submitting || isFiling}
+                        variant={isPredicted ? 'secondary' : 'primary'}
+                        pill
                       >
-                        {buttonLabel} &rarr;
-                      </button>
+                        {buttonLabel} →
+                      </Button>
                     </div>
                   )}
                   <FixtureReelStrip stations={stations} locked={isFiling} />
@@ -515,8 +551,7 @@ export default function FixturesPage() {
 
             {railShown && (
               <div
-                className="relative z-50 flex shrink-0 flex-col overflow-visible pt-5 pr-6 pl-2"
-                style={{ width: RAIL_WIDTH_PX }}
+                className="relative z-50 hidden w-[var(--rail-max)] shrink-0 flex-col overflow-visible pt-5 pr-6 pl-2 lg:flex"
               >
                 <FloatingSlipCard
                   fixture={selectedFixture}
@@ -533,51 +568,49 @@ export default function FixturesPage() {
             )}
           </div>
 
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-8 pt-3 md:hidden">
+          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-8 pt-3 lg:hidden">
             <div className="flex items-center justify-between gap-2.5">
-              <button
-                type="button"
+              <IconButton
+                label="Previous fixture"
                 onClick={selectPrev}
                 disabled={!canSelectPrev || isFiling}
-                aria-label="Previous fixture"
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
+                className="rounded-full border border-border-control"
               >
-                <ArrowLeft size={14} weight="bold" />
-              </button>
+                <ArrowLeft size={16} weight="bold" />
+              </IconButton>
               <div className="flex flex-col items-center gap-0.5">
-                <span className="font-mono text-xs tracking-wider text-brand-teal">
+                <span className="font-outfit text-xs tracking-wider text-brand-teal">
                   {selectedIndex + 1} / {fixtures.length}
                 </span>
-                <span className="font-mono text-xs tracking-wide text-text-muted-1">
+                <span className="font-outfit text-xs tracking-wide text-text-muted">
                   {[formatKickoff(selectedFixture.date), selectedFixture.venue].filter(Boolean).join(' · ')}
                 </span>
+                {showDeadlineCountdown && (
+                  <span className="text-xs text-brand-amber">{timeDisplay} to deadline</span>
+                )}
               </div>
-              <button
-                type="button"
+              <IconButton
+                label="Next fixture"
                 onClick={selectNext}
                 disabled={!canSelectNext || isFiling}
-                aria-label="Next fixture"
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
+                className="rounded-full border border-border-control"
               >
-                <ArrowRight size={14} weight="bold" />
-              </button>
+                <ArrowRight size={16} weight="bold" />
+              </IconButton>
             </div>
 
             {showEditor ? (
               <div className="flex flex-col gap-3">
                 <FixtureEditor {...editorProps} />
-                <button
-                  type="button"
+                <Button
                   onClick={handleSubmit}
                   disabled={submitting || isFiling}
-                  className={`flex cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-3 font-outfit text-sm font-semibold shadow-lg disabled:opacity-60 ${
-                    isPredicted
-                      ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4]'
-                      : 'bg-brand-indigo-mid text-white'
-                  }`}
+                  loading={submitting || isFiling}
+                  variant={isPredicted ? 'secondary' : 'primary'}
+                  className="w-full"
                 >
-                  {buttonLabel} &rarr;
-                </button>
+                  {buttonLabel} →
+                </Button>
                 {submitError && <p className="text-center text-xs text-state-error">{submitError}</p>}
               </div>
             ) : showReceipt ? (
@@ -606,7 +639,7 @@ export default function FixturesPage() {
                   initial={aiPanelWasFiling ? 'hidden' : false}
                   animate="visible"
                   variants={AI_PANEL_VARIANTS}
-                  transition={{ duration: 0.5, ease: 'easeOut', delay: AI_PANEL_DELAY_MS.mobile / 1000 }}
+                  transition={aiTransition}
                 >
                   <AiTeamReadPanel open={aiOpen} onToggle={() => setAiOpen((v) => !v)} />
                 </motion.div>

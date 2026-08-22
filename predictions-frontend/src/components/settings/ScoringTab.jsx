@@ -6,7 +6,7 @@ const SCORING = [
   { val: '15', label: 'Exact scoreline, every scorer named', note: 'the full mark — the only way to reach it is to name them all', fg: 'text-brand-teal' },
   { val: '10', label: 'Exact scoreline', note: 'right result, right numbers, scorers incomplete', fg: 'text-text-secondary' },
   { val: '+2', label: 'Each scorer you call correctly', note: '4 apiece with Scorer Focus played', fg: 'text-text-secondary' },
-  { val: '7', label: 'Correct draw called', note: 'draws pay more than a right winner — most sheets never call one', fg: 'text-brand-indigo-pale' },
+  { val: '7', label: 'Correct draw called', note: 'draws pay more than a right winner — most sheets never call one', fg: 'text-brand-teal' },
   { val: '5', label: 'Right winner, wrong scoreline', note: 'a win is a win, but the numbers pay', fg: 'text-brand-amber' },
   { val: '0', label: 'Wrong outcome', note: 'no consolation points, no partial credit', fg: 'text-text-muted-5' },
   { val: '−1', label: 'Per goal beyond two off the total', note: 'the goal-difference penalty, applied before chips', fg: 'text-state-error-mid' },
@@ -50,27 +50,29 @@ export default function ScoringTab() {
       </div>
 
       {/* Mobile: rules grouped inside one bordered panel. Desktop: flat divided rows. */}
-      <div className="flex flex-col gap-3 rounded-[16px] border border-border-base bg-surface-header p-5 md:hidden">
-        <KickerLabel as="span" className="text-sm tracking-[0.14em] text-text-muted-1">House rules</KickerLabel>
+      <details className="flex flex-col gap-3 rounded-md border border-border-base bg-surface-header p-5 lg:hidden">
+        <summary className="min-h-11 cursor-pointer font-outfit text-sm text-text-secondary">House rules</summary>
         {RULES.map((text, i) => (
           <span key={text} className="flex gap-3 text-sm leading-[1.55] text-text-muted-1">
             <span className="shrink-0 font-mono text-xs text-text-muted-5">{i + 1}.</span>
             {text}
           </span>
         ))}
-      </div>
+      </details>
 
-      <div className="hidden flex-col gap-1 md:flex">
-        <KickerLabel as="span" className="mt-3 text-sm tracking-[0.14em] text-text-muted-2">
-          How chips settle
-        </KickerLabel>
+      <details className="hidden flex-col gap-1 lg:flex">
+        <summary className="mt-3 min-h-11 cursor-pointer">
+          <KickerLabel as="span" className="text-sm tracking-[0.14em] text-text-muted-2">
+            How chips settle
+          </KickerLabel>
+        </summary>
         {RULES.map((text, i) => (
           <span key={text} className="flex items-start gap-3.5 border-b border-border-base py-3.5 last:border-b-0">
             <span className="w-5 shrink-0 font-mono text-xs text-text-muted-5">{i + 1}.</span>
             <span className="flex-1 text-base leading-[1.55] text-text-muted-1">{text}</span>
           </span>
         ))}
-      </div>
+      </details>
     </div>
   );
 }

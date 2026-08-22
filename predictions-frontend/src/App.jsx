@@ -7,6 +7,7 @@ import { ChipManagementProvider } from './context/ChipManagementContext';
 import DefaultRedirect from './components/common/DefaultRedirect';
 import PrivateRoute, { PublicRoute } from './components/common/PrivateRoute';
 import LoadingState from './components/common/LoadingState';
+import PageError from './components/ui/PageError';
 import AuthErrorBoundary from './components/auth/AuthErrorBoundary';
 import AppShell from './components/layout/AppShell';
 
@@ -33,7 +34,7 @@ const AppRouter = () => {
 
   if (!isInitialized()) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-app">
+      <div className="flex min-h-dvh items-center justify-center bg-surface-app">
         <LoadingState message="Initializing application..." />
       </div>
     );
@@ -41,16 +42,12 @@ const AppRouter = () => {
 
   if (hasInitializationError()) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-app">
-        <div className="text-center">
-          <p className="mb-4 text-state-error">Failed to initialize application</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="rounded-md bg-state-error px-4 py-2 text-white"
-          >
-            Retry
-          </button>
-        </div>
+      <div className="flex min-h-dvh items-center justify-center bg-surface-app">
+        <PageError
+          title="Failed to initialize"
+          body="Reload the page to try again."
+          onRetry={() => window.location.reload()}
+        />
       </div>
     );
   }

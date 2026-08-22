@@ -131,7 +131,7 @@ export default function StationRail({ stations, variant = 'desktop', onPrev, onN
 
   return (
     <div className="relative pb-1">
-      <div className="absolute inset-x-0 top-[52px] h-px bg-[#1d2a41]" />
+      <div className="absolute inset-x-0 top-[52px] h-px bg-border-base" />
       <div className="relative flex items-end justify-between gap-0.5">
         {stations.map((station) => (
           <DesktopStation key={station.id} station={station} />

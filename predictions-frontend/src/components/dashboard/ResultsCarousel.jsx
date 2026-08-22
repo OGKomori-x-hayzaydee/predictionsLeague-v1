@@ -8,7 +8,7 @@ import { predictionAsReceiptPair, recordSearchPath } from '../../utils/matchResu
 import { calculateCeilingPoints } from '../../utils/pointsCalculation';
 
 const arrowClass =
-  'mt-8 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30';
+  'mt-8 inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30';
 
 function TicketTape({ predictions, gameweekLabel }) {
   const navigate = useNavigate();
@@ -79,18 +79,18 @@ export default function ResultsCarousel({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <KickerLabel as="span" className="tracking-[0.16em] text-[#66748c]">
+        <KickerLabel>
           {gameweek ? `GAMEWEEK ${gameweek}` : 'LAST GAMEWEEK'}
         </KickerLabel>
-        <h2 className="m-0 font-dmSerif text-3xl leading-tight text-text-primary">
+        <h2 className="m-0 font-dmSerif text-lg leading-tight text-text-muted">
           Recent results
         </h2>
       </div>
 
-      {isLoading && <p className="text-xs text-[#66748c]">Loading recent results…</p>}
+      {isLoading && <p className="text-xs text-text-muted">Loading recent results…</p>}
 
       {!isLoading && predictions.length === 0 && (
-        <p className="text-xs text-[#66748c]">No scored predictions yet this season.</p>
+        <p className="text-xs text-text-muted">No scored predictions yet this season.</p>
       )}
 
       {!isLoading && predictions.length > 0 && (

@@ -72,7 +72,6 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
                       name={r.name}
                       src={r.avatar}
                       size={32}
-                      animateFallback={false}
                       className={r.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
                     />
                     <span className="max-w-full truncate text-2xs" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>

@@ -40,13 +40,15 @@ function WeekCard({ gw, isCurrent, isSelected, plannedChip, difficulty, onSelect
       }`}
     >
       <span className={`font-mono text-xs ${active ? 'text-brand-teal' : 'text-text-muted-2'}`}>{gw}</span>
-      <span className="flex h-[30px] items-center justify-center">
+      <span className={`flex h-[30px] items-center justify-center ${plannedChip && isSelected ? 'animate-[stampIn_0.45s_ease-out]' : ''}`}>
         {plannedChip ? (
           <ChipToken tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon} hue={CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE} size={30} />
         ) : null}
       </span>
-      <span className="flex w-6 flex-col justify-end overflow-hidden rounded-[3px] bg-surface-card-4" style={{ height: 64 }}>
-        <span className="rounded-[3px]" style={{ height: `${barPct}%`, background: barColor }} />
+      <span className="flex w-6 flex-col justify-end overflow-hidden rounded-[3px] bg-surface-track" style={{ height: difficulty ? 64 : 8 }}>
+        {difficulty ? (
+          <span className="rounded-[3px]" style={{ height: `${barPct}%`, background: barColor }} />
+        ) : null}
       </span>
       <span className="font-mono text-3xs tracking-[0.06em]" style={{ color: active ? 'var(--text-primary)' : 'var(--text-muted-2)' }}>
         {label}
@@ -167,6 +169,7 @@ export default function StrategyTab() {
   const handleAssign = (gw, chipId) => {
     if (!canPlan(chipLookup[chipId], gw, currentGameweek)) return;
     assign(gw, chipId);
+    setSelectedGw(gw);
   };
 
   if (chipsLoading) return <LoadingState message="Loading your chips..." />;
@@ -176,7 +179,7 @@ export default function StrategyTab() {
   return (
     <>
       {/* Desktop — foundation spec §5.3; drag chips from the hand onto a week */}
-      <div className="hidden flex-col gap-5 md:flex">
+      <div className="hidden flex-col gap-5 lg:flex">
         <div className="flex items-end justify-between gap-6">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="font-mono text-2xs tracking-[0.16em] text-brand-teal">
@@ -225,7 +228,7 @@ export default function StrategyTab() {
           />
         )}
 
-        {plannedCount > 0 && (
+        {plannedCount > 0 && !selectedGw && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="font-mono text-2xs tracking-[0.13em] text-text-muted-3">
@@ -265,7 +268,7 @@ export default function StrategyTab() {
       </div>
 
       {/* Mobile — Spine.dc.html buildChipsMobile(), tap-select instead of drag */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <StrategyMobile
           availableChips={availableChips}
           currentGameweek={currentGameweek}

@@ -5,11 +5,14 @@ import {
   Warning,
   Info,
   ArrowsClockwise,
-  XCircle
+  XCircle,
 } from '@phosphor-icons/react';
 import authService from '../../services/auth/AuthService';
+import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion';
+import Button from '../ui/buttons/Button';
+import IconButton from '../ui/buttons/IconButton';
 
-const StatusIcon = ({ type, className = "w-6 h-6" }) => {
+const StatusIcon = ({ type, className = 'h-6 w-6' }) => {
   const icons = {
     success: CheckCircle,
     error: XCircle,
@@ -17,11 +20,19 @@ const StatusIcon = ({ type, className = "w-6 h-6" }) => {
     info: Info,
     loading: ArrowsClockwise,
   };
-  
+
   const Icon = icons[type] || Info;
   const spinClass = type === 'loading' ? 'animate-spin' : '';
-  
+
   return <Icon className={`${className} ${spinClass}`} />;
+};
+
+const ICON_TONE = {
+  success: 'text-state-success',
+  error: 'text-state-error',
+  warning: 'text-state-warning',
+  info: 'text-state-info',
+  loading: 'text-brand-teal',
 };
 
 const StatusMessage = ({ status, onClose, onRetry }) => {
@@ -30,28 +41,24 @@ const StatusMessage = ({ status, onClose, onRetry }) => {
       type: 'info',
       title: 'Redirecting to login...',
       message: 'You will be taken to the secure login page',
-      color: 'blue',
       autoClose: false,
     },
     processing: {
       type: 'loading',
       title: 'Completing login...',
       message: 'Please wait while we verify your authentication',
-      color: 'blue',
       autoClose: false,
     },
     completed: {
       type: 'success',
       title: 'Login successful!',
       message: 'Welcome back! Redirecting to your dashboard...',
-      color: 'green',
       autoClose: 3000,
     },
     error: {
       type: 'error',
       title: 'Login failed',
       message: 'There was a problem with your authentication',
-      color: 'red',
       autoClose: false,
       showRetry: true,
     },
@@ -59,14 +66,12 @@ const StatusMessage = ({ status, onClose, onRetry }) => {
       type: 'warning',
       title: 'Login cancelled',
       message: 'Authentication was cancelled or interrupted',
-      color: 'yellow',
       autoClose: 5000,
     },
     expired: {
       type: 'warning',
       title: 'Session expired',
       message: 'Your login session has expired, please try again',
-      color: 'orange',
       autoClose: false,
       showRetry: true,
     },
@@ -74,7 +79,6 @@ const StatusMessage = ({ status, onClose, onRetry }) => {
       type: 'error',
       title: 'Security error',
       message: 'Invalid authentication state detected',
-      color: 'red',
       autoClose: false,
       showRetry: true,
     },
@@ -82,7 +86,6 @@ const StatusMessage = ({ status, onClose, onRetry }) => {
       type: 'error',
       title: 'Connection error',
       message: 'Unable to connect to authentication server',
-      color: 'red',
       autoClose: false,
       showRetry: true,
     },
@@ -90,111 +93,70 @@ const StatusMessage = ({ status, onClose, onRetry }) => {
       type: 'loading',
       title: 'Retrying login...',
       message: 'Attempting to reconnect to authentication service',
-      color: 'blue',
       autoClose: false,
     },
     max_retries_exceeded: {
       type: 'error',
       title: 'Connection failed',
       message: 'Unable to complete login after multiple attempts',
-      color: 'red',
       autoClose: false,
       showRetry: false,
     },
   };
 
   const config = statusConfig[status] || statusConfig.error;
-
-  const colorClasses = {
-    blue: {
-      bg: 'bg-blue-900/30 border-blue-500/30',
-      text: 'text-blue-200',
-      button: 'bg-blue-600 hover:bg-blue-700',
-    },
-    green: {
-      bg: 'bg-green-900/30 border-green-500/30',
-      text: 'text-green-200',
-      button: 'bg-green-600 hover:bg-green-700',
-    },
-    red: {
-      bg: 'bg-red-900/30 border-red-500/30',
-      text: 'text-red-200',
-      button: 'bg-red-600 hover:bg-red-700',
-    },
-    yellow: {
-      bg: 'bg-yellow-900/30 border-yellow-500/30',
-      text: 'text-yellow-200',
-      button: 'bg-yellow-600 hover:bg-yellow-700',
-    },
-    orange: {
-      bg: 'bg-orange-900/30 border-orange-500/30',
-      text: 'text-orange-200',
-      button: 'bg-orange-600 hover:bg-orange-700',
-    },
-  };
-
-  const colors = colorClasses[config.color];
+  const iconTone = ICON_TONE[config.type] || ICON_TONE.info;
 
   useEffect(() => {
     if (config.autoClose) {
       const timer = setTimeout(() => {
         onClose();
       }, config.autoClose);
-      
+
       return () => clearTimeout(timer);
     }
   }, [config.autoClose, onClose]);
 
+  const reduce = usePrefersReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      initial={reduce ? false : { opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      className={`${colors.bg} border rounded-lg p-4 shadow-lg backdrop-blur-sm`}
+      exit={reduce ? { opacity: 1 } : { opacity: 0, y: -20, scale: 0.95 }}
+      className="rounded-lg border border-border-card bg-surface-elevated p-4 text-text-primary shadow-card"
     >
       <div className="flex items-start space-x-3">
-        <StatusIcon 
-          type={config.type} 
-          className={`w-6 h-6 ${colors.text} flex-shrink-0 mt-0.5`} 
+        <StatusIcon
+          type={config.type}
+          className={`mt-0.5 h-6 w-6 flex-shrink-0 ${iconTone}`}
         />
-        
-        <div className="flex-1 min-w-0">
-          <h4 className={`font-semibold ${colors.text} font-outfit`}>
-            {config.title}
-          </h4>
-          <p className="text-white/70 text-sm mt-1 font-outfit">
-            {config.message}
-          </p>
+
+        <div className="min-w-0 flex-1">
+          <h4 className="font-outfit font-semibold text-text-primary">{config.title}</h4>
+          <p className="mt-1 font-outfit text-sm text-text-muted">{config.message}</p>
         </div>
 
         <div className="flex items-center space-x-2">
           {config.showRetry && onRetry && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onRetry}
-              className={`${colors.button} text-white px-3 py-1 rounded text-sm font-medium transition-colors`}
-            >
+            <Button onClick={onRetry} className="min-h-11">
               Retry
-            </motion.button>
+            </Button>
           )}
-          
+
           {onClose && !config.autoClose && (
-            <button
-              onClick={onClose}
-              className="text-white/50 hover:text-white/70 transition-colors"
-            >
-              <XCircle className="w-5 h-5" />
-            </button>
+            <IconButton label="Dismiss" onClick={onClose}>
+              <XCircle className="h-5 w-5" />
+            </IconButton>
           )}
         </div>
       </div>
-      
+
       {config.autoClose && (
         <div className="mt-3">
-          <div className={`h-1 bg-white/10 rounded-full overflow-hidden`}>
+          <div className="h-1 overflow-hidden rounded-full bg-surface-track">
             <motion.div
-              className={`h-full ${colors.button.split(' ')[0]} rounded-full`}
+              className="h-full rounded-full bg-brand-teal-deep"
               initial={{ width: '100%' }}
               animate={{ width: '0%' }}
               transition={{ duration: config.autoClose / 1000, ease: 'linear' }}
@@ -211,10 +173,8 @@ const OAuthStatusHandler = ({ className = '' }) => {
   const [statusDetails, setStatusDetails] = useState({});
 
   useEffect(() => {
-    // Listen to simplified auth service events only
     const unsubscribers = [];
 
-    // Listen to auth service events for OAuth-related errors
     unsubscribers.push(
       authService.on('oauth-error', (data) => {
         setCurrentStatus('error');
@@ -229,9 +189,8 @@ const OAuthStatusHandler = ({ className = '' }) => {
       })
     );
 
-    // Cleanup
     return () => {
-      unsubscribers.forEach(unsubscribe => unsubscribe());
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
   }, []);
 
@@ -242,27 +201,24 @@ const OAuthStatusHandler = ({ className = '' }) => {
 
   const handleRetry = async () => {
     try {
-      // Simple retry - just redirect to login
       handleClose();
-      
-      // Redirect to login page
+
       setTimeout(() => {
         window.location.href = '/login';
       }, 100);
     } catch (error) {
       console.error('Retry failed:', error);
-      
-      // Show error message
+
       setCurrentStatus('error');
-      setStatusDetails({ 
+      setStatusDetails({
         error: 'Retry failed. Please try again later.',
-        errorType: 'retry_failed' 
+        errorType: 'retry_failed',
       });
     }
   };
 
   return (
-    <div className={`fixed top-4 right-4 z-50 max-w-sm ${className}`}>
+    <div className={`fixed right-4 top-4 z-50 max-w-sm ${className}`}>
       <AnimatePresence>
         {currentStatus && (
           <StatusMessage

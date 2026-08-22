@@ -1,28 +1,16 @@
 import { hasSeasonCap } from '../../utils/chipStatus';
 
-/**
- * Per-chip accent hues + short poker-chip tags, literal from the v2
- * prototype's CHIPS table (frontendPrototype spec §1.8 / Spine.dc.html
- * ~line 4030-4036). Kept local to chips (mirrors components/fixtures/
- * chipHues.js and components/dashboard/chipHues.js) rather than added to
- * utils/chipManager.js's CHIP_CONFIG (whose own `color`/`icon` fields use
- * generic names + short text tags for a different purpose elsewhere in the
- * app) to avoid touching that shared file.
- */
+/** Chip accents resolve from CSS vars so light/dark stay in sync. */
 export const CHIP_HUES = {
-  doubleDown: '#5eead4',
-  wildcard: '#c4b5fd',
-  scorerFocus: '#fcd34d',
-  defensePlusPlus: '#7dd3fc',
-  allInWeek: '#fb7185',
+  doubleDown: 'var(--chip-teal)',
+  wildcard: 'var(--chip-violet)',
+  scorerFocus: 'var(--chip-amber)',
+  defensePlusPlus: 'var(--chip-sky)',
+  allInWeek: 'var(--chip-rose)',
 };
 
-export const DEFAULT_CHIP_HUE = '#5eead4';
+export const DEFAULT_CHIP_HUE = 'var(--chip-teal)';
 
-// Short poker-chip token labels (CHIPS[].tag in the prototype) — the
-// canonical short tag for each chip, used ahead of CHIP_CONFIG's own
-// (also short-text, non-emoji) `icon` field wherever a chip needs to fit
-// inside a small circular token at 10-13px.
 export const CHIP_TAGS = {
   doubleDown: '×2',
   wildcard: '×3',
@@ -31,14 +19,16 @@ export const CHIP_TAGS = {
   allInWeek: 'AI',
 };
 
-/**
- * Real chip status label — unlike the prototype's fictional SCHIPS table
- * (which gives every chip a season "allowance"), the real CHIP_CONFIG only
- * caps All-In Week (seasonLimit: 4); Double Down/Wildcard/Scorer
- * Focus/Defence++ are unlimited-use, cooldown-gated instead. Reflect
- * whichever constraint actually applies to this chip rather than forcing
- * every chip into an "N left" shape.
- */
+export const CHIP_BADGES = CHIP_TAGS;
+
+export const CHIP_EFFECTS = {
+  doubleDown: 'all points doubled',
+  wildcard: 'all points tripled',
+  scorerFocus: 'scorer points doubled',
+  defensePlusPlus: 'clean sheets doubled',
+  allInWeek: 'gameweek score doubled',
+};
+
 export function chipStatusLabel(chip) {
   if (hasSeasonCap(chip)) {
     const remaining = chip.remainingUses ?? Math.max(chip.seasonLimit - (chip.usageCount ?? 0), 0);

@@ -24,7 +24,6 @@ export default function FormBookPanel({ formBook, sel }) {
             name={memberPanel.name}
             src={memberPanel.avatar}
             size={40}
-            animateFallback={false}
             className={memberPanel.isCurrentUser ? 'ring-2 ring-brand-teal' : ''}
           />
           <div className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -124,7 +123,6 @@ export default function FormBookPanel({ formBook, sel }) {
                     name={c.name}
                     src={c.avatar}
                     size={24}
-                    animateFallback={false}
                     className={c.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
                   />
                   <span className={`truncate text-caption ${c.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{c.name}</span>

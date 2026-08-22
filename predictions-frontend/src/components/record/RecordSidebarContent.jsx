@@ -1,12 +1,6 @@
+import ChipToken from '../ui/ChipToken';
 import KickerLabel from '../ui/KickerLabel';
-
-const CHIP_TAGS = {
-  doubleDown: '×2',
-  wildcard: '×3',
-  scorerFocus: 'S+',
-  defensePlusPlus: 'D+',
-  allInWeek: 'AI',
-};
+import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE } from '../chips/chipHues';
 
 /**
  * Shared content for the desktop right rail (RecordSidebar) and the mobile
@@ -27,7 +21,7 @@ export default function RecordSidebarContent({ scopeLabel, scopeVal, scopeVerdic
         <span className="font-outfit text-xs leading-relaxed text-text-muted-2">{scopeVerdict}</span>
         <div className="relative mt-0.5 h-1 overflow-hidden rounded-full bg-surface-card-4">
           <div
-            className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-teal-mid to-brand-indigo-mid"
+            className="absolute inset-0 rounded-full bg-brand-teal-mid"
             style={{ width: `${Math.max(0, Math.min(100, scopePct))}%` }}
           />
         </div>
@@ -57,7 +51,12 @@ export default function RecordSidebarContent({ scopeLabel, scopeVal, scopeVerdic
         <KickerLabel className="tracking-[0.16em]">CHIP RETURN, {chipScope}</KickerLabel>
         {chipReturn.map((c) => (
           <span key={c.chipId} className="flex items-center gap-2.5">
-            <span className="w-5 shrink-0 font-outfit text-2xs text-text-muted-1">{CHIP_TAGS[c.chipId] || c.icon}</span>
+            <ChipToken
+              tag={CHIP_TAGS[c.chipId] || c.icon}
+              hue={CHIP_HUES[c.chipId] || DEFAULT_CHIP_HUE}
+              size={22}
+              muted={!c.usageCount}
+            />
             <span className="flex-1 truncate text-caption text-text-tertiary">{c.name}</span>
             <span className="font-outfit text-2xs text-text-muted-2">{c.usageCount ? `${c.usageCount} used` : 'unused'}</span>
             <span

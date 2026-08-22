@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import KickerLabel from '../ui/KickerLabel';
 import Avatar from '../ui/Avatar';
@@ -84,7 +85,7 @@ export default function RivalsSection({ leagues }) {
 
       <div className="flex flex-col gap-[9px]">
         {rows.map((m) => (
-          <div key={m.id ?? m.username} className="flex cursor-pointer items-center gap-[10px]">
+          <Link key={m.id ?? m.username} to="/leagues" className="flex items-center gap-[10px]">
             <span
               className={`w-4 shrink-0 font-outfit text-xs ${
                 m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-4'
@@ -96,7 +97,6 @@ export default function RivalsSection({ leagues }) {
               name={m.displayName || m.username}
               src={m.avatar}
               size={22}
-              animateFallback={false}
             />
             <span
               className={`min-w-0 flex-1 truncate text-sm ${
@@ -105,19 +105,19 @@ export default function RivalsSection({ leagues }) {
             >
               {m.isCurrentUser ? 'You' : m.displayName || m.username}
             </span>
-            <span className="flex h-1.5 w-16 overflow-hidden rounded-sm bg-[#111c2e]">
+            <span className="flex h-1.5 w-16 overflow-hidden rounded-sm bg-surface-track">
               <span
                 className="rounded-sm"
                 style={{
                   width: `${Math.max(8, ((m.points || 0) / maxPoints) * 100)}%`,
-                  background: m.isCurrentUser ? '#5eead4' : '#1e3450',
+                  background: m.isCurrentUser ? 'var(--brand-teal)' : 'var(--border-control)',
                 }}
               />
             </span>
             <span className="w-[34px] shrink-0 text-right font-outfit text-sm text-text-tertiary">
               {m.points}
             </span>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

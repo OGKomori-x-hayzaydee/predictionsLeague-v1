@@ -93,23 +93,40 @@ export function verdictTone(verdict) {
   return SCORE_TONE.muted;
 }
 
+const STAMP_AMBER = {
+  fg: 'var(--brand-amber)',
+  border: 'color-mix(in srgb, var(--brand-amber) 40%, transparent)',
+};
+const STAMP_TEAL = {
+  fg: 'var(--brand-teal)',
+  border: 'color-mix(in srgb, var(--brand-teal-mid) 60%, transparent)',
+};
+const STAMP_INDIGO = {
+  fg: 'var(--brand-indigo)',
+  border: 'color-mix(in srgb, var(--brand-indigo-mid) 60%, transparent)',
+};
+const STAMP_MUTED = {
+  fg: 'var(--text-muted)',
+  border: 'var(--border-card)',
+};
+
 export function stampStyle(verdict, { live = false, awaiting = false } = {}) {
   if (live) {
-    return { fg: '#fbbf24', border: '#b4530966', label: null };
+    return { ...STAMP_AMBER, label: null };
   }
   if (awaiting) {
-    return { fg: '#7f93ad', border: '#2a3a52', label: 'AWAITING' };
+    return { ...STAMP_MUTED, label: 'AWAITING' };
   }
   if (verdict?.verdict === 'EXACT') {
-    return { fg: '#5eead4', border: '#14b8a699', label: 'EXACT' };
+    return { ...STAMP_TEAL, label: 'EXACT' };
   }
   if (verdict?.verdict === 'OUTCOME') {
-    return { fg: '#818cf8', border: '#6366f199', label: 'CORRECT' };
+    return { ...STAMP_INDIGO, label: 'CORRECT' };
   }
   if (verdict?.verdict === 'MISSED') {
-    return { fg: '#fbbf24', border: '#b4530966', label: 'MISSED' };
+    return { ...STAMP_AMBER, label: 'MISSED' };
   }
-  return { fg: '#7f93ad', border: '#2a3a52', label: 'SCORED' };
+  return { ...STAMP_MUTED, label: 'SCORED' };
 }
 
 /**

@@ -21,46 +21,44 @@ function MemberRow({ member, busy, pendingRemove, onPromote, onAskRemove, onCanc
   const canAct = !member.isAdmin && !member.isCurrentUser;
 
   return (
-    <div className="flex flex-col gap-3 rounded-14 border border-border-base bg-surface-card-3 px-[13px] py-[13px] md:rounded-12 md:bg-surface-header/60 md:px-[17px] md:py-[15px]">
-      <div className="flex items-center gap-3">
-        <Avatar name={name} src={member.avatar} size={32} animateFallback={false} />
-        <span className="flex min-w-0 flex-1 flex-col gap-[3px] leading-[1.45] md:gap-0">
-          <span className="truncate text-caption text-text-secondary">
-            {name}
-            {member.isCurrentUser && <span className="ml-1 text-text-muted-3">· you</span>}
-          </span>
-          <span className="text-2xs leading-[1.45] text-text-muted-3 md:text-xs md:text-text-muted-1">
-            {member.points ?? 0} pts
-            {member.predictions != null ? ` · ${member.predictions} calls` : ''}
-          </span>
+    <div className="flex items-center gap-3 border-b border-border-hairline py-2 last:border-b-0">
+      <Avatar name={name} src={member.avatar} size={28} />
+      <span className="flex min-w-0 flex-1 flex-col leading-[1.35]">
+        <span className="truncate text-sm text-text-secondary">
+          {name}
+          {member.isCurrentUser && <span className="ml-1 text-text-muted">· you</span>}
         </span>
-        <span className="shrink-0 font-mono text-xs text-text-muted-1">
-          {member.isAdmin ? 'Admin' : 'Member'}
+        <span className="text-2xs text-text-muted">
+          {member.points ?? 0} pts
+          {member.predictions != null ? ` · ${member.predictions} calls` : ''}
         </span>
-      </div>
-
+      </span>
+      <span className="shrink-0 font-outfit text-2xs text-text-muted">
+        {member.isAdmin ? 'Admin' : 'Member'}
+      </span>
       {canAct && pendingRemove !== member.id && (
-        <div className="flex justify-end gap-2">
-          <Button size="sm" variant="secondary" pill={false} disabled={busy} onClick={() => onPromote(member)}>
-            Promote
-          </Button>
-          <Button size="sm" variant="ghost" pill={false} disabled={busy} onClick={() => onAskRemove(member.id)}>
-            Remove
-          </Button>
-        </div>
-      )}
-
-      {canAct && pendingRemove === member.id && (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-          <span className="text-2xs text-state-error-mid sm:mr-auto">Remove {name} from this league?</span>
-          <div className="flex justify-end gap-2">
-            <Button size="sm" variant="ghost" pill={false} disabled={busy} onClick={onCancelRemove}>
-              Cancel
+        <details className="relative">
+          <summary className="flex size-11 cursor-pointer list-none items-center justify-center rounded-md text-text-muted hover:bg-surface-elevated hover:text-text-primary [&::-webkit-details-marker]:hidden">
+            ⋯
+          </summary>
+          <div className="absolute right-0 z-20 mt-1 flex min-w-36 flex-col gap-1 rounded-md border border-border-card bg-surface-elevated p-1 shadow-card">
+            <Button size="sm" variant="secondary" disabled={busy} onClick={() => onPromote(member)}>
+              Promote
             </Button>
-            <Button size="sm" variant="danger" pill={false} disabled={busy} onClick={() => onConfirmRemove(member)}>
-              {busy ? 'Removing…' : 'Remove'}
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => onAskRemove(member.id)}>
+              Remove
             </Button>
           </div>
+        </details>
+      )}
+      {canAct && pendingRemove === member.id && (
+        <div className="flex items-center gap-1">
+          <Button size="sm" variant="ghost" disabled={busy} onClick={onCancelRemove}>
+            Cancel
+          </Button>
+          <Button size="sm" variant="danger" disabled={busy} onClick={() => onConfirmRemove(member)}>
+            {busy ? 'Removing…' : 'Remove'}
+          </Button>
         </div>
       )}
     </div>
@@ -148,7 +146,7 @@ export default function LeagueManageView({ overview, onUpdated, onDeleted }) {
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto flex w-[780px] max-w-full flex-col gap-[22px] px-4 py-6 md:py-[30px]">
+      <div className="mx-auto flex w-full form-max flex-col gap-[22px] px-4 py-6 md:py-[30px]">
         <div className="hidden flex-col gap-1.5 md:flex">
           <h2 className="font-dmSerif text-3xl leading-[1.1] text-text-primary">Manage</h2>
           <p className="max-w-[46em] text-caption leading-[1.6] text-text-muted-2 [text-wrap:pretty]">

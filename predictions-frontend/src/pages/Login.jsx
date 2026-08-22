@@ -5,10 +5,11 @@ import { motion } from "framer-motion";
 import { Eye, EyeSlash } from "@phosphor-icons/react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/landingPage/Navbar";
-import Footer from "../components/landingPage/Footer";
 import OAuthLoginSection from "../components/auth/OAuthLogin";
 import OAuthStatusHandler from "../components/auth/OAuthStatusHandler";
 import oauthAPI from "../services/api/oauthAPI";
+import Button from "../components/ui/buttons/Button";
+import usePrefersReducedMotion from "../hooks/usePrefersReducedMotion";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -27,6 +28,13 @@ const stagger = {
   },
 };
 
+const fieldWrap = (err) =>
+  `rounded-md border bg-surface-elevated transition-colors ${
+    err
+      ? "border-state-error focus-within:border-state-error"
+      : "border-border-control focus-within:border-brand-teal"
+  }`;
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,17 +45,19 @@ export default function Login() {
   const { login, isLoading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const reduceMotion = usePrefersReducedMotion();
 
-  // Get the intended destination after login
   const from = location.state?.from?.pathname || "/dashboard";
+  const enter = reduceMotion
+    ? { initial: false, animate: false }
+    : { initial: "hidden", animate: "visible" };
 
   const handleOAuthLogin = (providerId) => {
     try {
-      // Store that this is a login flow (not signup)
-      sessionStorage.setItem('oauth_flow_type', 'login');
+      sessionStorage.setItem("oauth_flow_type", "login");
       oauthAPI.initiateLogin(providerId, from);
-    } catch (error) {
-      setOauthError(error.message);
+    } catch (err) {
+      setOauthError(err.message);
     }
   };
 
@@ -55,7 +65,6 @@ export default function Login() {
     e.preventDefault();
     setValidationErrors({});
 
-    // Basic client-side validation
     const errors = {};
     if (!email.trim()) {
       errors.email = "Email is required";
@@ -65,8 +74,8 @@ export default function Login() {
 
     if (!password.trim()) {
       errors.password = "Password is required";
-    } else if (password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
+    } else if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -84,7 +93,7 @@ export default function Login() {
         navigate(from, { replace: true });
       }
     } catch (loginError) {
-      console.error('Login error:', loginError);
+      console.error("Login error:", loginError);
     }
   };
 
@@ -92,114 +101,85 @@ export default function Login() {
     <>
       <Navbar />
       <OAuthStatusHandler />
-      <div className="relative overflow-hidden bg-white dark:bg-primary-800 min-h-screen transition-colors duration-300">
-        {/* Background elements */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-50 via-white to-white dark:from-primary-700/40 dark:via-primary-800 dark:to-primary-800" />
+      <div className="relative min-h-dvh overflow-hidden bg-surface-app">
+        <Container size="2" className="relative z-10 px-4 pb-8 pt-24 sm:px-6 sm:pb-16 sm:pt-32">
           <motion.div
-            className="absolute top-40 left-10 w-64 h-64 rounded-full bg-teal-light/5 dark:bg-teal-500/20 blur-3xl"
-            animate={{ x: [0, 10, -10, 0], y: [0, 15, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 15, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-40 right-10 w-72 h-72 rounded-full bg-indigo-light/5 dark:bg-indigo-500/20 blur-3xl"
-            animate={{ x: [0, -20, 20, 0], y: [0, 20, -10, 0] }}
-            transition={{ repeat: Infinity, duration: 20, ease: "easeInOut" }}
-          />
-        </div>
-
-        <Container size="2" className="relative z-10 pt-24 sm:pt-32 pb-8 sm:pb-16 px-4 sm:px-6">
-          {/* Login form */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-            className="rounded-xl overflow-hidden max-w-md mx-auto mt-12 sm:mt-20 p-5 sm:p-6 md:p-8 bg-white/80 dark:bg-primary-700/50 backdrop-blur-md border border-light-border dark:border-primary-700/30 shadow-lg dark:shadow-none transition-colors duration-300"
+            {...enter}
+            variants={reduceMotion ? undefined : stagger}
+            className="mx-auto mt-12 max-w-md overflow-hidden rounded-lg border border-border-card bg-surface-card p-5 shadow-card sm:mt-20 sm:p-8 relative"
           >
-            <motion.div className="text-center mb-6 sm:mb-8" variants={fadeUp}>
-              <h1 className="text-light-text dark:text-white text-2xl sm:text-3xl font-bold font-dmSerif mb-2">
+            <span className="pointer-events-none absolute right-4 top-4 rotate-[-8deg] rounded-sm border border-brand-teal px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-brand-teal">
+              FILED
+            </span>
+            <motion.div className="mb-6 text-center sm:mb-8" variants={fadeUp}>
+              <h1 className="mb-2 font-dmSerif text-2xl font-bold text-text-primary sm:text-3xl">
                 welcome back
               </h1>
-              <p className="text-light-text-secondary dark:text-slate-300 font-outfit text-sm sm:text-base">
+              <p className="font-outfit text-sm text-text-muted sm:text-base">
                 log in to access your predictions and leaderboards
               </p>
             </motion.div>
 
             {(error || oauthError) && (
               <motion.div
-                className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-300 px-4 py-3 rounded-lg mb-6 font-outfit text-sm"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 rounded-lg border border-state-error/30 bg-state-error/10 px-4 py-3 font-outfit text-sm text-state-error"
+                initial={reduceMotion ? false : { opacity: 0, y: -10 }}
+                animate={reduceMotion ? false : { opacity: 1, y: 0 }}
               >
                 {error || oauthError}
               </motion.div>
             )}
 
-            {/* OAuth Login Section */}
-            <motion.div variants={fadeUp}>
-              <OAuthLoginSection
-                onOAuthLogin={handleOAuthLogin}
-                disabled={isLoading}
-                className="mb-6"
-              />
-            </motion.div>
-
             <motion.form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6" variants={fadeUp}>
               <div>
-                <label htmlFor="email" className="block text-light-text dark:text-slate-200 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 font-outfit">
+                <label htmlFor="email" className="mb-1.5 block font-outfit text-xs font-medium text-text-secondary sm:mb-2 sm:text-sm">
                   email address
                 </label>
-                <div className={`bg-white dark:bg-primary-600/50 rounded-md sm:rounded-lg border transition-colors ${
-                  validationErrors.email
-                    ? 'border-red-400 dark:border-red-500/50 focus-within:border-red-500'
-                    : 'border-slate-200 dark:border-primary-500/50 focus-within:border-teal-light dark:focus-within:border-teal-500'
-                }`}>
+                <div className={fieldWrap(validationErrors.email)}>
                   <input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
                       if (validationErrors.email) {
-                        setValidationErrors(prev => ({ ...prev, email: null }));
+                        setValidationErrors((prev) => ({ ...prev, email: null }));
                       }
                     }}
                     placeholder="your@email.com"
                     required
-                    className="w-full px-3 py-2.5 sm:py-2 bg-transparent text-light-text dark:text-white font-outfit placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none text-sm sm:text-base"
+                    className="w-full min-h-11 bg-transparent px-3 py-2.5 font-outfit text-sm text-text-primary outline-none placeholder:text-text-disabled sm:text-base"
                   />
                 </div>
                 {validationErrors.email && (
-                  <p className="text-red-500 dark:text-red-300 text-xs mt-1 font-outfit">{validationErrors.email}</p>
+                  <p className="mt-1 font-outfit text-xs text-state-error">{validationErrors.email}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-light-text dark:text-slate-200 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 font-outfit">
+                <label htmlFor="password" className="mb-1.5 block font-outfit text-xs font-medium text-text-secondary sm:mb-2 sm:text-sm">
                   password
                 </label>
-                <div className={`relative bg-white dark:bg-primary-600/50 rounded-md sm:rounded-lg border transition-colors ${
-                  validationErrors.password
-                    ? 'border-red-400 dark:border-red-500/50 focus-within:border-red-500'
-                    : 'border-slate-200 dark:border-primary-500/50 focus-within:border-teal-light dark:focus-within:border-teal-500'
-                }`}>
+                <div className={`relative ${fieldWrap(validationErrors.password)}`}>
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
                       if (validationErrors.password) {
-                        setValidationErrors(prev => ({ ...prev, password: null }));
+                        setValidationErrors((prev) => ({ ...prev, password: null }));
                       }
                     }}
                     placeholder="••••••••"
                     required
-                    className="w-full px-3 py-2.5 sm:py-2 bg-transparent text-light-text dark:text-white font-outfit placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none pr-10 text-sm sm:text-base"
+                    className="w-full min-h-11 bg-transparent px-3 py-2.5 pr-10 font-outfit text-sm text-text-primary outline-none placeholder:text-text-disabled sm:text-base"
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-light dark:text-teal-dark hover:opacity-70 transition-opacity"
+                    className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-brand-teal-deep transition-opacity hover:opacity-70"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
@@ -207,52 +187,47 @@ export default function Login() {
                   </button>
                 </div>
                 {validationErrors.password && (
-                  <p className="text-red-500 dark:text-red-300 text-xs mt-1 font-outfit">{validationErrors.password}</p>
+                  <p className="mt-1 font-outfit text-xs text-state-error">{validationErrors.password}</p>
                 )}
-                <div className="flex justify-end mt-1">
-                  <Link to="/forgot-password" className="text-sm text-teal-light dark:text-teal-dark hover:opacity-80 font-outfit transition-opacity">
+                <div className="mt-1 flex justify-end">
+                  <Link to="/forgot-password" className="font-outfit text-sm text-brand-teal-deep transition-opacity hover:opacity-80">
                     forgot password?
                   </Link>
                 </div>
               </div>
 
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="flex justify-center"
-              >
-                <button
-                  type="submit"
-                  className="w-full rounded-md bg-teal-light dark:bg-teal-dark text-white dark:text-primary-800 hover:opacity-90 font-bold font-outfit py-3 mx-auto cursor-pointer transition-opacity"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "logging in..." : "log in"}
-                </button>
-              </motion.div>
+              <Button type="submit" loading={isLoading} className="w-full">
+                {isLoading ? "logging in..." : "log in"}
+              </Button>
             </motion.form>
 
-            <motion.div className="mt-6 sm:mt-8 text-center" variants={fadeUp}>
-              <p className="text-light-text-secondary dark:text-slate-300 font-outfit text-sm sm:text-base">
+            <motion.div variants={fadeUp} className="mt-6">
+              <OAuthLoginSection
+                onOAuthLogin={handleOAuthLogin}
+                disabled={isLoading}
+              />
+            </motion.div>
+
+            <motion.div className="mt-6 text-center sm:mt-8" variants={fadeUp}>
+              <p className="font-outfit text-sm text-text-muted sm:text-base">
                 don't have an account?{" "}
-                <Link to="/signup" className="text-teal-light dark:text-teal-dark hover:opacity-80 font-medium transition-opacity">
+                <Link to="/signup" className="font-medium text-brand-teal-deep transition-opacity hover:opacity-80">
                   sign up now
                 </Link>
               </p>
             </motion.div>
 
             <motion.div
-              className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200 dark:border-white/10 text-center"
+              className="mt-6 border-t border-border-card pt-4 text-center sm:mt-8 sm:pt-6"
               variants={fadeUp}
             >
-              <p className="text-light-text-secondary/70 dark:text-teal-dark/70 text-xs font-outfit">
+              <p className="font-outfit text-xs text-text-muted">
                 predictions for the 2025/26 Premier League season are now open
               </p>
             </motion.div>
           </motion.div>
         </Container>
       </div>
-      <Footer />
     </>
   );
 }

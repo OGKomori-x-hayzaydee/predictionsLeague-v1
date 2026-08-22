@@ -1,246 +1,160 @@
-import React, { useState, useEffect, memo } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import Container from "../ui/Container";
-import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Moon } from "@phosphor-icons/react";
-import { useTheme } from "../../hooks/useTheme";
-import logo from "../../assets/logo.png";
+import { useEffect, useState, memo } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon } from '@phosphor-icons/react';
+import Container from '../ui/Container';
+import Button from '../ui/buttons/Button';
+import IconButton from '../ui/buttons/IconButton';
+import { useTheme } from '../../hooks/useTheme';
+import usePrefersReducedMotion from '../../hooks/usePrefersReducedMotion';
+import logo from '../../assets/logo.png';
 
-const NavItem = memo(({ to, children, location }) => {
-  const isActive = location.pathname === to;
+const PAGE_LINKS = [
+  { to: '/', label: 'Home' },
+  { to: '/howToPlay', label: 'How to Play' },
+];
+
+const HASH_LINKS = [
+  { to: '/howToPlay#basics', label: 'Basics' },
+  { to: '/howToPlay#scoring', label: 'Scoring' },
+  { to: '/howToPlay#chips', label: 'Chips' },
+  { to: '/howToPlay#faq', label: 'FAQ' },
+];
+
+const FOCUS =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal';
+
+function NavItem({ to, children, onNavigate }) {
+  const location = useLocation();
+  const isActive = to.includes('#')
+    ? `${location.pathname}${location.hash}` === to
+    : location.pathname === to;
 
   return (
-    <motion.div variants={itemVariants} className="relative">
-      <NavLink
-        to={to}
-        className={`font-outfit text-sm font-medium tracking-wide transition-colors duration-200 ${
-          isActive
-            ? "text-teal-light dark:text-teal-dark"
-            : "text-light-text dark:text-white/80 hover:text-teal-light dark:hover:text-teal-dark"
-        }`}
-      >
-        <span className="py-1 px-1 block">{children}</span>
-        <motion.div
-          className="h-0.5 bg-teal-light dark:bg-teal-dark"
-          initial={{ width: 0 }}
-          animate={{ width: isActive ? "100%" : 0 }}
-          whileHover={{ width: "100%" }}
-          transition={{ duration: 0.3 }}
-        />
-      </NavLink>
-    </motion.div>
+    <NavLink
+      to={to}
+      onClick={onNavigate}
+      className={`rounded-sm font-outfit text-sm font-medium tracking-wide transition-colors ${FOCUS} ${
+        isActive ? 'text-brand-teal' : 'text-text-muted hover:text-brand-teal'
+      }`}
+    >
+      <span className="block px-1 py-1">{children}</span>
+    </NavLink>
   );
-});
-
-const navbarVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const mobileMenuVariants = {
-  closed: { opacity: 0, scale: 0.95, y: -10 },
-  open: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      damping: 20,
-      stiffness: 300,
-    },
-  },
-};
+}
 
 const Navbar = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { isDarkMode, toggleTheme } = useTheme();
+  const reduce = usePrefersReducedMotion();
 
   useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [scrolled]);
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname, location.hash]);
+
+  const closeMenu = () => setIsMenuOpen(false);
+  const onHowToPlay = location.pathname === '/howToPlay';
 
   return (
-    <motion.nav
-      className={`fixed top-0 left-0 w-full py-4 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 dark:bg-primary-500/90 backdrop-blur-md shadow-sm dark:shadow-none"
-          : "bg-transparent"
+    <nav
+      className={`fixed top-0 left-0 z-50 w-full py-3 transition-colors duration-300 ${
+        scrolled || isMenuOpen
+          ? 'border-b border-border-card bg-surface-header/90 shadow-card backdrop-blur-md'
+          : 'bg-transparent'
       }`}
-      initial="hidden"
-      animate="visible"
-      variants={navbarVariants}
     >
       <Container size="4" className="mx-auto px-6">
         <div className="flex items-center justify-between">
-          <motion.div variants={itemVariants} className="flex items-center">
-            <NavLink to="/" className="flex items-center">
-              <img
-                src={logo}
-                alt="Predictions League Logo"
-                className="h-8 md:mr-3"
-              />
-              <span className="hidden md:inline text-teal-light dark:text-teal-100 text-2xl font-bold font-dmSerif">
-                predictionsLeague
-              </span>
-            </NavLink>
-          </motion.div>
+          <NavLink to="/" onClick={closeMenu} className={`flex items-center rounded-sm ${FOCUS}`}>
+            <img src={logo} alt="Predictions League" className="h-8 md:mr-3" />
+            <span className="hidden font-dmSerif text-2xl text-brand-teal md:inline">
+              predictionsLeague
+            </span>
+          </NavLink>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center gap-3">
-            <motion.button
-              className="text-light-text dark:text-white p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-              onClick={toggleTheme}
-              whileTap={{ scale: 0.95 }}
-              variants={itemVariants}
-              aria-label="Toggle theme"
+          <div className="flex items-center gap-2 md:hidden">
+            <IconButton label="Toggle theme" onClick={toggleTheme}>
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </IconButton>
+            <IconButton
+              label="Menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="landing-mobile-nav"
+              onClick={() => setIsMenuOpen((open) => !open)}
+              active={isMenuOpen}
             >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </motion.button>
-            <motion.button
-              className="text-light-text dark:text-white"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-              variants={itemVariants}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
-            </motion.button>
+            </IconButton>
           </div>
 
-          {/* Desktop navigation */}
-          <motion.div
-            className="hidden md:flex items-center gap-8 font-outfit"
-            variants={itemVariants}
-          >
-            <NavItem to="/" location={location}>Home</NavItem>
-            <NavItem to="/howToPlay" location={location}>How to Play</NavItem>
-
-            <motion.button
-              className="text-light-text dark:text-white p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-              onClick={toggleTheme}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Toggle theme"
-            >
-              {isDarkMode ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
-            </motion.button>
-
-            <motion.div variants={itemVariants}>
-              <NavLink to="/login">
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <button className="rounded-md bg-indigo-light dark:bg-indigo-dark hover:opacity-90 text-white px-5 py-2 transition-opacity">
-                    Log In
-                  </button>
-                </motion.div>
-              </NavLink>
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <NavLink to="/signup">
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <button className="rounded-md border border-indigo-light dark:border-indigo-dark bg-transparent hover:bg-indigo-light/10 dark:hover:bg-indigo-dark/10 text-indigo-light dark:text-indigo-dark px-5 py-2 transition-colors">
-                    Sign Up
-                  </button>
-                </motion.div>
-              </NavLink>
-            </motion.div>
-          </motion.div>
+          <div className="hidden items-center gap-7 font-outfit md:flex">
+            {PAGE_LINKS.map((link) => (
+              <NavItem key={link.to} to={link.to}>
+                {link.label}
+              </NavItem>
+            ))}
+            <IconButton label="Toggle theme" onClick={toggleTheme}>
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </IconButton>
+            <NavLink to="/login" className={`rounded-sm font-outfit text-sm font-medium text-text-muted hover:text-brand-teal ${FOCUS}`}>
+              Log In
+            </NavLink>
+            <NavLink to="/signup" className={`rounded-md ${FOCUS}`}>
+              <Button>Sign Up</Button>
+            </NavLink>
+          </div>
         </div>
 
-        {/* Mobile navigation */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="md:hidden bg-white/95 dark:bg-primary-500/95 backdrop-blur-md mt-4 py-4 px-5 rounded-xl shadow-lg dark:shadow-none border border-light-border dark:border-white/10"
-              initial="closed"
-              animate="open"
-              exit="closed"
-              variants={mobileMenuVariants}
+              id="landing-mobile-nav"
+              className="mt-4 rounded-lg border border-border-card bg-surface-card px-5 py-4 shadow-card md:hidden"
+              initial={reduce ? false : { opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduce ? { opacity: 1 } : { opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="flex flex-col gap-3">
-                <NavItem to="/" location={location}>Home</NavItem>
-                <NavItem to="/howToPlay" location={location}>How to Play</NavItem>
-
-                <div className="border-t border-light-border dark:border-white/10 my-2" />
-
-                <NavLink to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <motion.div whileTap={{ scale: 0.97 }}>
-                    <button className="rounded-md bg-indigo-light dark:bg-indigo-dark text-white px-5 py-2 w-full my-1">
-                      Log In
-                    </button>
-                  </motion.div>
+                {PAGE_LINKS.map((link) => (
+                  <NavItem key={link.to} to={link.to} onNavigate={closeMenu}>
+                    {link.label}
+                  </NavItem>
+                ))}
+                {onHowToPlay &&
+                  HASH_LINKS.map((link) => (
+                    <NavItem key={link.to} to={link.to} onNavigate={closeMenu}>
+                      {link.label}
+                    </NavItem>
+                  ))}
+                <div className="my-1 border-t border-border-card" />
+                <NavLink to="/login" onClick={closeMenu} className={`py-2 font-outfit text-sm text-text-muted ${FOCUS}`}>
+                  Log In
                 </NavLink>
-
-                <NavLink to="/signup" onClick={() => setIsMenuOpen(false)}>
-                  <motion.div whileTap={{ scale: 0.97 }}>
-                    <button className="rounded-md border border-indigo-light dark:border-indigo-dark bg-transparent text-indigo-light dark:text-indigo-dark px-5 py-2 w-full my-1">
-                      Sign Up
-                    </button>
-                  </motion.div>
+                <NavLink to="/signup" onClick={closeMenu}>
+                  <Button className="w-full">Sign Up</Button>
                 </NavLink>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </Container>
-    </motion.nav>
+    </nav>
   );
 });
 

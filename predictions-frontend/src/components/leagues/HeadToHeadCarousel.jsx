@@ -29,6 +29,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
       <div className="flex items-center justify-between gap-3">
         <KickerLabel>HEAD TO HEAD</KickerLabel>
         <SegmentedControl
+          className="hidden lg:flex"
           value={vsVariant}
           onChange={setVsVariant}
           options={[
@@ -45,7 +46,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
             onClick={() => canPrev && setVsIdx(idx - 1)}
             disabled={!canPrev}
             aria-label="Previous rival"
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft size={16} weight="bold" />
           </button>
@@ -53,17 +54,17 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
           <div className="flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5 pt-2.5">
             <div className="flex items-center justify-between gap-2 border-b border-border-base pb-2">
               <span className="flex min-w-0 items-center gap-2">
-                <Avatar name="You" src={current.youAvatar} size={28} animateFallback={false} className="ring-2 ring-brand-teal" />
+                <Avatar name="You" src={current.youAvatar} size={28} className="ring-2 ring-brand-teal" />
                 <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
               </span>
               <span className="font-outfit text-2xs tracking-widest text-text-muted-5">VS</span>
               <span className="flex min-w-0 items-center justify-end gap-2">
                 <span className="truncate font-dmSerif text-lg text-text-secondary md:text-2xl">{current.name}</span>
-                <Avatar name={current.name} src={current.avatar} size={28} animateFallback={false} />
+                <Avatar name={current.name} src={current.avatar} size={28} />
               </span>
             </div>
 
-            {vsVariant === 'tape' ? (
+            <div className={vsVariant === 'radar' ? 'lg:hidden' : undefined}>
               <div className="flex flex-col gap-2.5 md:gap-1.5">
                 {current.tapeRows.map((r) => (
                   <div key={r.label} className="flex flex-col gap-1 md:grid md:grid-cols-[3rem_minmax(0,1fr)_9rem_minmax(0,1fr)_3rem] md:items-center md:gap-2">
@@ -88,8 +89,15 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3 md:flex-row md:items-center">
+            </div>
+            <details className="rounded-md border border-border-hairline bg-surface-bar/60 lg:hidden">
+              <summary className="min-h-11 cursor-pointer px-3 py-2 font-outfit text-sm text-text-muted">Radar</summary>
+              <div className="flex flex-col items-center gap-3 px-3 pb-3">
+                <RadarChart rows={current.radarRows} themLabel={current.name} />
+              </div>
+            </details>
+            {vsVariant === 'radar' && (
+              <div className="hidden flex-col items-center gap-3 lg:flex lg:flex-row lg:items-center">
                 <RadarChart rows={current.radarRows} themLabel={current.name} />
                 <div className="flex w-full flex-col gap-2">
                   <div className="flex items-center gap-4 border-b border-border-base pb-1.5">
@@ -98,7 +106,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                       <span className="text-caption text-text-secondary">You</span>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="size-2 rounded-xs bg-[#f87171]" />
+                      <span className="size-2 rounded-xs bg-state-error" />
                       <span className="text-caption text-text-secondary">{current.name}</span>
                     </span>
                   </div>
@@ -106,7 +114,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                     <div key={r.label} className="grid grid-cols-[1fr_3rem_3rem] items-baseline gap-2.5">
                       <span className="font-outfit text-3xs tracking-widest text-text-muted-2">{r.label}</span>
                       <span className="text-right font-outfit text-caption text-brand-teal">{r.you}</span>
-                      <span className="text-right font-outfit text-caption text-[#f87171]">{r.them}</span>
+                      <span className="text-right font-outfit text-caption text-state-error">{r.them}</span>
                     </div>
                   ))}
                 </div>
@@ -123,7 +131,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
             onClick={() => canNext && setVsIdx(idx + 1)}
             disabled={!canNext}
             aria-label="Next rival"
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowRight size={16} weight="bold" />
           </button>

@@ -10,6 +10,7 @@ import Card from '../ui/Card';
 import KickerLabel from '../ui/KickerLabel';
 import { Button } from '../ui/buttons';
 import LoadingState from '../common/LoadingState';
+import useTheme from '../../hooks/useTheme';
 
 // The prototype has no concept of season rollover data in this app yet — this
 // is just the current league season label (same literal string already used
@@ -23,6 +24,7 @@ const FIELD_CLASS =
 export default function AccountTab({ profile, loading, onProfileChange }) {
   const { logout, updateUser, oauthData, isOAuthUser } = useAuth();
   const { preferences, updatePreference } = useUserPreferences();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -100,6 +102,14 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
 
       <div className="flex flex-col gap-3">
         <SettingsRow size="lg" label="Season" detail="The season currently being scored" kind="value" value={CURRENT_SEASON} />
+        <SettingsRow
+          size="lg"
+          label="Appearance"
+          detail="Light or dark ledger. Follows this device until you change it."
+          kind="toggle"
+          checked={isDarkMode}
+          onToggle={() => toggleTheme()}
+        />
         <SettingsRow
           size="lg"
           label="Public fingerprint"
