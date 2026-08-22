@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import KickerLabel from '../ui/KickerLabel';
 import RadarChart from '../ui/RadarChart';
 import SegmentedControl from '../ui/SegmentedControl';
@@ -39,12 +40,13 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
       <div className="overflow-hidden rounded-16 border border-border-base bg-surface-card">
         <div className="flex items-center gap-1.5 p-1.5">
           <button
+            type="button"
             onClick={() => canPrev && setVsIdx(idx - 1)}
             disabled={!canPrev}
             aria-label="Previous rival"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8249;
+            <ArrowLeft size={16} weight="bold" />
           </button>
 
           <div className="flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5 pt-2.5">
@@ -110,12 +112,13 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
           </div>
 
           <button
+            type="button"
             onClick={() => canNext && setVsIdx(idx + 1)}
             disabled={!canNext}
             aria-label="Next rival"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8250;
+            <ArrowRight size={16} weight="bold" />
           </button>
         </div>
 

@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import TeamCrest from '../ui/TeamCrest';
 
 function formatDay(dateStr) {
@@ -91,12 +92,13 @@ export default function StationRail({ stations, variant = 'desktop', onPrev, onN
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={onPrev}
             disabled={!canPrev}
             aria-label="Previous fixture"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-40"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8249;
+            <ArrowLeft size={12} weight="bold" />
           </button>
           <div className="scrollbar-none flex flex-1 gap-2 overflow-x-auto pb-0.5" style={{ scrollSnapType: 'x mandatory' }}>
             {stations.map((station) => (
@@ -104,12 +106,13 @@ export default function StationRail({ stations, variant = 'desktop', onPrev, onN
             ))}
           </div>
           <button
+            type="button"
             onClick={onNext}
             disabled={!canNext}
             aria-label="Next fixture"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-40"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8250;
+            <ArrowRight size={12} weight="bold" />
           </button>
         </div>
         <div className="flex justify-center gap-1 pt-0.5">

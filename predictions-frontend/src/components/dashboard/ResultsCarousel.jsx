@@ -1,11 +1,14 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import KickerLabel from '../ui/KickerLabel';
-import CarouselArrow from '../ui/CarouselArrow';
 import FixtureSlip from '../fixtures/FixtureSlip';
 import useCarouselScroll from '../../hooks/useCarouselScroll';
 import { predictionAsReceiptPair, recordSearchPath } from '../../utils/matchResult';
 import { calculateCeilingPoints } from '../../utils/pointsCalculation';
+
+const arrowClass =
+  'mt-8 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30';
 
 function TicketTape({ predictions, gameweekLabel }) {
   const navigate = useNavigate();
@@ -14,14 +17,15 @@ function TicketTape({ predictions, gameweekLabel }) {
 
   return (
     <div className="flex items-stretch gap-1.5">
-      <CarouselArrow
-        direction="left"
-        size="lg"
-        label="Previous results"
+      <button
+        type="button"
         onClick={() => scroll('left')}
         disabled={!canScrollLeft}
-        className="mt-8"
-      />
+        aria-label="Previous results"
+        className={arrowClass}
+      >
+        <ArrowLeft size={16} weight="bold" />
+      </button>
       <div
         ref={ref}
         onScroll={checkScrollability}
@@ -49,14 +53,15 @@ function TicketTape({ predictions, gameweekLabel }) {
           );
         })}
       </div>
-      <CarouselArrow
-        direction="right"
-        size="lg"
-        label="Next results"
+      <button
+        type="button"
         onClick={() => scroll('right')}
         disabled={!canScrollRight}
-        className="mt-8"
-      />
+        aria-label="Next results"
+        className={arrowClass}
+      >
+        <ArrowRight size={16} weight="bold" />
+      </button>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import KickerLabel from './KickerLabel';
 
 /**
@@ -42,23 +43,25 @@ export default function SlotBar({
       {reelNav && (
         <div className="flex shrink-0 items-center gap-3">
           <button
+            type="button"
             onClick={reelNav.onPrev}
             disabled={!reelNav.canPrev}
             aria-label="Previous"
-            className="flex size-8 items-center justify-center rounded-7 border border-border-control bg-surface-card-4/70 text-text-muted-1 transition-colors hover:border-brand-teal-mid/40 hover:text-brand-teal disabled:opacity-30"
+            className="inline-flex size-8 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8249;
+            <ArrowLeft size={14} weight="bold" />
           </button>
           <span className="min-w-14 text-center font-outfit text-caption tracking-[0.14em] text-brand-teal">
             {reelNav.counter}
           </span>
           <button
+            type="button"
             onClick={reelNav.onNext}
             disabled={!reelNav.canNext}
             aria-label="Next"
-            className="flex size-8 items-center justify-center rounded-7 border border-border-control bg-surface-card-4/70 text-text-muted-1 transition-colors hover:border-brand-teal-mid/40 hover:text-brand-teal disabled:opacity-30"
+            className="inline-flex size-8 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8250;
+            <ArrowRight size={14} weight="bold" />
           </button>
           <span className="h-4 w-px bg-border-card" />
           <span className="whitespace-nowrap text-base text-text-secondary">{reelNav.title}</span>

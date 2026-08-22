@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -539,9 +540,9 @@ export default function FixturesPage() {
                 onClick={selectPrev}
                 disabled={!canSelectPrev || isFiling}
                 aria-label="Previous fixture"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
               >
-                &#8249;
+                <ArrowLeft size={14} weight="bold" />
               </button>
               <div className="flex flex-col items-center gap-0.5">
                 <span className="font-mono text-xs tracking-wider text-brand-teal">
@@ -556,9 +557,9 @@ export default function FixturesPage() {
                 onClick={selectNext}
                 disabled={!canSelectNext || isFiling}
                 aria-label="Next fixture"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
               >
-                &#8250;
+                <ArrowRight size={14} weight="bold" />
               </button>
             </div>
 
