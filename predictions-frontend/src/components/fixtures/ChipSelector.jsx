@@ -32,11 +32,11 @@ export default function ChipSelector({ chips = [], selected = [], onToggle }) {
   const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex min-w-0 w-full flex-col gap-2">
       <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
         CHIPS · THIS MATCH
       </span>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:grid-cols-3">
         {CHIP_LIST.map((c) => {
           const isSelected = selectedIds.includes(c.id);
           const hue = CHIP_HUES[c.id] || DEFAULT_CHIP_HUE;

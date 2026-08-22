@@ -114,8 +114,12 @@ export default function FixtureEditor({
         </div>
       </div>
 
-      <div className="flex w-full max-w-[76rem] flex-col gap-4">
+      <div className="grid w-full max-w-[76rem] grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,3fr)_auto_minmax(0,2fr)] lg:gap-x-4">
         <ChipSelector chips={matchChips} selected={draft.chips} onToggle={onToggleMatchChip} />
+        <div
+          className="h-px w-full bg-[#1c2942] lg:h-auto lg:w-px lg:self-stretch"
+          aria-hidden
+        />
         <GameweekChipBar
           chips={gameweekChips}
           activeIds={activeGameweekChipIds}

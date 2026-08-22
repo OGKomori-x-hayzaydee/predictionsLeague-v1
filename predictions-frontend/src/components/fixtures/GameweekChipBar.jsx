@@ -33,13 +33,11 @@ export default function GameweekChipBar({
   onActivate,
 }) {
   return (
-    <div className="flex w-full flex-col gap-2">
-      <div className="flex flex-col gap-0.5">
-        <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
-          CHIPS · THE WHOLE GAMEWEEK
-        </span>
-      </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+    <div className="flex min-w-0 w-full flex-col gap-2">
+      <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#5b667d]">
+        CHIPS · THE WHOLE GAMEWEEK
+      </span>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-2">
         {GW_CHIP_LIST.map((c) => {
           const isSelected = activeIds.includes(c.id);
           const hue = CHIP_HUES[c.id] || DEFAULT_CHIP_HUE;

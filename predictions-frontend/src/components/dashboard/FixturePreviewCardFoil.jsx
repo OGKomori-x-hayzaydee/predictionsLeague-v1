@@ -52,7 +52,7 @@ function ChipStampTooltip({ chips, visible }) {
   if (!chips.length) return null;
   return (
     <div
-      className={`pointer-events-none absolute top-full right-0 z-20 mt-2 w-max max-w-[220px] rounded-[10px] border border-[#243247] bg-[#0b1424] px-3 py-2 shadow-[0_8px_20px_rgba(0,0,0,0.5)] transition-opacity duration-150 ${
+      className={`pointer-events-none absolute left-full top-1/2 z-20 ml-2 w-max max-w-[220px] -translate-y-1/2 rounded-[10px] border border-[#243247] bg-[#0b1424] px-3 py-2 shadow-[0_8px_20px_rgba(0,0,0,0.5)] transition-opacity duration-150 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
@@ -190,24 +190,14 @@ export default function FixturePreviewCardFoil({
           )}
         </button>
 
-        {/* Bottom row — highlighted ceiling points on the left, CTA on the right */}
-        <div className="flex items-center justify-between border-t border-[#1c2942] px-7 py-3">
+        {/* Bottom row — highlighted ceiling points, CTA floats in the corner */}
+        <div className="border-t border-[#1c2942] px-7 py-3 pr-28">
           <div className="flex flex-col leading-none">
             <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
             <span className="font-dmSerif text-lg text-brand-amber">
               {predicted ? `${ceiling} pts` : '—'}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/fixtures')}
-            className="flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
-          >
-            {predicted ? 'Edit in reel' : 'File in reel'}
-            <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
-              <path d="M3 7.5h8.5M8 4l3.5 3.5L8 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -224,6 +214,19 @@ export default function FixturePreviewCardFoil({
           <ChipPile chips={filedChips} size={stampSize} />
         </div>
       </div>
+
+      {/* Edit CTA — anchored to the card's bottom-right corner, mirroring the
+          chip stamp's top-right corner treatment. */}
+      <button
+        type="button"
+        onClick={() => navigate('/fixtures')}
+        className="absolute bottom-3 right-3 flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white shadow-[0_6px_14px_rgba(0,0,0,0.35)] transition-colors hover:bg-brand-indigo-hover"
+      >
+        {predicted ? 'Edit in reel' : 'File in reel'}
+        <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
+          <path d="M3 7.5h8.5M8 4l3.5 3.5L8 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
     </div>
   );
 }
