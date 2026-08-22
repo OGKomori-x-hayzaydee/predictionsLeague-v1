@@ -4,7 +4,6 @@ import KickerLabel from '../components/ui/KickerLabel';
 import StatTile from '../components/ui/StatTile';
 import StationRail from '../components/dashboard/StationRail';
 import FixturePreviewCard from '../components/dashboard/FixturePreviewCard';
-import SpinePreviewSwitcher, { useDashSpineVariant } from '../components/dashboard/SpinePreviewSwitcher';
 import ResultsCarousel from '../components/dashboard/ResultsCarousel';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardMobileSheet from '../components/dashboard/DashboardMobileSheet';
@@ -18,7 +17,6 @@ export default function DashboardPage() {
   const [aiOpen, setAiOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('this');
-  const [spineVariant, setSpineVariant] = useDashSpineVariant();
 
   const {
     stations,
@@ -122,12 +120,10 @@ export default function DashboardPage() {
 
           {/* Fixture preview card — fluid responsive width with subtle breathing room */}
           <div className="mt-5 mb-6 w-[94%] mx-auto">
-            <SpinePreviewSwitcher value={spineVariant} onChange={setSpineVariant} />
             <FixturePreviewCard
               fixture={selectedFixture}
               ceiling={selectedCeiling}
               variant="desktop"
-              spineVariant={spineVariant}
               deadlineLabel={deadlineFormatted}
             />
           </div>
@@ -193,12 +189,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <SpinePreviewSwitcher value={spineVariant} onChange={setSpineVariant} />
         <FixturePreviewCard
           fixture={selectedFixture}
           ceiling={selectedCeiling}
           variant="mobile"
-          spineVariant={spineVariant}
           aiOpen={aiOpen}
           onToggleAi={() => setAiOpen((v) => !v)}
           deadlineLabel={deadlineFormatted}

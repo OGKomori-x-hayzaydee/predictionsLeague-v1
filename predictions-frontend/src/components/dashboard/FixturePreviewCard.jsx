@@ -129,16 +129,17 @@ function FiledSpine({ spineVariant, isMobile, homeTeam, awayTeam, prediction, ho
  * Fixture-preview card — the selected station's detail view (Spine.dc.html
  * desktop lines 131-266, mobile lines 2257-2336).
  *
- * `spineVariant` picks the filed-score spine (A hyphen / B wax-seal / D well).
- * Unfiled copy is shared across those three. `C` (foil/collectible) is a
- * full break from that shared header/footer/frame — it owns its own chrome
+ * `C` (foil/collectible) is the shipped variant — it owns its own chrome
  * end to end, so it's dispatched separately rather than through FiledSpine.
+ * A (hyphen) / B (wax-seal) / D (well) are shelved: their code is still
+ * here (fixturePreviewSpines.jsx) but no longer wired to any UI — pass
+ * `spineVariant` explicitly to reach them if revisiting the comparison.
  */
 export default function FixturePreviewCard({
   fixture,
   ceiling,
   variant = 'desktop',
-  spineVariant = 'A',
+  spineVariant = 'C',
   aiOpen = true,
   onToggleAi,
   deadlineLabel,

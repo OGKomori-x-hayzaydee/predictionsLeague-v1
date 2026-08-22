@@ -154,7 +154,10 @@ export const dataMerging = {
           homeScorers: matchingPrediction.homeScorers || [],
           awayScorers: matchingPrediction.awayScorers || [],
           chips: matchingPrediction.chips || [],
-          submittedAt: matchingPrediction.submittedAt,
+          submittedAt:
+            matchingPrediction.submittedAt ||
+            matchingPrediction.predictedAt ||
+            matchingPrediction.date,
           status: matchingPrediction.status || 'pending',
           points: matchingPrediction.points ?? null,
           // Actual results (from backend after match completion)

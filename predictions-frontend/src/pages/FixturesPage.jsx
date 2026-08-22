@@ -75,6 +75,7 @@ function draftAsFiledPrediction(draft, fixture, gwChipIds = []) {
     matchDate: fixture.date,
     gameweek: fixture.gameweek,
     status: 'pending',
+    submittedAt: new Date().toISOString(),
   };
 }
 
@@ -195,7 +196,11 @@ export default function FixturesPage() {
     chips: restingPrediction.chips || filedChips,
   }) : 0;
 
-  const livePrediction = { ...draft, chips: filedChips };
+  const livePrediction = {
+    ...draft,
+    chips: filedChips,
+    submittedAt: restingPrediction?.submittedAt,
+  };
   const activePrediction = filedNow ? restingPrediction : livePrediction;
   const activeCeiling = filedNow ? restingCeiling : liveCeiling;
 
@@ -268,6 +273,7 @@ export default function FixturesPage() {
     if (!selectedFixture || isFiling) return;
     const editing = isPredicted;
     const chipsToFile = filedChips;
+    const filed = draftAsFiledPrediction(draft, selectedFixture, activeGwChipIds);
     setSubmitting(true);
     setSubmitError(null);
     setEditorOpen(false);
@@ -288,10 +294,9 @@ export default function FixturesPage() {
           ),
         {
           onFiled: () => {
-            const filed = draftAsFiledPrediction(draft, selectedFixture, activeGwChipIds);
             upsertUserPredictionCache(queryClient, filed);
             queryClient.invalidateQueries({ queryKey: [CHIP_QUERY_KEYS.STATUS] });
-            markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips });
+            markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips, submittedAt: filed.submittedAt });
           },
         }
       );
@@ -300,8 +305,7 @@ export default function FixturesPage() {
         setEditorOpen(true);
         setSubmitError(result?.error?.message || 'Could not file this prediction.');
       } else {
-        const filed = draftAsFiledPrediction(draft, selectedFixture, activeGwChipIds);
-        markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips });
+        markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips, submittedAt: filed.submittedAt });
         if (result.data) {
           const fromApi = result.data;
           upsertUserPredictionCache(queryClient, {

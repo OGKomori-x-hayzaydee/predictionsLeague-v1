@@ -46,6 +46,9 @@ export const userPredictionsAPI = {
 
         // Normalize date fields to prevent confusion between fixture date and prediction timestamp
         // Backend may send: date (fixture datetime), matchDate (fixture datetime), predictedAt (when prediction was made)
+        if (!normalized.submittedAt) {
+          normalized.submittedAt = normalized.predictedAt || normalized.date;
+        }
         if (!normalized.matchDate && normalized.date) {
           // If matchDate is missing, use date as the fixture datetime
           normalized.matchDate = normalized.date;

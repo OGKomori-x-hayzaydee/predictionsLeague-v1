@@ -7,6 +7,14 @@ import {
   pointsLabel,
 } from '../../utils/matchResult';
 
+function formatFiledClock(prediction) {
+  const raw = prediction?.submittedAt || prediction?.predictedAt;
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 /**
  * FixtureSlip — supports:
  * 1. `variant="rail"`: live updating preview slip in the right sidebar.
@@ -47,30 +55,25 @@ export default function FixtureSlip({
   const ledger = buildLedgerRows(prediction || {});
   const headline = slipHeadline(homeTeam, awayTeam, homeScore, awayScore);
   const sentence = slipSentence(homeTeam, awayTeam, homeScore, awayScore, prediction?.homeScorers, prediction?.awayScorers);
+  const filedClock = formatFiledClock(prediction);
 
   // RESTING / MAIN VIEW (Picture 3 - when fixture is filed and resting in center)
   if (variant === 'resting' || variant === 'main') {
     return (
       <div className="relative flex w-full max-w-[46.2rem] flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[1.65rem] shadow-2xl">
-        {/* Top line */}
-        <div className="flex items-baseline justify-between gap-2.5">
+        {/* Top line: kicker + clock, stamp occupies top-right */}
+        <div className="flex items-center justify-between gap-2.5">
           <span className="font-outfit text-xs tracking-wider text-[#66748c]">
-            THE SLIP · {gameweekLabel}
+            THE SLIP · {gameweekLabel}{filedClock ? ` · ${filedClock}` : ''}
           </span>
-          <span className="font-outfit text-xs tracking-wide text-[#5eead4]">
-            FILED 20:41
-          </span>
-        </div>
-
-        {/* Headline + FILED stamp */}
-        <div className="relative pr-20">
-          <h2 className="m-0 font-dmSerif text-[2.0625rem] md:text-[2.475rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
-            {headline}
-          </h2>
-          <span className="absolute right-0 top-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3.5 py-1 font-outfit text-sm font-bold tracking-wider text-[#5eead4]">
+          <span className="shrink-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3.5 py-1 font-outfit text-sm font-bold tracking-wider text-[#5eead4]">
             FILED
           </span>
         </div>
+
+        <h2 className="m-0 font-dmSerif text-[2.0625rem] md:text-[2.475rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
+          {headline}
+        </h2>
 
         {/* Crests + Scores */}
         <div className="flex items-center justify-center gap-4 py-2">
@@ -136,7 +139,7 @@ export default function FixtureSlip({
       {/* Top line */}
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
-          THE SLIP · {gameweekLabel}
+          THE SLIP · {gameweekLabel}{filed && filedClock ? ` · ${filedClock}` : ''}
         </span>
         <span
           className={`font-outfit text-2xs tracking-wide ${

@@ -10,6 +10,14 @@ import {
   CARD_BOUNCE_TRANSITION,
 } from './filingChoreography';
 
+function formatFiledClock(prediction) {
+  const raw = prediction?.submittedAt || prediction?.predictedAt;
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 /**
  * Measures the live translate needed to move the card from its in-flow
  * right-rail box to sitting centered within `paneRef`, recomputed via
@@ -93,6 +101,7 @@ export default function FloatingSlipCard({
     prediction?.homeScorers,
     prediction?.awayScorers
   );
+  const filedClock = formatFiledClock(prediction);
 
   return (
     <div ref={dockRef} className="relative w-full">
@@ -122,7 +131,7 @@ export default function FloatingSlipCard({
             <>
               <div className="flex items-baseline justify-between gap-2.5">
                 <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
-                  THE SLIP · {gameweekLabel}
+                  THE SLIP · {gameweekLabel}{filed && filedClock ? ` · ${filedClock}` : ''}
                 </span>
                 <span
                   className={`flex items-center gap-1.5 font-outfit text-2xs tracking-wide ${
@@ -170,23 +179,20 @@ export default function FloatingSlipCard({
             </>
           ) : (
             <>
-              <div className="relative">
-                <div className="flex items-baseline justify-between gap-2.5">
-                  <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
-                    THE SLIP · {gameweekLabel}
-                  </span>
-                  <span className="font-outfit text-2xs tracking-wide text-[#5eead4]">FILED</span>
-                </div>
-                <h2 className="m-0 mt-2.5 mr-[70px] font-dmSerif text-[1.65rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
-                  {headline}
-                </h2>
+              <div className="flex items-center justify-between gap-2.5">
+                <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
+                  THE SLIP · {gameweekLabel}{filedClock ? ` · ${filedClock}` : ''}
+                </span>
                 <span
-                  className="absolute right-0 top-0.5 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-[11px] py-[5px] font-outfit text-2xs font-bold tracking-wider text-[#5eead4]"
+                  className="shrink-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-[11px] py-[5px] font-outfit text-2xs font-bold tracking-wider text-[#5eead4]"
                   style={{ animation: 'stampIn .42s cubic-bezier(.2,1.4,.4,1) both' }}
                 >
                   FILED
                 </span>
               </div>
+              <h2 className="m-0 mt-2.5 font-dmSerif text-[1.65rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
+                {headline}
+              </h2>
 
               <div className="mt-1.5 flex items-center justify-center gap-3.5">
                 <TeamCrest team={homeTeam} size={31} />
