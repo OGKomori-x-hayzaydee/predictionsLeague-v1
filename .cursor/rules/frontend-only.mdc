@@ -1,0 +1,28 @@
+---
+description: All work is frontend-only; backend in this repo is reference, never edit it
+alwaysApply: true
+---
+
+# Frontend-only engineering
+
+All solutions are **frontend-engineered**. `predictions-backend` (Java/Spring) exists **only as a reference** so agents can learn live API shapes, DTOs, cookies, and error codes.
+
+## Do
+
+- Implement features, mappings, fallbacks, and empty states in `predictions-frontend/`
+- Read backend DTOs/controllers to discover JSON field names — then consume them in JS
+- If the API is missing a field, use what exists, client fallbacks, and optionally `docs/proposals/` — do not patch the server
+
+## Do not
+
+- Create, edit, delete, or commit anything under `predictions-backend/` (including `*.java`, yaml, migrations, tests)
+- “Just add a field” to a DTO or mapper because the UI needs it
+- Run backend codegen, OpenAPI regeneration that writes Java, or Flyway migrations
+
+```js
+// ❌ BAD — changing Java so standings include avatar
+// LeagueMember.java: private String avatar;
+
+// ✅ GOOD — consume whatever the payload already has
+<Avatar name={m.username} src={m.avatar || m.profilePicture || m.profilePictureUrl} />
+```

@@ -1,3 +1,11 @@
+# Frontend-only — MANDATORY product scope
+
+All solutions are **frontend-engineered**. `predictions-backend` exists **only as a reference** in this repo.
+
+- Implement everything in `predictions-frontend/`
+- Read Java/DTOs to learn JSON field names; never create, edit, or commit backend files
+- Missing API fields → client fallbacks and/or `docs/proposals/`, not a server patch
+
 # context-mode — MANDATORY routing rules
 
 You have context-mode MCP tools available. These rules are NOT optional — they protect your context window from flooding. A single unrouted command can dump 56 KB into context and waste the entire session.
