@@ -77,10 +77,15 @@ export default function ResultsCarousel({
   const gameweekLabel = gameweek ? `GW${gameweek}` : 'LAST GW';
 
   return (
-    <div className="flex flex-col gap-3">
-      <KickerLabel as="span" className="tracking-[0.16em] text-[#66748c]">
-        Recent results{gameweek ? ` · GW${gameweek}` : ''}
-      </KickerLabel>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1">
+        <KickerLabel as="span" className="tracking-[0.16em] text-[#66748c]">
+          {gameweek ? `GAMEWEEK ${gameweek}` : 'LAST GAMEWEEK'}
+        </KickerLabel>
+        <h2 className="m-0 font-dmSerif text-3xl leading-tight text-text-primary">
+          Recent results
+        </h2>
+      </div>
 
       {isLoading && <p className="text-xs text-[#66748c]">Loading recent results…</p>}
 

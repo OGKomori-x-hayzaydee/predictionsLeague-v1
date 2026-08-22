@@ -110,7 +110,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Fixture preview card — fluid responsive width with subtle breathing room */}
-          <div className="mt-5 mb-6 w-[94%] mx-auto">
+          <div className="mt-5 w-[94%] mx-auto">
             <FixturePreviewCardFoil
               fixture={selectedFixture}
               ceiling={selectedCeiling}
@@ -119,7 +119,9 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="w-[94%] mx-auto">
+          <hr className="mt-6 h-px border-0 bg-border-base" />
+
+          <div className="mt-6 w-[94%] mx-auto">
             <ResultsCarousel
               predictions={lastGw.predictions}
               gameweek={lastGw.gameweek}
