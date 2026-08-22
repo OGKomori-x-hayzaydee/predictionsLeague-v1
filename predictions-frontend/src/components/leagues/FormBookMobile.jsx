@@ -1,4 +1,5 @@
 import TeamCrest from '../ui/TeamCrest';
+import Avatar from '../ui/Avatar';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import SegmentedControl from '../ui/SegmentedControl';
@@ -67,13 +68,13 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
                       borderColor: on ? 'var(--color-brand-teal-mid)' : 'var(--border-base)',
                     }}
                   >
-                    <span
-                      className={`flex size-8 items-center justify-center rounded-full text-sm ${
-                        r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-                      }`}
-                    >
-                      {r.initial}
-                    </span>
+                    <Avatar
+                      name={r.name}
+                      src={r.avatar}
+                      size={32}
+                      animateFallback={false}
+                      className={r.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
+                    />
                     <span className="max-w-full truncate text-2xs" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
                       {r.name}
                     </span>

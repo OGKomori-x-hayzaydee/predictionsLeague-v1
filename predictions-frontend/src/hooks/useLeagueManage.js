@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import leagueAPI from '../services/api/leagueAPI.js';
 import { notificationManager } from '../services/notificationService.js';
+import { overlayOwnAvatar } from '../utils/profileOverrides';
+import { useAuthState } from './useAuth';
 
 function sortMembers(list) {
   return [...list].sort((a, b) => (a.position ?? 999) - (b.position ?? 999));
@@ -20,13 +22,16 @@ function notifyError(message) {
 }
 
 export default function useLeagueManage(leagueId) {
-  const [members, setMembers] = useState([]);
+  const { user } = useAuthState();
+  const ownAvatar = user?.avatar || user?.profilePicture;
+  const [membersRaw, setMembersRaw] = useState([]);
+  const members = useMemo(() => overlayOwnAvatar(membersRaw, ownAvatar) ?? membersRaw, [membersRaw, ownAvatar]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchMembers = useCallback(async () => {
     if (!leagueId) {
-      setMembers([]);
+      setMembersRaw([]);
       setLoading(false);
       return;
     }
@@ -34,10 +39,10 @@ export default function useLeagueManage(leagueId) {
     setError(null);
     try {
       const data = await leagueAPI.getLeagueStandings(leagueId);
-      setMembers(sortMembers(Array.from(data?.standings || [])));
+      setMembersRaw(sortMembers(Array.from(data?.standings || [])));
     } catch (err) {
       setError(err.message || 'Failed to load members');
-      setMembers([]);
+      setMembersRaw([]);
     } finally {
       setLoading(false);
     }
@@ -60,7 +65,7 @@ export default function useLeagueManage(leagueId) {
   const promoteMember = async (member) => {
     try {
       await leagueAPI.promoteMember(leagueId, member.id);
-      setMembers((prev) =>
+      setMembersRaw((prev) =>
         prev.map((m) => (m.id === member.id ? { ...m, isAdmin: true } : m)),
       );
       notificationManager.leagues.promoteSuccess(memberLabel(member));
@@ -73,7 +78,7 @@ export default function useLeagueManage(leagueId) {
   const removeMember = async (member) => {
     try {
       await leagueAPI.removeMember(leagueId, member.id);
-      setMembers((prev) => prev.filter((m) => m.id !== member.id));
+      setMembersRaw((prev) => prev.filter((m) => m.id !== member.id));
       notificationManager.leagues.removeSuccess(memberLabel(member));
     } catch (err) {
       notifyError(err.message || 'Failed to remove member');

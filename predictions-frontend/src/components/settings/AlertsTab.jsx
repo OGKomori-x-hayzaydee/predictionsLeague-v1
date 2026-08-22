@@ -18,10 +18,11 @@ export default function AlertsTab() {
   const notifications = preferences.notifications || {};
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {TOGGLES.map(({ key, label, detail }) => (
         <SettingsRow
           key={key}
+          size="lg"
           label={label}
           detail={detail}
           kind="toggle"

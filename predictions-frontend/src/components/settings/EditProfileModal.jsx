@@ -42,8 +42,8 @@ export default function EditProfileModal({ open, onClose, username, onSaved }) {
       busy={busy}
       title="Edit Profile"
       icon={
-        <span className="flex size-9 items-center justify-center rounded-lg bg-brand-amber/20 text-brand-amber">
-          <User size={18} weight="bold" />
+        <span className="flex size-11 items-center justify-center rounded-lg bg-brand-amber/20 text-brand-amber">
+          <User size={20} weight="bold" />
         </span>
       }
       footer={
@@ -57,21 +57,21 @@ export default function EditProfileModal({ open, onClose, username, onSaved }) {
         </>
       }
     >
-      <label className="flex flex-col gap-1">
-        <span className="font-outfit text-xs uppercase tracking-[0.12em] text-text-muted-3">Username</span>
-        <span className="text-xs text-text-muted-2">Your unique handle across the platform</span>
-        <span className="mt-2 flex items-center rounded-md border border-border-control bg-surface-card-2 focus-within:border-brand-teal">
-          <span className="pl-3 font-outfit text-sm text-text-muted-3">@</span>
+      <label className="flex flex-col gap-1.5">
+        <span className="font-outfit text-sm uppercase tracking-[0.12em] text-text-muted-3">Username</span>
+        <span className="text-sm text-text-muted-2">Your unique handle across the platform</span>
+        <span className="mt-2 flex items-center rounded-lg border border-border-control bg-surface-card-2 focus-within:border-brand-teal">
+          <span className="pl-3.5 font-outfit text-base text-text-muted-3">@</span>
           <input
             value={value}
             onChange={(e) => setValue(e.target.value.replace(/^@/, ''))}
-            className="w-full bg-transparent px-2 py-2 text-sm text-text-primary outline-none"
+            className="w-full bg-transparent px-2 py-2.5 text-base text-text-primary outline-none"
             autoComplete="username"
             spellCheck={false}
           />
         </span>
       </label>
-      {error && <p className="mt-3 text-xs text-state-error-mid">{error}</p>}
+      {error && <p className="mt-4 text-sm text-state-error-mid">{error}</p>}
     </Modal>
   );
 }

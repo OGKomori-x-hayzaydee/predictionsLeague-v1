@@ -83,7 +83,7 @@ export default function ChangeAvatarModal({ open, onClose, username, onSaved }) 
         ) : null
       }
     >
-      <div className="flex gap-5 border-b border-border-base">
+      <div className="flex gap-6 border-b border-border-base">
         {['generate', 'upload'].map((id) => (
           <button
             key={id}
@@ -92,7 +92,7 @@ export default function ChangeAvatarModal({ open, onClose, username, onSaved }) 
               setTab(id);
               setError(null);
             }}
-            className={`pb-2 font-outfit text-sm capitalize transition-colors ${
+            className={`pb-2.5 font-outfit text-base capitalize transition-colors ${
               tab === id
                 ? 'text-brand-amber shadow-[inset_0_-2px_0_0_var(--color-brand-amber)]'
                 : 'text-text-muted-2 hover:text-text-primary'
@@ -104,11 +104,11 @@ export default function ChangeAvatarModal({ open, onClose, username, onSaved }) 
       </div>
 
       {tab === 'generate' && (
-        <div className="flex flex-col items-center gap-5 pt-5">
-          <img src={preview} alt="" className="size-32 rounded-full border border-border-card bg-surface-card-2 object-cover" />
+        <div className="flex flex-col items-center gap-6 pt-6">
+          <img src={preview} alt="" className="size-40 rounded-full border border-border-card bg-surface-card-2 object-cover" />
           <div className="w-full">
-            <p className="mb-2 font-outfit text-xs uppercase tracking-[0.12em] text-text-muted-3">Style</p>
-            <div className="grid grid-cols-3 gap-2">
+            <p className="mb-3 font-outfit text-sm uppercase tracking-[0.12em] text-text-muted-3">Style</p>
+            <div className="grid grid-cols-3 gap-3">
               {AVATAR_STYLES.map((style) => {
                 const selected = style.id === styleId;
                 return (
@@ -116,18 +116,18 @@ export default function ChangeAvatarModal({ open, onClose, username, onSaved }) 
                     key={style.id}
                     type="button"
                     onClick={() => setStyleId(style.id)}
-                    className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-2.5 transition-colors ${
+                    className={`flex flex-col items-center gap-2 rounded-xl border px-2.5 py-3 transition-colors ${
                       selected
                         ? 'border-brand-amber bg-brand-amber/10'
                         : 'border-border-card bg-surface-card-3 hover:border-border-control'
                     }`}
                   >
                     <img
-                      src={dicebearDataUri(style.id, seed, 48)}
+                      src={dicebearDataUri(style.id, seed, 56)}
                       alt=""
-                      className="size-10 rounded-full object-cover"
+                      className="size-12 rounded-full object-cover"
                     />
-                    <span className="font-outfit text-2xs text-text-secondary">{style.label}</span>
+                    <span className="font-outfit text-xs text-text-secondary">{style.label}</span>
                   </button>
                 );
               })}
@@ -148,13 +148,13 @@ export default function ChangeAvatarModal({ open, onClose, username, onSaved }) 
             setDragOver(false);
             handlePickedFile(e.dataTransfer.files?.[0]);
           }}
-          className={`mt-5 flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed px-4 py-10 text-center transition-colors ${
+          className={`mt-6 flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[16px] border border-dashed px-5 py-12 text-center transition-colors ${
             dragOver ? 'border-brand-amber bg-brand-amber/10' : 'border-border-control bg-surface-card-2'
           }`}
         >
-          <UploadSimple size={28} className="text-text-muted-2" />
-          <span className="text-sm text-text-secondary">Tap to choose a photo</span>
-          <span className="font-outfit text-xs text-text-muted-3">JPEG, PNG, WebP, or GIF — max 5 MB</span>
+          <UploadSimple size={32} className="text-text-muted-2" />
+          <span className="text-base text-text-secondary">Tap to choose a photo</span>
+          <span className="font-outfit text-sm text-text-muted-3">JPEG, PNG, WebP, or GIF — max 5 MB</span>
           <input
             type="file"
             accept={ACCEPT}
@@ -168,7 +168,7 @@ export default function ChangeAvatarModal({ open, onClose, username, onSaved }) 
         </label>
       )}
 
-      {error && <p className="mt-3 text-xs text-state-error-mid">{error}</p>}
+      {error && <p className="mt-4 text-sm text-state-error-mid">{error}</p>}
     </Modal>
   );
 }

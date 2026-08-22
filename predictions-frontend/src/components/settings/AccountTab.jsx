@@ -18,7 +18,7 @@ import LoadingState from '../common/LoadingState';
 const CURRENT_SEASON = '2025/26';
 
 const FIELD_CLASS =
-  'w-full rounded-md border border-border-control bg-surface-card-2 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-teal';
+  'w-full rounded-lg border border-border-control bg-surface-card-2 px-4 py-2.5 text-base text-text-primary outline-none focus:border-brand-teal';
 
 export default function AccountTab({ profile, loading, onProfileChange }) {
   const { logout, updateUser, oauthData, isOAuthUser } = useAuth();
@@ -69,7 +69,7 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
   if (loading) return <LoadingState message="Loading account..." />;
 
   return (
-    <div className="flex flex-col gap-[22px]">
+    <div className="flex flex-col gap-8">
       <ProfileCard
         profile={{
           ...profile,
@@ -98,9 +98,10 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
         }}
       />
 
-      <div className="flex flex-col gap-2">
-        <SettingsRow label="Season" detail="The season currently being scored" kind="value" value={CURRENT_SEASON} />
+      <div className="flex flex-col gap-3">
+        <SettingsRow size="lg" label="Season" detail="The season currently being scored" kind="value" value={CURRENT_SEASON} />
         <SettingsRow
+          size="lg"
           label="Public fingerprint"
           detail="Let league members see your tendencies, not just your points"
           kind="toggle"
@@ -108,6 +109,7 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
           onToggle={(v) => updatePreference('publicFingerprint', v)}
         />
         <SettingsRow
+          size="lg"
           label="Delete account"
           detail="Removes your sheets from every league, permanently"
           kind="value"
@@ -118,13 +120,13 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
       </div>
 
       {confirmDelete && (
-        <Card className="flex flex-col gap-3 border-state-error/30 p-4 md:p-5">
-          <KickerLabel as="div" className="text-state-error-mid">Delete account</KickerLabel>
-          <p className="text-sm text-text-secondary">
+        <Card className="flex flex-col gap-4 border-state-error/30 p-5 md:p-6">
+          <KickerLabel as="div" className="text-sm text-state-error-mid">Delete account</KickerLabel>
+          <p className="text-base text-text-secondary">
             This removes your sheets from every league you're in, permanently. This can't be undone.
           </p>
-          {deleteError && <p className="text-xs text-state-error-mid">{deleteError}</p>}
-          <div className="flex justify-end gap-2">
+          {deleteError && <p className="text-sm text-state-error-mid">{deleteError}</p>}
+          <div className="flex justify-end gap-3">
             <Button variant="ghost" pill={false} onClick={() => { setConfirmDelete(false); setDeleteError(null); }} disabled={deleting}>
               Cancel
             </Button>
@@ -135,10 +137,10 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
         </Card>
       )}
 
-      <div className="flex flex-col gap-3">
-        <KickerLabel as="div">Change password</KickerLabel>
-        <Card className="p-4 md:p-5">
-          <form onSubmit={handleChangePassword} className="space-y-3">
+      <div className="flex flex-col gap-4">
+        <KickerLabel as="div" className="text-sm">Change password</KickerLabel>
+        <Card className="p-5 md:p-6">
+          <form onSubmit={handleChangePassword} className="space-y-4">
             <input
               type="password"
               placeholder="Current password"
@@ -164,11 +166,11 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
               onChange={(e) => setPasswordForm((f) => ({ ...f, confirmPassword: e.target.value }))}
             />
             {passwordStatus && (
-              <p className={`text-xs ${passwordStatus.type === 'error' ? 'text-state-error-mid' : 'text-brand-teal'}`}>
+              <p className={`text-sm ${passwordStatus.type === 'error' ? 'text-state-error-mid' : 'text-brand-teal'}`}>
                 {passwordStatus.message}
               </p>
             )}
-            <Button type="submit" variant="secondary" pill={false} size="sm" disabled={changingPassword}>
+            <Button type="submit" variant="secondary" pill={false} disabled={changingPassword}>
               {changingPassword ? 'Updating…' : 'Update password'}
             </Button>
           </form>
@@ -176,7 +178,7 @@ export default function AccountTab({ profile, loading, onProfileChange }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <Button variant="ghost" pill={false} onClick={logout}>Sign out</Button>
+        <Button variant="ghost" pill={false} size="lg" onClick={logout}>Sign out</Button>
       </div>
     </div>
   );

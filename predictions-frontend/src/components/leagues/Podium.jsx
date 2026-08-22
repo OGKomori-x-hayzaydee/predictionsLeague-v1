@@ -1,9 +1,10 @@
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 import { chipBadge } from '../../utils/leagueStats';
 
 const VISUAL_ORDER = [1, 0, 2];
 const PLINTH = ['h-24', 'h-16', 'h-12'];
-const AVATAR = ['size-10 text-base md:size-11', 'size-8 text-caption md:size-9', 'size-8 text-caption md:size-9'];
+const AVATAR_SIZE = [44, 32, 32];
 const PTS = ['text-3xl', 'text-2xl md:text-3xl', 'text-2xl md:text-3xl'];
 
 /**
@@ -37,11 +38,15 @@ export default function Podium({ podium, label, note, bestCall, expandedUsername
       >
         <span
           style={{ animation: first ? 'podiumGlow 2.6s ease-in-out infinite' : 'none' }}
-          className={`flex items-center justify-center rounded-full font-semibold ${AVATAR[i]} ${
-            member.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-          }`}
+          className="inline-flex"
         >
-          {(member.displayName || member.username).charAt(0).toUpperCase()}
+          <Avatar
+            name={member.displayName || member.username}
+            src={member.avatar}
+            size={AVATAR_SIZE[i]}
+            animateFallback={false}
+            className={member.isCurrentUser ? 'ring-2 ring-brand-teal' : ''}
+          />
         </span>
         <span className="max-w-full truncate text-caption text-text-secondary">{name}</span>
         <span className={`font-dmSerif leading-none ${PTS[i]} ${member.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>

@@ -26,3 +26,12 @@ export function mergeProfile(server) {
     avatar: over.avatar || over.profilePicture || server?.avatar || server?.profilePicture,
   };
 }
+
+/** Prefer the signed-in user's saved avatar on league member rows. */
+export function overlayOwnAvatar(members, extraSrc) {
+  if (!Array.isArray(members) || members.length === 0) return members;
+  const over = readProfileOverrides();
+  const own = over.avatar || over.profilePicture || extraSrc || null;
+  if (!own) return members;
+  return members.map((m) => (m.isCurrentUser ? { ...m, avatar: own } : m));
+}

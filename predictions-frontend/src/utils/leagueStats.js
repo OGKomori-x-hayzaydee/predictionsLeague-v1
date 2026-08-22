@@ -238,7 +238,9 @@ export function computeStandingsHistory({ gwTotals, settledGws, usernames }) {
 }
 
 export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFiledCount, fixturesByGw, history }) {
-  const nameOf = (u) => standings.find((s) => s.username === u)?.displayName || u;
+  const memberOf = (u) => standings.find((s) => s.username === u);
+  const nameOf = (u) => memberOf(u)?.displayName || u;
+  const avatarOf = (u) => memberOf(u)?.avatar;
   if (settledGws.length === 0) return [];
 
   const records = [];
@@ -256,6 +258,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
       label: 'HIGHEST GAMEWEEK',
       val: String(best.val),
       who: nameOf(best.who),
+      avatar: avatarOf(best.who),
       note: `Gameweek ${best.gw}`,
     });
   }
@@ -274,6 +277,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
         label: 'LONGEST RUN AT THE TOP',
         val: `${bestLen} wk${bestLen === 1 ? '' : 's'}`,
         who: nameOf(bestUser),
+        avatar: avatarOf(bestUser),
         note: bestStartGw === bestEndGw ? `Gameweek ${bestStartGw}` : `GW${bestStartGw} to GW${bestEndGw}`,
       });
     }
@@ -289,6 +293,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
       label: 'BEST SINGLE CALL',
       val: `+${bestSingle.points}`,
       who: nameOf(bestSingle.who),
+      avatar: avatarOf(bestSingle.who),
       note: `${bestSingle.homeTeam} v ${bestSingle.awayTeam}, GW${bestSingle.gw}`,
     });
   }
@@ -309,6 +314,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
       label: 'WORST GAMEWEEK',
       val: String(worst.val),
       who: nameOf(worst.who),
+      avatar: avatarOf(worst.who),
       note: `Gameweek ${worst.gw}, every call filed`,
     });
   }
@@ -386,6 +392,8 @@ export function buildHeadToHead({ rival, you, gwTotals, exactCount, drawCallCoun
     id: rival.id || rival.username,
     name: rival.displayName || rival.username,
     initial: (rival.displayName || rival.username).charAt(0).toUpperCase(),
+    avatar: rival.avatar,
+    youAvatar: you.avatar,
     tapeRows,
     radarRows,
     radarYou: radarPolygon(radarRows, 'you'),
@@ -445,6 +453,7 @@ export function buildActivityFeed({ standings, chipPlays, leagueName }) {
     if (m.joinedAt) {
       events.push({
         who: nameFor(m),
+        avatar: m.avatar,
         text: `joined ${leagueName}`,
         at: m.joinedAt,
         time: timeAgo(m.joinedAt),
@@ -459,6 +468,7 @@ export function buildActivityFeed({ standings, chipPlays, leagueName }) {
       const badge = chipBadge(p.chips);
       events.push({
         who: nameFor(member || { username, displayName: username }),
+        avatar: member?.avatar,
         text: `played ${badge?.name || 'a chip'} in GW${p.gw}`,
         at: p.predictedAt,
         time: p.predictedAt ? timeAgo(p.predictedAt) : `GW${p.gw}`,
@@ -520,6 +530,7 @@ export function buildFormBook({ predictionsByGw, gw, standings, mode }) {
         username: m.username,
         name: m.isCurrentUser ? 'You' : m.displayName || m.username,
         initial: (m.displayName || m.username).charAt(0).toUpperCase(),
+        avatar: m.avatar,
         isCurrentUser: !!m.isCurrentUser,
         position: m.position,
         filed,
@@ -580,6 +591,7 @@ export function buildMemberPanel({ formBook, username }) {
   return {
     name: member.name,
     initial: member.initial,
+    avatar: member.avatar,
     isCurrentUser: member.isCurrentUser,
     stats,
     sealed,
@@ -627,7 +639,9 @@ export function buildFixturePanel({ formBook, matchId }) {
     const c = r.cells[idx];
     return {
       name: r.name,
+      username: r.username,
       initial: r.initial,
+      avatar: r.avatar,
       isCurrentUser: r.isCurrentUser,
       call: c?.filed ? `${c.prediction.homeScore}–${c.prediction.awayScore}` : 'not filed',
       verdict: c?.verdict || null,

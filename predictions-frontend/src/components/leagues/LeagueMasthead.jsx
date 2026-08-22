@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, Check } from '@phosphor-icons/react';
 import { ordinal, formatMonthYear } from '../../utils/leagueStats';
+import Avatar from '../ui/Avatar';
 
 /**
  * League masthead card — real overview + standings data (name, position,
@@ -109,16 +110,32 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
       <div className="relative hidden h-px bg-white/10 md:block" />
 
       <div className="relative hidden items-center gap-5 md:flex">
-        <span className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="font-outfit text-2xs tracking-widest text-state-error">ABOVE</span>
+          {neighbours.above && (
+            <Avatar
+              name={neighbours.above.displayName || neighbours.above.username}
+              src={neighbours.above.avatar}
+              size={20}
+              animateFallback={false}
+            />
+          )}
           <span className="min-w-0 flex-1 truncate font-dmSerif text-sm text-text-secondary md:text-base">
             {neighbours.above ? (neighbours.above.displayName || neighbours.above.username) : 'nobody'}
           </span>
           {neighbours.above && <span className="shrink-0 font-outfit text-sm text-state-error">+{neighbours.gapAbove}</span>}
         </span>
         <span className="h-4 w-px shrink-0 bg-white/10" />
-        <span className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="font-outfit text-2xs tracking-widest text-brand-teal">BELOW</span>
+          {neighbours.below && (
+            <Avatar
+              name={neighbours.below.displayName || neighbours.below.username}
+              src={neighbours.below.avatar}
+              size={20}
+              animateFallback={false}
+            />
+          )}
           <span className="min-w-0 flex-1 truncate font-dmSerif text-sm text-text-secondary md:text-base">
             {neighbours.below ? (neighbours.below.displayName || neighbours.below.username) : 'nobody'}
           </span>

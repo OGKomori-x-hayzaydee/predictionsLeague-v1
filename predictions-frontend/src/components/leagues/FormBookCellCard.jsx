@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import TeamCrest from '../ui/TeamCrest';
+import Avatar from '../ui/Avatar';
 import { chipBadge, verdictColors } from '../../utils/leagueStats';
 import { getPointsBreakdown, calculateCeilingPoints } from '../../utils/pointsCalculation';
 import { CHIP_CONFIG } from '../../utils/chipManager';
@@ -106,13 +107,13 @@ export default function FormBookCellCard({ formBook, card, onClose }) {
         aria-label="How this scored"
       >
         <div className="flex items-center gap-3 px-5 py-4">
-          <span
-            className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-              member.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-            }`}
-          >
-            {member.initial}
-          </span>
+          <Avatar
+            name={name}
+            src={member.avatar}
+            size={40}
+            animateFallback={false}
+            className={member.isCurrentUser ? 'ring-2 ring-brand-teal' : ''}
+          />
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="truncate font-dmSerif text-xl text-text-primary">{name}</span>
             <span className="font-outfit text-2xs tracking-widest text-text-muted-3">GW{formBook.gw}</span>

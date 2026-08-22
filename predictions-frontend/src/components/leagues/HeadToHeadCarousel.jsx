@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 import RadarChart from '../ui/RadarChart';
 import SegmentedControl from '../ui/SegmentedControl';
 
@@ -51,9 +52,15 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
 
           <div className="flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5 pt-2.5">
             <div className="flex items-center justify-between gap-2 border-b border-border-base pb-2">
-              <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
+              <span className="flex min-w-0 items-center gap-2">
+                <Avatar name="You" src={current.youAvatar} size={28} animateFallback={false} className="ring-2 ring-brand-teal" />
+                <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
+              </span>
               <span className="font-outfit text-2xs tracking-widest text-text-muted-5">VS</span>
-              <span className="truncate font-dmSerif text-lg text-text-secondary md:text-2xl">{current.name}</span>
+              <span className="flex min-w-0 items-center justify-end gap-2">
+                <span className="truncate font-dmSerif text-lg text-text-secondary md:text-2xl">{current.name}</span>
+                <Avatar name={current.name} src={current.avatar} size={28} animateFallback={false} />
+              </span>
             </div>
 
             {vsVariant === 'tape' ? (

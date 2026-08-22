@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import leagueAPI from '../services/api/leagueAPI';
 import dashboardAPI from '../services/api/dashboardAPI';
+import { overlayOwnAvatar } from '../utils/profileOverrides';
 import {
   MAX_HISTORY_GAMEWEEKS,
   aggregateLeagueSeason,
@@ -22,7 +23,12 @@ import {
  * the same shape of insight honestly).
  */
 export default function useLeagueDetail(leagueId, overview, demoPack = null) {
-  const [standings, setStandings] = useState(demoPack?.standings ?? null);
+  const [ownAvatar, setOwnAvatar] = useState(null);
+  const [standingsRaw, setStandingsRaw] = useState(demoPack?.standings ?? null);
+  const standings = useMemo(
+    () => overlayOwnAvatar(standingsRaw, ownAvatar) ?? standingsRaw,
+    [standingsRaw, ownAvatar]
+  );
   const [standingsLoading, setStandingsLoading] = useState(!demoPack);
   const [currentGameweek, setCurrentGameweek] = useState(demoPack?.currentGameweek ?? null);
   const [predictionsByGw, setPredictionsByGw] = useState(demoPack?.predictionsByGw ?? {});
@@ -44,7 +50,7 @@ export default function useLeagueDetail(leagueId, overview, demoPack = null) {
   // don't know or care which source filled the state.
   useEffect(() => {
     if (!demoPack) return;
-    setStandings(demoPack.standings);
+    setStandingsRaw(demoPack.standings);
     setStandingsLoading(false);
     setPredictionsByGw(demoPack.predictionsByGw);
     setGwOrder(demoPack.gwOrder);
@@ -63,9 +69,9 @@ export default function useLeagueDetail(leagueId, overview, demoPack = null) {
       .then((res) => {
         if (cancelled) return;
         const list = Array.from(res?.standings || []).sort((a, b) => (a.position ?? 999) - (b.position ?? 999));
-        setStandings(list);
+        setStandingsRaw(list);
       })
-      .catch(() => !cancelled && setStandings([]))
+      .catch(() => !cancelled && setStandingsRaw([]))
       .finally(() => !cancelled && setStandingsLoading(false));
     return () => { cancelled = true; };
   }, [leagueId, demoPack]);
@@ -77,7 +83,11 @@ export default function useLeagueDetail(leagueId, overview, demoPack = null) {
     let cancelled = false;
     dashboardAPI
       .getEssentialData()
-      .then((data) => !cancelled && setCurrentGameweek(data?.season?.currentGameweek ?? null))
+      .then((data) => {
+        if (cancelled) return;
+        setCurrentGameweek(data?.season?.currentGameweek ?? null);
+        setOwnAvatar(data?.user?.avatar || null);
+      })
       .catch(() => !cancelled && setCurrentGameweek(null));
     return () => { cancelled = true; };
   }, [demoPack]);

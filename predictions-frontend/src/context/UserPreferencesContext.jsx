@@ -33,8 +33,7 @@ export const UserPreferencesProvider = ({ children }) => {
     // Privacy
     publicFingerprint: false,
 
-    // Teams followed (local-only — backend only stores one favouriteTeam,
-    // see components/settings/TeamsTab.jsx)
+    // Teams followed (local-only — backend only stores one favouriteTeam)
     followedTeams: [],
   };
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import TeamCrest from '../ui/TeamCrest';
+import Avatar from '../ui/Avatar';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import FormBookCellCard from './FormBookCellCard';
@@ -120,13 +121,13 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                     className="flex min-w-0 items-center gap-2 p-2.5 text-left"
                   >
                     <span className="w-4 font-outfit text-2xs text-text-muted-2">{r.position}</span>
-                    <span
-                      className={`flex size-6 shrink-0 items-center justify-center rounded-full text-2xs font-semibold ${
-                        r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-                      }`}
-                    >
-                      {r.initial}
-                    </span>
+                    <Avatar
+                      name={r.name}
+                      src={r.avatar}
+                      size={24}
+                      animateFallback={false}
+                      className={r.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
+                    />
                     <span className={`min-w-0 flex-1 truncate text-sm ${r.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{r.name}</span>
                     {!isSettled && (
                       <span className={`font-outfit text-2xs ${r.filed === fixtures.length ? 'text-brand-teal' : 'text-brand-amber'}`}>

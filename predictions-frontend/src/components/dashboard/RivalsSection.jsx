@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 import leagueAPI from '../../services/api/leagueAPI';
+import { overlayOwnAvatar } from '../../utils/profileOverrides';
+import { useAuthState } from '../../hooks/useAuth';
 
 /**
  * Real per-league standings (leagueAPI.getLeagueStandings — the same
@@ -9,12 +12,12 @@ import leagueAPI from '../../services/api/leagueAPI';
  * a league switcher is out of scope for the Dashboard's compact sidebar.
  */
 function useRivals(league) {
-  const [standings, setStandings] = useState(null);
+  const [standingsRaw, setStandingsRaw] = useState(null);
   const [isLoading, setIsLoading] = useState(!!league);
 
   useEffect(() => {
     if (!league?.id) {
-      setStandings(null);
+      setStandingsRaw(null);
       setIsLoading(false);
       return;
     }
@@ -27,16 +30,16 @@ function useRivals(league) {
         const list = Array.from(res?.standings || []).sort(
           (a, b) => (a.position ?? 999) - (b.position ?? 999)
         );
-        setStandings(list);
+        setStandingsRaw(list);
       })
-      .catch(() => !cancelled && setStandings([]))
+      .catch(() => !cancelled && setStandingsRaw([]))
       .finally(() => !cancelled && setIsLoading(false));
     return () => {
       cancelled = true;
     };
   }, [league?.id]);
 
-  return { standings, isLoading };
+  return { standingsRaw, isLoading };
 }
 
 // Top N, or a window centered on the user when they sit outside it — same
@@ -54,7 +57,12 @@ function windowAroundUser(standings, size = 5) {
 
 export default function RivalsSection({ leagues }) {
   const league = leagues?.[0] || null;
-  const { standings, isLoading } = useRivals(league);
+  const { user } = useAuthState();
+  const { standingsRaw, isLoading } = useRivals(league);
+  const standings = useMemo(
+    () => overlayOwnAvatar(standingsRaw, user?.avatar || user?.profilePicture) ?? standingsRaw,
+    [standingsRaw, user?.avatar, user?.profilePicture]
+  );
   const rows = windowAroundUser(standings);
   const maxPoints = rows.length ? Math.max(...rows.map((m) => m.points || 0), 1) : 1;
 
@@ -84,6 +92,12 @@ export default function RivalsSection({ leagues }) {
             >
               {m.position}
             </span>
+            <Avatar
+              name={m.displayName || m.username}
+              src={m.avatar}
+              size={22}
+              animateFallback={false}
+            />
             <span
               className={`min-w-0 flex-1 truncate text-sm ${
                 m.isCurrentUser ? 'font-medium text-brand-teal' : 'text-text-secondary'
