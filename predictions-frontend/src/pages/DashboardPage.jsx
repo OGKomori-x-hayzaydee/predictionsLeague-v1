@@ -3,7 +3,7 @@ import SlotBar from '../components/ui/SlotBar';
 import KickerLabel from '../components/ui/KickerLabel';
 import StatTile from '../components/ui/StatTile';
 import StationRail from '../components/dashboard/StationRail';
-import FixturePreviewCard from '../components/dashboard/FixturePreviewCard';
+import FixturePreviewCardFoil from '../components/dashboard/FixturePreviewCardFoil';
 import ResultsCarousel from '../components/dashboard/ResultsCarousel';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardMobileSheet from '../components/dashboard/DashboardMobileSheet';
@@ -120,7 +120,7 @@ export default function DashboardPage() {
 
           {/* Fixture preview card — fluid responsive width with subtle breathing room */}
           <div className="mt-5 mb-6 w-[94%] mx-auto">
-            <FixturePreviewCard
+            <FixturePreviewCardFoil
               fixture={selectedFixture}
               ceiling={selectedCeiling}
               variant="desktop"
@@ -189,7 +189,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <FixturePreviewCard
+        <FixturePreviewCardFoil
           fixture={selectedFixture}
           ceiling={selectedCeiling}
           variant="mobile"
