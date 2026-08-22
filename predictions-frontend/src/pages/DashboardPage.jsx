@@ -61,7 +61,7 @@ export default function DashboardPage() {
       : `GW${ledgerGameweek} total ${ledgerTotal} pts`;
 
   return (
-    <div className="animate-rise-in">
+    <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
       <div className="hidden md:block">
         <SlotBar
           kicker={currentGameweek ? `GAMEWEEK ${currentGameweek}` : 'GAMEWEEK'}
@@ -71,8 +71,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Desktop — foundation spec §5.3, dash grid 1fr 400px */}
-      <div className="hidden md:grid md:grid-cols-[1fr_400px] md:items-stretch">
-        <div className="flex min-w-0 flex-col gap-0 px-6 pb-6 pt-5">
+      <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[1fr_400px] md:items-stretch">
+        <div className="flex min-h-0 min-w-0 flex-col gap-0 overflow-y-auto px-6 pb-12 pt-5">
           <div className="flex items-end justify-between gap-6">
             <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
               <h1 className="font-dmSerif text-4xl text-text-primary">
