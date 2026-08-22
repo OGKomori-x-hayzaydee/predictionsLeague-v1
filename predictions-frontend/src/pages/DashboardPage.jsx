@@ -16,7 +16,6 @@ import { useNextMatch } from '../hooks/useNextMatch';
 export default function DashboardPage() {
   const [aiOpen, setAiOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('this');
 
   const {
     stations,
@@ -61,26 +60,18 @@ export default function DashboardPage() {
       ? `GW${ledgerGameweek} total ${ledgerTotal} · best week GW${ledgerBestGameweek} on ${ledgerBestTotal}`
       : `GW${ledgerGameweek} total ${ledgerTotal} pts`;
 
-  const slotTabs = [
-    { id: 'this', label: 'This week' },
-    { id: 'next', label: 'Next week' },
-  ];
-
   return (
     <div className="animate-rise-in">
       <div className="hidden md:block">
         <SlotBar
           kicker={currentGameweek ? `GAMEWEEK ${currentGameweek}` : 'GAMEWEEK'}
-          tabs={slotTabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
           right={`${filedCount} of ${total} filed`}
           deadline={showDeadlineCountdown ? timeDisplay : undefined}
         />
       </div>
 
-      {/* Desktop — foundation spec §5.3, dash grid 1fr 320px */}
-      <div className="hidden md:grid md:grid-cols-[1fr_320px] md:items-stretch">
+      {/* Desktop — foundation spec §5.3, dash grid 1fr 400px */}
+      <div className="hidden md:grid md:grid-cols-[1fr_400px] md:items-stretch">
         <div className="flex min-w-0 flex-col gap-0 px-6 pb-6 pt-5">
           <div className="flex items-end justify-between gap-6">
             <div className="flex min-w-0 flex-1 flex-col gap-[5px]">

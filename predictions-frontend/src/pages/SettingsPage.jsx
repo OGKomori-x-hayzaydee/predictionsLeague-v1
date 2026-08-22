@@ -5,6 +5,7 @@ import AccountTab from '../components/settings/AccountTab';
 import AlertsTab from '../components/settings/AlertsTab';
 import TeamsTab from '../components/settings/TeamsTab';
 import ScoringTab from '../components/settings/ScoringTab';
+import { mergeProfile } from '../utils/profileOverrides';
 
 // Spine.dc.html buildSettings() heads{} (script ~line 5292) — verbatim copy.
 // Tab id "notifications" matches this app's preferences.notifications shape;
@@ -54,7 +55,7 @@ export default function SettingsPage() {
     let cancelled = false;
     userAPI
       .getProfile()
-      .then((res) => !cancelled && setProfile(res.user))
+      .then((res) => !cancelled && setProfile(mergeProfile(res.user)))
       .catch(() => {})
       .finally(() => !cancelled && setProfileLoading(false));
     return () => {
@@ -81,7 +82,7 @@ export default function SettingsPage() {
             <h2 className="font-dmSerif text-3xl leading-[1.1] text-text-primary">{active.head}</h2>
             <p className="max-w-[46em] text-caption leading-[1.6] text-text-muted-2 [text-wrap:pretty]">{active.sub}</p>
           </div>
-          <Active profile={profile} loading={profileLoading} />
+          <Active profile={profile} loading={profileLoading} onProfileChange={setProfile} />
         </div>
       </div>
 
@@ -107,7 +108,7 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        <Active profile={profile} loading={profileLoading} />
+        <Active profile={profile} loading={profileLoading} onProfileChange={setProfile} />
       </div>
     </div>
   );

@@ -1,23 +1,40 @@
-export default function Avatar({ name = '', src, size = 34, className = '' }) {
-  const initial = name.trim().charAt(0).toUpperCase() || '?';
+import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { dicebearDataUri } from '../../utils/dicebearAvatar';
 
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt={name}
-        className={`shrink-0 rounded-full object-cover ${className}`}
-        style={{ width: size, height: size }}
-      />
-    );
+export default function Avatar({ name = '', src, size = 34, className = '', animateFallback = true }) {
+  const [broken, setBroken] = useState(false);
+  const fallback = useMemo(
+    () => dicebearDataUri('lorelei', name || 'player', size),
+    [name, size]
+  );
+
+  useEffect(() => {
+    setBroken(false);
+  }, [src]);
+
+  const showPhoto = Boolean(src) && !broken;
+  const img = (
+    <img
+      src={showPhoto ? src : fallback}
+      alt={name}
+      onError={() => setBroken(true)}
+      className={`shrink-0 rounded-full object-cover ${className}`}
+      style={{ width: size, height: size }}
+    />
+  );
+
+  if (showPhoto || !animateFallback) {
+    return img;
   }
 
   return (
-    <div
-      className={`flex shrink-0 items-center justify-center rounded-full bg-brand-teal/15 font-mono font-semibold text-brand-teal ${className}`}
-      style={{ width: size, height: size, fontSize: size * 0.42 }}
+    <motion.span
+      className="inline-flex shrink-0"
+      animate={{ y: [0, -2, 0] }}
+      transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
     >
-      {initial}
-    </div>
+      {img}
+    </motion.span>
   );
 }

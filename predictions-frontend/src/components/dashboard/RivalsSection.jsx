@@ -60,32 +60,32 @@ export default function RivalsSection({ leagues }) {
 
   return (
     <div className="flex flex-col gap-[11px]">
-      <KickerLabel as="div" className="tracking-[0.16em] text-text-muted-3">
+      <KickerLabel as="div" className="text-xs tracking-[0.16em] text-text-muted-3">
         Rivals{league ? ` · ${league.name}` : ''}
       </KickerLabel>
 
       {!league && !isLoading && (
-        <p className="text-xs leading-relaxed text-text-muted-2">
+        <p className="text-sm leading-relaxed text-text-muted-2">
           Join a league to see how you stack up against your rivals.
         </p>
       )}
-      {league && isLoading && <p className="text-xs text-text-muted-2">Loading…</p>}
+      {league && isLoading && <p className="text-sm text-text-muted-2">Loading…</p>}
       {league && !isLoading && rows.length === 0 && (
-        <p className="text-xs text-text-muted-2">No standings yet.</p>
+        <p className="text-sm text-text-muted-2">No standings yet.</p>
       )}
 
       <div className="flex flex-col gap-[9px]">
         {rows.map((m) => (
           <div key={m.id ?? m.username} className="flex cursor-pointer items-center gap-[10px]">
             <span
-              className={`w-3.5 shrink-0 font-outfit text-2xs ${
+              className={`w-4 shrink-0 font-outfit text-xs ${
                 m.isCurrentUser ? 'text-brand-teal' : 'text-text-muted-4'
               }`}
             >
               {m.position}
             </span>
             <span
-              className={`min-w-0 flex-1 truncate text-caption ${
+              className={`min-w-0 flex-1 truncate text-sm ${
                 m.isCurrentUser ? 'font-medium text-brand-teal' : 'text-text-secondary'
               }`}
             >
@@ -100,7 +100,7 @@ export default function RivalsSection({ leagues }) {
                 }}
               />
             </span>
-            <span className="w-[30px] shrink-0 text-right font-outfit text-xs text-text-tertiary">
+            <span className="w-[34px] shrink-0 text-right font-outfit text-sm text-text-tertiary">
               {m.points}
             </span>
           </div>

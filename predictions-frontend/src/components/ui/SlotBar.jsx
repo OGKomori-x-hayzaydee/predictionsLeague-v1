@@ -95,11 +95,11 @@ export default function SlotBar({
       )}
 
       <div className="ml-auto flex min-w-0 shrink items-center gap-3">
-        {right && <span className="min-w-0 truncate font-outfit text-caption text-text-muted-2">{right}</span>}
+        {right && <span className="min-w-0 truncate font-outfit text-base text-text-muted-2">{right}</span>}
         {deadline && (
           <span className="flex shrink-0 items-center gap-2 rounded-full border border-border-control bg-surface-card-4/70 px-3 py-1.5">
             <span className="size-2 shrink-0 rounded-full bg-brand-amber animate-[tick_2s_ease-in-out_infinite]" />
-            <span className="whitespace-nowrap font-outfit text-caption text-brand-amber">{deadline} to deadline</span>
+            <span className="whitespace-nowrap font-outfit text-sm text-brand-amber">{deadline} to deadline</span>
           </span>
         )}
         {trailing}

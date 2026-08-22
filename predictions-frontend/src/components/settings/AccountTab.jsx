@@ -3,6 +3,9 @@ import userAPI from '../../services/api/userAPI';
 import { useAuth } from '../../context/AuthContext';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import SettingsRow from './SettingsRow';
+import ProfileCard from './ProfileCard';
+import ChangeAvatarModal from './ChangeAvatarModal';
+import EditProfileModal from './EditProfileModal';
 import Card from '../ui/Card';
 import KickerLabel from '../ui/KickerLabel';
 import { Button } from '../ui/buttons';
@@ -17,9 +20,12 @@ const CURRENT_SEASON = '2025/26';
 const FIELD_CLASS =
   'w-full rounded-md border border-border-control bg-surface-card-2 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-teal';
 
-export default function AccountTab({ profile, loading }) {
-  const { logout } = useAuth();
+export default function AccountTab({ profile, loading, onProfileChange }) {
+  const { logout, updateUser, oauthData, isOAuthUser } = useAuth();
   const { preferences, updatePreference } = useUserPreferences();
+
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [passwordStatus, setPasswordStatus] = useState(null);
@@ -64,9 +70,35 @@ export default function AccountTab({ profile, loading }) {
 
   return (
     <div className="flex flex-col gap-[22px]">
+      <ProfileCard
+        profile={{
+          ...profile,
+          linkedGoogle: profile?.linkedGoogle || Boolean(oauthData?.provider) || Boolean(isOAuthUser?.()),
+        }}
+        onChangeAvatar={() => setAvatarOpen(true)}
+        onEditProfile={() => setEditOpen(true)}
+      />
+
+      <ChangeAvatarModal
+        open={avatarOpen}
+        onClose={() => setAvatarOpen(false)}
+        username={profile?.username}
+        onSaved={(url) => {
+          onProfileChange?.((prev) => ({ ...(prev || {}), profilePicture: url, avatar: url }));
+          updateUser({ avatar: url, profilePicture: url });
+        }}
+      />
+      <EditProfileModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        username={profile?.username}
+        onSaved={(next) => {
+          onProfileChange?.((prev) => ({ ...(prev || {}), ...next }));
+          updateUser({ username: next?.username });
+        }}
+      />
+
       <div className="flex flex-col gap-2">
-        <SettingsRow label="Display name" detail="Shown across every league you join" kind="value" value={profile?.username || '—'} />
-        <SettingsRow label="Email" detail="Used for sign-in and weekly summaries" kind="value" value={profile?.email || '—'} />
         <SettingsRow label="Season" detail="The season currently being scored" kind="value" value={CURRENT_SEASON} />
         <SettingsRow
           label="Public fingerprint"

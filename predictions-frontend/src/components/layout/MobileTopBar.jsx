@@ -3,6 +3,7 @@ import { Gear } from '@phosphor-icons/react';
 import { useAuthState } from '../../hooks/useAuth';
 import Avatar from '../ui/Avatar';
 import logo from '../../assets/logo.png';
+import { readProfileOverrides } from '../../utils/profileOverrides';
 
 const TITLES = {
   dashboard: 'Dashboard',
@@ -22,7 +23,10 @@ const TITLES = {
 export default function MobileTopBar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { username } = useAuthState();
+  const { user, username } = useAuthState();
+  const overrides = readProfileOverrides();
+  const displayName = overrides.username || username || user?.firstName || 'You';
+  const avatarSrc = user?.avatar || user?.profilePicture || overrides.avatar || overrides.profilePicture;
 
   const segment = pathname.split('/').filter(Boolean)[0];
   const title = TITLES[segment] || 'predictionsLeague';
@@ -39,23 +43,21 @@ export default function MobileTopBar() {
           onClick={() => navigate('/settings')}
           aria-label="Settings"
           className={`flex h-11 w-11 shrink-0 items-center justify-center bg-transparent transition-colors ${
-            isSettingsPage ? 'text-brand-teal' : 'text-text-muted-1'
+            isSettingsPage ? 'text-brand-teal' : 'text-white hover:text-brand-teal-pale'
           }`}
         >
-          <Gear width={19} height={19} />
+          <Gear size={22} weight="bold" />
         </button>
         <NavLink
           to="/profile"
           aria-label="Profile"
           className="flex h-11 w-11 shrink-0 items-center justify-center"
         >
-          {/* `!` forces these to win over Avatar's own baked-in bg/text classes. */}
           <Avatar
-            name={username || 'You'}
+            name={displayName}
+            src={avatarSrc}
             size={28}
-            className={`!text-white ring-[1.5px] ${
-              isProfilePage ? '!bg-brand-teal-deep ring-brand-teal' : '!bg-brand-indigo-mid ring-transparent'
-            }`}
+            className={isProfilePage ? 'ring-[1.5px] ring-brand-teal' : ''}
           />
         </NavLink>
       </div>

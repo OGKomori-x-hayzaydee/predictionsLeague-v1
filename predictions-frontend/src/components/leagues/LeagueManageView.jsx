@@ -23,7 +23,7 @@ function MemberRow({ member, busy, pendingRemove, onPromote, onAskRemove, onCanc
   return (
     <div className="flex flex-col gap-3 rounded-14 border border-border-base bg-surface-card-3 px-[13px] py-[13px] md:rounded-12 md:bg-surface-header/60 md:px-[17px] md:py-[15px]">
       <div className="flex items-center gap-3">
-        <Avatar name={name} size={32} />
+        <Avatar name={name} src={member.avatar} size={32} animateFallback={false} />
         <span className="flex min-w-0 flex-1 flex-col gap-[3px] leading-[1.45] md:gap-0">
           <span className="truncate text-caption text-text-secondary">
             {name}

@@ -1,5 +1,7 @@
-import baseAPI, { apiCall } from './baseAPI.js';
+import { apiCall } from './baseAPI.js';
 import { handleApiError } from '../../utils/apiErrorHandler.js';
+import { isCloudinaryConfigured, uploadToCloudinary, fileToDataUri } from '../../utils/cloudinaryUpload.js';
+import { mergeProfile, writeProfileOverrides } from '../../utils/profileOverrides.js';
 
 /**
  * User API service
@@ -72,37 +74,74 @@ export const userAPI = {
   },
 
   /**
-   * Upload profile picture
-   * @param {File} file - Profile picture file
-   * @returns {Promise<Object>} Upload response with image URL
+   * Update the current user's username.
+   * Persists locally immediately. PATCH /profile is attempted when the
+   * backend exposes it (see docs/proposals/cloudinary-avatars.md).
+   */
+  async updateUsername(username) {
+    writeProfileOverrides({ username });
+    const response = await apiCall({
+      method: 'PATCH',
+      url: '/profile',
+      data: { username },
+      skipErrorToast: true,
+    });
+
+    if (response.success) {
+      return {
+        success: true,
+        persisted: true,
+        user: mergeProfile(response.data),
+      };
+    }
+
+    return {
+      success: true,
+      persisted: false,
+      user: mergeProfile({ username }),
+    };
+  },
+
+  /**
+   * Upload a profile picture. Prefers unsigned Cloudinary when configured,
+   * then best-effort POST /profile/upload (existing S3 endpoint). Always
+   * returns a displayable URL (data URI as last resort).
    */
   async uploadProfilePicture(file) {
-    try {
-      const formData = new FormData();
-      formData.append('profilePicture', file);
+    let url = null;
 
+    if (isCloudinaryConfigured()) {
+      try {
+        url = await uploadToCloudinary(file);
+      } catch (error) {
+        handleApiError(error, { customMessage: 'Cloudinary upload failed.' });
+      }
+    }
+
+    if (!url) {
+      const formData = new FormData();
+      formData.append('file', file);
       const response = await apiCall({
         method: 'POST',
-        url: '/profile/picture',
+        url: '/profile/upload',
         data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        skipErrorToast: true,
       });
-
       if (response.success) {
-        return {
-          success: true,
-          imageUrl: response.data.imageUrl,
-          user: response.data.user,
-        };
-      } else {
-        throw new Error(response.error?.message || 'Failed to upload profile picture');
+        url = response.data.url || response.data.imageUrl;
       }
-    } catch (error) {
-      handleApiError(error, { customMessage: 'Failed to upload profile picture. Please try again.' });
-      throw error;
     }
+
+    if (!url) {
+      url = await fileToDataUri(file);
+    }
+
+    writeProfileOverrides({ avatar: url, profilePicture: url });
+    return {
+      success: true,
+      imageUrl: url,
+      url,
+    };
   },
 
   /**
@@ -110,24 +149,13 @@ export const userAPI = {
    * @returns {Promise<Object>} Delete response
    */
   async deleteProfilePicture() {
-    try {
-      const response = await apiCall({
-        method: 'DELETE',
-        url: '/users/profile/picture',
-      });
-
-      if (response.success) {
-        return {
-          success: true,
-          user: response.data,
-        };
-      } else {
-        throw new Error(response.error?.message || 'Failed to delete profile picture');
-      }
-    } catch (error) {
-      handleApiError(error, { customMessage: 'Failed to delete profile picture. Please try again.' });
-      throw error;
-    }
+    writeProfileOverrides({ avatar: null, profilePicture: null });
+    await apiCall({
+      method: 'DELETE',
+      url: '/profile/upload',
+      skipErrorToast: true,
+    });
+    return { success: true };
   },
 
   /**

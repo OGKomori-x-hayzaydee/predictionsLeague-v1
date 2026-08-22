@@ -12,6 +12,7 @@ import userAPI from '../services/api/userAPI';
 import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { computeProfileStats, computeChipAlmanac } from '../utils/profileStats';
 import { normalizeTeamName } from '../utils/teamUtils';
+import { mergeProfile } from '../utils/profileOverrides';
 
 const TABS = [
   { id: 'record', label: 'Record' },
@@ -30,7 +31,7 @@ export default function ProfilePage() {
     Promise.all([userAPI.getProfile(), userPredictionsAPI.getAllUserPredictions({ status: 'all' })])
       .then(([profileRes, predictionsRes]) => {
         if (cancelled) return;
-        setProfile(profileRes.user);
+        setProfile(mergeProfile(profileRes.user));
         setPredictions(predictionsRes.data || []);
       })
       .catch(() => {})
@@ -80,7 +81,7 @@ export default function ProfilePage() {
       <div className="md:grid md:min-h-0 md:grid-cols-[1fr_330px] md:items-stretch">
         <div className="min-w-0 px-4 py-5 md:px-[26px] md:py-[22px]">
           <div className="flex items-start gap-5">
-            <Avatar name={profile?.username || 'You'} size={64} />
+            <Avatar name={profile?.username || 'You'} src={profile?.profilePicture} size={64} />
             <div className="flex min-w-0 flex-col gap-1.5">
               <h1 className="font-dmSerif text-2xl leading-tight text-text-primary">
                 {profile?.username || 'Your profile'}

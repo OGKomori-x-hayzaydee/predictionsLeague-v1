@@ -29,7 +29,7 @@ export default function BottomTabBar() {
           to={path}
           className={({ isActive }) =>
             `flex min-w-0 flex-col items-center gap-1 px-0.5 pb-2.5 pt-2 font-outfit transition-colors ${
-              isActive ? 'text-brand-teal' : 'text-text-muted-3'
+              isActive ? 'text-brand-teal' : 'text-white'
             }`
           }
         >

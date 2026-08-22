@@ -56,12 +56,14 @@ export const clearTokens = () => {
 // Request interceptor - Updated for HTTP-only cookies
 baseAPI.interceptors.request.use(
   (config) => {
-    // With HTTP-only cookies, authentication is handled automatically
-    // No need to manually add Authorization headers
-    
-    // Add request ID for debugging
+    // Let the browser set the multipart boundary. The instance default
+    // Content-Type: application/json would otherwise break FormData uploads.
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     config.metadata = { startTime: new Date() };
-    
+
     return config;
   },
   (error) => {
@@ -82,7 +84,11 @@ baseAPI.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
+
+    if (originalRequest?.skipErrorToast) {
+      return Promise.reject(error);
+    }
+
     // Handle network errors
     if (!error.response) {
       showToast('Network error. Please check your connection.', 'error');
