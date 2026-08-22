@@ -190,25 +190,24 @@ export default function FixturePreviewCardFoil({
           )}
         </button>
 
-        {/* Bottom row — highlighted ceiling points on the left, CTA centered */}
-        <div className="grid grid-cols-3 items-center border-t border-[#1c2942] px-7 py-3">
+        {/* Bottom row — highlighted ceiling points on the left, CTA on the right */}
+        <div className="flex items-center justify-between border-t border-[#1c2942] px-7 py-3">
           <div className="flex flex-col leading-none">
-            <span className="font-outfit text-xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
-            <span className="font-dmSerif text-base text-brand-amber">
+            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
+            <span className="font-dmSerif text-lg text-brand-amber">
               {predicted ? `${ceiling} pts` : '—'}
             </span>
           </div>
           <button
             type="button"
             onClick={() => navigate('/fixtures')}
-            className="flex cursor-pointer items-center justify-self-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
+            className="flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
             {predicted ? 'Edit in reel' : 'File in reel'}
             <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
               <path d="M3 7.5h8.5M8 4l3.5 3.5L8 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <span />
         </div>
       </div>
 
