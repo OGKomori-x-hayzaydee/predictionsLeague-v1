@@ -132,10 +132,6 @@ export default function DashboardPage() {
             <ResultsCarousel
               predictions={lastGw.predictions}
               gameweek={lastGw.gameweek}
-              usingDemo={lastGw.usingDemo}
-              hasReal={lastGw.hasReal}
-              previewMode={lastGw.previewMode}
-              onTogglePreview={() => lastGw.setPreviewMode((v) => !v)}
               isLoading={lastGw.isLoading}
             />
           </div>

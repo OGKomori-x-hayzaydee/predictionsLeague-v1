@@ -35,14 +35,14 @@ function ScorerPills({ names }) {
         names.map((name) => (
           <span
             key={name}
-            className="flex items-center gap-2 rounded-full border border-[#1c2942] bg-[#0b1626] px-3 py-1 text-sm text-[#c8d2e0]"
+            className="flex items-center gap-2 rounded-full border border-[#1c2942] bg-[#0b1626] px-3 py-1 text-xs text-[#c8d2e0]"
           >
             <span className="h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] border-brand-teal" />
             {name}
           </span>
         ))
       ) : (
-        <span className="font-outfit text-sm text-[#4f5b70]">no scorer named</span>
+        <span className="font-outfit text-xs text-[#4f5b70]">no scorer named</span>
       )}
     </div>
   );
