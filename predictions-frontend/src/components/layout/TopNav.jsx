@@ -59,9 +59,9 @@ export default function TopNav() {
               key={id}
               to={path}
               className={({ isActive }) =>
-                `whitespace-nowrap rounded-9 px-4 py-2 font-outfit text-base transition-colors ${
+                `whitespace-nowrap rounded-9 px-4 py-2 font-outfit text-base no-underline transition-colors ${
                   isActive
-                    ? 'bg-surface-nav-active text-brand-teal'
+                    ? 'bg-surface-nav-active text-brand-teal hover:text-brand-teal'
                     : 'text-white hover:text-brand-teal-pale'
                 }`
               }
