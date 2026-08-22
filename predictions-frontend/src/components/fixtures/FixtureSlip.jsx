@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { ArrowRight } from '@phosphor-icons/react';
 import TeamCrest from '../ui/TeamCrest';
 import { buildLedgerRows, namedScorers, slipHeadline, slipSentence } from './predictionLedger';
 import {
   buildResultView,
-  BREAKDOWN_LABELS,
   pointsLabel,
 } from '../../utils/matchResult';
 
@@ -222,7 +221,6 @@ function ScorerPills({ names, empty, hitNames = [] }) {
 }
 
 function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density, onViewFull }) {
-  const [ledgerOpen, setLedgerOpen] = useState(false);
   const { homeTeam, awayTeam } = fixture;
   const result = buildResultView(fixture, prediction);
   const compact = density === 'compact';
@@ -288,18 +286,11 @@ function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density, onVi
     );
   }
 
-  const breakdownEntries = result.breakdown ? Object.entries(result.breakdown) : [];
-
   return (
     <div className="relative flex w-full max-w-[46.2rem] flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[1.65rem] shadow-2xl">
-      <div className="flex items-baseline justify-between gap-2.5">
-        <span className="font-outfit text-xs tracking-wider text-[#66748c]">
-          {kicker} · {gameweekLabel}
-        </span>
-        <span className="font-outfit text-xs tracking-wide" style={{ color: result.stamp.fg }}>
-          {result.live ? result.stamp.label : result.settled ? 'SCORED' : result.awaiting ? 'AWAITING' : 'LOCKED'}
-        </span>
-      </div>
+      <span className="font-outfit text-xs tracking-wider text-[#66748c]">
+        {kicker} · {gameweekLabel}
+      </span>
 
       <div className="relative pr-20">
         <h2 className="m-0 font-dmSerif text-[2.0625rem] md:text-[2.475rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
@@ -349,50 +340,28 @@ function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density, onVi
 
       <div className="h-px bg-[#16203a]" />
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        <span className="flex items-center gap-2 rounded-full border border-[#2a3a52] bg-[#0b1626] px-4 py-2">
+      <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-col leading-snug">
           <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">STAKED</span>
           <span className="font-dmSerif text-xl leading-none text-[#fcd34d]">{ceiling ?? '—'}</span>
-        </span>
-        <span className="flex items-center gap-2 rounded-full border border-[#2a3a52] bg-[#0b1626] px-4 py-2">
+        </div>
+        <div className="flex flex-col leading-snug">
           <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">ACTUAL</span>
           <span className="font-dmSerif text-xl leading-none" style={{ color: pointsFg }}>
             {result.settled ? pointsLabel(result.points) : '—'}
           </span>
-        </span>
+        </div>
         {onViewFull && (
           <button
             type="button"
             onClick={onViewFull}
-            className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-brand-indigo-mid px-5 py-2.5 font-outfit text-xs font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
+            className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-brand-indigo-mid px-5 py-2.5 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
           >
             Full prediction
+            <ArrowRight size={16} weight="bold" />
           </button>
         )}
       </div>
-
-      {result.settled && breakdownEntries.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => setLedgerOpen((v) => !v)}
-            className="flex cursor-pointer items-center justify-between font-outfit text-2xs tracking-[0.14em] text-[#5b667d] hover:text-[#c8d2e0]"
-          >
-            HOW THIS SCORED
-            <span className={`transition-transform ${ledgerOpen ? 'rotate-180' : ''}`}>&#9662;</span>
-          </button>
-          {ledgerOpen && (
-            <div className="flex flex-col gap-1.5">
-              {breakdownEntries.map(([key, val]) => (
-                <div key={key} className="flex items-baseline justify-between gap-3 text-xs">
-                  <span className="text-[#8fa0b8]">{BREAKDOWN_LABELS[key] || key}</span>
-                  <span className="font-outfit text-white">{val}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
