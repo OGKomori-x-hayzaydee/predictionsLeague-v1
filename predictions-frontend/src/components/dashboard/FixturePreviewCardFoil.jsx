@@ -178,7 +178,7 @@ export default function FixturePreviewCardFoil({
         {/* Bottom row — actual result summary: scoreline, scorers, ceiling vs actual */}
         <div className="grid grid-cols-3 divide-x divide-[#1c2942] border-t border-dashed border-white/10 bg-[#070d18] px-2 py-3">
           <div className="flex flex-col items-center gap-1 px-2 text-center">
-            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">Scoreline</span>
+            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">Actual Scoreline</span>
             <span className="font-dmSerif text-lg text-white">{scoreLabel}</span>
           </div>
           <div className="flex flex-col items-center gap-1 px-2 text-center">
