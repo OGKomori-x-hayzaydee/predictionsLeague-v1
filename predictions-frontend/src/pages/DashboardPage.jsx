@@ -14,7 +14,6 @@ import useLastSettledGameweek from '../hooks/useLastSettledGameweek';
 import { useNextMatch } from '../hooks/useNextMatch';
 
 export default function DashboardPage() {
-  const [aiOpen, setAiOpen] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const {
@@ -182,8 +181,6 @@ export default function DashboardPage() {
           fixture={selectedFixture}
           ceiling={selectedCeiling}
           variant="mobile"
-          aiOpen={aiOpen}
-          onToggleAi={() => setAiOpen((v) => !v)}
           deadlineLabel={deadlineFormatted}
         />
 

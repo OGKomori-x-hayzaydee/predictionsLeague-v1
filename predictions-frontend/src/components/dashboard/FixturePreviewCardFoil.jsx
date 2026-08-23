@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import TeamCrest from '../ui/TeamCrest';
 import ChipPile from './ChipPile';
 import { resolveFiledChips } from './resolveFiledChips';
-import { isFinishedMatch } from '../../utils/fixtureUtils';
+import { buildResultView, pointsLabel } from '../../utils/matchResult';
+import { namedScorers } from '../fixtures/predictionLedger';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -82,11 +82,8 @@ export default function FixturePreviewCardFoil({
   fixture,
   ceiling,
   variant = 'desktop',
-  aiOpen = true,
-  onToggleAi,
   deadlineLabel,
 }) {
-  const navigate = useNavigate();
   const isMobile = variant === 'mobile';
   const [chipHover, setChipHover] = useState(false);
 
@@ -110,6 +107,18 @@ export default function FixturePreviewCardFoil({
   const awayScorers = (prediction?.awayScorers || []).filter(Boolean);
   const crestSize = isMobile ? 50 : 69;
   const stampSize = isMobile ? 46 : 60;
+
+  const result = buildResultView(fixture, prediction);
+  const actualScorers = namedScorers(
+    prediction?.actualHomeScorers || fixture?.actualHomeScorers,
+    prediction?.actualAwayScorers || fixture?.actualAwayScorers,
+  );
+  const scoreLabel =
+    result.actualHome != null && result.actualAway != null
+      ? `${result.actualHome}–${result.actualAway}`
+      : '—';
+  const actualPointsLabel = predicted && result.settled ? pointsLabel(result.points) : '—';
+  const ceilingLabel = predicted ? `${ceiling} pts` : '—';
 
   return (
     <div className="relative mx-auto w-full max-w-[820px] pt-3.5 pr-3.5">
@@ -166,53 +175,41 @@ export default function FixturePreviewCardFoil({
           </div>
         )}
 
-        {/* Footer — AI overview as a card-back flap */}
-        <button
-          type="button"
-          onClick={isMobile ? onToggleAi : undefined}
-          disabled={!isMobile}
-          className={`flex w-full flex-col gap-1.5 border-t border-dashed border-white/10 bg-[#070d18] px-7 py-2.5 text-left ${
-            isMobile ? 'cursor-pointer' : 'cursor-default'
-          }`}
-        >
-          <span className="flex items-center gap-[9px]">
-            <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[#818cf8]" />
-            <span className="font-outfit text-xs uppercase tracking-[0.16em] text-[#66748c]">AI overview</span>
-            <span className="font-outfit text-xs text-[#4f5b70]">coming soon</span>
-            {isMobile && (
-              <span className="ml-auto font-outfit text-xs text-text-muted-2">{aiOpen ? '▴' : '▾'}</span>
+        {/* Bottom row — actual result summary: scoreline, scorers, ceiling vs actual */}
+        <div className="grid grid-cols-3 divide-x divide-[#1c2942] border-t border-dashed border-white/10 bg-[#070d18] px-2 py-3">
+          <div className="flex flex-col items-center gap-1 px-2 text-center">
+            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">Scoreline</span>
+            <span className="font-dmSerif text-lg text-white">{scoreLabel}</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 px-2 text-center">
+            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">Scorers</span>
+            {actualScorers.length > 0 ? (
+              <div className="flex flex-wrap items-center justify-center gap-1">
+                {actualScorers.map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-full border border-[#1c2942] bg-[#0b1626] px-2 py-0.5 text-2xs text-[#c8d2e0]"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="font-outfit text-xs text-[#4f5b70]">—</span>
             )}
-          </span>
-          {(!isMobile || aiOpen) && (
-            <p className="m-0 font-outfit text-sm leading-relaxed text-[#8fa0b8]" style={{ textWrap: 'pretty' }}>
-              Predicted scorelines, head-to-head history and what the league is picking will land here
-              once a live model is plugged in. For now, this one&rsquo;s on you.
-            </p>
-          )}
-        </button>
-
-        {/* Bottom row — ceiling + reel CTA inside the card */}
-        <div className="flex items-center justify-between gap-3 border-t border-[#1c2942] px-7 py-3">
-          <div className="flex flex-col leading-none">
-            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#7f93ad]">Ceiling</span>
-            <span className="font-dmSerif text-lg text-brand-amber">
-              {predicted ? `${ceiling} pts` : '—'}
+          </div>
+          <div className="flex flex-col items-center gap-1 px-2 text-center">
+            <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">
+              Ceiling vs Actual
+            </span>
+            <span className="font-dmSerif text-lg">
+              <span className="text-brand-amber">{ceilingLabel}</span>
+              <span className="mx-1 text-[#4a5b78]">vs</span>
+              <span className={result.settled && result.points > 0 ? 'text-[#5eead4]' : 'text-[#7f93ad]'}>
+                {actualPointsLabel}
+              </span>
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/fixtures')}
-            className="flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-[9px] bg-brand-indigo-mid px-4 py-2 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
-          >
-            {isFinishedMatch(fixture.status)
-              ? 'View in reel'
-              : predicted
-                ? 'Edit in reel'
-                : 'File in reel'}
-            <svg width="13" height="13" viewBox="0 0 15 15" fill="none">
-              <path d="M3 7.5h8.5M8 4l3.5 3.5L8 11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
         </div>
       </div>
 
