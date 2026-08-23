@@ -3,7 +3,7 @@ import { hasSeasonCap } from '../../utils/chipStatus';
 
 const CHIP_LIST = [
   { id: 'doubleDown', name: 'Double Down', tag: 'x2', desc: 'Doubles everything this match returns.' },
-  { id: 'wildcard', name: 'Wildcard', tag: 'x3', desc: 'Triples one match. One a season.' },
+  { id: 'wildcard', name: 'Wildcard', tag: 'x3', desc: 'Triples one match.' },
   { id: 'scorerFocus', name: 'Scorer Focus', tag: 'S+', desc: 'Each named scorer pays 4 instead of 2.' },
 ];
 
