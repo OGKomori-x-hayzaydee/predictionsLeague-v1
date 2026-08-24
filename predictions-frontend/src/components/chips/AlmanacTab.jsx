@@ -35,21 +35,16 @@ function usedLabel(chip) {
   return `${chip.usageCount} used`;
 }
 
-function constraintLabel(chipId) {
+function constraintCopy(chipId) {
   const config = CHIP_CONFIG[chipId];
   if (!config) return '';
-  const parts = [];
-  if (config.cooldown > 0) {
-    parts.push(`${config.cooldown} GW cooldown`);
-  } else {
-    parts.push('No cooldown');
-  }
-  if (config.seasonLimit) {
-    parts.push(`${config.seasonLimit} per season`);
-  } else {
-    parts.push('no season cap');
-  }
-  return parts.join(' · ');
+  const cooldown = config.cooldown > 0
+    ? `${config.cooldown} gameweek${config.cooldown === 1 ? '' : 's'} cooldown`
+    : 'No cooldown';
+  const cap = config.seasonLimit
+    ? `${config.seasonLimit} uses per season`
+    : 'No season cap';
+  return `${cooldown}. ${cap}.`;
 }
 
 function buildHabits(rows, auditTotal, totalUses) {
@@ -154,11 +149,10 @@ function ExplainCard({ chip, focused }) {
           {chip.scope === 'match' ? 'MATCH' : 'WEEK'}
         </span>
       </div>
-      <span className="font-outfit text-3xs tracking-[0.08em] text-text-muted-4">
-        {constraintLabel(chip.chipId)}
-      </span>
       <span className="text-caption leading-relaxed text-text-muted-2 [text-wrap:pretty]">{copy.explain}</span>
-      <span className="text-xs leading-relaxed text-text-muted-3 italic [text-wrap:pretty]">{copy.forWhat}</span>
+      <span className="text-caption leading-relaxed text-text-secondary [text-wrap:pretty]">
+        {constraintCopy(chip.chipId)}
+      </span>
     </div>
   );
 }

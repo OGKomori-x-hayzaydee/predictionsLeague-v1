@@ -38,27 +38,22 @@ export const DEMO_CHIP_ALLOWANCE = {
   allInWeek: 2,
 };
 
-/** Sidebar blurb — SCHIPS.explain / forWhat, shown in live and preview. */
+/** Sidebar blurb — effect copy for Chip by chip cards. */
 export const CHIP_ALMANAC_COPY = {
   doubleDown: {
     explain: 'Doubles everything one fixture earns you — the outcome, the scoreline and the scorers.',
-    forWhat: 'Best on a fixture you expect to call exactly, not merely correctly.',
   },
   wildcard: {
     explain: 'Triples a single fixture. It can share a match with Double Down.',
-    forWhat: 'Eight gameweeks off after you play it. A soft home win with two obvious scorers.',
   },
   scorerFocus: {
     explain: 'Doubles scorer points only in one fixture; the result points are untouched.',
-    forWhat: 'High-scoring fixtures where you trust the scorers more than the line.',
   },
   defensePlusPlus: {
     explain: 'Pays five points for every clean sheet you called across the whole week.',
-    forWhat: 'Weeks stacked with mismatches, where clean sheets are likely.',
   },
   allInWeek: {
     explain: 'Doubles every point in the gameweek, good and bad.',
-    forWhat: 'Four uses a season, no cooldown. A week you have already read well — it doubles mistakes too.',
   },
 };
 
