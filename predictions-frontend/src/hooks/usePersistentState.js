@@ -30,6 +30,40 @@ export const usePersistentState = (key, defaultValue) => {
   return [state, setState];
 };
 
+function readSession(key, defaultValue) {
+  try {
+    const item = window.sessionStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.warn(`Error reading sessionStorage key "${key}":`, error);
+    return defaultValue;
+  }
+}
+
+/**
+ * Like usePersistentState, but sessionStorage — survives in-tab navigation
+ * and dies when the tab closes.
+ */
+export const useSessionState = (key, defaultValue) => {
+  const [storedKey, setStoredKey] = useState(key);
+  const [state, setState] = useState(() => readSession(key, defaultValue));
+
+  if (key !== storedKey) {
+    setStoredKey(key);
+    setState(readSession(key, defaultValue));
+  }
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(key, JSON.stringify(state));
+    } catch (error) {
+      console.warn(`Error setting sessionStorage key "${key}":`, error);
+    }
+  }, [key, state]);
+
+  return [state, setState];
+};
+
 /**
  * Custom hook for filter state that persists to localStorage
  * Provides a standardized way to persist filter selections across page navigation

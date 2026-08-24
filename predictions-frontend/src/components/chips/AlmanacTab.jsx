@@ -9,7 +9,6 @@ import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE } from './chipHues';
 import {
   CHIP_ALMANAC_COPY,
   CHIP_ALMANAC_RULES,
-  DEMO_CHIP_ALLOWANCE,
 } from './chipsDemoData';
 
 const CHIP_ORDER = Object.keys(CHIP_CONFIG);
@@ -31,10 +30,26 @@ function bestWorstWeek(log) {
   return { best: sorted[0], worst: sorted[sorted.length - 1] };
 }
 
-function usedLabel(chip, allowance) {
-  if (allowance != null) return `${chip.usageCount} of ${allowance}`;
+function usedLabel(chip) {
   if (hasSeasonCap(chip)) return `${chip.usageCount} of ${chip.seasonLimit}`;
   return `${chip.usageCount} used`;
+}
+
+function constraintLabel(chipId) {
+  const config = CHIP_CONFIG[chipId];
+  if (!config) return '';
+  const parts = [];
+  if (config.cooldown > 0) {
+    parts.push(`${config.cooldown} GW cooldown`);
+  } else {
+    parts.push('No cooldown');
+  }
+  if (config.seasonLimit) {
+    parts.push(`${config.seasonLimit} per season`);
+  } else {
+    parts.push('no season cap');
+  }
+  return parts.join(' · ');
 }
 
 function buildHabits(rows, auditTotal, totalUses) {
@@ -139,6 +154,9 @@ function ExplainCard({ chip, focused }) {
           {chip.scope === 'match' ? 'MATCH' : 'WEEK'}
         </span>
       </div>
+      <span className="font-outfit text-3xs tracking-[0.08em] text-text-muted-4">
+        {constraintLabel(chip.chipId)}
+      </span>
       <span className="text-caption leading-relaxed text-text-muted-2 [text-wrap:pretty]">{copy.explain}</span>
       <span className="text-xs leading-relaxed text-text-muted-3 italic [text-wrap:pretty]">{copy.forWhat}</span>
     </div>
@@ -152,7 +170,7 @@ function ExplainCard({ chip, focused }) {
  * blurbs and the numbered rules are the prototype's copy. Clicking a
  * debrief row focuses the matching explain card (`chFocus`).
  */
-export default function AlmanacTab({ predictions, previewMode = false, onBackToPlan, loading = false }) {
+export default function AlmanacTab({ predictions, previewMode: _previewMode = false, onBackToPlan, loading = false }) {
   const [focusId, setFocusId] = useState('doubleDown');
 
   const rows = useMemo(() => {
@@ -162,15 +180,14 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
 
     return almanac.map((chip) => {
       const { best, worst } = bestWorstWeek(chip.log);
-      const allowance = previewMode ? DEMO_CHIP_ALLOWANCE[chip.chipId] : undefined;
       return {
         ...chip,
-        used: usedLabel(chip, allowance),
+        used: usedLabel(chip),
         bestLabel: chip.usageCount ? weekMark(best) : '—',
         worstLabel: chip.usageCount === 0 ? '—' : chip.usageCount === 1 ? 'unplayed since' : weekMark(worst),
       };
     });
-  }, [predictions, previewMode]);
+  }, [predictions]);
 
   const used = rows.filter((c) => c.usageCount > 0);
   const auditTotal = rows.reduce((sum, c) => sum + c.totalReturn, 0);

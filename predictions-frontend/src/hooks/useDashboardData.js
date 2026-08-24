@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import dashboardAPI from '../services/api/dashboardAPI';
 import leagueAPI from '../services/api/leagueAPI';
 import { useNextMatch } from './useNextMatch';
+import { useUserPredictions } from './useClientSideFixtures';
 
 // This hook implements progressive loading with real API calls
 // It uses the hybrid API approach with dashboard/ endpoints for secondary data
@@ -35,9 +36,12 @@ const useDashboardData = () => {
   });
 
   // Recent scored predictions, used to derive the Dashboard's "LAST
-  // GAMEWEEK" ledger (see ledger useMemo below).
-  const [recentPredictions, setRecentPredictions] = useState([]);
-  const [recentPredictionsLoading, setRecentPredictionsLoading] = useState(true);
+  // GAMEWEEK" ledger (see ledger useMemo below). Sourced from
+  // /predictions/user (via useUserPredictions) rather than
+  // /dashboard/predictions/recent — that endpoint's DTO never carries the
+  // actual match score, only the user's own predicted score, so the ledger
+  // could never show a real result from it.
+  const { data: recentPredictions, isLoading: recentPredictionsLoading } = useUserPredictions({ status: 'all' });
 
   const [errors, setErrors] = useState({});
 
@@ -117,18 +121,6 @@ const useDashboardData = () => {
         setSecondaryLoading(prev => ({ ...prev, leagues: false }));
       }
 
-      // Fetch recent scored predictions (for the "LAST GAMEWEEK" ledger)
-      try {
-        setRecentPredictionsLoading(true);
-        const predictions = await dashboardAPI.getRecentPredictions();
-        setRecentPredictions(predictions || []);
-      } catch (error) {
-        console.error('❌ Failed to fetch recent predictions:', error);
-        setErrors(prev => ({ ...prev, recentPredictions: error }));
-      } finally {
-        setRecentPredictionsLoading(false);
-      }
-
       // Performance insights - commented out for later implementation
 
       // Set insights loading to false since we're not fetching it
@@ -143,9 +135,15 @@ const useDashboardData = () => {
   // to 3 rows for the sidebar/sheet, plus the season's best-scoring
   // gameweek. Pure arithmetic over real backend fields (points/correct/
   // gameweek) — no fabricated data.
+  //
+  // "Completed" is judged by the actual result (actualHomeScore/
+  // actualAwayScore) being present, not by `points`: PredictionEntity.points
+  // defaults to 0 (never null) until a match settles, so filtering on
+  // points-not-null would wrongly treat the *current*, still-open gameweek
+  // as "last gameweek" too.
   const ledger = useMemo(() => {
     const completed = (recentPredictions || []).filter(
-      (p) => p.points !== null && p.points !== undefined && p.gameweek != null
+      (p) => p.actualHomeScore != null && p.actualAwayScore != null && p.gameweek != null
     );
     if (completed.length === 0) {
       return { entries: [], gameweek: null, total: 0, bestGameweek: null, bestTotal: 0 };
@@ -163,7 +161,7 @@ const useDashboardData = () => {
 
     const entries = gwPredictions.slice(0, 3).map((p) => ({
       id: p.matchId,
-      match: `${p.homeTeam} ${p.homeScore}–${p.awayScore} ${p.awayTeam}`,
+      match: `${p.homeTeam} ${p.actualHomeScore}–${p.actualAwayScore} ${p.awayTeam}`,
       detail: p.correct ? 'Correct result' : 'No points',
       pts: p.points,
       mark:

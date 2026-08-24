@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TeamCrest from '../ui/TeamCrest';
 import ChipPile from './ChipPile';
 import { resolveFiledChips } from './resolveFiledChips';
 import { buildResultView, pointsLabel } from '../../utils/matchResult';
 import { namedScorers } from '../fixtures/predictionLedger';
+import { isFinishedMatch } from '../../utils/fixtureUtils';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -85,7 +87,9 @@ export default function FixturePreviewCardFoil({
   deadlineLabel,
 }) {
   const isMobile = variant === 'mobile';
+  const navigate = useNavigate();
   const [chipHover, setChipHover] = useState(false);
+  const [aiOpen, setAiOpen] = useState(true);
 
   if (!fixture) {
     return (
@@ -119,6 +123,7 @@ export default function FixturePreviewCardFoil({
       : '—';
   const actualPointsLabel = predicted && result.settled ? pointsLabel(result.points) : '—';
   const ceilingLabel = predicted ? `${ceiling} pts` : '—';
+  const played = isFinishedMatch(fixture.status);
 
   return (
     <div className="relative mx-auto w-full max-w-[820px] pt-3.5 pr-3.5">
@@ -175,6 +180,34 @@ export default function FixturePreviewCardFoil({
           </div>
         )}
 
+        {!played && (
+          <div className="border-t border-dashed border-white/10 px-7 py-3">
+            <button
+              type="button"
+              onClick={() => setAiOpen((v) => !v)}
+              className="flex w-full items-center gap-2.5 text-left"
+            >
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#818cf8]" />
+              <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">
+                AI overview
+              </span>
+              <span className="ml-auto font-outfit text-xs text-[#8496ad]">coming soon</span>
+              {isMobile && (
+                <span className="font-outfit text-xs text-[#8496ad]">{aiOpen ? '▴' : '▾'}</span>
+              )}
+            </button>
+            {(!isMobile || aiOpen) && (
+              <p
+                className="mt-2 max-w-[38em] font-outfit text-xs leading-relaxed text-[#8fa0b8]"
+                style={{ textWrap: 'pretty' }}
+              >
+                Squad reads, recent form and likely scorers will land here once a live feed is
+                plugged in.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Bottom row — actual result summary: scoreline, scorers, ceiling vs actual */}
         <div className="grid grid-cols-3 divide-x divide-[#1c2942] border-t border-dashed border-white/10 bg-[#070d18] px-2 py-3">
           <div className="flex flex-col items-center gap-1 px-2 text-center">
@@ -211,6 +244,18 @@ export default function FixturePreviewCardFoil({
             </span>
           </div>
         </div>
+
+        {!played && (
+          <div className="flex justify-center border-t border-dashed border-white/10 px-7 py-3">
+            <button
+              type="button"
+              onClick={() => navigate('/fixtures')}
+              className="rounded-full bg-brand-indigo-mid px-6 py-2 font-outfit text-sm font-semibold text-white hover:bg-brand-indigo-hover"
+            >
+              {predicted ? 'Edit in reel' : 'File in reel'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Chip stack — filed chip(s) overlapping the card's corner like a

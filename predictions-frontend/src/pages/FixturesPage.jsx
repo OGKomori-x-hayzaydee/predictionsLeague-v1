@@ -15,6 +15,8 @@ import useDashboardData from '../hooks/useDashboardData';
 import { useNextMatch } from '../hooks/useNextMatch';
 import { useChipManagement } from '../context/ChipManagementContext';
 import useFilingSequence from '../hooks/useFilingSequence';
+import usePredictionDrafts, { draftFromFiled, draftsEqual } from '../hooks/usePredictionDrafts';
+import useAuthState from '../hooks/useAuth';
 import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { HYBRID_QUERY_KEYS } from '../hooks/useClientSideFixtures';
 import { CHIP_QUERY_KEYS } from '../hooks/useChips';
@@ -22,7 +24,6 @@ import { extractMatchId, transformChipsFromBackend } from '../utils/backendMappi
 import { calculateCeilingPoints } from '../utils/pointsCalculation';
 import {
   inferActiveGameweekChipIds,
-  matchChipsFromIds,
   mergeMatchAndGameweekChips,
 } from '../utils/gameweekChipState';
 import { stampGameweekChipOnPending } from '../utils/stampGameweekChip';
@@ -36,7 +37,7 @@ import {
   getBackdropTarget,
   BACKDROP_TRANSITION,
 } from '../components/fixtures/filingChoreography';
-import { buildResultView, recordSearchPath } from '../utils/matchResult';
+import { buildResultView, isKickoffPassed, recordSearchPath } from '../utils/matchResult';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -101,6 +102,7 @@ function upsertUserPredictionCache(queryClient, prediction) {
 export default function FixturesPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { userId, username } = useAuthState();
   const { availableChips, currentGameweek: chipGameweek, refreshChips } = useChipManagement();
 
   const {
@@ -119,6 +121,12 @@ export default function FixturesPage() {
 
   const { essentialData } = useDashboardData();
   const { timeDisplay, isLive } = useNextMatch();
+  const currentGameweek = essentialData?.season?.currentGameweek || chipGameweek;
+  const draftUser = userId || username || essentialData?.user?.username || essentialData?.user?.id;
+  const { readDraft, writeDraft, clearDraft } = usePredictionDrafts({
+    userId: draftUser,
+    gameweek: currentGameweek,
+  });
 
   const paneRef = useRef(null);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
@@ -132,22 +140,83 @@ export default function FixturesPage() {
   const [optimisticGwChips, setOptimisticGwChips] = useState([]);
   const [stampingChipId, setStampingChipId] = useState(null);
 
+  const selectedKey = fixtureKey(selectedFixture);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const hydratingRef = useRef(false);
+  const draftOwnerKeyRef = useRef(null);
+  const fixturesRef = useRef(fixtures);
+  fixturesRef.current = fixtures;
+  const readDraftRef = useRef(readDraft);
+  readDraftRef.current = readDraft;
+  const writeDraftRef = useRef(writeDraft);
+  writeDraftRef.current = writeDraft;
+  const clearDraftRef = useRef(clearDraft);
+  clearDraftRef.current = clearDraft;
+
+  const persistDraftFor = useCallback((key, nextDraft, fixture) => {
+    if (!key) return;
+    if (isKickoffPassed(fixture?.status, fixture?.date)) {
+      clearDraftRef.current(key);
+      return;
+    }
+    const filed = draftFromFiled(fixture?.userPrediction);
+    if (draftsEqual(nextDraft, filed)) {
+      clearDraftRef.current(key);
+      return;
+    }
+    writeDraftRef.current(key, nextDraft);
+  }, []);
+
   useEffect(() => {
-    const existing = selectedFixture?.userPrediction;
-    setDraft({
-      homeScore: existing?.homeScore ?? 0,
-      awayScore: existing?.awayScore ?? 0,
-      homeScorers: existing?.homeScorers ?? [],
-      awayScorers: existing?.awayScorers ?? [],
-      chips: matchChipsFromIds(existing?.chips),
-    });
+    const nextKey = fixtureKey(selectedFixture);
+    const prevKey = draftOwnerKeyRef.current;
+    if (prevKey && prevKey !== nextKey) {
+      const prevFixture = fixturesRef.current.find((f) => fixtureKey(f) === prevKey);
+      persistDraftFor(prevKey, draftRef.current, prevFixture);
+    }
+
+    hydratingRef.current = true;
+    draftOwnerKeyRef.current = nextKey;
+
+    if (!nextKey) {
+      setDraft(EMPTY_DRAFT);
+      setEditorOpen(false);
+      setSubmitError(null);
+      setOptimisticFiled(null);
+      resetFiling();
+      return;
+    }
+
+    const locked = isKickoffPassed(selectedFixture?.status, selectedFixture?.date);
+    const stored = !locked ? readDraftRef.current(nextKey) : null;
+    setDraft(stored || draftFromFiled(selectedFixture?.userPrediction));
     setEditorOpen(false);
     setSubmitError(null);
     setOptimisticFiled(null);
     resetFiling();
+    // Hydrate only when the selected fixture changes — not when its prediction cache updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFixture?.id, resetFiling]);
 
-  const currentGameweek = essentialData?.season?.currentGameweek || chipGameweek;
+  useEffect(() => {
+    if (hydratingRef.current) {
+      hydratingRef.current = false;
+      return;
+    }
+    const owner = draftOwnerKeyRef.current;
+    if (!owner || owner !== selectedKey) return;
+    persistDraftFor(selectedKey, draft, selectedFixture);
+  }, [draft, selectedKey, selectedFixture, persistDraftFor]);
+
+  useEffect(
+    () => () => {
+      const key = draftOwnerKeyRef.current;
+      const fixture = fixturesRef.current.find((f) => fixtureKey(f) === key);
+      persistDraftFor(key, draftRef.current, fixture);
+    },
+    [persistDraftFor]
+  );
   const deadlineFormatted = essentialData?.season?.deadlineFormatted;
   const showDeadlineCountdown =
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
@@ -164,7 +233,6 @@ export default function FixturesPage() {
     [availableChips, fixtures, currentGameweek, optimisticGwChips]
   );
 
-  const selectedKey = fixtureKey(selectedFixture);
   const hasOptimisticFiling = !!optimisticFiled && !!selectedFixture && optimisticFiled.id === selectedFixture.id;
   const isPredicted =
     !!selectedFixture?.predicted ||
@@ -297,6 +365,7 @@ export default function FixturesPage() {
           onFiled: () => {
             upsertUserPredictionCache(queryClient, filed);
             queryClient.invalidateQueries({ queryKey: [CHIP_QUERY_KEYS.STATUS] });
+            clearDraft(selectedKey);
             markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips, submittedAt: filed.submittedAt });
           },
         }
@@ -306,6 +375,7 @@ export default function FixturesPage() {
         setEditorOpen(true);
         setSubmitError(result?.error?.message || 'Could not file this prediction.');
       } else {
+        clearDraft(selectedKey);
         markFixtureFiled(selectedFixture, { ...draft, chips: filed.chips, submittedAt: filed.submittedAt });
         if (result.data) {
           const fromApi = result.data;

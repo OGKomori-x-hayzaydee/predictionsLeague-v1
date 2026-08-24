@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import leagueAPI from '../services/api/leagueAPI';
 import dashboardAPI from '../services/api/dashboardAPI';
 import { overlayOwnAvatar } from '../utils/profileOverrides';
+import { useFixtures } from './useFixtures';
 import {
   MAX_HISTORY_GAMEWEEKS,
   aggregateLeagueSeason,
@@ -23,6 +24,7 @@ import {
  * the same shape of insight honestly).
  */
 export default function useLeagueDetail(leagueId, overview, demoPack = null) {
+  const { fixtures: liveFixtures, isLoading: fixturesLoading } = useFixtures({ enabled: !demoPack });
   const [ownAvatar, setOwnAvatar] = useState(null);
   const [standingsRaw, setStandingsRaw] = useState(demoPack?.standings ?? null);
   const standings = useMemo(
@@ -204,8 +206,20 @@ export default function useLeagueDetail(leagueId, overview, demoPack = null) {
 
   const formBook = useMemo(() => {
     if (!standings || selectedGw == null) return null;
-    return buildFormBook({ predictionsByGw, gw: selectedGw, standings, mode });
-  }, [predictionsByGw, selectedGw, standings, mode]);
+    const seed = !demoPack && selectedGw === currentGameweek ? liveFixtures : [];
+    return buildFormBook({
+      predictionsByGw,
+      gw: selectedGw,
+      standings,
+      mode,
+      gwFixtures: seed,
+    });
+  }, [predictionsByGw, selectedGw, standings, mode, demoPack, currentGameweek, liveFixtures]);
+
+  const formBookLoading =
+    selectedGw == null ||
+    ((seasonLoading || (!demoPack && selectedGw === currentGameweek && fixturesLoading)) &&
+      !(formBook?.fixtures?.length));
 
   const gwOptions = useMemo(() => {
     if (!currentGameweek) return [];
@@ -246,6 +260,7 @@ export default function useLeagueDetail(leagueId, overview, demoPack = null) {
     gwOptions,
     mode, setMode,
     formBook,
+    formBookLoading,
     sel, setSel,
     vsIdx, setVsIdx,
     vsVariant, setVsVariant,

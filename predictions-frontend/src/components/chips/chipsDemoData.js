@@ -46,7 +46,7 @@ export const CHIP_ALMANAC_COPY = {
   },
   wildcard: {
     explain: 'Triples a single fixture. It can share a match with Double Down.',
-    forWhat: 'One swing a season. A soft home win with two obvious scorers.',
+    forWhat: 'Eight gameweeks off after you play it. A soft home win with two obvious scorers.',
   },
   scorerFocus: {
     explain: 'Doubles scorer points only in one fixture; the result points are untouched.',
@@ -58,7 +58,7 @@ export const CHIP_ALMANAC_COPY = {
   },
   allInWeek: {
     explain: 'Doubles every point in the gameweek, good and bad.',
-    forWhat: 'A week you have already read well — it doubles mistakes too.',
+    forWhat: 'Four uses a season, no cooldown. A week you have already read well — it doubles mistakes too.',
   },
 };
 
@@ -66,6 +66,8 @@ export const CHIP_ALMANAC_COPY = {
 export const CHIP_ALMANAC_RULES = [
   'Stack as many chips on a match as cooldowns and caps allow, including both multipliers.',
   'Defence++ and All-In Week can both be on in the same gameweek; each spreads to every slip you file.',
+  'Double Down cools down for 1 gameweek; Wildcard 8; Scorer Focus and Defence++ 6. All-In Week has no cooldown.',
+  'All-In Week is the only chip with a season cap: four uses. The rest can be replayed after their cooldown.',
   'Multipliers scale scorer points as well as the result, so they reward exact calls.',
   'Defence++ settles before any multiplier is applied.',
   'A chip is reserved when you plan it and only spent when you file that gameweek.',

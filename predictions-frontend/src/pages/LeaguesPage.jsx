@@ -296,6 +296,7 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
         <>
           <FormBookGrid
             formBook={lg.formBook}
+            loading={lg.formBookLoading}
             sel={lg.sel}
             setSel={lg.setSel}
             mode={lg.mode}
@@ -310,6 +311,7 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
           <div className="px-4 pb-6 pt-3 md:hidden">
             <FormBookMobile
               formBook={lg.formBook}
+              loading={lg.formBookLoading}
               sel={lg.sel}
               setSel={lg.setSel}
               mobGrid={lg.mobGrid}

@@ -21,7 +21,8 @@
  */
 
 import { CHIP_CONFIG } from './chipManager';
-import { REVERSE_CHIP_MAPPING } from './backendMappings';
+import { extractMatchId, REVERSE_CHIP_MAPPING } from './backendMappings';
+import { resolveActualScores } from './matchResult';
 
 /** How many trailing gameweeks of league history to pull (bounded so
  * opening a mature league doesn't fire 30+ parallel requests). */
@@ -481,23 +482,70 @@ export function buildActivityFeed({ standings, chipPlays, leagueName }) {
   return events.slice(0, 8);
 }
 
+function preferDefined(current, incoming) {
+  return incoming != null ? incoming : current ?? null;
+}
+
+function preferScorers(current, incoming) {
+  if (Array.isArray(incoming) && incoming.length) return incoming;
+  return current || [];
+}
+
+function formBookMatchId(entry) {
+  if (!entry) return null;
+  const raw = extractMatchId(entry) ?? entry.matchId ?? entry.id;
+  const id = Number(raw);
+  return Number.isFinite(id) ? id : null;
+}
+
+function upsertFormBookFixture(fixMap, entry) {
+  const matchId = formBookMatchId(entry);
+  if (matchId == null) return;
+  const existing = fixMap.get(matchId);
+  fixMap.set(matchId, {
+    matchId,
+    homeTeam: entry.homeTeam || existing?.homeTeam,
+    awayTeam: entry.awayTeam || existing?.awayTeam,
+    actualHomeScore: preferDefined(existing?.actualHomeScore, entry.actualHomeScore),
+    actualAwayScore: preferDefined(existing?.actualAwayScore, entry.actualAwayScore),
+    actualHomeScorers: preferScorers(existing?.actualHomeScorers, entry.actualHomeScorers),
+    actualAwayScorers: preferScorers(existing?.actualAwayScorers, entry.actualAwayScorers),
+  });
+}
+
 /** Real per-gameweek grid for the Form book (desktop 12×N grid / mobile
  * by-member / by-fixture panels) — fixtures + every member's call. */
-export function buildFormBook({ predictionsByGw, gw, standings, mode }) {
+export function buildFormBook({ predictionsByGw, gw, standings, mode, gwFixtures = [] }) {
   const preds = predictionsByGw[gw] || [];
   const byUserFixture = new Map(); // `${username}|${matchId}` -> prediction
   const fixMap = new Map();
+
+  (gwFixtures || []).forEach((f) => {
+    if (f?.gameweek != null && gw != null && Number(f.gameweek) !== Number(gw)) return;
+    const actual = resolveActualScores(f, f.userPrediction);
+    upsertFormBookFixture(fixMap, {
+      matchId: formBookMatchId(f),
+      homeTeam: f.homeTeam,
+      awayTeam: f.awayTeam,
+      actualHomeScore: actual.home,
+      actualAwayScore: actual.away,
+      actualHomeScorers: f.actualHomeScorers || f.userPrediction?.actualHomeScorers,
+      actualAwayScorers: f.actualAwayScorers || f.userPrediction?.actualAwayScorers,
+    });
+  });
+
   preds.forEach((p) => {
-    byUserFixture.set(`${p.username}|${p.matchId}`, p);
-    if (!fixMap.has(p.matchId)) {
-      fixMap.set(p.matchId, {
-        matchId: p.matchId,
-        homeTeam: p.homeTeam,
-        awayTeam: p.awayTeam,
-        actualHomeScore: p.actualHomeScore,
-        actualAwayScore: p.actualAwayScore,
-      });
-    }
+    const matchId = formBookMatchId(p);
+    if (matchId != null) byUserFixture.set(`${p.username}|${matchId}`, p);
+    upsertFormBookFixture(fixMap, {
+      matchId,
+      homeTeam: p.homeTeam,
+      awayTeam: p.awayTeam,
+      actualHomeScore: p.actualHomeScore,
+      actualAwayScore: p.actualAwayScore,
+      actualHomeScorers: p.actualHomeScorers,
+      actualAwayScorers: p.actualAwayScorers,
+    });
   });
   const fixtures = Array.from(fixMap.values()).sort((a, b) => a.matchId - b.matchId);
   const isSettled = fixtures.length > 0 && fixtures.every((f) => f.actualHomeScore != null && f.actualAwayScore != null);
@@ -510,19 +558,26 @@ export function buildFormBook({ predictionsByGw, gw, standings, mode }) {
         const p = byUserFixture.get(`${m.username}|${f.matchId}`);
         if (!p) return { filed: false, matchId: f.matchId };
         filed += 1;
-        const v = verdictFor(p);
-        const pts = p.points ?? 0;
+        const merged = {
+          ...p,
+          actualHomeScore: p.actualHomeScore ?? f.actualHomeScore,
+          actualAwayScore: p.actualAwayScore ?? f.actualAwayScore,
+          actualHomeScorers: p.actualHomeScorers?.length ? p.actualHomeScorers : f.actualHomeScorers,
+          actualAwayScorers: p.actualAwayScorers?.length ? p.actualAwayScorers : f.actualAwayScorers,
+        };
+        const v = verdictFor(merged);
+        const pts = merged.points ?? 0;
         total += pts;
-        const badge = chipBadge(p.chips);
+        const badge = chipBadge(merged.chips);
         return {
           filed: true,
           matchId: f.matchId,
           verdict: v,
-          label: mode === 'points' ? (v ? (pts === 0 ? '0' : `+${pts}`) : '—') : `${p.homeScore}–${p.awayScore}`,
+          label: mode === 'points' ? (v ? (pts === 0 ? '0' : `+${pts}`) : '—') : `${merged.homeScore}–${merged.awayScore}`,
           points: pts,
           chip: badge?.tag || '',
           chipName: badge?.name || '',
-          prediction: p,
+          prediction: merged,
         };
       });
       return {

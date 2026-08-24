@@ -3,12 +3,19 @@ import Avatar from '../ui/Avatar';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import SegmentedControl from '../ui/SegmentedControl';
+import LoadingState from '../common/LoadingState';
 
 /**
  * Mobile Form book — by-member / by-fixture rails.
  */
-export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw, currentGameweek, settledGws }) {
-  if (!formBook) return null;
+export default function FormBookMobile({ formBook, loading, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw, currentGameweek, settledGws }) {
+  if (loading || !formBook) {
+    return (
+      <div className="md:hidden">
+        <LoadingState message="Loading form book…" />
+      </div>
+    );
+  }
   const { fixtures, rows, isSettled, gw } = formBook;
   const byMember = mobGrid === 'member';
 
@@ -36,7 +43,7 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
 
       {fixtures.length === 0 ? (
         <p className="rounded-16 border border-border-base bg-surface-card p-4 text-caption text-text-muted-2">
-          No calls filed yet for this gameweek.
+          No fixtures for this gameweek yet.
         </p>
       ) : (
         <>

@@ -5,22 +5,29 @@ import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import FormBookCellCard from './FormBookCellCard';
 import SegmentedControl from '../ui/SegmentedControl';
+import LoadingState from '../common/LoadingState';
 import { verdictColors } from '../../utils/leagueStats';
 
 /**
  * Desktop Form book — member × fixture grid + right-rail detail panel.
  */
-export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwOptions, selectedGw, setSelectedGw, leagueName, currentGameweek, settledGws }) {
+export default function FormBookGrid({ formBook, loading, sel, setSel, mode, setMode, gwOptions, selectedGw, setSelectedGw, leagueName, currentGameweek, settledGws }) {
   const [card, setCard] = useState(null);
 
-  if (!formBook) return null;
+  if (loading || !formBook) {
+    return (
+      <div className="hidden min-h-0 flex-1 md:flex">
+        <LoadingState message="Loading form book…" />
+      </div>
+    );
+  }
   const { fixtures, rows, isSettled, gw } = formBook;
 
   if (fixtures.length === 0) {
     return (
       <div className="hidden min-h-0 flex-1 flex-col items-center justify-center gap-2 px-6 text-center md:flex">
-        <span className="font-dmSerif text-xl text-text-primary">No calls filed yet for GW{gw}</span>
-        <p className="max-w-sm text-sm text-text-muted-2">Once anyone in this league files a prediction for this gameweek, the form book fills in here.</p>
+        <span className="font-dmSerif text-xl text-text-primary">No fixtures for GW{gw} yet</span>
+        <p className="max-w-sm text-sm text-text-muted-2">This gameweek has no matches to show. Filed calls appear here once the week is loaded.</p>
       </div>
     );
   }
