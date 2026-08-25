@@ -681,6 +681,66 @@ class NotificationManager {
     return this.recentActivities;
   }
 
+  loadFiredIds() {
+    try {
+      return JSON.parse(localStorage.getItem('notif-fired-ids') || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  hasFired(id) {
+    return Boolean(this.loadFiredIds()[id]);
+  }
+
+  markFired(id) {
+    if (!id) return;
+    const map = this.loadFiredIds();
+    map[id] = Date.now();
+    try {
+      localStorage.setItem('notif-fired-ids', JSON.stringify(map));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async requestBrowserPermission() {
+    if (typeof Notification === 'undefined') return 'denied';
+    if (Notification.permission !== 'default') return Notification.permission;
+    try {
+      return await Notification.requestPermission();
+    } catch {
+      return 'denied';
+    }
+  }
+
+  browserNotify({ title, body, tag }) {
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') return;
+    try {
+      new Notification(title, { body, tag });
+    } catch {
+      /* ignore */
+    }
+  }
+
+  deadlineReminder({ id, message, useBrowser }) {
+    if (this.hasFired(id)) return false;
+    this.markFired(id);
+    this.notify({
+      type: NOTIFICATION_TYPES.INFO,
+      category: NOTIFICATION_TYPES.SYSTEM,
+      action: NOTIFICATION_ACTIONS.PREFERENCES_UPDATE,
+      message,
+      icon: 'info',
+      trackAsActivity: false,
+    });
+    if (useBrowser && typeof document !== 'undefined' && document.hidden) {
+      this.browserNotify({ title: 'Predictions League', body: message, tag: id });
+    }
+    return true;
+  }
+
   // Legacy support for existing showToast calls
   showToast(message, type = 'info', duration = 3000) {
     if (typeof message === 'string') {

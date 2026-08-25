@@ -64,8 +64,8 @@ export const CHIP_ALMANAC_RULES = [
   'Double Down cools down for 1 gameweek; Wildcard 8; Scorer Focus and Defence++ 6. All-In Week has no cooldown.',
   'All-In Week is the only chip with a season cap: four uses. The rest can be replayed after their cooldown.',
   'Multipliers scale scorer points as well as the result, so they reward exact calls.',
-  'Defence++ settles before any multiplier is applied.',
-  'A chip is reserved when you plan it and only spent when you file that gameweek.',
+  'Defence++ settles after any multiplier is applied.',
+  'Planning a chip is local to this browser; it is only spent when you file that gameweek.',
   'Unplayed chips are worth nothing at the final whistle. They do not carry over.',
 ];
 

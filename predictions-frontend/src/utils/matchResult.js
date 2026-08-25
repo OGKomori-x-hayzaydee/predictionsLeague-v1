@@ -194,15 +194,42 @@ export function reelPresentation(fixture, prediction, { isSelected = false } = {
   return { result, scoreLabel: null, scoreTone: SCORE_TONE.open };
 }
 
-export function lastSettledGameweek(predictions = []) {
-  const settled = (predictions || []).filter((p) => hasPair(p.actualHomeScore, p.actualAwayScore));
+export function hasActualScorePair(row) {
+  return hasPair(row?.actualHomeScore, row?.actualAwayScore);
+}
+
+/** True when every row in the set has an actual scoreline. */
+export function isGameweekFullySettled(rows = []) {
+  if (!rows.length) return false;
+  return rows.every(hasActualScorePair);
+}
+
+/**
+ * Last gameweek where *every* prediction in that week has actuals.
+ * Partial current weeks (3 of 6 finished) do not qualify.
+ */
+export function lastFullySettledGameweek(predictions = []) {
+  const byGw = new Map();
+  (predictions || []).forEach((p) => {
+    if (p?.gameweek == null) return;
+    const gw = Number(p.gameweek);
+    if (!byGw.has(gw)) byGw.set(gw, []);
+    byGw.get(gw).push(p);
+  });
+
+  const settled = [...byGw.entries()].filter(([, rows]) => isGameweekFullySettled(rows));
   if (!settled.length) return { gameweek: null, rows: [] };
-  const gameweek = Math.max(...settled.map((p) => Number(p.gameweek) || 0));
-  const rows = (predictions || [])
-    .filter((p) => Number(p.gameweek) === gameweek)
+
+  const gameweek = Math.max(...settled.map(([gw]) => gw));
+  const rows = (byGw.get(gameweek) || [])
     .slice()
     .sort((a, b) => new Date(a.date || a.matchDate || 0) - new Date(b.date || b.matchDate || 0));
   return { gameweek, rows };
+}
+
+/** @deprecated Use lastFullySettledGameweek — kept as an alias so existing imports stay honest. */
+export function lastSettledGameweek(predictions = []) {
+  return lastFullySettledGameweek(predictions);
 }
 
 export function pointsLabel(points) {

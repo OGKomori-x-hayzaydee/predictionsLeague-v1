@@ -10,6 +10,8 @@ import {
   CHIP_ALMANAC_COPY,
   CHIP_ALMANAC_RULES,
 } from './chipsDemoData';
+import { SIDE_RAIL_GRID } from '../../utils/layout';
+import { useChipManagement } from '../../context/ChipManagementContext';
 
 const CHIP_ORDER = Object.keys(CHIP_CONFIG);
 
@@ -35,7 +37,7 @@ function usedLabel(chip) {
   return `${chip.usageCount} used`;
 }
 
-function constraintCopy(chipId) {
+function constraintCopy(chipId, live) {
   const config = CHIP_CONFIG[chipId];
   if (!config) return '';
   const cooldown = config.cooldown > 0
@@ -44,7 +46,16 @@ function constraintCopy(chipId) {
   const cap = config.seasonLimit
     ? `${config.seasonLimit} uses per season`
     : 'No season cap';
-  return `${cooldown}. ${cap}.`;
+  const parts = [`${cooldown}. ${cap}.`];
+  if (live?.remainingGameweeks > 0) {
+    parts.push(`Live: ${live.remainingGameweeks} GW remaining on cooldown.`);
+  } else if (live?.available) {
+    parts.push('Live: ready now.');
+  }
+  if (hasSeasonCap(live || config) && live?.remainingUses != null) {
+    parts.push(`${live.remainingUses} of ${live.seasonLimit ?? config.seasonLimit} uses left.`);
+  }
+  return parts.join(' ');
 }
 
 function buildHabits(rows, auditTotal, totalUses) {
@@ -130,7 +141,7 @@ function MobileDebriefCard({ chip, focused, onFocus }) {
   );
 }
 
-function ExplainCard({ chip, focused }) {
+function ExplainCard({ chip, focused, live }) {
   const hue = CHIP_HUES[chip.chipId] || DEFAULT_CHIP_HUE;
   const tag = CHIP_TAGS[chip.chipId] || chip.icon;
   const copy = CHIP_ALMANAC_COPY[chip.chipId] || {};
@@ -151,7 +162,7 @@ function ExplainCard({ chip, focused }) {
       </div>
       <span className="text-caption leading-relaxed text-text-muted-2 [text-wrap:pretty]">{copy.explain}</span>
       <span className="text-caption leading-relaxed text-text-secondary [text-wrap:pretty]">
-        {constraintCopy(chip.chipId)}
+        {constraintCopy(chip.chipId, live)}
       </span>
     </div>
   );
@@ -166,6 +177,11 @@ function ExplainCard({ chip, focused }) {
  */
 export default function AlmanacTab({ predictions, previewMode: _previewMode = false, onBackToPlan, loading = false }) {
   const [focusId, setFocusId] = useState('doubleDown');
+  const { availableChips } = useChipManagement();
+  const liveById = useMemo(
+    () => Object.fromEntries((availableChips || []).map((c) => [c.chipId, c])),
+    [availableChips]
+  );
 
   const rows = useMemo(() => {
     const almanac = computeChipAlmanac(predictions)
@@ -204,7 +220,7 @@ export default function AlmanacTab({ predictions, previewMode: _previewMode = fa
   return (
     <>
       {/* Desktop — Spine.dc.html 1289-1356 */}
-      <div className="hidden min-h-0 md:grid md:h-full md:grid-cols-[1fr_340px]">
+      <div className={`hidden min-h-0 md:grid md:h-full ${SIDE_RAIL_GRID}`}>
         <div className="flex min-h-0 min-w-0 flex-col gap-[15px] overflow-y-auto px-[26px] py-[22px]">
           <div className="flex items-end justify-between gap-5">
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -261,7 +277,7 @@ export default function AlmanacTab({ predictions, previewMode: _previewMode = fa
           <KickerLabel className="tracking-[0.16em]">Chip by chip</KickerLabel>
           <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto pr-1">
             {rows.map((chip) => (
-              <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} />
+              <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} live={liveById[chip.chipId]} />
             ))}
           </div>
           {onBackToPlan && (
@@ -305,7 +321,7 @@ export default function AlmanacTab({ predictions, previewMode: _previewMode = fa
 
         <div className="flex flex-col gap-2">
           {rows.map((chip) => (
-            <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} />
+            <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} live={liveById[chip.chipId]} />
           ))}
         </div>
 

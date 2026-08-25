@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import SlotBar from '../components/ui/SlotBar';
 import KickerLabel from '../components/ui/KickerLabel';
 import StatTile from '../components/ui/StatTile';
@@ -7,14 +8,20 @@ import FixturePreviewCardFoil from '../components/dashboard/FixturePreviewCardFo
 import ResultsCarousel from '../components/dashboard/ResultsCarousel';
 import DashboardSidebar from '../components/dashboard/DashboardSidebar';
 import DashboardMobileSheet from '../components/dashboard/DashboardMobileSheet';
+import RoundupPlayer from '../components/roundup/RoundupPlayer';
 import LoadingState from '../components/common/LoadingState';
 import useFixtureSpine from '../hooks/useFixtureSpine';
 import useDashboardData from '../hooks/useDashboardData';
 import useLastSettledGameweek from '../hooks/useLastSettledGameweek';
+import useWrappedWindow from '../hooks/useWrappedWindow';
+import { useUserPredictions } from '../hooks/useClientSideFixtures';
 import { useNextMatch } from '../hooks/useNextMatch';
+import { SIDE_RAIL_GRID } from '../utils/layout';
 
 export default function DashboardPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [roundupOpen, setRoundupOpen] = useState(() => searchParams.get('roundup') === '1');
 
   const {
     stations,
@@ -42,8 +49,10 @@ export default function DashboardPage() {
   } = useDashboardData();
   const { timeDisplay, isLive } = useNextMatch();
   const lastGw = useLastSettledGameweek();
+  const { data: allPredictions = [] } = useUserPredictions({ status: 'all' });
 
   const currentGameweek = essentialData?.season?.currentGameweek;
+  const roundup = useWrappedWindow({ currentGameweek, predictions: allPredictions });
   const deadlineFormatted = essentialData?.season?.deadlineFormatted;
   const showDeadlineCountdown =
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
@@ -59,6 +68,32 @@ export default function DashboardPage() {
       ? `GW${ledgerGameweek} total ${ledgerTotal} · best week GW${ledgerBestGameweek} on ${ledgerBestTotal}`
       : `GW${ledgerGameweek} total ${ledgerTotal} pts`;
 
+  const openRoundup = () => {
+    setRoundupOpen(true);
+    roundup.markPlayed();
+  };
+
+  const closeRoundup = () => {
+    setRoundupOpen(false);
+    if (searchParams.get('roundup')) {
+      searchParams.delete('roundup');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
+
+  const roundupLabel = roundup.played
+    ? 'Replay'
+    : roundup.candidate
+      ? `GW${roundup.candidate} ROUNDUP`
+      : 'ROUNDUP';
+
+  useEffect(() => {
+    if (searchParams.get('roundup') === '1' && roundup.available) {
+      setRoundupOpen(true);
+      roundup.markPlayed();
+    }
+  }, [searchParams, roundup.available]);
+
   return (
     <div className="flex flex-col animate-rise-in md:h-[calc(100vh-var(--shell-nav-h))] md:overflow-hidden">
       <div className="hidden md:block">
@@ -66,11 +101,22 @@ export default function DashboardPage() {
           kicker={currentGameweek ? `GAMEWEEK ${currentGameweek}` : 'GAMEWEEK'}
           right={`${filedCount} of ${total} filed`}
           deadline={showDeadlineCountdown ? timeDisplay : undefined}
+          trailing={
+            roundup.available ? (
+              <button
+                type="button"
+                onClick={openRoundup}
+                className="shrink-0 rounded-full border border-brand-teal-mid/40 bg-brand-teal/10 px-3 py-1.5 font-outfit text-xs tracking-[0.12em] text-brand-teal hover:bg-brand-teal/20"
+              >
+                {roundupLabel}
+              </button>
+            ) : null
+          }
         />
       </div>
 
       {/* Desktop — foundation spec §5.3, dash grid 1fr 400px */}
-      <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[1fr_400px] md:items-stretch">
+      <div className={`hidden min-h-0 flex-1 md:grid ${SIDE_RAIL_GRID} md:items-stretch`}>
         <div className="flex min-h-0 min-w-0 flex-col gap-0 overflow-y-auto px-6 pb-12 pt-5">
           <div className="flex items-end justify-between gap-6">
             <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
@@ -114,7 +160,6 @@ export default function DashboardPage() {
               fixture={selectedFixture}
               ceiling={selectedCeiling}
               variant="desktop"
-              deadlineLabel={deadlineFormatted}
             />
           </div>
 
@@ -181,16 +226,27 @@ export default function DashboardPage() {
           fixture={selectedFixture}
           ceiling={selectedCeiling}
           variant="mobile"
-          deadlineLabel={deadlineFormatted}
         />
 
-        <button
-          onClick={() => setSheetOpen(true)}
-          className="flex items-center justify-between rounded-[14px] border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
-        >
-          Rivals, chips in hand &amp; last gameweek
-          <span className="font-outfit text-2xs text-brand-teal">VIEW &rsaquo;</span>
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="flex items-center justify-between rounded-[14px] border border-border-card bg-surface-card/70 px-4 py-[13px] text-sm text-text-secondary"
+          >
+            Rivals, chips in hand &amp; last gameweek
+            <span className="font-outfit text-2xs text-brand-teal">VIEW &rsaquo;</span>
+          </button>
+          {roundup.available && (
+            <button
+              type="button"
+              onClick={openRoundup}
+              className="flex items-center justify-between rounded-[14px] border border-brand-teal-mid/30 bg-brand-teal/10 px-4 py-[13px] text-sm text-brand-teal"
+            >
+              {roundup.played ? `Replay GW${roundup.candidate}` : `GW${roundup.candidate} ROUNDUP`}
+              <span className="font-outfit text-2xs">PLAY &rsaquo;</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <DashboardMobileSheet
@@ -201,6 +257,15 @@ export default function DashboardPage() {
         ledgerLoading={ledgerLoading}
         leagues={leagues}
       />
+
+      {roundupOpen && roundup.available && (
+        <RoundupPlayer
+          candidate={roundup.candidate}
+          rows={roundup.rows}
+          allPredictions={allPredictions}
+          onClose={closeRoundup}
+        />
+      )}
     </div>
   );
 }

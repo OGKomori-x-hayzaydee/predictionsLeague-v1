@@ -6,6 +6,7 @@ import { resolveFiledChips } from './resolveFiledChips';
 import { buildResultView, pointsLabel } from '../../utils/matchResult';
 import { namedScorers } from '../fixtures/predictionLedger';
 import { isFinishedMatch } from '../../utils/fixtureUtils';
+import { formatFixtureDeadline } from '../../utils/dateUtils';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -84,7 +85,6 @@ export default function FixturePreviewCardFoil({
   fixture,
   ceiling,
   variant = 'desktop',
-  deadlineLabel,
 }) {
   const isMobile = variant === 'mobile';
   const navigate = useNavigate();
@@ -124,6 +124,9 @@ export default function FixturePreviewCardFoil({
   const actualPointsLabel = predicted && result.settled ? pointsLabel(result.points) : '—';
   const ceilingLabel = predicted ? `${ceiling} pts` : '—';
   const played = isFinishedMatch(fixture.status);
+  const deadlineCaption = formatFixtureDeadline(date);
+  const homeCall = predicted && prediction?.homeScore != null ? prediction.homeScore : '—';
+  const awayCall = predicted && prediction?.awayScore != null ? prediction.awayScore : '—';
 
   return (
     <div className="relative mx-auto w-full max-w-[820px] pt-3.5 pr-3.5">
@@ -139,46 +142,38 @@ export default function FixturePreviewCardFoil({
           <span className="font-outfit text-xs text-[#66748c]">
             {[venue, formatKickoff(date)].filter(Boolean).join(' · ')}
           </span>
+          {!played && deadlineCaption && (
+            <span className="font-outfit text-2xs tracking-[0.08em] text-[#8496ad]">
+              File by {deadlineCaption}
+            </span>
+          )}
         </div>
 
-        {predicted ? (
-          <div
-            className={`grid items-start gap-5 px-7 py-5 ${
-              isMobile ? 'grid-cols-1 justify-items-center' : 'grid-cols-[1fr_auto_1fr]'
-            }`}
-          >
-            <div className="flex w-full flex-col items-center gap-2.5">
-              <TeamCrest team={homeTeam} size={crestSize} />
-              <span className="font-dmSerif text-2xl leading-tight text-white">{homeTeam}</span>
-              <ScorerPills names={homeScorers} />
-            </div>
+        <div
+          className={`grid items-start gap-5 px-7 py-5 ${
+            isMobile ? 'grid-cols-1 justify-items-center' : 'grid-cols-[1fr_auto_1fr]'
+          }`}
+        >
+          <div className="flex w-full flex-col items-center gap-2.5">
+            <TeamCrest team={homeTeam} size={crestSize} />
+            <span className="font-dmSerif text-2xl leading-tight text-white">{homeTeam}</span>
+            <ScorerPills names={homeScorers} />
+          </div>
 
-            <div className="flex flex-col items-center gap-1 self-center rounded-[12px] border border-[#1c2942] bg-[#050a13] px-8 py-3 shadow-[inset_0_2px_6px_rgba(0,0,0,0.5)]">
-              <div className="flex items-center gap-3">
-                <span className="font-dmSerif text-7xl leading-[0.9] text-white">{prediction.homeScore}</span>
-                <span className="font-dmSerif text-3xl leading-none text-[#4a5b78]">–</span>
-                <span className="font-dmSerif text-7xl leading-[0.9] text-white">{prediction.awayScore}</span>
-              </div>
-            </div>
-
-            <div className="flex w-full flex-col items-center gap-2.5">
-              <TeamCrest team={awayTeam} size={crestSize} />
-              <span className="font-dmSerif text-2xl leading-tight text-white">{awayTeam}</span>
-              <ScorerPills names={awayScorers} />
+          <div className="flex flex-col items-center gap-1 self-center rounded-[12px] border border-[#1c2942] bg-[#050a13] px-8 py-3 shadow-[inset_0_2px_6px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center gap-3">
+              <span className="font-dmSerif text-7xl leading-[0.9] text-white">{homeCall}</span>
+              <span className="font-dmSerif text-3xl leading-none text-[#4a5b78]">–</span>
+              <span className="font-dmSerif text-7xl leading-[0.9] text-white">{awayCall}</span>
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center gap-1.5 px-7 py-6 text-center">
-            <span className="font-dmSerif text-3xl leading-tight text-white">
-              Nothing filed on {homeTeam} v {awayTeam}
-            </span>
-            <span className="max-w-[38em] font-outfit text-sm text-[#8896ad]" style={{ textWrap: 'pretty' }}>
-              {deadlineLabel
-                ? `File a scoreline before the deadline (${deadlineLabel}) to put points on it.`
-                : 'File a scoreline before the deadline to put points on it.'}
-            </span>
+
+          <div className="flex w-full flex-col items-center gap-2.5">
+            <TeamCrest team={awayTeam} size={crestSize} />
+            <span className="font-dmSerif text-2xl leading-tight text-white">{awayTeam}</span>
+            <ScorerPills names={awayScorers} />
           </div>
-        )}
+        </div>
 
         {!played && (
           <div className="border-t border-dashed border-white/10 px-7 py-3">

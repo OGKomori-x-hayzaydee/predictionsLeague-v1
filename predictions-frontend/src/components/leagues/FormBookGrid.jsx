@@ -7,6 +7,7 @@ import FormBookCellCard from './FormBookCellCard';
 import SegmentedControl from '../ui/SegmentedControl';
 import LoadingState from '../common/LoadingState';
 import { verdictColors } from '../../utils/leagueStats';
+import { SIDE_RAIL_GRID } from '../../utils/layout';
 
 /**
  * Desktop Form book — member × fixture grid + right-rail detail panel.
@@ -48,7 +49,7 @@ export default function FormBookGrid({ formBook, loading, sel, setSel, mode, set
   const fixtureSel = sel?.type === 'fixture' ? sel.id : null;
 
   return (
-    <div className="relative hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_25rem]">
+    <div className={`relative hidden min-h-0 flex-1 md:grid ${SIDE_RAIL_GRID}`}>
       <div className="flex min-h-0 flex-col px-6 pt-5">
         <div className="flex flex-none items-end justify-between gap-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">

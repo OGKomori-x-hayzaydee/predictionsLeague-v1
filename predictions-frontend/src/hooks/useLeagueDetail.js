@@ -206,15 +206,16 @@ export default function useLeagueDetail(leagueId, overview, demoPack = null) {
 
   const formBook = useMemo(() => {
     if (!standings || selectedGw == null) return null;
-    const seed = !demoPack && selectedGw === currentGameweek ? liveFixtures : [];
+    const historical = seasonAgg?.fixturesByGw?.[selectedGw] || [];
+    const live = !demoPack && selectedGw === currentGameweek ? (liveFixtures || []) : [];
     return buildFormBook({
       predictionsByGw,
       gw: selectedGw,
       standings,
       mode,
-      gwFixtures: seed,
+      gwFixtures: [...historical, ...live],
     });
-  }, [predictionsByGw, selectedGw, standings, mode, demoPack, currentGameweek, liveFixtures]);
+  }, [predictionsByGw, selectedGw, standings, mode, demoPack, currentGameweek, liveFixtures, seasonAgg]);
 
   const formBookLoading =
     selectedGw == null ||

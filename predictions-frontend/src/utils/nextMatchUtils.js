@@ -2,6 +2,8 @@
  * Utility functions for calculating next match information
  */
 
+import { fixtureDeadline, isFilingLocked } from './dateUtils';
+
 /**
  * Find the next upcoming match from fixtures data
  * @param {Array} fixtures - Array of fixture objects
@@ -12,27 +14,31 @@ export const getNextMatch = (fixtures) => {
     return null;
   }
 
-  const now = new Date();
-  
-  // Filter for future matches and sort by date
+  const now = Date.now();
+
   const upcomingMatches = fixtures
-    .filter(fixture => {
-      const matchDate = new Date(fixture.date);
+    .filter((fixture) => {
       const isUpcoming = fixture.status === 'SCHEDULED' || fixture.status === 'TIMED';
-      const isFuture = matchDate > now;
-      
-      return isFuture && isUpcoming;
+      if (!isUpcoming || isFilingLocked(fixture.status, fixture.date)) return false;
+      const deadline = fixtureDeadline(fixture.date);
+      return deadline && deadline.getTime() > now;
     })
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+    .sort((a, b) => {
+      const da = fixtureDeadline(a.date)?.getTime() ?? 0;
+      const db = fixtureDeadline(b.date)?.getTime() ?? 0;
+      return da - db;
+    });
 
   if (upcomingMatches.length === 0) {
     return null;
   }
 
   const nextMatch = upcomingMatches[0];
-  
+  const deadline = fixtureDeadline(nextMatch.date);
+
   return {
-    nextMatchTime: nextMatch.date,
+    nextMatchTime: deadline ? deadline.toISOString() : nextMatch.date,
+    kickoffTime: nextMatch.date,
     homeTeam: nextMatch.homeTeam,
     awayTeam: nextMatch.awayTeam,
     matchId: nextMatch.id,
@@ -42,8 +48,8 @@ export const getNextMatch = (fixtures) => {
 };
 
 /**
- * Calculate time until next match
- * @param {string} nextMatchTime - ISO timestamp of next match
+ * Calculate time until the next filing deadline (45 minutes before kickoff).
+ * @param {string} nextMatchTime - ISO timestamp of the deadline
  * @returns {Object} Time breakdown object
  */
 export const calculateTimeUntilMatch = (nextMatchTime) => {
@@ -56,7 +62,7 @@ export const calculateTimeUntilMatch = (nextMatchTime) => {
   const timeUntilMatch = nextMatch - now;
 
   if (timeUntilMatch <= 0) {
-    return { timeDisplay: "Live now", isLive: true };
+    return { timeDisplay: "Locked", isLive: false };
   }
 
   const days = Math.floor(timeUntilMatch / (1000 * 60 * 60 * 24));

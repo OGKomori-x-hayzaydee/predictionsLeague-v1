@@ -37,7 +37,8 @@ import {
   getBackdropTarget,
   BACKDROP_TRANSITION,
 } from '../components/fixtures/filingChoreography';
-import { buildResultView, isKickoffPassed, recordSearchPath } from '../utils/matchResult';
+import { buildResultView, recordSearchPath } from '../utils/matchResult';
+import { formatFixtureDeadline, isFilingLocked } from '../utils/dateUtils';
 
 function formatKickoff(dateStr) {
   if (!dateStr) return '';
@@ -156,7 +157,7 @@ export default function FixturesPage() {
 
   const persistDraftFor = useCallback((key, nextDraft, fixture) => {
     if (!key) return;
-    if (isKickoffPassed(fixture?.status, fixture?.date)) {
+    if (isFilingLocked(fixture?.status, fixture?.date)) {
       clearDraftRef.current(key);
       return;
     }
@@ -188,16 +189,16 @@ export default function FixturesPage() {
       return;
     }
 
-    const locked = isKickoffPassed(selectedFixture?.status, selectedFixture?.date);
+    const locked = isFilingLocked(selectedFixture?.status, selectedFixture?.date);
     const stored = !locked ? readDraftRef.current(nextKey) : null;
     setDraft(stored || draftFromFiled(selectedFixture?.userPrediction));
     setEditorOpen(false);
     setSubmitError(null);
     setOptimisticFiled(null);
     resetFiling();
-    // Hydrate only when the selected fixture changes — not when its prediction cache updates.
+    // Hydrate when the selected match changes (matchId, not React object identity).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFixture?.id, resetFiling]);
+  }, [selectedKey, resetFiling]);
 
   useEffect(() => {
     if (hydratingRef.current) {
@@ -217,7 +218,6 @@ export default function FixturesPage() {
     },
     [persistDraftFor]
   );
-  const deadlineFormatted = essentialData?.season?.deadlineFormatted;
   const showDeadlineCountdown =
     !!timeDisplay && !isLive && timeDisplay !== 'Loading...' && timeDisplay !== 'No matches';
   const gameweekLabel = currentGameweek ? `GW${currentGameweek}` : 'GW24';
@@ -243,10 +243,17 @@ export default function FixturesPage() {
     ? buildResultView(selectedFixture, hasOptimisticFiling ? optimisticFiled.prediction : selectedFixture.userPrediction)
     : null;
   const matchLocked = !!resultView?.kickedOff;
+  const filingLocked = isFilingLocked(selectedFixture?.status, selectedFixture?.date);
   const showReceipt = matchLocked;
-  const showEditor = !filedNow && !matchLocked;
+  const showEditor = !filedNow && !filingLocked;
+  const fixtureDeadlineLabel = formatFixtureDeadline(selectedFixture?.date);
 
   const totalGoals = draft.homeScore + draft.awayScore;
+  const filedBaseline = hasOptimisticFiling
+    ? optimisticFiled.prediction
+    : selectedFixture?.userPrediction;
+  const dirty = !draftsEqual(draft, draftFromFiled(filedBaseline));
+  const submitDisabled = submitting || isFiling || filingLocked || (isPredicted && !dirty);
   const filedChips = chipsFromDraft(draft, activeGwChipIds);
 
   const liveCeiling = calculateCeilingPoints({
@@ -339,7 +346,8 @@ export default function FixturesPage() {
   );
 
   const handleSubmit = async () => {
-    if (!selectedFixture || isFiling) return;
+    if (!selectedFixture || isFiling || filingLocked) return;
+    if (isPredicted && !dirty) return;
     const editing = isPredicted;
     const chipsToFile = filedChips;
     const filed = draftAsFiledPrediction(draft, selectedFixture, activeGwChipIds);
@@ -447,11 +455,13 @@ export default function FixturesPage() {
 
   const buttonLabel = submitting || isFiling
     ? 'Filing…'
-    : isPredicted
-      ? 'Filed · amend to re-file'
-      : totalGoals === 0
-        ? 'Review & file 0–0'
-        : 'Review & file';
+    : isPredicted && !dirty
+      ? 'Filed'
+      : isPredicted
+        ? 'Re-file'
+        : totalGoals === 0
+          ? 'Review & file 0–0'
+          : 'Review & file';
 
   const aiPanelWasFiling = filePhase !== FILE_PHASES.IDLE;
 
@@ -533,12 +543,12 @@ export default function FixturesPage() {
                       <FixtureSlip
                         fixture={selectedFixture}
                         prediction={activePrediction}
-                        filed={true}
+                        filed={isPredicted}
                         ceiling={activeCeiling}
                         variant="resting"
-                        onEdit={() => setEditorOpen(true)}
+                        onEdit={filingLocked ? undefined : () => setEditorOpen(true)}
                         gameweekLabel={gameweekLabel}
-                        deadlineLabel={deadlineFormatted}
+                        deadlineLabel={fixtureDeadlineLabel}
                       />
 
                       <motion.div
@@ -567,7 +577,7 @@ export default function FixturesPage() {
                       <button
                         type="button"
                         onClick={handleSubmit}
-                        disabled={submitting || isFiling}
+                        disabled={submitDisabled}
                         className={`flex cursor-pointer items-center gap-2 rounded-full px-8 py-2.5 font-outfit text-sm font-semibold transition-all disabled:opacity-50 ${
                           isPredicted
                             ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4] hover:bg-[#0f766e66]'
@@ -639,7 +649,7 @@ export default function FixturesPage() {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={submitting || isFiling}
+                  disabled={submitDisabled}
                   className={`flex cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-3 font-outfit text-sm font-semibold shadow-lg disabled:opacity-60 ${
                     isPredicted
                       ? 'border border-[#14b8a666] bg-[#0f766e44] text-[#5eead4]'
@@ -665,12 +675,12 @@ export default function FixturesPage() {
                 <FixtureSlip
                   fixture={selectedFixture}
                   prediction={activePrediction}
-                  filed={true}
+                  filed={isPredicted}
                   ceiling={activeCeiling}
                   variant="resting"
-                  onEdit={() => setEditorOpen(true)}
+                  onEdit={filingLocked ? undefined : () => setEditorOpen(true)}
                   gameweekLabel={gameweekLabel}
-                  deadlineLabel={deadlineFormatted}
+                  deadlineLabel={fixtureDeadlineLabel}
                 />
                 <motion.div
                   initial={aiPanelWasFiling ? 'hidden' : false}

@@ -28,6 +28,7 @@ export const UserPreferencesProvider = ({ children }) => {
       resultsSettled: true,
       chipExpiryWarnings: true,
       weeklySummaryEmail: false,
+      reminderFrequency: 'both',
     },
 
     // Privacy
@@ -44,7 +45,14 @@ export const UserPreferencesProvider = ({ children }) => {
       if (savedPreferences) {
         const parsed = JSON.parse(savedPreferences);
         // Merge with defaults to ensure all properties exist
-        return { ...defaultPreferences, ...parsed };
+        return {
+          ...defaultPreferences,
+          ...parsed,
+          notifications: {
+            ...defaultPreferences.notifications,
+            ...(parsed.notifications || {}),
+          },
+        };
       }
     } catch (error) {
       console.error("Error parsing user preferences from localStorage:", error);

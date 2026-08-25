@@ -1,6 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { matchChipsFromIds } from '../utils/gameweekChipState';
-import { useSessionState } from './usePersistentState';
+import { usePersistentState } from './usePersistentState';
+
+const PENDING_KEY = 'prediction-drafts:pending';
 
 export function draftFromFiled(existing) {
   return {
@@ -36,40 +38,61 @@ function snapshotDraft(draft) {
   };
 }
 
+function readLocal(key, fallback) {
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 /**
  * Per-fixture unfiled prediction drafts, keyed by user + gameweek in
- * sessionStorage so switching reel stations or leaving /fixtures keeps work.
+ * localStorage so switching reel stations or leaving /fixtures keeps work.
  */
 export default function usePredictionDrafts({ userId, gameweek }) {
   const ready = Boolean(userId) && gameweek != null;
   const storageKey = ready
     ? `prediction-drafts:${userId}:${gameweek}`
-    : 'prediction-drafts:pending';
-  const [map, setMap] = useSessionState(storageKey, {});
+    : PENDING_KEY;
+  const [map, setMap] = usePersistentState(storageKey, {});
+
+  useEffect(() => {
+    if (!ready) return;
+    const pending = readLocal(PENDING_KEY, {});
+    if (!pending || typeof pending !== 'object' || !Object.keys(pending).length) return;
+    setMap((prev) => ({ ...pending, ...prev }));
+    try {
+      window.localStorage.removeItem(PENDING_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, [ready, setMap]);
 
   const readDraft = useCallback(
     (key) => {
-      if (!ready || !key) return null;
+      if (!key) return null;
       return map[key] ?? null;
     },
-    [map, ready]
+    [map]
   );
 
   const writeDraft = useCallback(
     (key, draft) => {
-      if (!ready || !key) return;
+      if (!key) return;
       const next = snapshotDraft(draft);
       setMap((prev) => {
         if (prev[key] && draftsEqual(prev[key], next)) return prev;
         return { ...prev, [key]: next };
       });
     },
-    [ready, setMap]
+    [setMap]
   );
 
   const clearDraft = useCallback(
     (key) => {
-      if (!ready || !key) return;
+      if (!key) return;
       setMap((prev) => {
         if (!(key in prev)) return prev;
         const next = { ...prev };
@@ -77,7 +100,7 @@ export default function usePredictionDrafts({ userId, gameweek }) {
         return next;
       });
     },
-    [ready, setMap]
+    [setMap]
   );
 
   return { readDraft, writeDraft, clearDraft };

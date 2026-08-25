@@ -13,6 +13,7 @@ import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { computeProfileStats, computeChipAlmanac } from '../utils/profileStats';
 import { normalizeTeamName } from '../utils/teamUtils';
 import { mergeProfile } from '../utils/profileOverrides';
+import { SIDE_RAIL_GRID, MAIN_PANE_CLASS } from '../utils/layout';
 
 const TABS = [
   { id: 'record', label: 'Record' },
@@ -78,8 +79,9 @@ export default function ProfilePage() {
         right={`${stats.totalCompleted} predictions settled`}
       />
 
-      <div className="md:grid md:min-h-0 md:grid-cols-[1fr_330px] md:items-stretch">
+      <div className={`md:grid md:min-h-0 ${SIDE_RAIL_GRID} md:items-stretch`}>
         <div className="min-w-0 px-4 py-5 md:px-[26px] md:py-[22px]">
+          <div className={`${MAIN_PANE_CLASS} flex flex-col gap-5`}>
           <div className="flex items-start gap-5">
             <Avatar name={profile?.username || 'You'} src={profile?.profilePicture} size={64} />
             <div className="flex min-w-0 flex-col gap-1.5">
@@ -120,6 +122,7 @@ export default function ProfilePage() {
 
           <div className="mt-4 rounded-md border border-border-card bg-surface-card p-4 md:hidden">
             <ProfileSidebarContent chipAlmanac={chipAlmanac} />
+          </div>
           </div>
         </div>
 

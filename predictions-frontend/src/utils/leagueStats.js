@@ -652,7 +652,7 @@ export function buildMemberPanel({ formBook, username }) {
     sealed,
     sealedBody,
     sheetTitle: member.isCurrentUser ? 'YOUR CALLS' : "THEIR CALLS, AGAINST YOURS",
-    sheetNote: `GW${formBook.gw} · ${formBook.isSettled ? 'scored' : 'pending'}`,
+    sheetNote: `GW${formBook.gw}${member.position != null ? ` · #${member.position}` : ''} · ${formBook.isSettled ? 'scored' : 'pending'}`,
     sheet,
   };
 }

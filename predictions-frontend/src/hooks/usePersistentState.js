@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
  * @returns {[any, function]} - [value, setValue] tuple like useState
  */
 export const usePersistentState = (key, defaultValue) => {
-  // Initialize state from localStorage or use default
+  const [storedKey, setStoredKey] = useState(key);
   const [state, setState] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
@@ -18,7 +18,16 @@ export const usePersistentState = (key, defaultValue) => {
     }
   });
 
-  // Update localStorage whenever state changes
+  if (key !== storedKey) {
+    setStoredKey(key);
+    try {
+      const item = window.localStorage.getItem(key);
+      setState(item ? JSON.parse(item) : defaultValue);
+    } catch {
+      setState(defaultValue);
+    }
+  }
+
   useEffect(() => {
     try {
       window.localStorage.setItem(key, JSON.stringify(state));

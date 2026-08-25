@@ -18,6 +18,12 @@ export default function FormBookMobile({ formBook, loading, sel, setSel, mobGrid
   }
   const { fixtures, rows, isSettled, gw } = formBook;
   const byMember = mobGrid === 'member';
+  const byRank = mobGrid === 'rank';
+  const hint = byRank
+    ? 'Tap a name to read their sheet against yours'
+    : byMember
+      ? 'Tap a name to read their sheet against yours'
+      : 'Tap a fixture to see how the room called it';
 
   return (
     <div className="flex flex-col gap-3 md:hidden">
@@ -52,16 +58,44 @@ export default function FormBookMobile({ formBook, loading, sel, setSel, mobGrid
             value={mobGrid}
             onChange={setMobGrid}
             options={[
-              { id: 'member', label: 'BY MEMBER' },
-              { id: 'fixture', label: 'BY FIXTURE' },
+              { id: 'member', label: 'MEMBER' },
+              { id: 'fixture', label: 'FIXTURE' },
+              { id: 'rank', label: 'BY RANK' },
             ]}
           />
 
           <span className="text-2xs text-text-muted-1">
-            {byMember ? 'Tap a name to read their sheet against yours' : 'Tap a fixture to see how the room called it'}
+            {hint}
           </span>
 
-          {byMember ? (
+          {byRank ? (
+            <div className="flex flex-col gap-1.5">
+              {rows.map((r) => {
+                const on = sel?.type === 'member' && sel.id === r.username;
+                return (
+                  <button
+                    key={r.username}
+                    type="button"
+                    onClick={() => setSel({ type: 'member', id: r.username })}
+                    className="grid grid-cols-[2rem_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-12 border px-3 py-2.5 text-left"
+                    style={{
+                      background: on ? 'color-mix(in srgb, var(--color-brand-teal) 15%, transparent)' : 'var(--surface-card-2)',
+                      borderColor: on ? 'var(--color-brand-teal-mid)' : 'var(--border-base)',
+                    }}
+                  >
+                    <span className="font-outfit text-xs text-text-muted-1">#{r.position ?? '—'}</span>
+                    <span className="truncate text-sm text-text-primary">{r.name}</span>
+                    <span className="font-outfit text-2xs text-text-muted-2">
+                      {r.filed}/{fixtures.length} filed
+                    </span>
+                    <span className="font-dmSerif text-base text-brand-teal">
+                      {isSettled ? r.total : '—'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : byMember ? (
             <div className="flex gap-1.5 overflow-x-auto pb-1">
               {rows.map((r) => {
                 const on = sel?.type === 'member' && sel.id === r.username;

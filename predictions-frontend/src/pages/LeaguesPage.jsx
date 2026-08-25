@@ -17,7 +17,7 @@ import useLeagueDetail from '../hooks/useLeagueDetail';
 import { useNextMatch } from '../hooks/useNextMatch';
 import { ordinal, leagueTone, standingsNeighbors, moveSince, buildPodiumNote } from '../utils/leagueStats';
 import leagueAPI from '../services/api/leagueAPI';
-import { DEMO_LEAGUES, getDemoLeaguePack } from '../components/leagues/leaguesDemoData';
+import { SIDE_RAIL_GRID, MAIN_PANE_CLASS } from '../utils/layout';
 
 const DETAIL_TABS = [
   { id: 'overview', label: 'Overview' },
@@ -251,8 +251,9 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
 
       {lg.activeTab === 'overview' ? (
         <>
-          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_24rem]">
-            <div className="flex min-h-0 min-w-0 flex-col gap-3.5 overflow-y-auto px-6 py-5">
+          <div className={`hidden min-h-0 flex-1 md:grid ${SIDE_RAIL_GRID}`}>
+            <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto px-6 py-5">
+              <div className={`${MAIN_PANE_CLASS} flex flex-col gap-5`}>
               <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
               <Podium
                 podium={lg.podium}
@@ -266,6 +267,7 @@ function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, d
               <HeadToHeadCarousel rivals={lg.rivals} vsIdx={lg.vsIdx} setVsIdx={lg.setVsIdx} vsVariant={lg.vsVariant} setVsVariant={lg.setVsVariant} />
               <PositionChart series={lg.positionSeries} line={lg.positionLine} gws={lg.settledGws} moveLabel={move.label} moveTone={move.tone} tone={tone.var} />
               <RecordsGrid records={lg.records} />
+              </div>
             </div>
             <ActivityFeed feed={lg.feed} className="min-h-0 border-l border-border-hairline bg-surface-bar p-5" />
           </div>

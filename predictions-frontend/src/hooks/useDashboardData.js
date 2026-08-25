@@ -3,6 +3,8 @@ import dashboardAPI from '../services/api/dashboardAPI';
 import leagueAPI from '../services/api/leagueAPI';
 import { useNextMatch } from './useNextMatch';
 import { useUserPredictions } from './useClientSideFixtures';
+import { lastFullySettledGameweek, VERDICT_LABELS, pointsLabel } from '../utils/matchResult';
+import { callVerdict } from '../utils/recordStats';
 
 // This hook implements progressive loading with real API calls
 // It uses the hybrid API approach with dashboard/ endpoints for secondary data
@@ -130,49 +132,40 @@ const useDashboardData = () => {
     fetchSecondaryData();
   }, [essentialData]);
 
-  // Derive the "LAST GAMEWEEK" ledger from recent predictions: the most
-  // recently completed gameweek's scored predictions, newest first, capped
-  // to 3 rows for the sidebar/sheet, plus the season's best-scoring
-  // gameweek. Pure arithmetic over real backend fields (points/correct/
-  // gameweek) — no fabricated data.
-  //
-  // "Completed" is judged by the actual result (actualHomeScore/
-  // actualAwayScore) being present, not by `points`: PredictionEntity.points
-  // defaults to 0 (never null) until a match settles, so filtering on
-  // points-not-null would wrongly treat the *current*, still-open gameweek
-  // as "last gameweek" too.
+  // LAST GAMEWEEK ledger: last *fully settled* GW (every filed row has
+  // actuals), all fixtures that week, subtitle from verdict/points.
+  // Backend `correct` is exact-scoreline only — never use it as "scored".
   const ledger = useMemo(() => {
-    const completed = (recentPredictions || []).filter(
-      (p) => p.actualHomeScore != null && p.actualAwayScore != null && p.gameweek != null
-    );
-    if (completed.length === 0) {
-      return { entries: [], gameweek: null, total: 0, bestGameweek: null, bestTotal: 0 };
-    }
+    const empty = { entries: [], gameweek: null, total: 0, bestGameweek: null, bestTotal: 0 };
+    const settled = lastFullySettledGameweek(recentPredictions || []);
+    if (!settled.gameweek || !settled.rows.length) return empty;
 
     const gwTotals = new Map();
-    completed.forEach((p) => {
+    (recentPredictions || []).forEach((p) => {
+      if (p.gameweek == null) return;
+      if (p.actualHomeScore == null || p.actualAwayScore == null) return;
       gwTotals.set(p.gameweek, (gwTotals.get(p.gameweek) || 0) + (p.points || 0));
     });
 
-    const latestGameweek = Math.max(...gwTotals.keys());
-    const gwPredictions = completed
-      .filter((p) => p.gameweek === latestGameweek)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    const entries = settled.rows.map((p) => {
+      const verdict = callVerdict(p);
+      const label = verdict ? VERDICT_LABELS[verdict.verdict] || verdict.verdict : null;
+      const pts = pointsLabel(p.points);
+      return {
+        id: p.matchId,
+        match: `${p.homeTeam} ${p.actualHomeScore}–${p.actualAwayScore} ${p.awayTeam}`,
+        detail: label ? `${label} · ${pts}` : pts,
+        pts: p.points,
+        mark:
+          verdict?.verdict === 'EXACT'
+            ? 'var(--color-brand-teal)'
+            : verdict?.verdict === 'OUTCOME'
+              ? 'var(--color-brand-indigo)'
+              : 'var(--color-brand-amber-mid)',
+      };
+    });
 
-    const entries = gwPredictions.slice(0, 3).map((p) => ({
-      id: p.matchId,
-      match: `${p.homeTeam} ${p.actualHomeScore}–${p.actualAwayScore} ${p.awayTeam}`,
-      detail: p.correct ? 'Correct result' : 'No points',
-      pts: p.points,
-      mark:
-        p.points >= 10
-          ? 'var(--color-brand-teal)'
-          : p.points > 0
-            ? 'var(--color-brand-indigo)'
-            : 'var(--color-brand-amber-mid)',
-    }));
-
-    const total = gwTotals.get(latestGameweek) || 0;
+    const total = gwTotals.get(settled.gameweek) || settled.rows.reduce((s, p) => s + (p.points || 0), 0);
 
     let bestGameweek = null;
     let bestTotal = -Infinity;
@@ -183,7 +176,7 @@ const useDashboardData = () => {
       }
     });
 
-    return { entries, gameweek: latestGameweek, total, bestGameweek, bestTotal };
+    return { entries, gameweek: settled.gameweek, total, bestGameweek, bestTotal };
   }, [recentPredictions]);
 
   // Refresh function to refetch leagues data

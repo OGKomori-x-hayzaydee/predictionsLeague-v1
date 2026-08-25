@@ -38,7 +38,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
         />
       </div>
 
-      <div className="overflow-hidden rounded-16 border border-border-base bg-surface-card">
+      <div className="mx-auto w-full max-w-[52rem] overflow-hidden rounded-16 border border-border-base bg-surface-card">
         <div className="flex items-center gap-1.5 p-1.5">
           <button
             type="button"
@@ -51,7 +51,7 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
           </button>
 
           <div className="flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5 pt-2.5">
-            <div className="flex items-center justify-between gap-2 border-b border-border-base pb-2">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border-base pb-2">
               <span className="flex min-w-0 items-center gap-2">
                 <Avatar name="You" src={current.youAvatar} size={28} animateFallback={false} className="ring-2 ring-brand-teal" />
                 <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
@@ -89,9 +89,9 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-3 md:flex-row md:items-center">
+              <div className="grid justify-items-center gap-3 md:grid-cols-[minmax(0,260px)_minmax(12rem,18rem)] md:items-center md:justify-center">
                 <RadarChart rows={current.radarRows} themLabel={current.name} />
-                <div className="flex w-full flex-col gap-2">
+                <div className="flex w-full max-w-[18rem] flex-col gap-2">
                   <div className="flex items-center gap-4 border-b border-border-base pb-1.5">
                     <span className="flex items-center gap-1.5">
                       <span className="size-2 rounded-xs bg-brand-teal" />

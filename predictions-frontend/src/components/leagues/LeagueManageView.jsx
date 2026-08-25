@@ -6,6 +6,7 @@ import Avatar from '../ui/Avatar';
 import { Button } from '../ui/buttons';
 import LoadingState from '../common/LoadingState';
 import useLeagueManage from '../../hooks/useLeagueManage';
+import Modal from '../ui/Modal';
 
 const FIELD_CLASS =
   'w-full rounded-md border border-border-control bg-surface-card-2 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-teal';
@@ -185,24 +186,29 @@ export default function LeagueManageView({ overview, onUpdated, onDeleted }) {
               value="—"
             />
           )}
-          <SettingsRow
-            label="Close this league"
-            detail="Removes every member, including you. It will disappear from everyone’s list."
-            kind="value"
-            value="…"
-            danger
-            onClick={() => setConfirmDelete(true)}
-          />
+          <div className="flex flex-col gap-3 rounded-14 border border-state-error/20 bg-surface-header/60 px-[17px] py-[15px]">
+            <span className="text-caption text-state-error-mid">Close this league</span>
+            <span className="text-2xs text-text-muted-1">
+              Removes every member, including you. It will disappear from everyone&apos;s list.
+            </span>
+            <Button variant="danger" pill={false} size="sm" onClick={() => setConfirmDelete(true)}>
+              Close league
+            </Button>
+          </div>
         </div>
 
-        {confirmDelete && (
-          <Card className="flex flex-col gap-3 border-state-error/30 p-4 md:p-5">
-            <KickerLabel as="div" className="text-state-error-mid">Close league</KickerLabel>
-            <p className="text-sm text-text-secondary">
-              This removes every member from {overview?.name || 'this league'}, including you. There is no undo.
-            </p>
-            {deleteError && <p className="text-xs text-state-error-mid">{deleteError}</p>}
-            <div className="flex justify-end gap-2">
+        <Modal
+          open={confirmDelete}
+          onClose={() => {
+            if (!deleting) {
+              setConfirmDelete(false);
+              setDeleteError(null);
+            }
+          }}
+          busy={deleting}
+          title="Close league"
+          footer={
+            <>
               <Button
                 variant="ghost"
                 pill={false}
@@ -217,9 +223,14 @@ export default function LeagueManageView({ overview, onUpdated, onDeleted }) {
               <Button variant="danger" pill={false} onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Closing…' : 'Close league'}
               </Button>
-            </div>
-          </Card>
-        )}
+            </>
+          }
+        >
+          <p className="text-sm text-text-secondary">
+            This removes every member from {overview?.name || 'this league'}, including you. There is no undo.
+          </p>
+          {deleteError && <p className="mt-3 text-xs text-state-error-mid">{deleteError}</p>}
+        </Modal>
 
         <div className="flex flex-col gap-3">
           <KickerLabel as="div">League details</KickerLabel>
