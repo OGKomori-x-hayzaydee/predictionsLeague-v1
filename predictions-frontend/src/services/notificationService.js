@@ -77,6 +77,10 @@ export const NOTIFICATION_ACTIONS = {
   LEAGUE_JOIN: 'league_join',
   LEAGUE_LEAVE: 'league_leave',
   LEAGUE_INVITE: 'league_invite',
+  LEAGUE_UPDATE: 'league_update',
+  LEAGUE_PROMOTE: 'league_promote',
+  LEAGUE_REMOVE: 'league_remove',
+  LEAGUE_DELETE: 'league_delete',
   
   // Settings Actions
   THEME_CHANGE: 'theme_change',
@@ -267,6 +271,43 @@ class NotificationManager {
       message: `Invited ${inviteCount} ${inviteCount === 1 ? 'person' : 'people'} to "${leagueName}"`,
       icon: 'mail',
       metadata: { leagueName, inviteCount }
+    }),
+
+    updateSuccess: (leagueName) => this.notify({
+      type: NOTIFICATION_TYPES.SUCCESS,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_UPDATE,
+      message: `League "${leagueName}" updated`,
+      icon: 'settings',
+      metadata: { leagueName }
+    }),
+
+    promoteSuccess: (memberName) => this.notify({
+      type: NOTIFICATION_TYPES.SUCCESS,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_PROMOTE,
+      message: `${memberName} is now a league admin`,
+      icon: 'user-plus',
+      metadata: { memberName }
+    }),
+
+    removeSuccess: (memberName) => this.notify({
+      type: NOTIFICATION_TYPES.INFO,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_REMOVE,
+      message: `${memberName} removed from the league`,
+      icon: 'user-minus',
+      metadata: { memberName }
+    }),
+
+    deleteSuccess: (leagueName) => this.notify({
+      type: NOTIFICATION_TYPES.INFO,
+      category: NOTIFICATION_TYPES.LEAGUE,
+      action: NOTIFICATION_ACTIONS.LEAGUE_DELETE,
+      message: `Everyone removed from "${leagueName}"`,
+      icon: 'trash',
+      metadata: { leagueName },
+      trackAsActivity: false
     })
   };
 
@@ -638,6 +679,66 @@ class NotificationManager {
 
   getRecentActivities() {
     return this.recentActivities;
+  }
+
+  loadFiredIds() {
+    try {
+      return JSON.parse(localStorage.getItem('notif-fired-ids') || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  hasFired(id) {
+    return Boolean(this.loadFiredIds()[id]);
+  }
+
+  markFired(id) {
+    if (!id) return;
+    const map = this.loadFiredIds();
+    map[id] = Date.now();
+    try {
+      localStorage.setItem('notif-fired-ids', JSON.stringify(map));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async requestBrowserPermission() {
+    if (typeof Notification === 'undefined') return 'denied';
+    if (Notification.permission !== 'default') return Notification.permission;
+    try {
+      return await Notification.requestPermission();
+    } catch {
+      return 'denied';
+    }
+  }
+
+  browserNotify({ title, body, tag }) {
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') return;
+    try {
+      new Notification(title, { body, tag });
+    } catch {
+      /* ignore */
+    }
+  }
+
+  deadlineReminder({ id, message, useBrowser }) {
+    if (this.hasFired(id)) return false;
+    this.markFired(id);
+    this.notify({
+      type: NOTIFICATION_TYPES.INFO,
+      category: NOTIFICATION_TYPES.SYSTEM,
+      action: NOTIFICATION_ACTIONS.PREFERENCES_UPDATE,
+      message,
+      icon: 'info',
+      trackAsActivity: false,
+    });
+    if (useBrowser && typeof document !== 'undefined' && document.hidden) {
+      this.browserNotify({ title: 'Predictions League', body: message, tag: id });
+    }
+    return true;
   }
 
   // Legacy support for existing showToast calls

@@ -15,6 +15,7 @@ dist-ssr
 *.local
 test
 
+.freebuff/
 # Environment variables
 .env
 .env.local

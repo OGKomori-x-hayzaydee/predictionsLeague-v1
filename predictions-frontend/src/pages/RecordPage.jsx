@@ -12,6 +12,7 @@ import userPredictionsAPI from '../services/api/userPredictionsAPI';
 import { computeProfileStats, computeChipAlmanac } from '../utils/profileStats';
 import { calculatePoints } from '../utils/pointsCalculation';
 import { DEMO_PREDICTIONS, DEMO_SEASON_HISTORY, DEMO_RANK_TRAJECTORY, DEMO_RANK_NOTE } from '../components/record/recordDemoData';
+import { SIDE_RAIL_GRID, MAIN_PANE_CLASS } from '../utils/layout';
 import {
   computePointsBands,
   computeScoringRate,
@@ -67,19 +68,6 @@ export default function RecordPage() {
       return next;
     });
     setSelectedGameweek(null);
-  };
-
-  // "Full prediction" (Season ticket card) -> Search tab, pre-queried to
-  // this exact fixture and auto-expanded/scrolled/glowing there — a real,
-  // bookmarkable deep link rather than local component state.
-  const handleViewFull = (prediction) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('tab', 'search');
-      next.set('q', `${prediction.homeTeam} ${prediction.awayTeam}`);
-      next.set('highlight', String(prediction.id ?? prediction.matchId ?? ''));
-      return next;
-    });
   };
 
   // Scope for the sidebar/sheet: a single selected gameweek (Season tab
@@ -224,15 +212,15 @@ export default function RecordPage() {
             </div>
           </div>
         ) : (
-          <div className="md:grid md:h-full md:min-h-0 md:grid-cols-[1fr_320px] md:items-stretch">
+          <div className={`md:grid md:h-full md:min-h-0 ${SIDE_RAIL_GRID} md:items-stretch`}>
             <div className="min-w-0 px-4 py-5 md:min-h-0 md:overflow-y-auto md:px-[26px] md:py-6">
+              <div className={`${MAIN_PANE_CLASS} flex flex-col gap-5`}>
               {activeTab === 'season' && (
                 <SeasonTab
                   predictions={effectivePredictions}
                   stats={stats}
                   selectedGameweek={selectedGameweek}
                   onSelectGameweek={setSelectedGameweek}
-                  onViewFull={handleViewFull}
                   previewMode={previewMode}
                 />
               )}
@@ -257,6 +245,7 @@ export default function RecordPage() {
                 Hit rate, bands &amp; chip return
                 <span className="font-outfit text-2xs text-brand-teal">VIEW &rsaquo;</span>
               </button>
+              </div>
             </div>
 
             <RecordSidebar {...scopeProps} insight={insight} />

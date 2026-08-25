@@ -12,12 +12,12 @@ export default function LedgerSection({ ledger, footer, isLoading }) {
 
   return (
     <div className="flex flex-col gap-[13px]">
-      <KickerLabel as="div" className="tracking-[0.16em] text-text-muted-3">
+      <KickerLabel as="div" className="text-xs tracking-[0.16em] text-text-muted-3">
         Last gameweek
       </KickerLabel>
-      {isLoading && <p className="text-xs text-text-muted-2">Loading…</p>}
+      {isLoading && <p className="text-sm text-text-muted-2">Loading…</p>}
       {!isLoading && (!ledger || ledger.length === 0) && (
-        <p className="text-xs text-text-muted-2">No scored predictions yet this season.</p>
+        <p className="text-sm text-text-muted-2">No scored predictions yet this season.</p>
       )}
       <div className="flex flex-col gap-[13px]">
         {(ledger || []).map((entry) => (
@@ -28,8 +28,8 @@ export default function LedgerSection({ ledger, footer, isLoading }) {
           >
             <span className="h-[26px] w-[2px] shrink-0 rounded-sm" style={{ background: entry.mark }} />
             <span className="flex min-w-0 flex-1 flex-col leading-[1.25]">
-              <span className="truncate text-caption text-[#dbe3ee]">{entry.match}</span>
-              <span className="font-outfit text-2xs text-[#66748c]">{entry.detail}</span>
+              <span className="truncate text-sm text-[#dbe3ee]">{entry.match}</span>
+              <span className="font-outfit text-xs text-[#66748c]">{entry.detail}</span>
             </span>
             <span className="shrink-0 font-dmSerif text-xl" style={{ color: entry.mark }}>
               {entry.pts > 0 ? `+${entry.pts}` : entry.pts}
@@ -37,7 +37,7 @@ export default function LedgerSection({ ledger, footer, isLoading }) {
           </button>
         ))}
       </div>
-      {footer && <span className="font-outfit text-2xs text-[#4f5b70]">{footer}</span>}
+      {footer && <span className="font-outfit text-xs text-[#4f5b70]">{footer}</span>}
     </div>
   );
 }

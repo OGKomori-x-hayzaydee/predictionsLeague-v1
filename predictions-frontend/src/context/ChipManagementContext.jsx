@@ -8,8 +8,8 @@ import {
   disablePremiumRestrictions 
 } from '../utils/chipManager';
 import { useAuth } from './AuthContext';
-import { useFixtures } from '../hooks/useFixtures';
-import { useChips } from '../hooks/useChips'; // NEW: React Query hook
+import { useExternalFixtures } from '../hooks/useExternalFixtures';
+import { useChips } from '../hooks/useChips';
 
 const ChipManagementContext = createContext(null);
 
@@ -36,7 +36,13 @@ export function ChipManagementProvider({ children }) {
     refresh: refreshChips
   } = useChips();
 
-  const currentGameweek = useMemo(() => backendGameweek || 1, [backendGameweek]);
+  const { fixtures: seasonFixtures } = useExternalFixtures();
+  const fixtureGameweek = seasonFixtures?.[0]?.gameweek;
+  const currentGameweek = useMemo(() => {
+    if (backendGameweek) return backendGameweek;
+    if (fixtureGameweek) return Number(fixtureGameweek);
+    return 1;
+  }, [backendGameweek, fixtureGameweek]);
 
   // Initialize chip manager when user changes
   useEffect(() => {

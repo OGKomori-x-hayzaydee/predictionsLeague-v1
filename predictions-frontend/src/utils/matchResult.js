@@ -1,0 +1,267 @@
+import { calculatePoints, getPointsBreakdown } from './pointsCalculation';
+import { callVerdict } from './recordStats';
+import {
+  MATCH_STATUS,
+  isLiveMatch,
+  isFinishedMatch,
+  formatMatchMinute,
+} from './fixtureUtils';
+
+export const VERDICT_LABELS = { EXACT: 'EXACT', OUTCOME: 'CORRECT', MISSED: 'MISSED' };
+
+export const BREAKDOWN_LABELS = {
+  perfectPrediction: 'Exact scoreline called, scorers matched',
+  exactScore: 'Exact scoreline called',
+  correctDraw: 'Correct draw',
+  correctOutcome: 'Right winner',
+  goalscorers: 'Named scorers correctly',
+  scorerFocus: 'Scorer Focus applied',
+  goalDiffPenalty: 'Goal-difference penalty',
+  wildcard: 'Wildcard applied',
+  doubleDown: 'Double Down applied',
+  allInWeek: 'All-In Week applied',
+  defensePlusPlus: 'Defence++ clean sheet bonus',
+};
+
+export const SCORE_TONE = {
+  exact: 'exact',
+  outcome: 'outcome',
+  miss: 'miss',
+  live: 'live',
+  filed: 'filed',
+  editing: 'editing',
+  muted: 'muted',
+  open: 'open',
+};
+
+/**
+ * Kickoff has happened (or the match is otherwise no longer open to file).
+ */
+export function isKickoffPassed(status, date) {
+  if (isLiveMatch(status) || isFinishedMatch(status)) return true;
+  if (status === MATCH_STATUS.SUSPENDED) return true;
+  if (!date) return false;
+  const t = new Date(date).getTime();
+  return !Number.isNaN(t) && t <= Date.now();
+}
+
+function hasPair(home, away) {
+  return home !== null && home !== undefined && away !== null && away !== undefined;
+}
+
+/**
+ * Prefer prediction actuals (MatchEntity via /predictions/user), then fixture scores
+ * (Redis live/finish poller). Scheduled 0–0 placeholders are ignored unless live/finished.
+ */
+export function resolveActualScores(fixture, prediction) {
+  if (hasPair(prediction?.actualHomeScore, prediction?.actualAwayScore)) {
+    return { home: prediction.actualHomeScore, away: prediction.actualAwayScore, source: 'prediction' };
+  }
+  const liveOrFinished = isLiveMatch(fixture?.status) || isFinishedMatch(fixture?.status);
+  if (liveOrFinished && hasPair(fixture?.homeScore, fixture?.awayScore)) {
+    return { home: fixture.homeScore, away: fixture.awayScore, source: 'fixture' };
+  }
+  return { home: null, away: null, source: null };
+}
+
+function scoringPayload(prediction, actual, fixture) {
+  if (!prediction || !hasPair(actual.home, actual.away)) return null;
+  return {
+    ...prediction,
+    actualHomeScore: actual.home,
+    actualAwayScore: actual.away,
+    actualHomeScorers: prediction.actualHomeScorers || fixture?.actualHomeScorers || [],
+    actualAwayScorers: prediction.actualAwayScorers || fixture?.actualAwayScorers || [],
+  };
+}
+
+function resolvePoints(prediction, scored) {
+  if (!scored) return null;
+  if (prediction?.points != null && prediction.status !== 'pending') return prediction.points;
+  return calculatePoints(scored);
+}
+
+export function scorerWasCorrect(name, actualHomeScorers = [], actualAwayScorers = []) {
+  if (!name) return false;
+  return [...(actualHomeScorers || []), ...(actualAwayScorers || [])].includes(name);
+}
+
+export function verdictTone(verdict) {
+  if (verdict?.verdict === 'EXACT') return SCORE_TONE.exact;
+  if (verdict?.verdict === 'OUTCOME') return SCORE_TONE.outcome;
+  if (verdict?.verdict === 'MISSED') return SCORE_TONE.miss;
+  return SCORE_TONE.muted;
+}
+
+export function stampStyle(verdict, { live = false, awaiting = false } = {}) {
+  if (live) {
+    return { fg: '#fbbf24', border: '#b4530966', label: null };
+  }
+  if (awaiting) {
+    return { fg: '#7f93ad', border: '#2a3a52', label: 'AWAITING' };
+  }
+  if (verdict?.verdict === 'EXACT') {
+    return { fg: '#5eead4', border: '#14b8a699', label: 'EXACT' };
+  }
+  if (verdict?.verdict === 'OUTCOME') {
+    return { fg: '#818cf8', border: '#6366f199', label: 'CORRECT' };
+  }
+  if (verdict?.verdict === 'MISSED') {
+    return { fg: '#fbbf24', border: '#b4530966', label: 'MISSED' };
+  }
+  return { fg: '#7f93ad', border: '#2a3a52', label: 'SCORED' };
+}
+
+/**
+ * Single view-model for Fixtures receipts, the reel, and the dashboard carousel.
+ */
+export function buildResultView(fixture, prediction) {
+  const status = fixture?.status;
+  const live = isLiveMatch(status);
+  const finished = isFinishedMatch(status);
+  const kickedOff = isKickoffPassed(status, fixture?.date);
+  const actual = resolveActualScores(fixture, prediction);
+  const awaiting = kickedOff && !hasPair(actual.home, actual.away);
+  const settled = finished && hasPair(actual.home, actual.away);
+  const scored = settled ? scoringPayload(prediction, actual, fixture) : null;
+  const verdict = scored ? callVerdict(scored) : null;
+  const breakdown = scored ? getPointsBreakdown(scored) : null;
+  const points = resolvePoints(prediction, scored);
+  const minuteLabel = live ? formatMatchMinute(fixture?.minute) : '';
+  const stamp = stampStyle(verdict, { live, awaiting });
+  if (live) {
+    stamp.label = minuteLabel ? `LIVE ${minuteLabel}` : 'LIVE';
+  }
+
+  return {
+    live,
+    finished,
+    kickedOff,
+    awaiting,
+    settled,
+    hasCall: !!prediction && prediction.homeScore != null,
+    actualHome: actual.home,
+    actualAway: actual.away,
+    callHome: prediction?.homeScore,
+    callAway: prediction?.awayScore,
+    minuteLabel,
+    points,
+    verdict,
+    breakdown,
+    stamp,
+    tone: live ? SCORE_TONE.live : verdictTone(verdict),
+    scoringPrediction: scored,
+  };
+}
+
+export function reelPresentation(fixture, prediction, { isSelected = false } = {}) {
+  const result = buildResultView(fixture, prediction);
+  const predicted = !!prediction;
+
+  if (result.live) {
+    return {
+      result,
+      scoreLabel: hasPair(result.actualHome, result.actualAway)
+        ? `${result.actualHome}–${result.actualAway}`
+        : 'LIVE',
+      scoreTone: SCORE_TONE.live,
+    };
+  }
+
+  if (result.finished) {
+    if (result.awaiting) {
+      return { result, scoreLabel: 'FT', scoreTone: SCORE_TONE.muted };
+    }
+    return {
+      result,
+      scoreLabel: `${result.actualHome}–${result.actualAway}`,
+      scoreTone: predicted ? result.tone : SCORE_TONE.muted,
+    };
+  }
+
+  if (predicted && prediction) {
+    return {
+      result,
+      scoreLabel: `${prediction.homeScore}–${prediction.awayScore}`,
+      scoreTone: SCORE_TONE.filed,
+    };
+  }
+
+  if (isSelected) {
+    return { result, scoreLabel: 'editing', scoreTone: SCORE_TONE.editing };
+  }
+
+  return { result, scoreLabel: null, scoreTone: SCORE_TONE.open };
+}
+
+export function hasActualScorePair(row) {
+  return hasPair(row?.actualHomeScore, row?.actualAwayScore);
+}
+
+/** True when every row in the set has an actual scoreline. */
+export function isGameweekFullySettled(rows = []) {
+  if (!rows.length) return false;
+  return rows.every(hasActualScorePair);
+}
+
+/**
+ * Last gameweek where *every* prediction in that week has actuals.
+ * Partial current weeks (3 of 6 finished) do not qualify.
+ */
+export function lastFullySettledGameweek(predictions = []) {
+  const byGw = new Map();
+  (predictions || []).forEach((p) => {
+    if (p?.gameweek == null) return;
+    const gw = Number(p.gameweek);
+    if (!byGw.has(gw)) byGw.set(gw, []);
+    byGw.get(gw).push(p);
+  });
+
+  const settled = [...byGw.entries()].filter(([, rows]) => isGameweekFullySettled(rows));
+  if (!settled.length) return { gameweek: null, rows: [] };
+
+  const gameweek = Math.max(...settled.map(([gw]) => gw));
+  const rows = (byGw.get(gameweek) || [])
+    .slice()
+    .sort((a, b) => new Date(a.date || a.matchDate || 0) - new Date(b.date || b.matchDate || 0));
+  return { gameweek, rows };
+}
+
+/** @deprecated Use lastFullySettledGameweek — kept as an alias so existing imports stay honest. */
+export function lastSettledGameweek(predictions = []) {
+  return lastFullySettledGameweek(predictions);
+}
+
+export function pointsLabel(points) {
+  if (points == null) return '—';
+  if (points > 0) return `+${points}`;
+  return String(points);
+}
+
+/** Shape a /predictions/user row as fixture + prediction for the scored slip. */
+export function predictionAsReceiptPair(prediction) {
+  const settled = hasPair(prediction?.actualHomeScore, prediction?.actualAwayScore);
+  return {
+    fixture: {
+      id: prediction.matchId ?? prediction.id,
+      homeTeam: prediction.homeTeam,
+      awayTeam: prediction.awayTeam,
+      date: prediction.date || prediction.matchDate,
+      status: settled ? MATCH_STATUS.FINISHED : MATCH_STATUS.TIMED,
+      homeScore: prediction.actualHomeScore,
+      awayScore: prediction.actualAwayScore,
+      actualHomeScorers: prediction.actualHomeScorers,
+      actualAwayScorers: prediction.actualAwayScorers,
+      gameweek: prediction.gameweek,
+    },
+    prediction,
+  };
+}
+
+export function recordSearchPath(prediction) {
+  const highlight = prediction?.matchId ?? prediction?.id ?? '';
+  const q = `${prediction?.homeTeam || ''} ${prediction?.awayTeam || ''}`.trim();
+  const params = new URLSearchParams({ tab: 'search', highlight: String(highlight) });
+  if (q) params.set('q', q);
+  return `/record?${params.toString()}`;
+}

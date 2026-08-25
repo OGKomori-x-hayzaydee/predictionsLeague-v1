@@ -1,4 +1,5 @@
 import TeamCrest from '../ui/TeamCrest';
+import { SCORE_TONE } from '../../utils/matchResult';
 
 function formatDay(dateStr) {
   if (!dateStr) return '—';
@@ -7,6 +8,41 @@ function formatDay(dateStr) {
   const day = d.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase();
   const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
   return `${day} ${time}`;
+}
+
+function toneClass(tone, isSelected) {
+  switch (tone) {
+    case SCORE_TONE.exact:
+      return 'text-[#5eead4]';
+    case SCORE_TONE.outcome:
+      return 'text-[#818cf8]';
+    case SCORE_TONE.miss:
+      return 'text-[#fbbf24]';
+    case SCORE_TONE.live:
+      return 'text-[#fbbf24]';
+    case SCORE_TONE.filed:
+      return 'text-[#5eead4]';
+    case SCORE_TONE.editing:
+      return 'text-[#fcd34d]';
+    default:
+      return isSelected ? 'text-[#fcd34d]' : 'text-[#5b667d]';
+  }
+}
+
+function markClass(tone, isSelected) {
+  switch (tone) {
+    case SCORE_TONE.exact:
+    case SCORE_TONE.filed:
+      return 'bg-[#14b8a6]';
+    case SCORE_TONE.outcome:
+      return 'bg-[#6366f1]';
+    case SCORE_TONE.miss:
+    case SCORE_TONE.live:
+    case SCORE_TONE.editing:
+      return 'bg-[#fcd34d]';
+    default:
+      return isSelected ? 'bg-[#fcd34d]' : 'bg-[#1e2a3f]';
+  }
 }
 
 /**
@@ -40,9 +76,9 @@ export default function FixtureReelStrip({ stations, locked = false }) {
         {stations.map((s) => {
           const isSelected = s.isSelected;
           const isPredicted = s.predicted;
-          const label = isPredicted ? s.scoreLabel : isSelected ? 'editing' : 'open';
-          const scoreColor = isPredicted ? 'text-[#5eead4]' : isSelected ? 'text-[#fcd34d]' : 'text-[#5b667d]';
-          const markColor = isPredicted ? 'bg-[#14b8a6]' : isSelected ? 'bg-[#fcd34d]' : 'bg-[#1e2a3f]';
+          const label = s.scoreLabel || (isSelected ? 'editing' : 'open');
+          const scoreColor = toneClass(s.scoreTone, isSelected);
+          const markColor = markClass(s.scoreTone, isSelected);
           const dayColor = isSelected ? '#5eead4' : '#7f93ad';
           const bgClass = isSelected ? 'bg-[#0d1c2ecc]' : isPredicted ? 'bg-[#0b1424b8]' : 'bg-[#080e1a80]';
           const borderClass = isSelected

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
  * @returns {[any, function]} - [value, setValue] tuple like useState
  */
 export const usePersistentState = (key, defaultValue) => {
-  // Initialize state from localStorage or use default
+  const [storedKey, setStoredKey] = useState(key);
   const [state, setState] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
@@ -18,12 +18,55 @@ export const usePersistentState = (key, defaultValue) => {
     }
   });
 
-  // Update localStorage whenever state changes
+  if (key !== storedKey) {
+    setStoredKey(key);
+    try {
+      const item = window.localStorage.getItem(key);
+      setState(item ? JSON.parse(item) : defaultValue);
+    } catch {
+      setState(defaultValue);
+    }
+  }
+
   useEffect(() => {
     try {
       window.localStorage.setItem(key, JSON.stringify(state));
     } catch (error) {
       console.warn(`Error setting localStorage key "${key}":`, error);
+    }
+  }, [key, state]);
+
+  return [state, setState];
+};
+
+function readSession(key, defaultValue) {
+  try {
+    const item = window.sessionStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.warn(`Error reading sessionStorage key "${key}":`, error);
+    return defaultValue;
+  }
+}
+
+/**
+ * Like usePersistentState, but sessionStorage — survives in-tab navigation
+ * and dies when the tab closes.
+ */
+export const useSessionState = (key, defaultValue) => {
+  const [storedKey, setStoredKey] = useState(key);
+  const [state, setState] = useState(() => readSession(key, defaultValue));
+
+  if (key !== storedKey) {
+    setStoredKey(key);
+    setState(readSession(key, defaultValue));
+  }
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(key, JSON.stringify(state));
+    } catch (error) {
+      console.warn(`Error setting sessionStorage key "${key}":`, error);
     }
   }, [key, state]);
 

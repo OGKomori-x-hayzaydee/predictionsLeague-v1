@@ -1,4 +1,5 @@
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 
 /**
  * Recent activity — join events and chip plays, newest first.
@@ -11,7 +12,7 @@ export default function ActivityFeed({ feed, className = '' }) {
         <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
           {feed.map((f, i) => (
             <span key={i} className="flex items-start gap-2.5 border-b border-border-hairline py-2.5 last:border-0">
-              <span className="mt-1.5 size-1.5 shrink-0 rounded-full" style={{ background: f.tone }} />
+              <Avatar name={f.who} src={f.avatar} size={22} animateFallback={false} className="mt-0.5" />
               <span className="flex-1 text-caption leading-relaxed text-text-muted-2">
                 <span className="font-dmSerif text-sm text-text-primary">{f.who}</span> {f.text}
               </span>

@@ -4,12 +4,14 @@ import KickerLabel from '../ui/KickerLabel';
 import LoadingState from '../common/LoadingState';
 import { computeChipAlmanac } from '../../utils/profileStats';
 import { CHIP_CONFIG } from '../../utils/chipManager';
+import { hasSeasonCap } from '../../utils/chipStatus';
 import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE } from './chipHues';
 import {
   CHIP_ALMANAC_COPY,
   CHIP_ALMANAC_RULES,
-  DEMO_CHIP_ALLOWANCE,
 } from './chipsDemoData';
+import { SIDE_RAIL_GRID } from '../../utils/layout';
+import { useChipManagement } from '../../context/ChipManagementContext';
 
 const CHIP_ORDER = Object.keys(CHIP_CONFIG);
 
@@ -30,10 +32,30 @@ function bestWorstWeek(log) {
   return { best: sorted[0], worst: sorted[sorted.length - 1] };
 }
 
-function usedLabel(chip, allowance) {
-  if (allowance != null) return `${chip.usageCount} of ${allowance}`;
-  if (chip.seasonLimit != null) return `${chip.usageCount} of ${chip.seasonLimit}`;
+function usedLabel(chip) {
+  if (hasSeasonCap(chip)) return `${chip.usageCount} of ${chip.seasonLimit}`;
   return `${chip.usageCount} used`;
+}
+
+function constraintCopy(chipId, live) {
+  const config = CHIP_CONFIG[chipId];
+  if (!config) return '';
+  const cooldown = config.cooldown > 0
+    ? `${config.cooldown} gameweek${config.cooldown === 1 ? '' : 's'} cooldown`
+    : 'No cooldown';
+  const cap = config.seasonLimit
+    ? `${config.seasonLimit} uses per season`
+    : 'No season cap';
+  const parts = [`${cooldown}. ${cap}.`];
+  if (live?.remainingGameweeks > 0) {
+    parts.push(`Live: ${live.remainingGameweeks} GW remaining on cooldown.`);
+  } else if (live?.available) {
+    parts.push('Live: ready now.');
+  }
+  if (hasSeasonCap(live || config) && live?.remainingUses != null) {
+    parts.push(`${live.remainingUses} of ${live.seasonLimit ?? config.seasonLimit} uses left.`);
+  }
+  return parts.join(' ');
 }
 
 function buildHabits(rows, auditTotal, totalUses) {
@@ -119,7 +141,7 @@ function MobileDebriefCard({ chip, focused, onFocus }) {
   );
 }
 
-function ExplainCard({ chip, focused }) {
+function ExplainCard({ chip, focused, live }) {
   const hue = CHIP_HUES[chip.chipId] || DEFAULT_CHIP_HUE;
   const tag = CHIP_TAGS[chip.chipId] || chip.icon;
   const copy = CHIP_ALMANAC_COPY[chip.chipId] || {};
@@ -139,7 +161,9 @@ function ExplainCard({ chip, focused }) {
         </span>
       </div>
       <span className="text-caption leading-relaxed text-text-muted-2 [text-wrap:pretty]">{copy.explain}</span>
-      <span className="text-xs leading-relaxed text-text-muted-3 italic [text-wrap:pretty]">{copy.forWhat}</span>
+      <span className="text-caption leading-relaxed text-text-secondary [text-wrap:pretty]">
+        {constraintCopy(chip.chipId, live)}
+      </span>
     </div>
   );
 }
@@ -151,8 +175,13 @@ function ExplainCard({ chip, focused }) {
  * blurbs and the numbered rules are the prototype's copy. Clicking a
  * debrief row focuses the matching explain card (`chFocus`).
  */
-export default function AlmanacTab({ predictions, previewMode = false, onBackToPlan, loading = false }) {
+export default function AlmanacTab({ predictions, previewMode: _previewMode = false, onBackToPlan, loading = false }) {
   const [focusId, setFocusId] = useState('doubleDown');
+  const { availableChips } = useChipManagement();
+  const liveById = useMemo(
+    () => Object.fromEntries((availableChips || []).map((c) => [c.chipId, c])),
+    [availableChips]
+  );
 
   const rows = useMemo(() => {
     const almanac = computeChipAlmanac(predictions)
@@ -161,15 +190,14 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
 
     return almanac.map((chip) => {
       const { best, worst } = bestWorstWeek(chip.log);
-      const allowance = previewMode ? DEMO_CHIP_ALLOWANCE[chip.chipId] : undefined;
       return {
         ...chip,
-        used: usedLabel(chip, allowance),
+        used: usedLabel(chip),
         bestLabel: chip.usageCount ? weekMark(best) : '—',
         worstLabel: chip.usageCount === 0 ? '—' : chip.usageCount === 1 ? 'unplayed since' : weekMark(worst),
       };
     });
-  }, [predictions, previewMode]);
+  }, [predictions]);
 
   const used = rows.filter((c) => c.usageCount > 0);
   const auditTotal = rows.reduce((sum, c) => sum + c.totalReturn, 0);
@@ -192,7 +220,7 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
   return (
     <>
       {/* Desktop — Spine.dc.html 1289-1356 */}
-      <div className="hidden min-h-0 md:grid md:h-full md:grid-cols-[1fr_340px]">
+      <div className={`hidden min-h-0 md:grid md:h-full ${SIDE_RAIL_GRID}`}>
         <div className="flex min-h-0 min-w-0 flex-col gap-[15px] overflow-y-auto px-[26px] py-[22px]">
           <div className="flex items-end justify-between gap-5">
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -249,7 +277,7 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
           <KickerLabel className="tracking-[0.16em]">Chip by chip</KickerLabel>
           <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto pr-1">
             {rows.map((chip) => (
-              <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} />
+              <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} live={liveById[chip.chipId]} />
             ))}
           </div>
           {onBackToPlan && (
@@ -293,7 +321,7 @@ export default function AlmanacTab({ predictions, previewMode = false, onBackToP
 
         <div className="flex flex-col gap-2">
           {rows.map((chip) => (
-            <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} />
+            <ExplainCard key={chip.chipId} chip={chip} focused={focusId === chip.chipId} live={liveById[chip.chipId]} />
           ))}
         </div>
 

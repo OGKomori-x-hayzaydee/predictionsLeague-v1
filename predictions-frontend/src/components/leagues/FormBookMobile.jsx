@@ -1,15 +1,29 @@
 import TeamCrest from '../ui/TeamCrest';
+import Avatar from '../ui/Avatar';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import SegmentedControl from '../ui/SegmentedControl';
+import LoadingState from '../common/LoadingState';
 
 /**
  * Mobile Form book — by-member / by-fixture rails.
  */
-export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw, currentGameweek, settledGws }) {
-  if (!formBook) return null;
+export default function FormBookMobile({ formBook, loading, sel, setSel, mobGrid, setMobGrid, gwOptions, selectedGw, setSelectedGw, currentGameweek, settledGws }) {
+  if (loading || !formBook) {
+    return (
+      <div className="md:hidden">
+        <LoadingState message="Loading form book…" />
+      </div>
+    );
+  }
   const { fixtures, rows, isSettled, gw } = formBook;
   const byMember = mobGrid === 'member';
+  const byRank = mobGrid === 'rank';
+  const hint = byRank
+    ? 'Tap a name to read their sheet against yours'
+    : byMember
+      ? 'Tap a name to read their sheet against yours'
+      : 'Tap a fixture to see how the room called it';
 
   return (
     <div className="flex flex-col gap-3 md:hidden">
@@ -35,7 +49,7 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
 
       {fixtures.length === 0 ? (
         <p className="rounded-16 border border-border-base bg-surface-card p-4 text-caption text-text-muted-2">
-          No calls filed yet for this gameweek.
+          No fixtures for this gameweek yet.
         </p>
       ) : (
         <>
@@ -44,16 +58,44 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
             value={mobGrid}
             onChange={setMobGrid}
             options={[
-              { id: 'member', label: 'BY MEMBER' },
-              { id: 'fixture', label: 'BY FIXTURE' },
+              { id: 'member', label: 'MEMBER' },
+              { id: 'fixture', label: 'FIXTURE' },
+              { id: 'rank', label: 'BY RANK' },
             ]}
           />
 
           <span className="text-2xs text-text-muted-1">
-            {byMember ? 'Tap a name to read their sheet against yours' : 'Tap a fixture to see how the room called it'}
+            {hint}
           </span>
 
-          {byMember ? (
+          {byRank ? (
+            <div className="flex flex-col gap-1.5">
+              {rows.map((r) => {
+                const on = sel?.type === 'member' && sel.id === r.username;
+                return (
+                  <button
+                    key={r.username}
+                    type="button"
+                    onClick={() => setSel({ type: 'member', id: r.username })}
+                    className="grid grid-cols-[2rem_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-12 border px-3 py-2.5 text-left"
+                    style={{
+                      background: on ? 'color-mix(in srgb, var(--color-brand-teal) 15%, transparent)' : 'var(--surface-card-2)',
+                      borderColor: on ? 'var(--color-brand-teal-mid)' : 'var(--border-base)',
+                    }}
+                  >
+                    <span className="font-outfit text-xs text-text-muted-1">#{r.position ?? '—'}</span>
+                    <span className="truncate text-sm text-text-primary">{r.name}</span>
+                    <span className="font-outfit text-2xs text-text-muted-2">
+                      {r.filed}/{fixtures.length} filed
+                    </span>
+                    <span className="font-dmSerif text-base text-brand-teal">
+                      {isSettled ? r.total : '—'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : byMember ? (
             <div className="flex gap-1.5 overflow-x-auto pb-1">
               {rows.map((r) => {
                 const on = sel?.type === 'member' && sel.id === r.username;
@@ -67,13 +109,13 @@ export default function FormBookMobile({ formBook, sel, setSel, mobGrid, setMobG
                       borderColor: on ? 'var(--color-brand-teal-mid)' : 'var(--border-base)',
                     }}
                   >
-                    <span
-                      className={`flex size-8 items-center justify-center rounded-full text-sm ${
-                        r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-                      }`}
-                    >
-                      {r.initial}
-                    </span>
+                    <Avatar
+                      name={r.name}
+                      src={r.avatar}
+                      size={32}
+                      animateFallback={false}
+                      className={r.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
+                    />
                     <span className="max-w-full truncate text-2xs" style={{ color: on ? 'var(--color-brand-teal)' : 'var(--text-secondary)' }}>
                       {r.name}
                     </span>

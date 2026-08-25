@@ -1,3 +1,5 @@
+import { hasSeasonCap } from '../../utils/chipStatus';
+
 /**
  * Per-chip accent hues + short poker-chip tags, literal from the v2
  * prototype's CHIPS table (frontendPrototype spec §1.8 / Spine.dc.html
@@ -38,7 +40,7 @@ export const CHIP_TAGS = {
  * every chip into an "N left" shape.
  */
 export function chipStatusLabel(chip) {
-  if (chip.seasonLimit != null) {
+  if (hasSeasonCap(chip)) {
     const remaining = chip.remainingUses ?? Math.max(chip.seasonLimit - (chip.usageCount ?? 0), 0);
     return { text: `${remaining} of ${chip.seasonLimit} left`, warn: remaining === 0 };
   }

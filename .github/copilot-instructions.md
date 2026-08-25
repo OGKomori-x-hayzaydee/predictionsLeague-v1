@@ -1,0 +1,1 @@
+All solutions are frontend-engineered. `predictions-backend` is reference only — read it for API shapes, never edit Java, yaml, or migrations. Implement features in `predictions-frontend/`. If an endpoint is missing a field, use client fallbacks or `docs/proposals/`; do not patch the server.

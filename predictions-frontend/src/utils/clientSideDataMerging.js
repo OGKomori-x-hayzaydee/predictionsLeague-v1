@@ -37,10 +37,10 @@ export const fixtureMatching = {
    */
   fixturesMatch(externalFixture, userPrediction) {
     // PRIMARY MATCHING: Match by fixture ID / matchId (most reliable)
-    if (externalFixture.id && userPrediction.matchId) {
-      if (externalFixture.id === userPrediction.matchId) {
-        return true;
-      }
+    const fixtureId = Number(externalFixture.matchId ?? externalFixture.id);
+    const predictionId = Number(userPrediction.matchId ?? userPrediction.id);
+    if (Number.isFinite(fixtureId) && Number.isFinite(predictionId) && fixtureId === predictionId) {
+      return true;
     }
 
     // SECONDARY MATCHING: Match by fixture key
@@ -154,13 +154,21 @@ export const dataMerging = {
           homeScorers: matchingPrediction.homeScorers || [],
           awayScorers: matchingPrediction.awayScorers || [],
           chips: matchingPrediction.chips || [],
-          submittedAt: matchingPrediction.submittedAt,
+          submittedAt:
+            matchingPrediction.submittedAt ||
+            matchingPrediction.predictedAt ||
+            matchingPrediction.date,
           status: matchingPrediction.status || 'pending',
+          points: matchingPrediction.points ?? null,
           // Actual results (from backend after match completion)
+          actualHomeScore: matchingPrediction.actualHomeScore ?? null,
+          actualAwayScore: matchingPrediction.actualAwayScore ?? null,
           actualHomeScorers: matchingPrediction.actualHomeScorers || null,
           actualAwayScorers: matchingPrediction.actualAwayScorers || null
         } : null,
-        // Also add actual scorers at fixture level for easier access
+        // Also add actuals at fixture level for easier access (FT still lives on fixture.homeScore)
+        actualHomeScore: matchingPrediction?.actualHomeScore ?? null,
+        actualAwayScore: matchingPrediction?.actualAwayScore ?? null,
         actualHomeScorers: matchingPrediction?.actualHomeScorers || null,
         actualAwayScorers: matchingPrediction?.actualAwayScorers || null,
         

@@ -1,34 +1,64 @@
 /**
- * Complete Premier League Team Logo System
- * Handles all 20 teams with fallbacks and dynamic loading
+ * Complete Premier League + Championship Team Logo System
+ * Handles all clubs with fallbacks and dynamic loading
+ *
+ * Crest assets are sourced from football-data.org (free tier), whose terms
+ * of use explicitly permit displaying the `crest` field returned by their
+ * API in apps built on it (unlike scraping Wikipedia's non-free uploads,
+ * which are for editorial use on Wikipedia only). Required attribution
+ * ("Football data provided by the Football-Data.org API") lives in Footer.jsx.
  */
 
-// Available team logos (SVG format)
-import arsenalLogo from "../assets/clubs/arsenal.svg";
-import chelseaLogo from "../assets/clubs/chelsea.svg";
-import liverpoolLogo from "../assets/clubs/liverpool.svg";
-import manCityLogo from "../assets/clubs/mancity.svg";
-import manUtdLogo from "../assets/clubs/manutd.svg";
-import tottenhamLogo from "../assets/clubs/spurs.svg";
-import bournemouthLogo from "../assets/clubs/bournemouth.svg";
-import brentfordLogo from "../assets/clubs/brentford.svg";
-import brightonLogo from "../assets/clubs/brighton.svg";
-import crystalpalaceLogo from "../assets/clubs/crystalpalace.svg";
-import evertonLogo from "../assets/clubs/everton.svg";
-import fulhamLogo from "../assets/clubs/fulham.svg";
-import leedsLogo from "../assets/clubs/leeds.svg";
-import newcastleLogo from "../assets/clubs/newcastle.svg";
-import nottinghamforestLogo from "../assets/clubs/nottinghamforest.svg";
-import southamptonLogo from "../assets/clubs/southampton.svg";
-import westhamLogo from "../assets/clubs/westham.svg";
-import wolvesLogo from "../assets/clubs/wolves.svg";
-import astonvillaLogo from "../assets/clubs/astonvilla.svg";
-import burnleyLogo from "../assets/clubs/burnley.svg";
+// Local crest assets (PNG, football-data.org)
+import arsenalLogo from "../assets/clubs/arsenal.png";
+import astonVillaLogo from "../assets/clubs/astonvilla.png";
+import chelseaLogo from "../assets/clubs/chelsea.png";
+import evertonLogo from "../assets/clubs/everton.png";
+import fulhamLogo from "../assets/clubs/fulham.png";
+import liverpoolLogo from "../assets/clubs/liverpool.png";
+import manCityLogo from "../assets/clubs/mancity.png";
+import manUnitedLogo from "../assets/clubs/manunited.png";
+import newcastleLogo from "../assets/clubs/newcastle.png";
+import sunderlandLogo from "../assets/clubs/sunderland.png";
+import tottenhamLogo from "../assets/clubs/tottenham.png";
+import hullCityLogo from "../assets/clubs/hullcity.png";
+import leedsUnitedLogo from "../assets/clubs/leedsunited.png";
+import ipswichTownLogo from "../assets/clubs/ipswichtown.png";
+import nottinghamForestLogo from "../assets/clubs/nottingham.png";
+import crystalPalaceLogo from "../assets/clubs/crystalpalace.png";
+import brightonLogo from "../assets/clubs/brightonhove.png";
+import brentfordLogo from "../assets/clubs/brentford.png";
+import bournemouthLogo from "../assets/clubs/bournemouth.png";
+import coventryCityLogo from "../assets/clubs/coventrycity.png";
+import blackburnLogo from "../assets/clubs/blackburn.png";
+import boltonLogo from "../assets/clubs/bolton.png";
+import norwichLogo from "../assets/clubs/norwich.png";
+import qprLogo from "../assets/clubs/qpr.png";
+import stokeLogo from "../assets/clubs/stoke.png";
+import swanseaLogo from "../assets/clubs/swansea.png";
+import westBromLogo from "../assets/clubs/westbrom.png";
+import wolvesLogo from "../assets/clubs/wolverhampton.png";
+import portsmouthLogo from "../assets/clubs/portsmouth.png";
+import burnleyLogo from "../assets/clubs/burnley.png";
+import birminghamLogo from "../assets/clubs/birmingham.png";
+import southamptonLogo from "../assets/clubs/southampton.png";
+import derbyCountyLogo from "../assets/clubs/derbycounty.png";
+import middlesbroughLogo from "../assets/clubs/middlesbrough.png";
+import watfordLogo from "../assets/clubs/watford.png";
+import charltonLogo from "../assets/clubs/charlton.png";
+import sheffieldUtdLogo from "../assets/clubs/sheffieldutd.png";
+import millwallLogo from "../assets/clubs/millwall.png";
+import bristolCityLogo from "../assets/clubs/bristolcity.png";
+import wrexhamLogo from "../assets/clubs/wrexham.png";
+import westHamLogo from "../assets/clubs/westham.png";
+import cardiffLogo from "../assets/clubs/cardiff.png";
+import prestonNELogo from "../assets/clubs/prestonne.png";
+import lincolnCityLogo from "../assets/clubs/lincolncity.png";
 
 // Complete list of Premier League teams
 export const PREMIER_LEAGUE_TEAMS = [
   "Arsenal",
-  "Aston Villa", 
+  "Aston Villa",
   "Bournemouth",
   "Brentford",
   "Brighton",
@@ -46,44 +76,82 @@ export const PREMIER_LEAGUE_TEAMS = [
   "Southampton",
   "Tottenham",
   "West Ham",
-  "Wolves"
+  "Wolves",
 ];
 
 export const LOCAL_LOGOS = {
-  // Existing logos (will be replaced with consistent versions)
-  "Arsenal": arsenalLogo,
-  "Chelsea": chelseaLogo,
-  "Liverpool": liverpoolLogo,
-  "Man City": manCityLogo,
-  "Manchester City": manCityLogo,
-  "Man United": manUtdLogo,
-  "Manchester United": manUtdLogo,
-  "Tottenham": tottenhamLogo,
-  "Tottenham Hotspur": tottenhamLogo,
-  "Spurs": tottenhamLogo,
-  "Aston Villa": astonvillaLogo,
-  "Bournemouth": bournemouthLogo,
+  Arsenal: arsenalLogo,
+  "Aston Villa": astonVillaLogo,
+  Bournemouth: bournemouthLogo,
   "AFC Bournemouth": bournemouthLogo,
-  "Brentford": brentfordLogo,
-  "Brighton": brightonLogo,
+  Brentford: brentfordLogo,
+  Brighton: brightonLogo,
   "Brighton Hove": brightonLogo,
   "Brighton & Hove Albion": brightonLogo,
-  "Burnley": burnleyLogo,
-  "Crystal Palace": crystalpalaceLogo,
-  "Everton": evertonLogo,
-  "Fulham": fulhamLogo,
-  "Leeds United": leedsLogo,
-  "Leeds": leedsLogo,
-  "Newcastle": newcastleLogo,
+  Burnley: burnleyLogo,
+  Chelsea: chelseaLogo,
+  "Crystal Palace": crystalPalaceLogo,
+  Everton: evertonLogo,
+  Fulham: fulhamLogo,
+  "Leeds United": leedsUnitedLogo,
+  Leeds: leedsUnitedLogo,
+  Liverpool: liverpoolLogo,
+  "Man City": manCityLogo,
+  "Manchester City": manCityLogo,
+  "Man United": manUnitedLogo,
+  "Manchester United": manUnitedLogo,
+  Newcastle: newcastleLogo,
   "Newcastle United": newcastleLogo,
-  "Nottingham": nottinghamforestLogo,
-  "Nottingham Forest": nottinghamforestLogo,
-  "Southampton": southamptonLogo,
-  "West Ham": westhamLogo,
-  "West Ham United": westhamLogo,
-  "Wolves": wolvesLogo,
-  "Wolverhampton": wolvesLogo,
-  "Wolverhampton Wanderers": wolvesLogo
+  "Nottingham Forest": nottinghamForestLogo,
+  Nottingham: nottinghamForestLogo,
+  Southampton: southamptonLogo,
+  Sunderland: sunderlandLogo,
+  Tottenham: tottenhamLogo,
+  "Tottenham Hotspur": tottenhamLogo,
+  Spurs: tottenhamLogo,
+  "West Ham": westHamLogo,
+  "West Ham United": westHamLogo,
+  Wolves: wolvesLogo,
+  Wolverhampton: wolvesLogo,
+  "Wolverhampton Wanderers": wolvesLogo,
+
+  // Championship / other clubs
+  "Hull City": hullCityLogo,
+  "Coventry City": coventryCityLogo,
+  "Ipswich Town": ipswichTownLogo,
+  Blackburn: blackburnLogo,
+  "Blackburn Rovers": blackburnLogo,
+  Bolton: boltonLogo,
+  "Bolton Wanderers": boltonLogo,
+  Norwich: norwichLogo,
+  "Norwich City": norwichLogo,
+  QPR: qprLogo,
+  "Queens Park Rangers": qprLogo,
+  Stoke: stokeLogo,
+  "Stoke City": stokeLogo,
+  Swansea: swanseaLogo,
+  "Swansea City": swanseaLogo,
+  "West Brom": westBromLogo,
+  "West Bromwich Albion": westBromLogo,
+  Portsmouth: portsmouthLogo,
+  Birmingham: birminghamLogo,
+  "Birmingham City": birminghamLogo,
+  "Derby County": derbyCountyLogo,
+  Derby: derbyCountyLogo,
+  Middlesbrough: middlesbroughLogo,
+  Watford: watfordLogo,
+  Charlton: charltonLogo,
+  "Charlton Athletic": charltonLogo,
+  "Sheffield Utd": sheffieldUtdLogo,
+  "Sheffield United": sheffieldUtdLogo,
+  Millwall: millwallLogo,
+  "Bristol City": bristolCityLogo,
+  Wrexham: wrexhamLogo,
+  Cardiff: cardiffLogo,
+  "Cardiff City": cardiffLogo,
+  "Preston NE": prestonNELogo,
+  "Preston North End": prestonNELogo,
+  "Lincoln City": lincolnCityLogo,
 };
 
 /**
@@ -206,6 +274,56 @@ export const TEAM_NAME_MAPPING = {
   "Wolverhampton Wanderers": "Wolves",
   Wolves: "Wolves",
   WWFC: "Wolves",
+
+  // Hull City
+  "Hull City": "Hull City",
+  "Hull City AFC": "Hull City",
+  Hull: "Hull City",
+
+  // Coventry City
+  "Coventry City": "Coventry City",
+  "Coventry City FC": "Coventry City",
+  Coventry: "Coventry City",
+
+  // Ipswich Town
+  "Ipswich Town": "Ipswich Town",
+  "Ipswich Town FC": "Ipswich Town",
+  Ipswich: "Ipswich Town",
+
+  // Other Championship clubs
+  Blackburn: "Blackburn",
+  "Blackburn Rovers": "Blackburn",
+  Bolton: "Bolton",
+  "Bolton Wanderers": "Bolton",
+  Norwich: "Norwich",
+  "Norwich City": "Norwich",
+  QPR: "QPR",
+  "Queens Park Rangers": "QPR",
+  Stoke: "Stoke",
+  "Stoke City": "Stoke",
+  Swansea: "Swansea",
+  "Swansea City": "Swansea",
+  "West Brom": "West Brom",
+  "West Bromwich Albion": "West Brom",
+  Portsmouth: "Portsmouth",
+  Birmingham: "Birmingham",
+  "Birmingham City": "Birmingham",
+  "Derby County": "Derby County",
+  Derby: "Derby County",
+  Middlesbrough: "Middlesbrough",
+  Watford: "Watford",
+  Charlton: "Charlton",
+  "Charlton Athletic": "Charlton",
+  "Sheffield Utd": "Sheffield Utd",
+  "Sheffield United": "Sheffield Utd",
+  Millwall: "Millwall",
+  "Bristol City": "Bristol City",
+  Wrexham: "Wrexham",
+  Cardiff: "Cardiff",
+  "Cardiff City": "Cardiff",
+  "Preston NE": "Preston NE",
+  "Preston North End": "Preston NE",
+  "Lincoln City": "Lincoln City",
 };
 
 /**
@@ -233,6 +351,29 @@ export const TEAM_COLORS = {
   Tottenham: "#132257",
   "West Ham": "#7A263A",
   Wolves: "#FDB626",
+  "Hull City": "#F18A00",
+  "Coventry City": "#78D0F7",
+  "Ipswich Town": "#0033A0",
+  Blackburn: "#009EE0",
+  Bolton: "#8D0E1A",
+  Norwich: "#00A650",
+  QPR: "#1D5BA4",
+  Stoke: "#E03A3E",
+  Swansea: "#121212",
+  "West Brom": "#122F67",
+  Portsmouth: "#001489",
+  Birmingham: "#0000FF",
+  "Derby County": "#FFFFFF",
+  Middlesbrough: "#CC0000",
+  Watford: "#FBEE23",
+  Charlton: "#D3141C",
+  "Sheffield Utd": "#EE2737",
+  Millwall: "#001B5A",
+  "Bristol City": "#E21C21",
+  Wrexham: "#B3131E",
+  Cardiff: "#0070B5",
+  "Preston NE": "#1B1B1B",
+  "Lincoln City": "#E2231A",
 };
 
 /**
@@ -275,59 +416,11 @@ export const generateFallbackLogo = (teamName, size = 64) => {
 };
 
 /**
- * High-quality external logo URLs for teams without local assets
- * Using reliable sources with HTTPS and proper CORS headers
- */
-export const EXTERNAL_LOGO_URLS = {
-  // Premier League Official Badge URLs (more reliable)
-  "Aston Villa":
-    "https://resources.premierleague.com/premierleague/badges/rb/t7.svg",
-  Bournemouth:
-    "https://resources.premierleague.com/premierleague/badges/rb/t91.svg",
-  Brentford:
-    "https://resources.premierleague.com/premierleague/badges/rb/t94.svg",
-  Brighton:
-    "https://resources.premierleague.com/premierleague/badges/rb/t36.svg",
-  Burnley:
-    "https://resources.premierleague.com/premierleague/badges/rb/t90.svg",
-  "Crystal Palace":
-    "https://resources.premierleague.com/premierleague/badges/rb/t31.svg",
-  Everton:
-    "https://resources.premierleague.com/premierleague/badges/rb/t11.svg",
-  Fulham: "https://resources.premierleague.com/premierleague/badges/rb/t54.svg",
-  "Leeds United":
-    "https://resources.premierleague.com/premierleague/badges/rb/t2.svg",
-  "Leicester City":
-    "https://resources.premierleague.com/premierleague/badges/rb/t13.svg",
-  Newcastle:
-    "https://resources.premierleague.com/premierleague/badges/rb/t4.svg",
-  "Nottingham Forest":
-    "https://resources.premierleague.com/premierleague/badges/rb/t17.svg",
-  "Sheffield United":
-    "https://resources.premierleague.com/premierleague/badges/rb/t49.svg",
-  Southampton:
-    "https://resources.premierleague.com/premierleague/badges/rb/t20.svg",
-  Watford:
-    "https://resources.premierleague.com/premierleague/badges/rb/t57.svg",
-  "West Ham":
-    "https://resources.premierleague.com/premierleague/badges/rb/t21.svg",
-  Wolves: "https://resources.premierleague.com/premierleague/badges/rb/t39.svg",
-
-  // Fallback URLs for teams not in current PL (Championship teams that might get promoted)
-  Sunderland:
-    "https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg",
-  "Norwich City":
-    "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City.svg",
-  "Blackburn Rovers":
-    "https://upload.wikimedia.org/wikipedia/en/0/0f/Blackburn_Rovers.svg",
-};
-
-/**
  * Main function to get team logo
- * Priority: Local Assets > Cached External > External URLs > Fallback
+ * Priority: Local Assets > Fallback
  */
 export const getTeamLogo = async (teamName, options = {}) => {
-  const { size = 64, preferLocal = true, useFallback = true } = options;
+  const { size = 64, useFallback = true } = options;
 
   if (!teamName) {
     return useFallback ? generateFallbackLogo("Unknown", size) : null;
@@ -335,31 +428,14 @@ export const getTeamLogo = async (teamName, options = {}) => {
 
   const normalizedName = normalizeTeamName(teamName);
 
-  // 1. Try local assets first
-  if (preferLocal && LOCAL_LOGOS[teamName]) {
+  if (LOCAL_LOGOS[teamName]) {
     return LOCAL_LOGOS[teamName];
   }
 
-  if (preferLocal && LOCAL_LOGOS[normalizedName]) {
+  if (LOCAL_LOGOS[normalizedName]) {
     return LOCAL_LOGOS[normalizedName];
   }
 
-  // 2. Try external URLs
-  if (EXTERNAL_LOGO_URLS[normalizedName]) {
-    try {
-      // Test if the external URL is accessible
-      const response = await fetch(EXTERNAL_LOGO_URLS[normalizedName], {
-        method: "HEAD",
-      });
-      if (response.ok) {
-        return EXTERNAL_LOGO_URLS[normalizedName];
-      }
-    } catch (error) {
-      console.warn(`External logo failed for ${normalizedName}:`, error);
-    }
-  }
-
-  // 3. Generate fallback
   return useFallback ? generateFallbackLogo(normalizedName, size) : null;
 };
 
@@ -367,7 +443,7 @@ export const getTeamLogo = async (teamName, options = {}) => {
  * Sync version that returns immediately available logos
  */
 export const getTeamLogoSync = (teamName, options = {}) => {
-  const { size = 64, preferLocal = true, useFallback = true } = options;
+  const { size = 64, useFallback = true } = options;
 
   if (!teamName) {
     return useFallback ? generateFallbackLogo("Unknown", size) : null;
@@ -375,21 +451,14 @@ export const getTeamLogoSync = (teamName, options = {}) => {
 
   const normalizedName = normalizeTeamName(teamName);
 
-  // Try local assets
-  if (preferLocal && LOCAL_LOGOS[teamName]) {
+  if (LOCAL_LOGOS[teamName]) {
     return LOCAL_LOGOS[teamName];
   }
 
-  if (preferLocal && LOCAL_LOGOS[normalizedName]) {
+  if (LOCAL_LOGOS[normalizedName]) {
     return LOCAL_LOGOS[normalizedName];
   }
 
-  // Try external URLs (optimistic)
-  if (EXTERNAL_LOGO_URLS[normalizedName]) {
-    return EXTERNAL_LOGO_URLS[normalizedName];
-  }
-
-  // Generate fallback
   return useFallback ? generateFallbackLogo(normalizedName, size) : null;
 };
 
@@ -397,11 +466,11 @@ export const getTeamLogoSync = (teamName, options = {}) => {
  * Standard logo size configurations for consistent display
  */
 export const LOGO_SIZES = {
-  xs: 24,      // Mini icons
-  sm: 32,      // Small contexts
-  md: 48,      // Default size
-  lg: 64,      // Large displays
-  xl: 96,      // Hero sections
+  xs: 24, // Mini icons
+  sm: 32, // Small contexts
+  md: 48, // Default size
+  lg: 64, // Large displays
+  xl: 96, // Hero sections
 };
 
 /**
@@ -409,9 +478,10 @@ export const LOGO_SIZES = {
  * Ensures consistent aspect ratios and prevents layout shifts
  */
 export const getLogoContainerClasses = (size = 48) => {
-  const baseClasses = "flex items-center justify-center flex-shrink-0 overflow-hidden";
+  const baseClasses =
+    "flex items-center justify-center flex-shrink-0 overflow-hidden";
   const roundingClass = size <= 32 ? "rounded" : "rounded-lg";
-  
+
   return `${baseClasses} ${roundingClass}`;
 };
 
@@ -422,7 +492,7 @@ export const getLogoContainerClasses = (size = 48) => {
 export const getLogoImageClasses = (theme = "light") => {
   const baseClasses = "max-w-full max-h-full object-contain";
   const themeClasses = theme === "dark" ? "filter brightness-110" : "";
-  
+
   return `${baseClasses} ${themeClasses}`.trim();
 };
 
@@ -453,7 +523,6 @@ export default {
   preloadAllLogos,
   PREMIER_LEAGUE_TEAMS,
   LOCAL_LOGOS,
-  EXTERNAL_LOGO_URLS,
   TEAM_COLORS,
   LOGO_SIZES,
   getLogoContainerClasses,

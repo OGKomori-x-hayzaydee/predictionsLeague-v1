@@ -13,8 +13,8 @@
  * predictions-backend only ever imports a fixture into `matches` if the
  * home OR away side is one of six clubs (TeamEntity.isBigSixTeam — see
  * APIService.updateFixtures(), `if (home.getIsBigSixTeam() ||
- * away.getIsBigSixTeam())`). That fixed six-club roster is already the
- * real, non-fabricated classification Settings' TeamsTab.jsx keys off of.
+ * away.getIsBigSixTeam())`). That fixed six-club roster is the
+ * real, non-fabricated classification this gauge keys off of.
  * A gameweek where several of those fixtures pit two Big Six sides against
  * each other (both teams from the six-club list) is a genuinely harder
  * week to call than one full of Big Six vs. lower-table fixtures — that's
@@ -28,8 +28,7 @@
  * "not released yet" placeholder for those instead of calling this.
  */
 
-// Same six-club roster as Settings' TeamsTab.jsx — the entire real pool
-// predictions-backend tracks fixtures for.
+// Same six-club roster the backend tracks fixtures for.
 export const BIG_SIX = ['Arsenal', 'Chelsea', 'Liverpool', 'Man City', 'Man United', 'Spurs'];
 
 const TIER_ORDER = ['soft', 'ok', 'firm', 'hard'];

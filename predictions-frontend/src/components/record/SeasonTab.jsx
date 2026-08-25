@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import StatTile from '../ui/StatTile';
 import GameweekRidge from './GameweekRidge';
 import PredictionRow from './PredictionRow';
@@ -34,7 +35,7 @@ function weekSlice(predictions, gameweek) {
  * `mobileGameweek` state rather than the shared `selectedGameweek` prop, so
  * defaulting it doesn't also force the desktop drawer open.
  */
-export default function SeasonTab({ predictions, stats, selectedGameweek, onSelectGameweek, onViewFull, previewMode = false }) {
+export default function SeasonTab({ predictions, stats, selectedGameweek, onSelectGameweek, previewMode = false }) {
   const { weekPredictions, weekTotal, weekExact } = weekSlice(predictions, selectedGameweek);
 
   const settledWeeks = stats.pointsByGameweek.length;
@@ -104,7 +105,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
                 weekPredictions.map((p) => (
-                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen onViewFull={onViewFull} />
+                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen />
                 ))
               )}
             </div>
@@ -157,12 +158,13 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
             <div className="flex flex-col gap-3 rounded-14 border border-border-card bg-surface-card p-4">
               <div className="flex items-center justify-between gap-3">
                 <button
+                  type="button"
                   onClick={() => canMobilePrev && setMobileGw(weeks[mobileIndex - 1].gameweek)}
                   disabled={!canMobilePrev}
                   aria-label="Previous week"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
                 >
-                  &#8249;
+                  <ArrowLeft size={14} weight="bold" />
                 </button>
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="font-dmSerif text-lg text-text-primary">Gameweek {mobileGw}</span>
@@ -171,12 +173,13 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => canMobileNext && setMobileGw(weeks[mobileIndex + 1].gameweek)}
                   disabled={!canMobileNext}
                   aria-label="Next week"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
                 >
-                  &#8250;
+                  <ArrowRight size={14} weight="bold" />
                 </button>
               </div>
 
@@ -202,7 +205,7 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
                 mobileWeekPredictions.map((p, i) => (
-                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen={i === 0} onViewFull={onViewFull} />
+                  <PredictionRow key={p.id || p.matchId} prediction={p} defaultOpen={i === 0} />
                 ))
               )}
             </div>

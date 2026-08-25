@@ -1,10 +1,24 @@
+import { ArrowRight } from '@phosphor-icons/react';
 import TeamCrest from '../ui/TeamCrest';
 import { buildLedgerRows, namedScorers, slipHeadline, slipSentence } from './predictionLedger';
+import {
+  buildResultView,
+  pointsLabel,
+} from '../../utils/matchResult';
+
+function formatFiledClock(prediction) {
+  const raw = prediction?.submittedAt || prediction?.predictedAt;
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+}
 
 /**
  * FixtureSlip — supports:
- * 1. `variant="rail"` (Picture 5): The live updating preview slip in the right sidebar.
- * 2. `variant="resting"` / `variant="main"` (Picture 3): The resting filed card with rubber-stamp and edit CTA.
+ * 1. `variant="rail"`: live updating preview slip in the right sidebar.
+ * 2. `variant="resting"` / `variant="main"`: resting filed card with rubber-stamp and edit CTA.
+ * 3. `variant="scored"`: CALL vs FT receipt once the match is live or finished.
  */
 export default function FixtureSlip({
   fixture,
@@ -13,9 +27,25 @@ export default function FixtureSlip({
   ceiling,
   variant = 'rail',
   onEdit,
+  onViewFull,
   gameweekLabel = 'GW24',
+  density = 'full',
 }) {
   if (!fixture) return null;
+
+  if (variant === 'scored') {
+    return (
+      <ScoredSlip
+        fixture={fixture}
+        prediction={prediction}
+        ceiling={ceiling}
+        gameweekLabel={gameweekLabel}
+        density={density}
+        onViewFull={onViewFull}
+      />
+    );
+  }
+
   const { homeTeam, awayTeam } = fixture;
 
   const homeScore = prediction?.homeScore ?? 0;
@@ -24,38 +54,33 @@ export default function FixtureSlip({
   const ledger = buildLedgerRows(prediction || {});
   const headline = slipHeadline(homeTeam, awayTeam, homeScore, awayScore);
   const sentence = slipSentence(homeTeam, awayTeam, homeScore, awayScore, prediction?.homeScorers, prediction?.awayScorers);
+  const filedClock = formatFiledClock(prediction);
 
   // RESTING / MAIN VIEW (Picture 3 - when fixture is filed and resting in center)
   if (variant === 'resting' || variant === 'main') {
     return (
-      <div className="relative flex w-full max-w-2xl flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-6 shadow-2xl">
-        {/* Top line */}
-        <div className="flex items-baseline justify-between gap-2.5">
+      <div className="relative flex w-full max-w-[46.2rem] flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[1.65rem] shadow-2xl">
+        {/* Top line: kicker + clock, stamp occupies top-right */}
+        <div className="flex items-center justify-between gap-2.5">
           <span className="font-outfit text-xs tracking-wider text-[#66748c]">
-            THE SLIP · {gameweekLabel}
+            THE SLIP · {gameweekLabel}{filedClock ? ` · ${filedClock}` : ''}
           </span>
-          <span className="font-outfit text-xs tracking-wide text-[#5eead4]">
-            FILED 20:41
-          </span>
-        </div>
-
-        {/* Headline + FILED stamp */}
-        <div className="relative pr-20">
-          <h2 className="m-0 font-dmSerif text-3xl md:text-4xl leading-tight text-white" style={{ textWrap: 'pretty' }}>
-            {headline}
-          </h2>
-          <span className="absolute right-0 top-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3.5 py-1 font-outfit text-sm font-bold tracking-wider text-[#5eead4]">
+          <span className="shrink-0 rotate-[-8deg] rounded-md border-[3px] border-[#14b8a699] px-3.5 py-1 font-outfit text-sm font-bold tracking-wider text-[#5eead4]">
             FILED
           </span>
         </div>
 
+        <h2 className="m-0 font-dmSerif text-[2.0625rem] md:text-[2.475rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
+          {headline}
+        </h2>
+
         {/* Crests + Scores */}
         <div className="flex items-center justify-center gap-4 py-2">
-          <TeamCrest team={homeTeam} size={40} />
-          <span className="font-dmSerif text-5xl md:text-6xl leading-none text-white">
+          <TeamCrest team={homeTeam} size={44} />
+          <span className="font-dmSerif text-[3.3rem] md:text-[4.125rem] leading-none text-white">
             {homeScore}–{awayScore}
           </span>
-          <TeamCrest team={awayTeam} size={40} />
+          <TeamCrest team={awayTeam} size={44} />
         </div>
 
         <div className="h-px bg-[#16203a]" />
@@ -90,7 +115,7 @@ export default function FixtureSlip({
 
           <div className="ml-auto flex flex-col items-end leading-none">
             <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">CEILING</span>
-            <span className="font-dmSerif text-3xl text-[#fcd34d]">{ceiling}</span>
+            <span className="font-dmSerif text-[2.0625rem] text-[#fcd34d]">{ceiling}</span>
           </div>
 
           {onEdit && (
@@ -113,7 +138,7 @@ export default function FixtureSlip({
       {/* Top line */}
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
-          THE SLIP · {gameweekLabel}
+          THE SLIP · {gameweekLabel}{filed && filedClock ? ` · ${filedClock}` : ''}
         </span>
         <span
           className={`font-outfit text-2xs tracking-wide ${
@@ -161,6 +186,182 @@ export default function FixtureSlip({
       <span className="font-outfit text-2xs leading-relaxed text-[#4f5b70]">
         This slip is what gets filed. Review it, then sign it off.
       </span>
+    </div>
+  );
+}
+
+function ScorerPills({ names, empty, hitNames = [] }) {
+  if (!names.length) {
+    return <span className="font-outfit text-xs text-[#4f5b70]">{empty}</span>;
+  }
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {names.map((name, i) => {
+        const hit = hitNames.includes(name);
+        return (
+          <span
+            key={`${name}-${i}`}
+            className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs ${
+              hit
+                ? 'border-[#14b8a666] bg-[#0f766e22] text-[#5eead4]'
+                : 'border-[#1c2942] bg-[#0b1626] text-[#c8d2e0]'
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] ${
+                hit ? 'border-brand-teal bg-brand-teal' : 'border-[#4f5b70]'
+              }`}
+            />
+            {name}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function ScoredSlip({ fixture, prediction, ceiling, gameweekLabel, density, onViewFull }) {
+  const { homeTeam, awayTeam } = fixture;
+  const result = buildResultView(fixture, prediction);
+  const compact = density === 'compact';
+  const actualNames = namedScorers(
+    prediction?.actualHomeScorers || fixture?.actualHomeScorers,
+    prediction?.actualAwayScorers || fixture?.actualAwayScorers,
+  );
+  const called = namedScorers(prediction?.homeScorers, prediction?.awayScorers);
+  const heroReady = result.actualHome != null && result.actualAway != null;
+  const heroScore = heroReady ? `${result.actualHome}–${result.actualAway}` : '—';
+  const heroColor = result.verdict?.verdict === 'EXACT' ? '#5eead4' : '#ffffff';
+  const headline = result.awaiting
+    ? 'Awaiting official score'
+    : !result.hasCall
+      ? `${homeTeam} v ${awayTeam}`
+      : heroReady
+        ? slipHeadline(homeTeam, awayTeam, result.actualHome, result.actualAway)
+        : slipHeadline(homeTeam, awayTeam, result.callHome, result.callAway);
+  const kicker = result.live ? 'THE RECEIPT · LIVE' : 'THE RECEIPT';
+  const pointsFg = result.settled
+    ? (result.points > 0 ? '#5eead4' : '#7f93ad')
+    : '#8a7a4a';
+
+  const stamp = (
+    <span
+      className={`rotate-[-8deg] rounded-md border-[3px] font-outfit font-bold tracking-wider ${
+        compact ? 'px-2 py-0.5 text-2xs' : 'px-3.5 py-1 text-sm'
+      }`}
+      style={{ borderColor: result.stamp.border, color: result.stamp.fg }}
+    >
+      {result.stamp.label}
+    </span>
+  );
+
+  if (compact) {
+    return (
+      <div className="relative flex h-full w-[13.5rem] shrink-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-3.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="font-outfit text-2xs tracking-wider text-[#66748c]">
+            {gameweekLabel}
+          </span>
+          {stamp}
+        </div>
+        <div className="flex items-center justify-center gap-2 py-1">
+          <TeamCrest team={homeTeam} size={22} />
+          <span className="font-dmSerif text-[1.85rem] leading-none" style={{ color: heroColor }}>
+            {heroScore}
+          </span>
+          <TeamCrest team={awayTeam} size={22} />
+        </div>
+        <span className="text-center font-outfit text-2xs tracking-wider text-[#5b667d]">
+          {result.hasCall ? `CALL ${result.callHome}–${result.callAway}` : 'NO SLIP'}
+        </span>
+        <div className="mt-auto flex items-end justify-between">
+          <span className="truncate font-outfit text-2xs text-[#7f93ad]">
+            {homeTeam.split(' ').pop()}–{awayTeam.split(' ').pop()}
+          </span>
+          <span className="font-dmSerif text-xl leading-none" style={{ color: pointsFg }}>
+            {result.settled ? pointsLabel(result.points) : result.live ? ceiling : '—'}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex w-full max-w-[46.2rem] flex-col gap-4 overflow-hidden rounded-2xl border border-[#1c2942] bg-gradient-to-b from-[#0c1424] to-[#080e1a] p-[1.65rem] shadow-2xl">
+      <span className="font-outfit text-xs tracking-wider text-[#66748c]">
+        {kicker} · {gameweekLabel}
+      </span>
+
+      <div className="relative pr-20">
+        <h2 className="m-0 font-dmSerif text-[2.0625rem] md:text-[2.475rem] leading-tight text-white" style={{ textWrap: 'pretty' }}>
+          {headline}
+        </h2>
+        <span className="absolute right-0 top-0">{stamp}</span>
+      </div>
+
+      <div className="flex flex-col items-center gap-1.5 py-2">
+        <div className="flex items-center justify-center gap-4">
+          <TeamCrest team={homeTeam} size={44} />
+          <span
+            className="font-dmSerif text-[3.3rem] md:text-[4.125rem] leading-none"
+            style={{ color: heroColor }}
+          >
+            {heroScore}
+          </span>
+          <TeamCrest team={awayTeam} size={44} />
+        </div>
+        <span className="font-outfit text-xs tracking-[0.14em] text-[#7f93ad]">
+          {result.hasCall ? `CALL ${result.callHome}–${result.callAway}` : 'NO SLIP FILED'}
+        </span>
+      </div>
+
+      <div className="h-px bg-[#16203a]" />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-0">
+        <div className="flex flex-col items-center gap-2 sm:border-r sm:border-[#16203a] sm:pr-4">
+          <span className="font-outfit text-2xs tracking-[0.14em] text-[#5b667d]">CALLED</span>
+          <ScorerPills
+            names={called}
+            empty={result.hasCall ? 'no scorers named' : 'nothing on file'}
+            hitNames={actualNames}
+          />
+        </div>
+        <div className="flex flex-col items-center gap-2 sm:pl-4">
+          <span className="font-outfit text-2xs tracking-[0.14em] text-[#5b667d]">
+            {result.live ? 'LIVE' : 'ACTUAL'}
+          </span>
+          <ScorerPills
+            names={actualNames}
+            empty={result.awaiting || !heroReady ? 'awaiting scorers' : 'no scorers'}
+            hitNames={called}
+          />
+        </div>
+      </div>
+
+      <div className="h-px bg-[#16203a]" />
+
+      <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-col leading-snug">
+          <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">STAKED</span>
+          <span className="font-dmSerif text-xl leading-none text-[#fcd34d]">{ceiling ?? '—'}</span>
+        </div>
+        <div className="flex flex-col leading-snug">
+          <span className="font-outfit text-2xs tracking-wider text-[#7f93ad]">ACTUAL</span>
+          <span className="font-dmSerif text-xl leading-none" style={{ color: pointsFg }}>
+            {result.settled ? pointsLabel(result.points) : '—'}
+          </span>
+        </div>
+        {onViewFull && (
+          <button
+            type="button"
+            onClick={onViewFull}
+            className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-brand-indigo-mid px-5 py-2.5 font-outfit text-sm font-semibold text-white transition-colors hover:bg-brand-indigo-hover"
+          >
+            Full prediction
+            <ArrowRight size={16} weight="bold" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

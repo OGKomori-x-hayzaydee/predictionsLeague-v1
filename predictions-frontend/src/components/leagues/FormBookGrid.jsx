@@ -1,25 +1,34 @@
 import { useState } from 'react';
 import TeamCrest from '../ui/TeamCrest';
+import Avatar from '../ui/Avatar';
 import GwPicker from './GwPicker';
 import FormBookPanel from './FormBookPanel';
 import FormBookCellCard from './FormBookCellCard';
 import SegmentedControl from '../ui/SegmentedControl';
+import LoadingState from '../common/LoadingState';
 import { verdictColors } from '../../utils/leagueStats';
+import { SIDE_RAIL_GRID } from '../../utils/layout';
 
 /**
  * Desktop Form book — member × fixture grid + right-rail detail panel.
  */
-export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwOptions, selectedGw, setSelectedGw, leagueName, currentGameweek, settledGws }) {
+export default function FormBookGrid({ formBook, loading, sel, setSel, mode, setMode, gwOptions, selectedGw, setSelectedGw, leagueName, currentGameweek, settledGws }) {
   const [card, setCard] = useState(null);
 
-  if (!formBook) return null;
+  if (loading || !formBook) {
+    return (
+      <div className="hidden min-h-0 flex-1 md:flex">
+        <LoadingState message="Loading form book…" />
+      </div>
+    );
+  }
   const { fixtures, rows, isSettled, gw } = formBook;
 
   if (fixtures.length === 0) {
     return (
       <div className="hidden min-h-0 flex-1 flex-col items-center justify-center gap-2 px-6 text-center md:flex">
-        <span className="font-dmSerif text-xl text-text-primary">No calls filed yet for GW{gw}</span>
-        <p className="max-w-sm text-sm text-text-muted-2">Once anyone in this league files a prediction for this gameweek, the form book fills in here.</p>
+        <span className="font-dmSerif text-xl text-text-primary">No fixtures for GW{gw} yet</span>
+        <p className="max-w-sm text-sm text-text-muted-2">This gameweek has no matches to show. Filed calls appear here once the week is loaded.</p>
       </div>
     );
   }
@@ -40,7 +49,7 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
   const fixtureSel = sel?.type === 'fixture' ? sel.id : null;
 
   return (
-    <div className="relative hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_25rem]">
+    <div className={`relative hidden min-h-0 flex-1 md:grid ${SIDE_RAIL_GRID}`}>
       <div className="flex min-h-0 flex-col px-6 pt-5">
         <div className="flex flex-none items-end justify-between gap-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -120,13 +129,13 @@ export default function FormBookGrid({ formBook, sel, setSel, mode, setMode, gwO
                     className="flex min-w-0 items-center gap-2 p-2.5 text-left"
                   >
                     <span className="w-4 font-outfit text-2xs text-text-muted-2">{r.position}</span>
-                    <span
-                      className={`flex size-6 shrink-0 items-center justify-center rounded-full text-2xs font-semibold ${
-                        r.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-                      }`}
-                    >
-                      {r.initial}
-                    </span>
+                    <Avatar
+                      name={r.name}
+                      src={r.avatar}
+                      size={24}
+                      animateFallback={false}
+                      className={r.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
+                    />
                     <span className={`min-w-0 flex-1 truncate text-sm ${r.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{r.name}</span>
                     {!isSettled && (
                       <span className={`font-outfit text-2xs ${r.filed === fixtures.length ? 'text-brand-teal' : 'text-brand-amber'}`}>

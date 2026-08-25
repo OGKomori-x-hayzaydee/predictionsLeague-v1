@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { X } from '@phosphor-icons/react';
+import { Prohibit, X } from '@phosphor-icons/react';
 import ChipToken from '../ui/ChipToken';
 import { CHIP_HUES, CHIP_TAGS, DEFAULT_CHIP_HUE, chipStatusLabel } from './chipHues';
 import { whyCannotPlan } from './planRules';
-import { isFixtureClash } from './difficultyTiers';
+import { isGameweekChip } from '../../utils/chipManager';
+import FixtureSlip from '../fixtures/FixtureSlip';
 
 /**
  * Mobile Strategy view — Spine.dc.html buildChipsMobile() (script
@@ -66,16 +67,16 @@ export default function StrategyMobile({
             return (
               <button
                 key={chip.chipId}
-                disabled={!chip.available}
+                type="button"
                 onClick={() => setSelectedChipId((s) => (s === chip.chipId ? null : chip.chipId))}
-                className={`flex shrink-0 items-center gap-[9px] rounded-14 border px-3 py-2.5 text-left transition-colors ${
+                className={`flex shrink-0 items-center gap-3 rounded-14 border px-3.5 py-3 text-left transition-colors ${
                   on ? 'border-brand-teal-mid/50 bg-brand-teal/10' : 'border-border-card bg-surface-card-4'
-                } ${!chip.available ? 'opacity-40' : ''}`}
+                } ${!chip.available ? 'opacity-70' : ''}`}
               >
-                <ChipToken tag={tag} hue={hue} size={28} />
+                <ChipToken tag={tag} hue={hue} size={32} muted={!chip.available} />
                 <span className="flex flex-col gap-0.5 whitespace-nowrap">
-                  <span className="text-caption text-text-secondary">{chip.name}</span>
-                  <span className={`font-mono text-3xs ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>{status.text}</span>
+                  <span className="text-sm text-text-secondary">{chip.name}</span>
+                  <span className={`font-mono text-2xs ${status.warn ? 'text-state-error' : 'text-text-muted-2'}`}>{status.text}</span>
                 </span>
               </button>
             );
@@ -104,23 +105,28 @@ export default function StrategyMobile({
           const open = expandedWeek === gw;
           const reason = selectedChip ? whyCannotPlan(selectedChip, gw, currentGameweek) : null;
 
+          const hue = plannedChip ? CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE : null;
+          const gwArmed = plannedChip && isGameweekChip(plannedChip.chipId);
+          const matchArmed = plannedChip && !isGameweekChip(plannedChip.chipId);
+
           return (
             <div
               key={gw}
-              className={`flex flex-col overflow-hidden rounded-14 border transition-opacity ${
+              className={`flex flex-col overflow-hidden rounded-14 border ${
                 plannedChip ? 'border-brand-teal-mid/30 bg-surface-card-3' : 'border-border-card bg-surface-card-2'
-              } ${selectedChip && reason ? 'opacity-40' : ''}`}
+              }`}
+              style={gwArmed ? { boxShadow: `inset 0 0 0 1px ${hue}` } : undefined}
             >
-              <button onClick={() => handleWeekTap(gw)} className="flex min-h-[58px] items-center gap-[11px] px-[13px] py-[11px] text-left">
-                <span className="w-11 shrink-0 font-mono text-xs text-text-muted-1">
+              <button type="button" onClick={() => handleWeekTap(gw)} className="flex min-h-16 items-center gap-3 px-4 py-3.5 text-left">
+                <span className="w-14 shrink-0 font-mono text-sm text-text-muted-1">
                   GW{gw}
                   {isCurrent && <span className="ml-1 text-brand-teal">NOW</span>}
                 </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
-                  <span className="font-mono text-2xs tracking-[0.08em] text-text-muted-2">
+                <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <span className="font-mono text-xs tracking-[0.08em] text-text-muted-2">
                     {difficulty ? difficulty.style.label : 'FIXTURES TBD'}
                   </span>
-                  <span className="flex h-[5px] overflow-hidden rounded-[3px] bg-surface-card-4">
+                  <span className="flex h-1.5 overflow-hidden rounded-[3px] bg-surface-card-4">
                     <span
                       className="h-full rounded-[3px]"
                       style={{
@@ -130,17 +136,18 @@ export default function StrategyMobile({
                     />
                   </span>
                   {selectedChip && (
-                    <span className={`font-mono text-2xs ${reason ? 'text-state-error' : 'text-brand-teal'}`}>
+                    <span className={`flex items-center gap-1 font-mono text-xs ${reason ? 'text-state-error' : 'text-brand-teal'}`}>
+                      {reason ? <Prohibit size={12} /> : null}
                       {reason || `tap to place ${selectedChip.name}`}
                     </span>
                   )}
                 </span>
-                <span className="flex shrink-0 items-center gap-[5px]">
+                <span className="flex shrink-0 items-center gap-1.5">
                   {plannedChip && (
-                    <ChipToken tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon} hue={CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE} size={24} />
+                    <ChipToken tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon} hue={CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE} size={28} />
                   )}
                   <span
-                    className="font-mono text-xs text-text-muted-4 transition-transform"
+                    className="font-mono text-sm text-text-muted-4 transition-transform"
                     style={{ transform: open ? 'rotate(180deg)' : 'none' }}
                   >
                     ▾
@@ -149,38 +156,47 @@ export default function StrategyMobile({
               </button>
 
               {open && (
-                <div className="flex flex-col gap-[11px] border-t border-border-base px-[13px] py-3">
+                <div className="flex flex-col gap-3 border-t border-border-base px-4 py-4">
                   {isCurrent ? (
                     currentGwFixtures.length > 0 ? (
-                      <div className="flex flex-col gap-[7px]">
-                        {currentGwFixtures.map((f) => {
-                          const clash = isFixtureClash(f, normalizeTeamName);
-                          return (
-                            <div key={f.id} className="flex items-center gap-2 rounded-11 border border-border-base bg-surface-app px-3 py-2">
-                              <span className="min-w-0 flex-1 truncate text-xs text-text-secondary">
-                                {normalizeTeamName(f.homeTeam)} v {normalizeTeamName(f.awayTeam)}
-                              </span>
-                              {clash && (
-                                <span className="shrink-0 rounded-full border border-border-control px-2 py-0.5 font-mono text-3xs text-text-muted-2">
-                                  CLASH
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
+                      <div className="flex gap-3 overflow-x-auto pb-1">
+                        {currentGwFixtures.map((f) => (
+                          <div key={f.id} className="relative shrink-0">
+                            <FixtureSlip
+                              fixture={{
+                                ...f,
+                                homeTeam: normalizeTeamName(f.homeTeam),
+                                awayTeam: normalizeTeamName(f.awayTeam),
+                              }}
+                              prediction={f.userPrediction}
+                              variant="scored"
+                              density="compact"
+                              gameweekLabel={`GW${gw}`}
+                            />
+                            {matchArmed && (
+                              <div className="absolute -right-1 -top-1 rotate-[8deg]" title={plannedChip.name}>
+                                <ChipToken
+                                  tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon}
+                                  hue={hue}
+                                  size={26}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <span className="text-2xs text-text-muted-2">Fixtures for this gameweek aren&apos;t in yet.</span>
+                      <span className="text-sm text-text-muted-2">Fixtures for this gameweek aren&apos;t in yet.</span>
                     )
                   ) : (
-                    <span className="text-2xs text-text-muted-2">Fixtures for GW{gw} haven&apos;t been released yet.</span>
+                    <span className="text-sm text-text-muted-2">Fixtures for GW{gw} haven&apos;t been released yet.</span>
                   )}
                   {plannedChip && (
-                    <div className="flex items-center gap-[10px] rounded-12 border border-border-base bg-surface-app px-3 py-2.5">
-                      <ChipToken tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon} hue={CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE} size={26} />
-                      <span className="flex-1 text-caption text-text-secondary">{plannedChip.name} planned this week</span>
-                      <button onClick={() => onRemove(gw)} className="font-mono text-2xs text-text-muted-3" aria-label="Remove">
-                        <X size={12} />
+                    <div className="flex items-center gap-3 rounded-12 border border-border-base bg-surface-app px-3 py-3">
+                      <ChipToken tag={CHIP_TAGS[plannedChip.chipId] || plannedChip.icon} hue={CHIP_HUES[plannedChip.chipId] || DEFAULT_CHIP_HUE} size={28} />
+                      <span className="flex-1 text-sm text-text-secondary">{plannedChip.name} planned this week</span>
+                      <button type="button" onClick={() => onRemove(gw)} className="font-mono text-xs text-text-muted-3" aria-label="Remove">
+                        <X size={14} />
                       </button>
                     </div>
                   )}

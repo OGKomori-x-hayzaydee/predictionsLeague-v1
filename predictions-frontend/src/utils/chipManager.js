@@ -37,10 +37,9 @@ export const CHIP_CONFIG = {
     description: "Double all points earned from one selected match",
     icon: "2x",
     color: "teal",
-    cooldown: 0, // Available every gameweek - no cooldown
-    seasonLimit: null, // Unlimited uses
-    gameweekLimit: 1, // Can only be used once per gameweek
-    scope: "match" // Applied per match
+    cooldown: 1, // Backend remainingGameweeks after use
+    seasonLimit: null,
+    scope: "match"
   },
   wildcard: {
     id: "wildcard",
@@ -49,8 +48,8 @@ export const CHIP_CONFIG = {
     description: "Triple all points earned from one selected match",
     icon: "3x",
     color: "purple",
-    cooldown: 7, // Can't use for 7 gameweeks after usage
-    seasonLimit: null, // Unlimited uses (respecting cooldown)
+    cooldown: 8,
+    seasonLimit: null,
     scope: "match"
   },
   scorerFocus: {
@@ -60,7 +59,7 @@ export const CHIP_CONFIG = {
     description: "Doubles all points from goalscorer predictions in one match",
     icon: "S+",
     color: "green",
-    cooldown: 5, // Can't use for 5 gameweeks after usage
+    cooldown: 6,
     seasonLimit: null,
     scope: "match"
   },
@@ -71,7 +70,7 @@ export const CHIP_CONFIG = {
     description: "Earn +5 bonus points per correctly predicted clean sheet across your predictions (applied after multipliers)",
     icon: "D+",
     color: "blue",
-    cooldown: 5, // Can't use for 5 gameweeks after usage
+    cooldown: 6,
     seasonLimit: null,
     scope: "gameweek"
   },
@@ -82,8 +81,8 @@ export const CHIP_CONFIG = {
     description: "Doubles the entire gameweek score (including deductions)",
     icon: "AI",
     color: "red",
-    cooldown: 0, // No cooldown
-    seasonLimit: 4, // Can only use 4 times per season
+    cooldown: 0,
+    seasonLimit: 4,
     scope: "gameweek"
   }
 };

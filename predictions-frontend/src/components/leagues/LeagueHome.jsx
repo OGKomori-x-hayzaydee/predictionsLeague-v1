@@ -146,6 +146,7 @@ export default function LeagueHome({ myLeagues, isLoading, onOpen, onJoin, onCre
                   <span className="truncate font-dmSerif text-lg leading-none text-text-primary md:text-2xl">{l.name}</span>
                   <span className="font-outfit text-2xs text-text-muted-4">
                     {l.members} member{l.members === 1 ? '' : 's'} · since {formatMonthYear(l.createdAt)}
+                    {l.isAdmin ? ' · admin' : ''}
                   </span>
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-0.5">

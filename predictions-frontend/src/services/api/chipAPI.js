@@ -10,6 +10,7 @@
  */
 
 import { apiCall } from './baseAPI';
+import { normalizeChipStatusPayload } from '../../utils/chipStatus';
 
 /**
  * Chip API Service
@@ -72,15 +73,17 @@ export const chipAPI = {
         })));
       }
 
+      const normalized = normalizeChipStatusPayload(response.data);
+
       console.log('✅ Chip status fetched successfully', {
-        chipsCount: response.data?.chips?.length || 0,
-        availableCount: response.data?.chips?.filter(c => c.available)?.length || 0,
-        currentGameweek: response.data?.currentGameweek
+        chipsCount: normalized.chips?.length || 0,
+        availableCount: normalized.chips?.filter(c => c.available)?.length || 0,
+        currentGameweek: normalized.currentGameweek
       });
 
       return {
         success: true,
-        data: response.data,
+        data: normalized,
         error: null
       };
     } catch (error) {

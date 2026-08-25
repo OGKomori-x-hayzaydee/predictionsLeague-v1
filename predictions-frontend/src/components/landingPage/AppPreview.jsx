@@ -22,12 +22,12 @@ import {
 } from "@phosphor-icons/react";
 import { useTheme } from "../../hooks/useTheme";
 import logo from "../../assets/logo.png";
-import arsenalLogo from "../../assets/clubs/arsenal.svg";
-import chelseaLogo from "../../assets/clubs/chelsea.svg";
-import liverpoolLogo from "../../assets/clubs/liverpool.svg";
-import mancityLogo from "../../assets/clubs/mancity.svg";
-import spursLogo from "../../assets/clubs/spurs.svg";
-import manutdLogo from "../../assets/clubs/manutd.svg";
+import arsenalLogo from "../../assets/clubs/arsenal.png";
+import chelseaLogo from "../../assets/clubs/chelsea.png";
+import liverpoolLogo from "../../assets/clubs/liverpool.png";
+import mancityLogo from "../../assets/clubs/mancity.png";
+import spursLogo from "../../assets/clubs/tottenham.png";
+import manutdLogo from "../../assets/clubs/manunited.png";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },

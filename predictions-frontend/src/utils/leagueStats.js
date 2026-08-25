@@ -21,7 +21,8 @@
  */
 
 import { CHIP_CONFIG } from './chipManager';
-import { REVERSE_CHIP_MAPPING } from './backendMappings';
+import { extractMatchId, REVERSE_CHIP_MAPPING } from './backendMappings';
+import { resolveActualScores } from './matchResult';
 
 /** How many trailing gameweeks of league history to pull (bounded so
  * opening a mature league doesn't fire 30+ parallel requests). */
@@ -238,7 +239,9 @@ export function computeStandingsHistory({ gwTotals, settledGws, usernames }) {
 }
 
 export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFiledCount, fixturesByGw, history }) {
-  const nameOf = (u) => standings.find((s) => s.username === u)?.displayName || u;
+  const memberOf = (u) => standings.find((s) => s.username === u);
+  const nameOf = (u) => memberOf(u)?.displayName || u;
+  const avatarOf = (u) => memberOf(u)?.avatar;
   if (settledGws.length === 0) return [];
 
   const records = [];
@@ -256,6 +259,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
       label: 'HIGHEST GAMEWEEK',
       val: String(best.val),
       who: nameOf(best.who),
+      avatar: avatarOf(best.who),
       note: `Gameweek ${best.gw}`,
     });
   }
@@ -274,6 +278,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
         label: 'LONGEST RUN AT THE TOP',
         val: `${bestLen} wk${bestLen === 1 ? '' : 's'}`,
         who: nameOf(bestUser),
+        avatar: avatarOf(bestUser),
         note: bestStartGw === bestEndGw ? `Gameweek ${bestStartGw}` : `GW${bestStartGw} to GW${bestEndGw}`,
       });
     }
@@ -289,6 +294,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
       label: 'BEST SINGLE CALL',
       val: `+${bestSingle.points}`,
       who: nameOf(bestSingle.who),
+      avatar: avatarOf(bestSingle.who),
       note: `${bestSingle.homeTeam} v ${bestSingle.awayTeam}, GW${bestSingle.gw}`,
     });
   }
@@ -309,6 +315,7 @@ export function buildRecords({ standings, gwTotals, bestCall, settledGws, gwFile
       label: 'WORST GAMEWEEK',
       val: String(worst.val),
       who: nameOf(worst.who),
+      avatar: avatarOf(worst.who),
       note: `Gameweek ${worst.gw}, every call filed`,
     });
   }
@@ -386,6 +393,8 @@ export function buildHeadToHead({ rival, you, gwTotals, exactCount, drawCallCoun
     id: rival.id || rival.username,
     name: rival.displayName || rival.username,
     initial: (rival.displayName || rival.username).charAt(0).toUpperCase(),
+    avatar: rival.avatar,
+    youAvatar: you.avatar,
     tapeRows,
     radarRows,
     radarYou: radarPolygon(radarRows, 'you'),
@@ -445,6 +454,7 @@ export function buildActivityFeed({ standings, chipPlays, leagueName }) {
     if (m.joinedAt) {
       events.push({
         who: nameFor(m),
+        avatar: m.avatar,
         text: `joined ${leagueName}`,
         at: m.joinedAt,
         time: timeAgo(m.joinedAt),
@@ -459,6 +469,7 @@ export function buildActivityFeed({ standings, chipPlays, leagueName }) {
       const badge = chipBadge(p.chips);
       events.push({
         who: nameFor(member || { username, displayName: username }),
+        avatar: member?.avatar,
         text: `played ${badge?.name || 'a chip'} in GW${p.gw}`,
         at: p.predictedAt,
         time: p.predictedAt ? timeAgo(p.predictedAt) : `GW${p.gw}`,
@@ -471,23 +482,70 @@ export function buildActivityFeed({ standings, chipPlays, leagueName }) {
   return events.slice(0, 8);
 }
 
+function preferDefined(current, incoming) {
+  return incoming != null ? incoming : current ?? null;
+}
+
+function preferScorers(current, incoming) {
+  if (Array.isArray(incoming) && incoming.length) return incoming;
+  return current || [];
+}
+
+function formBookMatchId(entry) {
+  if (!entry) return null;
+  const raw = extractMatchId(entry) ?? entry.matchId ?? entry.id;
+  const id = Number(raw);
+  return Number.isFinite(id) ? id : null;
+}
+
+function upsertFormBookFixture(fixMap, entry) {
+  const matchId = formBookMatchId(entry);
+  if (matchId == null) return;
+  const existing = fixMap.get(matchId);
+  fixMap.set(matchId, {
+    matchId,
+    homeTeam: entry.homeTeam || existing?.homeTeam,
+    awayTeam: entry.awayTeam || existing?.awayTeam,
+    actualHomeScore: preferDefined(existing?.actualHomeScore, entry.actualHomeScore),
+    actualAwayScore: preferDefined(existing?.actualAwayScore, entry.actualAwayScore),
+    actualHomeScorers: preferScorers(existing?.actualHomeScorers, entry.actualHomeScorers),
+    actualAwayScorers: preferScorers(existing?.actualAwayScorers, entry.actualAwayScorers),
+  });
+}
+
 /** Real per-gameweek grid for the Form book (desktop 12×N grid / mobile
  * by-member / by-fixture panels) — fixtures + every member's call. */
-export function buildFormBook({ predictionsByGw, gw, standings, mode }) {
+export function buildFormBook({ predictionsByGw, gw, standings, mode, gwFixtures = [] }) {
   const preds = predictionsByGw[gw] || [];
   const byUserFixture = new Map(); // `${username}|${matchId}` -> prediction
   const fixMap = new Map();
+
+  (gwFixtures || []).forEach((f) => {
+    if (f?.gameweek != null && gw != null && Number(f.gameweek) !== Number(gw)) return;
+    const actual = resolveActualScores(f, f.userPrediction);
+    upsertFormBookFixture(fixMap, {
+      matchId: formBookMatchId(f),
+      homeTeam: f.homeTeam,
+      awayTeam: f.awayTeam,
+      actualHomeScore: actual.home,
+      actualAwayScore: actual.away,
+      actualHomeScorers: f.actualHomeScorers || f.userPrediction?.actualHomeScorers,
+      actualAwayScorers: f.actualAwayScorers || f.userPrediction?.actualAwayScorers,
+    });
+  });
+
   preds.forEach((p) => {
-    byUserFixture.set(`${p.username}|${p.matchId}`, p);
-    if (!fixMap.has(p.matchId)) {
-      fixMap.set(p.matchId, {
-        matchId: p.matchId,
-        homeTeam: p.homeTeam,
-        awayTeam: p.awayTeam,
-        actualHomeScore: p.actualHomeScore,
-        actualAwayScore: p.actualAwayScore,
-      });
-    }
+    const matchId = formBookMatchId(p);
+    if (matchId != null) byUserFixture.set(`${p.username}|${matchId}`, p);
+    upsertFormBookFixture(fixMap, {
+      matchId,
+      homeTeam: p.homeTeam,
+      awayTeam: p.awayTeam,
+      actualHomeScore: p.actualHomeScore,
+      actualAwayScore: p.actualAwayScore,
+      actualHomeScorers: p.actualHomeScorers,
+      actualAwayScorers: p.actualAwayScorers,
+    });
   });
   const fixtures = Array.from(fixMap.values()).sort((a, b) => a.matchId - b.matchId);
   const isSettled = fixtures.length > 0 && fixtures.every((f) => f.actualHomeScore != null && f.actualAwayScore != null);
@@ -500,19 +558,26 @@ export function buildFormBook({ predictionsByGw, gw, standings, mode }) {
         const p = byUserFixture.get(`${m.username}|${f.matchId}`);
         if (!p) return { filed: false, matchId: f.matchId };
         filed += 1;
-        const v = verdictFor(p);
-        const pts = p.points ?? 0;
+        const merged = {
+          ...p,
+          actualHomeScore: p.actualHomeScore ?? f.actualHomeScore,
+          actualAwayScore: p.actualAwayScore ?? f.actualAwayScore,
+          actualHomeScorers: p.actualHomeScorers?.length ? p.actualHomeScorers : f.actualHomeScorers,
+          actualAwayScorers: p.actualAwayScorers?.length ? p.actualAwayScorers : f.actualAwayScorers,
+        };
+        const v = verdictFor(merged);
+        const pts = merged.points ?? 0;
         total += pts;
-        const badge = chipBadge(p.chips);
+        const badge = chipBadge(merged.chips);
         return {
           filed: true,
           matchId: f.matchId,
           verdict: v,
-          label: mode === 'points' ? (v ? (pts === 0 ? '0' : `+${pts}`) : '—') : `${p.homeScore}–${p.awayScore}`,
+          label: mode === 'points' ? (v ? (pts === 0 ? '0' : `+${pts}`) : '—') : `${merged.homeScore}–${merged.awayScore}`,
           points: pts,
           chip: badge?.tag || '',
           chipName: badge?.name || '',
-          prediction: p,
+          prediction: merged,
         };
       });
       return {
@@ -520,6 +585,7 @@ export function buildFormBook({ predictionsByGw, gw, standings, mode }) {
         username: m.username,
         name: m.isCurrentUser ? 'You' : m.displayName || m.username,
         initial: (m.displayName || m.username).charAt(0).toUpperCase(),
+        avatar: m.avatar,
         isCurrentUser: !!m.isCurrentUser,
         position: m.position,
         filed,
@@ -580,12 +646,13 @@ export function buildMemberPanel({ formBook, username }) {
   return {
     name: member.name,
     initial: member.initial,
+    avatar: member.avatar,
     isCurrentUser: member.isCurrentUser,
     stats,
     sealed,
     sealedBody,
     sheetTitle: member.isCurrentUser ? 'YOUR CALLS' : "THEIR CALLS, AGAINST YOURS",
-    sheetNote: `GW${formBook.gw} · ${formBook.isSettled ? 'scored' : 'pending'}`,
+    sheetNote: `GW${formBook.gw}${member.position != null ? ` · #${member.position}` : ''} · ${formBook.isSettled ? 'scored' : 'pending'}`,
     sheet,
   };
 }
@@ -627,7 +694,9 @@ export function buildFixturePanel({ formBook, matchId }) {
     const c = r.cells[idx];
     return {
       name: r.name,
+      username: r.username,
       initial: r.initial,
+      avatar: r.avatar,
       isCurrentUser: r.isCurrentUser,
       call: c?.filed ? `${c.prediction.homeScore}–${c.prediction.awayScore}` : 'not filed',
       verdict: c?.verdict || null,

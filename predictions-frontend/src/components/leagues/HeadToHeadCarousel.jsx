@@ -1,4 +1,6 @@
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 import RadarChart from '../ui/RadarChart';
 import SegmentedControl from '../ui/SegmentedControl';
 
@@ -36,22 +38,29 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
         />
       </div>
 
-      <div className="overflow-hidden rounded-16 border border-border-base bg-surface-card">
+      <div className="mx-auto w-full max-w-[52rem] overflow-hidden rounded-16 border border-border-base bg-surface-card">
         <div className="flex items-center gap-1.5 p-1.5">
           <button
+            type="button"
             onClick={() => canPrev && setVsIdx(idx - 1)}
             disabled={!canPrev}
             aria-label="Previous rival"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8249;
+            <ArrowLeft size={16} weight="bold" />
           </button>
 
           <div className="flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5 pt-2.5">
-            <div className="flex items-center justify-between gap-2 border-b border-border-base pb-2">
-              <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border-base pb-2">
+              <span className="flex min-w-0 items-center gap-2">
+                <Avatar name="You" src={current.youAvatar} size={28} animateFallback={false} className="ring-2 ring-brand-teal" />
+                <span className="font-dmSerif text-lg text-brand-teal md:text-2xl">You</span>
+              </span>
               <span className="font-outfit text-2xs tracking-widest text-text-muted-5">VS</span>
-              <span className="truncate font-dmSerif text-lg text-text-secondary md:text-2xl">{current.name}</span>
+              <span className="flex min-w-0 items-center justify-end gap-2">
+                <span className="truncate font-dmSerif text-lg text-text-secondary md:text-2xl">{current.name}</span>
+                <Avatar name={current.name} src={current.avatar} size={28} animateFallback={false} />
+              </span>
             </div>
 
             {vsVariant === 'tape' ? (
@@ -80,9 +89,9 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-3 md:flex-row md:items-center">
+              <div className="grid justify-items-center gap-3 md:grid-cols-[minmax(0,260px)_minmax(12rem,18rem)] md:items-center md:justify-center">
                 <RadarChart rows={current.radarRows} themLabel={current.name} />
-                <div className="flex w-full flex-col gap-2">
+                <div className="flex w-full max-w-[18rem] flex-col gap-2">
                   <div className="flex items-center gap-4 border-b border-border-base pb-1.5">
                     <span className="flex items-center gap-1.5">
                       <span className="size-2 rounded-xs bg-brand-teal" />
@@ -110,12 +119,13 @@ export default function HeadToHeadCarousel({ rivals, vsIdx, setVsIdx, vsVariant,
           </div>
 
           <button
+            type="button"
             onClick={() => canNext && setVsIdx(idx + 1)}
             disabled={!canNext}
             aria-label="Next rival"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border-control bg-surface-card-4/70 text-text-muted-1 disabled:opacity-30"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-text-muted-4 bg-surface-card text-text-primary transition-colors hover:border-brand-teal-mid hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
           >
-            &#8250;
+            <ArrowRight size={16} weight="bold" />
           </button>
         </div>
 

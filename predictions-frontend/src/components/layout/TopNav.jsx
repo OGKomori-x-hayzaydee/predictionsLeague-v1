@@ -4,9 +4,9 @@ import { Gear } from '@phosphor-icons/react';
 import { NAV_ITEMS } from './navItems';
 import { useAuthState } from '../../hooks/useAuth';
 import useDashboardData from '../../hooks/useDashboardData';
-import KickerLabel from '../ui/KickerLabel';
 import Avatar from '../ui/Avatar';
 import logo from '../../assets/logo.png';
+import { readProfileOverrides } from '../../utils/profileOverrides';
 
 /**
  * Desktop app masthead. 64px tall normally; on Fixtures it auto-hides to
@@ -24,9 +24,10 @@ export default function TopNav() {
   const isProfilePage = pathname.startsWith('/profile');
   const isSettingsPage = pathname.startsWith('/settings');
   const dim = isFixturesPage && !wake;
-
-  const points = essentialData?.user?.points ?? essentialData?.stats?.weeklyPoints?.value ?? null;
-  const rank = essentialData?.stats?.globalRank?.value ?? null;
+  const overrides = readProfileOverrides();
+  const avatarSrc =
+    user?.avatar || user?.profilePicture || overrides.avatar || overrides.profilePicture || essentialData?.user?.avatar;
+  const displayName = overrides.username || username || user?.firstName || 'You';
 
   useEffect(() => {
     const root = document.documentElement;
@@ -58,10 +59,10 @@ export default function TopNav() {
               key={id}
               to={path}
               className={({ isActive }) =>
-                `whitespace-nowrap rounded-9 px-4 py-2 font-outfit text-base transition-colors ${
+                `whitespace-nowrap rounded-9 px-4 py-2 font-outfit text-base no-underline transition-colors ${
                   isActive
-                    ? 'bg-surface-nav-active text-brand-teal'
-                    : 'text-text-muted-1 hover:text-brand-teal'
+                    ? 'bg-surface-nav-active text-brand-teal hover:text-brand-teal'
+                    : 'text-white hover:text-brand-teal-pale'
                 }`
               }
             >
@@ -71,43 +72,23 @@ export default function TopNav() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-[18px]">
-          {points !== null && (
-            <div className="flex flex-col items-end leading-tight">
-              <KickerLabel as="span" className="text-2xs tracking-[0.12em] text-text-muted-4">
-                Season
-              </KickerLabel>
-              <span className="font-dmSerif text-lg text-brand-teal-pale">{points}</span>
-            </div>
-          )}
-          {rank !== null && (
-            <div className="flex flex-col items-end leading-tight">
-              <KickerLabel as="span" className="text-2xs tracking-[0.12em] text-text-muted-4">
-                Rank
-              </KickerLabel>
-              <span className="font-dmSerif text-lg text-text-primary">
-                {rank}
-                <span className="text-caption text-text-muted-3">/12</span>
-              </span>
-            </div>
-          )}
-
           <button
             onClick={() => navigate('/settings')}
             aria-label="Settings"
             className={`flex size-9 shrink-0 items-center justify-center rounded-9 border bg-transparent transition-colors ${
               isSettingsPage
                 ? 'border-brand-teal-mid/40 text-brand-teal'
-                : 'border-border-card text-text-muted-4 hover:border-brand-teal-mid/40 hover:text-brand-teal'
+                : 'border-white/35 text-white hover:border-brand-teal-mid/40 hover:text-brand-teal'
             }`}
           >
-            <Gear size={18} />
+            <Gear size={22} weight="bold" />
           </button>
 
           <NavLink to="/profile" aria-label="Profile">
             <Avatar
-              name={username || user?.firstName || 'You'}
+              name={displayName}
+              src={avatarSrc}
               size={36}
-              className={isProfilePage ? '!bg-brand-teal-deep !text-white' : '!bg-brand-indigo-mid !text-white'}
             />
           </NavLink>
         </div>

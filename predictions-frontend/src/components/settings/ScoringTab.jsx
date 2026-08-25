@@ -15,8 +15,8 @@ const SCORING = [
 // Verbatim from the app's chip-settlement rules (RULES array, Spine script ~line
 // 4795) — identical to what the current app's ScoringTab already showed.
 const RULES = [
-  'Two chips to a match at most — never two multipliers on the same one.',
-  'One gameweek chip a week. Defence++ and All-In Week cannot share.',
+  'Stack as many chips on a match as cooldowns and caps allow, including both multipliers.',
+  'Defence++ and All-In Week can both be on in the same gameweek; each spreads to every slip you file.',
   'Multipliers scale scorer points as well as the result, so they reward exact calls.',
   'Defence++ settles before any multiplier is applied.',
   'A chip is reserved when you plan it and only spent when you file that gameweek.',
@@ -25,23 +25,23 @@ const RULES = [
 
 export default function ScoringTab() {
   return (
-    <div className="flex flex-col gap-[10px] md:gap-[10px]">
-      <span className="hidden font-mono text-2xs tracking-[0.14em] text-text-muted-2 md:inline">
+    <div className="flex flex-col gap-4">
+      <span className="hidden font-mono text-xs tracking-[0.14em] text-text-muted-2 md:inline">
         WHAT A CALL IS WORTH
       </span>
 
-      <div className="grid grid-cols-1 gap-[9px] md:grid-cols-2 md:gap-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-3">
         {SCORING.map((s) => (
           <div
             key={s.label}
-            className="flex gap-[13px] rounded-14 border border-border-base bg-surface-card-3 p-[13px] md:items-center md:gap-[14px] md:rounded-11 md:border-border-card md:p-4"
+            className="flex gap-4 rounded-[16px] border border-border-base bg-surface-card-3 p-4 md:items-center md:gap-[18px] md:rounded-14 md:border-border-card md:p-5"
           >
-            <span className={`w-[42px] shrink-0 font-dmSerif text-2xl leading-none md:w-[52px] md:text-2xl ${s.fg}`}>
+            <span className={`w-[52px] shrink-0 font-dmSerif text-3xl leading-none md:w-[64px] ${s.fg}`}>
               {s.val}
             </span>
-            <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-              <span className="text-caption text-text-secondary [text-wrap:pretty] md:text-caption">{s.label}</span>
-              <span className="text-2xs leading-[1.5] text-text-muted-3 [text-wrap:pretty] md:text-2xs md:text-text-muted-2">
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="text-base text-text-secondary [text-wrap:pretty]">{s.label}</span>
+              <span className="text-sm leading-[1.5] text-text-muted-3 [text-wrap:pretty] md:text-text-muted-2">
                 {s.note}
               </span>
             </span>
@@ -50,24 +50,24 @@ export default function ScoringTab() {
       </div>
 
       {/* Mobile: rules grouped inside one bordered panel. Desktop: flat divided rows. */}
-      <div className="flex flex-col gap-[9px] rounded-14 border border-border-base bg-surface-header p-[14px] md:hidden">
-        <KickerLabel as="span" className="tracking-[0.14em] text-text-muted-1">House rules</KickerLabel>
+      <div className="flex flex-col gap-3 rounded-[16px] border border-border-base bg-surface-header p-5 md:hidden">
+        <KickerLabel as="span" className="text-sm tracking-[0.14em] text-text-muted-1">House rules</KickerLabel>
         {RULES.map((text, i) => (
-          <span key={text} className="flex gap-[9px] text-xs leading-[1.55] text-text-muted-1">
-            <span className="shrink-0 font-mono text-2xs text-text-muted-5">{i + 1}.</span>
+          <span key={text} className="flex gap-3 text-sm leading-[1.55] text-text-muted-1">
+            <span className="shrink-0 font-mono text-xs text-text-muted-5">{i + 1}.</span>
             {text}
           </span>
         ))}
       </div>
 
-      <div className="hidden flex-col gap-0.5 md:flex">
-        <KickerLabel as="span" className="mt-2 tracking-[0.14em] text-text-muted-2">
+      <div className="hidden flex-col gap-1 md:flex">
+        <KickerLabel as="span" className="mt-3 text-sm tracking-[0.14em] text-text-muted-2">
           How chips settle
         </KickerLabel>
         {RULES.map((text, i) => (
-          <span key={text} className="flex items-start gap-[11px] border-b border-border-base py-[10px] last:border-b-0">
-            <span className="w-[18px] shrink-0 font-mono text-2xs text-text-muted-5">{i + 1}.</span>
-            <span className="flex-1 text-caption leading-[1.55] text-text-muted-1">{text}</span>
+          <span key={text} className="flex items-start gap-3.5 border-b border-border-base py-3.5 last:border-b-0">
+            <span className="w-5 shrink-0 font-mono text-xs text-text-muted-5">{i + 1}.</span>
+            <span className="flex-1 text-base leading-[1.55] text-text-muted-1">{text}</span>
           </span>
         ))}
       </div>

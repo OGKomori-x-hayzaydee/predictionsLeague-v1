@@ -7,9 +7,9 @@
  * ~4389-4403) — see that file for the prototype reference. The *position*
  * math (`getCardTarget`) deliberately does not match `buildReel()`'s
  * `cardT` verbatim: the prototype hardcodes `translate(-480px,150px)`,
- * tuned for one fixed demo frame, and fades out in place on `return`
- * rather than sliding away — this version measures the real center offset
- * live and slides back out past the dock on exit, per product direction.
+ * tuned for one fixed demo frame, and fades out in place on `return`.
+ * This version measures the real center offset from the in-flow right
+ * rail and, on `return`, lands back in that rail as FILED.
  *
  * Phase machine (exactly 4 values, advanced by `useFilingSequence`):
  *
@@ -98,24 +98,19 @@ export const BACKDROP_TRANSITION = { duration: 0.6, ease: 'easeInOut' };
  * (`cardIsHome`, shorter) — which is exactly why the card used to visibly
  * drift off-true-center right as it stamped.
  *
- *   - idle + shown:      docked top-right, fully visible
- *   - idle + !shown:     docked top-right, invisible, nudged out (26px)
+ *   - idle + shown:      docked in the right rail, fully visible
+ *   - idle + !shown:     same dock, hidden (no sideways nudge)
  *   - center:            translated by `centerOffset`, scaled up 1.08x
  *   - stamp:             same position, a quick whole-card bounce
  *                        (`scale` as a 3-keyframe array — see
  *                        `CARD_BOUNCE_TRANSITION`) plays as it lands
- *   - return:            slides *back out* past the dock and off-frame —
- *                        `centerOffset * CARD_EXIT_FACTOR` (a negative
- *                        factor) reverses the arrival vector and
- *                        overshoots it, continuing the same line past the
- *                        dock and out of the visible pane, while fading —
- *                        instead of fading in place
+ *   - return:            back into the rail as FILED (x/y 0), not off-screen
  */
 export function getCardTarget(phase, shown, centerOffset = { x: 0, y: 0 }) {
   const { x: cx, y: cy } = centerOffset;
 
   if (phase === FILE_PHASES.RETURN) {
-    return { opacity: 0, x: cx * CARD_EXIT_FACTOR, y: cy * CARD_EXIT_FACTOR, scale: 1 };
+    return { opacity: 1, x: 0, y: 0, scale: 1 };
   }
   if (phase === FILE_PHASES.STAMP) {
     // Keyframe array = Framer Motion plays a little scale sequence for
@@ -130,14 +125,8 @@ export function getCardTarget(phase, shown, centerOffset = { x: 0, y: 0 }) {
   if (shown) {
     return { opacity: 1, x: 0, y: 0, scale: 1 };
   }
-  return { opacity: 0, x: 26, y: 0, scale: 1 };
+  return { opacity: 0, x: 0, y: 0, scale: 1 };
 }
-
-// How far past the dock the return-phase exit overshoots, expressed as a
-// multiple of the arrival offset (negative = reverse direction). -1 would
-// land exactly back at the dock; anything beyond that continues past it
-// and off the edge of the pane. See `getCardTarget`'s return-phase comment.
-export const CARD_EXIT_FACTOR = -1.55;
 
 // Split to match the CSS original: transform eases with a slight overshoot
 // (cubic-bezier(.34,1.2,.5,1)) over .6s, opacity is a plain .34s ease-out —
@@ -158,18 +147,9 @@ export const CARD_BOUNCE_TRANSITION = Object.freeze({
   ease: 'easeInOut',
 });
 
-// Desktop rail-reservation width (the docked card's ~380px + gutter) and
-// the transition used to smooth its resize via Framer Motion's `layout`
-// projection (FLIP: one reflow at each end, transform-interpolated in
-// between) rather than a per-frame `padding-right` CSS transition, which
-// forces a full layout recalculation on every animation frame. See
-// FixturesPage.jsx for where this is applied — deliberately on the two
-// inner panes whose own rect actually narrows (the scrollable content and
-// the footer dock), not on their padded parent, since a `flex-1` element
-// with `align-items: stretch` keeps its own outer rect constant regardless
-// of its own padding value; it's only its children's available width that
-// changes.
-export const RAIL_WIDTH_PX = 366;
+// Desktop rail width (the in-flow right column) and the transition used
+// to smooth its appearance via Framer Motion's `layout` projection.
+export const RAIL_WIDTH_PX = 403;
 export const CONTENT_LAYOUT_TRANSITION = { duration: 0.46, ease: [0.4, 0, 0.2, 1] };
 
 // AI panel entrance (replaces the old `slideFromBehind` CSS keyframe —

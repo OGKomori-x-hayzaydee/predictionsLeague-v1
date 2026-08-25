@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 import { verdictColors, buildMemberPanel, buildFixturePanel } from '../../utils/leagueStats';
 
 /**
@@ -19,13 +20,13 @@ export default function FormBookPanel({ formBook, sel }) {
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-3 md:gap-4">
         <div className="flex items-center gap-3">
-          <span
-            className={`flex size-10 shrink-0 items-center justify-center rounded-full text-base font-semibold ${
-              memberPanel.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-            }`}
-          >
-            {memberPanel.initial}
-          </span>
+          <Avatar
+            name={memberPanel.name}
+            src={memberPanel.avatar}
+            size={40}
+            animateFallback={false}
+            className={memberPanel.isCurrentUser ? 'ring-2 ring-brand-teal' : ''}
+          />
           <div className="flex min-w-0 flex-1 flex-col leading-tight">
             <span className="truncate font-dmSerif text-lg text-text-primary md:text-2xl">{memberPanel.name}</span>
             <span className="font-outfit text-2xs text-text-muted-2">{memberPanel.sheetNote}</span>
@@ -112,20 +113,20 @@ export default function FormBookPanel({ formBook, sel }) {
               const vc = c.verdict ? verdictColors(c.verdict) : null;
               return (
                 <div
-                  key={c.initial + c.name}
+                  key={c.username || c.name}
                   className="grid min-h-11 grid-cols-[1.5rem_1fr_3.5rem_2.5rem] items-center gap-2 rounded-9 border px-2.5 py-1.5"
                   style={{
                     background: c.isCurrentUser ? 'color-mix(in srgb, var(--color-brand-teal) 6%, var(--surface-card))' : 'var(--surface-card-2)',
                     borderColor: c.isCurrentUser ? 'var(--color-brand-teal-mid)' : 'var(--border-hairline)',
                   }}
                 >
-                  <span
-                    className={`flex size-6 items-center justify-center rounded-full text-2xs font-semibold ${
-                      c.isCurrentUser ? 'bg-brand-teal-deep text-brand-teal-tint' : 'bg-surface-card-4 text-text-muted-1'
-                    }`}
-                  >
-                    {c.initial}
-                  </span>
+                  <Avatar
+                    name={c.name}
+                    src={c.avatar}
+                    size={24}
+                    animateFallback={false}
+                    className={c.isCurrentUser ? 'ring-1 ring-brand-teal' : ''}
+                  />
                   <span className={`truncate text-caption ${c.isCurrentUser ? 'text-brand-teal' : 'text-text-secondary'}`}>{c.name}</span>
                   <span className="text-center font-outfit text-caption" style={{ color: vc?.fg || 'var(--text-muted-4)' }}>{c.call}</span>
                   <span className="text-right font-outfit text-caption text-text-muted-2">{c.pts}</span>

@@ -46,6 +46,9 @@ export const userPredictionsAPI = {
 
         // Normalize date fields to prevent confusion between fixture date and prediction timestamp
         // Backend may send: date (fixture datetime), matchDate (fixture datetime), predictedAt (when prediction was made)
+        if (!normalized.submittedAt) {
+          normalized.submittedAt = normalized.predictedAt || normalized.date;
+        }
         if (!normalized.matchDate && normalized.date) {
           // If matchDate is missing, use date as the fixture datetime
           normalized.matchDate = normalized.date;
@@ -72,12 +75,13 @@ export const userPredictionsAPI = {
           // Silently fixed - removed verbose logging
         }
 
-        // Ensure actualScores are truly null if match hasn't been played
+        // Pending rows may still carry 0–0 placeholders. Only clear actuals
+        // when they are missing — never because the value is 0.
         if (normalized.status === 'pending') {
-          if (normalized.actualHomeScore === 0 || normalized.actualHomeScore === undefined) {
+          if (normalized.actualHomeScore === undefined) {
             normalized.actualHomeScore = null;
           }
-          if (normalized.actualAwayScore === 0 || normalized.actualAwayScore === undefined) {
+          if (normalized.actualAwayScore === undefined) {
             normalized.actualAwayScore = null;
           }
         }

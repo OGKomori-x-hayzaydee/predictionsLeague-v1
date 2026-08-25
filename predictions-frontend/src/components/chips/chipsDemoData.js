@@ -38,37 +38,34 @@ export const DEMO_CHIP_ALLOWANCE = {
   allInWeek: 2,
 };
 
-/** Sidebar blurb — SCHIPS.explain / forWhat, shown in live and preview. */
+/** Sidebar blurb — effect copy for Chip by chip cards. */
 export const CHIP_ALMANAC_COPY = {
   doubleDown: {
     explain: 'Doubles everything one fixture earns you — the outcome, the scoreline and the scorers.',
-    forWhat: 'Best on a fixture you expect to call exactly, not merely correctly.',
   },
   wildcard: {
-    explain: 'Triples a single fixture. It cannot share a match with Double Down.',
-    forWhat: 'One swing a season. A soft home win with two obvious scorers.',
+    explain: 'Triples a single fixture. It can share a match with Double Down.',
   },
   scorerFocus: {
     explain: 'Doubles scorer points only in one fixture; the result points are untouched.',
-    forWhat: 'High-scoring fixtures where you trust the scorers more than the line.',
   },
   defensePlusPlus: {
     explain: 'Pays five points for every clean sheet you called across the whole week.',
-    forWhat: 'Weeks stacked with mismatches, where clean sheets are likely.',
   },
   allInWeek: {
     explain: 'Doubles every point in the gameweek, good and bad.',
-    forWhat: 'A week you have already read well — it doubles mistakes too.',
   },
 };
 
 /** Spine.dc.html RULES — Almanac "The rules, plainly". */
 export const CHIP_ALMANAC_RULES = [
-  'Two chips to a match at most — never two multipliers on the same one.',
-  'One gameweek chip a week. Defence++ and All-In Week cannot share.',
+  'Stack as many chips on a match as cooldowns and caps allow, including both multipliers.',
+  'Defence++ and All-In Week can both be on in the same gameweek; each spreads to every slip you file.',
+  'Double Down cools down for 1 gameweek; Wildcard 8; Scorer Focus and Defence++ 6. All-In Week has no cooldown.',
+  'All-In Week is the only chip with a season cap: four uses. The rest can be replayed after their cooldown.',
   'Multipliers scale scorer points as well as the result, so they reward exact calls.',
-  'Defence++ settles before any multiplier is applied.',
-  'A chip is reserved when you plan it and only spent when you file that gameweek.',
+  'Defence++ settles after any multiplier is applied.',
+  'Planning a chip is local to this browser; it is only spent when you file that gameweek.',
   'Unplayed chips are worth nothing at the final whistle. They do not carry over.',
 ];
 

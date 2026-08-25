@@ -27,3 +27,16 @@ export const CHIP_BADGES = {
   defensePlusPlus: 'D+',
   allInWeek: 'AI',
 };
+
+/**
+ * One-line effects for the dashboard preview well — paraphrased from
+ * CHIP_CONFIG.description so the well can caption the token without
+ * dumping the full rule paragraph.
+ */
+export const CHIP_EFFECTS = {
+  doubleDown: 'all points doubled',
+  wildcard: 'all points tripled',
+  scorerFocus: 'scorer points doubled',
+  defensePlusPlus: 'clean sheets doubled',
+  allInWeek: 'gameweek score doubled',
+};

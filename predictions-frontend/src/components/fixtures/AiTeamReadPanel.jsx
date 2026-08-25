@@ -12,21 +12,21 @@ export default function AiTeamReadPanel({ open, onToggle }) {
       {/* Header bar */}
       <div
         onClick={onToggle}
-        className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 select-none"
+        className="flex cursor-pointer items-center gap-2.5 px-[1.1rem] py-[0.6875rem] select-none"
       >
         <span className="w-1.5 h-1.5 shrink-0 rounded-full bg-[#818cf8]" />
-        <span className="font-outfit text-xs uppercase tracking-widest text-[#66748c]">
+        <span className="font-outfit text-[0.825rem] uppercase tracking-widest text-[#66748c]">
           AI TEAM READ
         </span>
-        <span className="ml-auto font-outfit text-xs text-[#8496ad]">Coming soon</span>
-        <span className="font-outfit text-xs text-[#8496ad]">{open ? '▴' : '▾'}</span>
+        <span className="ml-auto font-outfit text-[0.825rem] text-[#8496ad]">Coming soon</span>
+        <span className="font-outfit text-[0.825rem] text-[#8496ad]">{open ? '▴' : '▾'}</span>
       </div>
 
       {open && (
-        <div className="flex flex-col items-center gap-2 border-t border-[#16203a] px-6 py-7 text-center">
-          <span className="font-dmSerif text-lg text-white">Squad reads are coming soon</span>
+        <div className="flex flex-col items-center gap-2 border-t border-[#16203a] px-[1.65rem] py-8 text-center">
+          <span className="font-dmSerif text-[1.2375rem] text-white">Squad reads are coming soon</span>
           <p
-            className="m-0 max-w-sm font-outfit text-xs leading-relaxed text-[#8fa0b8]"
+            className="m-0 max-w-[26.4rem] font-outfit text-[0.825rem] leading-relaxed text-[#8fa0b8]"
             style={{ textWrap: 'pretty' }}
           >
             Injury news, recent form and likely-scorer suggestions will land here once a live

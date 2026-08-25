@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Ticket } from '@phosphor-icons/react';
 import SlotBar from '../components/ui/SlotBar';
 import LoadingState from '../components/common/LoadingState';
 import LeagueHome from '../components/leagues/LeagueHome';
+import LeagueManageView from '../components/leagues/LeagueManageView';
 import LeagueMasthead from '../components/leagues/LeagueMasthead';
 import Podium from '../components/leagues/Podium';
 import PositionChart from '../components/leagues/PositionChart';
@@ -16,12 +17,14 @@ import useLeagueDetail from '../hooks/useLeagueDetail';
 import { useNextMatch } from '../hooks/useNextMatch';
 import { ordinal, leagueTone, standingsNeighbors, moveSince, buildPodiumNote } from '../utils/leagueStats';
 import leagueAPI from '../services/api/leagueAPI';
-import { DEMO_LEAGUES, getDemoLeaguePack } from '../components/leagues/leaguesDemoData';
+import { SIDE_RAIL_GRID, MAIN_PANE_CLASS } from '../utils/layout';
 
 const DETAIL_TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'grid', label: 'Form book' },
 ];
+
+const MANAGE_TAB = { id: 'manage', label: 'Manage' };
 
 const PREVIEW_BTN =
   'shrink-0 rounded-7 border px-3 py-1.5 font-outfit text-caption tracking-wide transition-colors';
@@ -45,6 +48,10 @@ export default function LeaguesPage() {
     setSelected(null);
   };
 
+  const openLeague = (league) => setSelected(league);
+
+  const backToHome = () => setSelected(null);
+
   const previewButtonClass = `${PREVIEW_BTN} ${
     previewMode ? 'border-brand-amber/50 text-brand-amber' : 'border-border-card text-text-muted-3 hover:text-brand-teal'
   }`;
@@ -67,7 +74,16 @@ export default function LeaguesPage() {
         <LeagueDetailView
           key={selected.id}
           overview={selected}
-          onBack={() => setSelected(null)}
+          onBack={backToHome}
+          canManage={!!selected.isAdmin && !previewMode}
+          onUpdated={(patch) => {
+            setSelected((current) => (current ? { ...current, ...patch } : current));
+            refreshMyLeagues();
+          }}
+          onDeleted={() => {
+            setSelected(null);
+            refreshMyLeagues();
+          }}
           deadline={deadline}
           previewMode={previewMode}
           onTogglePreview={togglePreview}
@@ -103,7 +119,7 @@ export default function LeaguesPage() {
             <LeagueHome
               myLeagues={leagues}
               isLoading={!previewMode && isLoading}
-              onOpen={setSelected}
+              onOpen={openLeague}
               onPreview={() => setPreviewMode(true)}
               previewMode={previewMode}
               {...joinCreate}
@@ -115,7 +131,7 @@ export default function LeaguesPage() {
   );
 }
 
-function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePreview, previewButtonClass }) {
+function LeagueDetailView({ overview, onBack, canManage, onUpdated, onDeleted, deadline, previewMode, onTogglePreview, previewButtonClass }) {
   const demoPack = previewMode ? getDemoLeaguePack(overview.id) : null;
   const lg = useLeagueDetail(previewMode ? null : overview.id, overview, demoPack);
   const tone = leagueTone(overview.id);
@@ -129,6 +145,17 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
     youGwTotal: lg.youGwTotal,
     youGwRank: lg.youGwRank,
   });
+
+  const tabs = canManage ? [...DETAIL_TABS, MANAGE_TAB] : DETAIL_TABS;
+
+  const setTab = (id) => {
+    if (id === 'manage' && !canManage) return;
+    lg.setActiveTab(id);
+  };
+
+  useEffect(() => {
+    if (!canManage && lg.activeTab === 'manage') lg.setActiveTab('overview');
+  }, [canManage, lg.activeTab, lg.setActiveTab]);
 
   const openInFormBook = (username) => {
     lg.setActiveTab('grid');
@@ -157,9 +184,9 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
         <SlotBar
           kicker="ALL LEAGUES"
           onBack={onBack}
-          tabs={DETAIL_TABS}
+          tabs={tabs}
           activeTab={lg.activeTab}
-          onTabChange={lg.setActiveTab}
+          onTabChange={setTab}
           right={slotRight}
           deadline={deadline}
           trailing={
@@ -171,21 +198,39 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
       </div>
 
       <div className="flex flex-col gap-3 px-4 pt-4 md:hidden">
-        <LeagueMasthead
-          overview={overview}
-          you={lg.you}
-          tone={tone}
-          memberCount={memberCountLabel}
-          neighbours={neighbours}
-          move={move}
-          onBack={onBack}
-        />
+        {lg.activeTab === 'manage' ? (
+          <div className="flex items-start gap-3">
+            <button
+              onClick={onBack}
+              aria-label="Back to all leagues"
+              className="flex size-11 shrink-0 items-center justify-center rounded-11 border border-border-control bg-surface-card-4/60 text-sm text-text-secondary"
+            >
+              &#8249;
+            </button>
+            <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
+              <h2 className="font-dmSerif text-2xl leading-[1.15] text-text-primary">Manage</h2>
+              <span className="text-xs leading-[1.6] text-text-muted-2 [text-wrap:pretty]">
+                Invite people, keep the roster, or close this league. Scoring and privacy were set when it was created.
+              </span>
+            </div>
+          </div>
+        ) : (
+          <LeagueMasthead
+            overview={overview}
+            you={lg.you}
+            tone={tone}
+            memberCount={memberCountLabel}
+            neighbours={neighbours}
+            move={move}
+            onBack={onBack}
+          />
+        )}
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1 rounded-11 border border-border-card bg-surface-card-4 p-0.5">
-            {DETAIL_TABS.map((t) => (
+            {tabs.map((t) => (
               <button
                 key={t.id}
-                onClick={() => lg.setActiveTab(t.id)}
+                onClick={() => setTab(t.id)}
                 className={`min-h-10 flex-1 rounded-sm font-outfit text-2xs tracking-widest ${
                   lg.activeTab === t.id ? 'bg-surface-nav-active text-brand-teal' : 'text-text-muted-2'
                 }`}
@@ -206,8 +251,9 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
 
       {lg.activeTab === 'overview' ? (
         <>
-          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[minmax(0,1fr)_24rem]">
-            <div className="flex min-h-0 min-w-0 flex-col gap-3.5 overflow-y-auto px-6 py-5">
+          <div className={`hidden min-h-0 flex-1 md:grid ${SIDE_RAIL_GRID}`}>
+            <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto px-6 py-5">
+              <div className={`${MAIN_PANE_CLASS} flex flex-col gap-5`}>
               <LeagueMasthead overview={overview} you={lg.you} tone={tone} memberCount={memberCountLabel} neighbours={neighbours} move={move} />
               <Podium
                 podium={lg.podium}
@@ -221,6 +267,7 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
               <HeadToHeadCarousel rivals={lg.rivals} vsIdx={lg.vsIdx} setVsIdx={lg.setVsIdx} vsVariant={lg.vsVariant} setVsVariant={lg.setVsVariant} />
               <PositionChart series={lg.positionSeries} line={lg.positionLine} gws={lg.settledGws} moveLabel={move.label} moveTone={move.tone} tone={tone.var} />
               <RecordsGrid records={lg.records} />
+              </div>
             </div>
             <ActivityFeed feed={lg.feed} className="min-h-0 border-l border-border-hairline bg-surface-bar p-5" />
           </div>
@@ -241,10 +288,17 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
             <ActivityFeed feed={lg.feed} className="rounded-16 border border-border-base bg-surface-card p-3.5" />
           </div>
         </>
+      ) : lg.activeTab === 'manage' && canManage ? (
+        <LeagueManageView
+          overview={overview}
+          onUpdated={onUpdated}
+          onDeleted={onDeleted}
+        />
       ) : (
         <>
           <FormBookGrid
             formBook={lg.formBook}
+            loading={lg.formBookLoading}
             sel={lg.sel}
             setSel={lg.setSel}
             mode={lg.mode}
@@ -259,6 +313,7 @@ function LeagueDetailView({ overview, onBack, deadline, previewMode, onTogglePre
           <div className="px-4 pb-6 pt-3 md:hidden">
             <FormBookMobile
               formBook={lg.formBook}
+              loading={lg.formBookLoading}
               sel={lg.sel}
               setSel={lg.setSel}
               mobGrid={lg.mobGrid}

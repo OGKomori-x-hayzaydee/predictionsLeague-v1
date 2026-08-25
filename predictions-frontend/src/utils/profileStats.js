@@ -1,5 +1,30 @@
 import { calculatePoints, getPointsBreakdown } from './pointsCalculation';
-import { CHIP_CONFIG } from './chipManager';
+import { CHIP_CONFIG, isGameweekChip } from './chipManager';
+
+function chipsWithout(chips, chipId) {
+  return (chips || []).filter((id) => id !== chipId);
+}
+
+/**
+ * Marginal points this chip added on one slip (others held fixed).
+ * Defence++ with no clean sheet returns 0; do not use getPointsBreakdown.
+ */
+export function attributeChipReturn(prediction, chipId) {
+  const total = calculatePoints(prediction);
+  if (total == null) return 0;
+  const without = calculatePoints({
+    ...prediction,
+    chips: chipsWithout(prediction.chips, chipId),
+  });
+  return total - (without ?? 0);
+}
+
+export function chipContribution(prediction) {
+  const total = calculatePoints(prediction);
+  if (total == null) return 0;
+  const none = calculatePoints({ ...prediction, chips: [] });
+  return total - (none ?? 0);
+}
 
 /**
  * Aggregates a raw prediction-history array (userAPI.getPredictionHistory /
@@ -76,20 +101,10 @@ export function computeProfileStats(predictions = []) {
       breakdown.goalDifferencePenalties.calls += 1;
       breakdown.goalDifferencePenalties.points += b.goalDiffPenalty;
     }
-    if ((p.chips || []).length > 0) {
-      const preChipPoints =
-        (b.perfectPrediction ?? 0) +
-        (b.exactScore ?? 0) +
-        (b.correctDraw ?? 0) +
-        (b.correctOutcome ?? 0) +
-        (b.goalscorers ?? 0) +
-        (b.goalDiffPenalty ?? 0);
-      const total = calculatePoints(p) ?? 0;
-      const chipBonus = total - preChipPoints;
-      if (chipBonus !== 0) {
-        breakdown.chipMultipliers.calls += 1;
-        breakdown.chipMultipliers.points += chipBonus;
-      }
+    const chipBonus = chipContribution(p);
+    if (chipBonus !== 0) {
+      breakdown.chipMultipliers.calls += 1;
+      breakdown.chipMultipliers.points += chipBonus;
     }
   });
 
@@ -173,7 +188,12 @@ export function computeHitRateByOutcome(predictions = []) {
  */
 export function computeChipAlmanac(predictions = []) {
   const completed = predictions.filter(
-    (p) => p.actualHomeScore !== null && p.actualHomeScore !== undefined && (p.chips || []).length > 0
+    (p) =>
+      p.actualHomeScore !== null &&
+      p.actualHomeScore !== undefined &&
+      p.actualAwayScore !== null &&
+      p.actualAwayScore !== undefined &&
+      (p.chips || []).length > 0
   );
 
   const byChip = {};
@@ -181,24 +201,37 @@ export function computeChipAlmanac(predictions = []) {
     byChip[id] = { chipId: id, ...CHIP_CONFIG[id], usageCount: 0, totalReturn: 0, log: [] };
   });
 
-  completed.forEach((p) => {
-    const b = getPointsBreakdown(p);
-    if (!b) return;
-    const preChipPoints =
-      (b.perfectPrediction ?? 0) +
-      (b.exactScore ?? 0) +
-      (b.correctDraw ?? 0) +
-      (b.correctOutcome ?? 0) +
-      (b.goalscorers ?? 0) +
-      (b.goalDiffPenalty ?? 0);
-    const total = calculatePoints(p) ?? 0;
-    const chipBonus = total - preChipPoints;
+  const gwSeen = {};
+  const gwLog = {};
+  Object.keys(CHIP_CONFIG).forEach((id) => {
+    gwSeen[id] = new Set();
+    gwLog[id] = {};
+  });
 
+  completed.forEach((p) => {
     (p.chips || []).forEach((chipId) => {
       if (!byChip[chipId]) return;
-      byChip[chipId].usageCount += 1;
-      byChip[chipId].totalReturn += chipBonus;
-      byChip[chipId].log.push({ gameweek: p.gameweek, points: chipBonus });
+      const delta = attributeChipReturn(p, chipId);
+      if (isGameweekChip(chipId)) {
+        const gw = p.gameweek;
+        gwLog[chipId][gw] = (gwLog[chipId][gw] || 0) + delta;
+        if (!gwSeen[chipId].has(gw)) {
+          gwSeen[chipId].add(gw);
+          byChip[chipId].usageCount += 1;
+        }
+      } else {
+        byChip[chipId].usageCount += 1;
+        byChip[chipId].totalReturn += delta;
+        byChip[chipId].log.push({ gameweek: p.gameweek, points: delta });
+      }
+    });
+  });
+
+  Object.keys(CHIP_CONFIG).forEach((id) => {
+    if (!isGameweekChip(id)) return;
+    Object.entries(gwLog[id]).forEach(([gameweek, points]) => {
+      byChip[id].totalReturn += points;
+      byChip[id].log.push({ gameweek: Number(gameweek), points });
     });
   });
 

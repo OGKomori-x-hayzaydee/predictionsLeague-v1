@@ -292,12 +292,14 @@ body {
   box-sizing: border-box;
 }
 
-a {
-  color: var(--brand-teal);
-  text-decoration: none;
-}
-a:hover {
-  color: var(--brand-teal-pale);
+@layer base {
+  a {
+    color: var(--brand-teal);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--brand-teal-pale);
+  }
 }
 
 button,

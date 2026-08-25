@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import TopNav from './TopNav';
 import MobileTopBar from './MobileTopBar';
 import BottomTabBar from './BottomTabBar';
+import ReminderHost from '../ReminderHost';
 
 /**
  * Authenticated app shell (foundation spec §5-§6). Desktop gets a two-tier
@@ -23,6 +24,7 @@ export default function AppShell() {
         <Outlet />
       </main>
       <BottomTabBar />
+      <ReminderHost />
     </div>
   );
 }

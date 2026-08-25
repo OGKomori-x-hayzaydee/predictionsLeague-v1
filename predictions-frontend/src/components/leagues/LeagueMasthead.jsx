@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { Copy, Check } from '@phosphor-icons/react';
 import { ordinal, formatMonthYear } from '../../utils/leagueStats';
+import Avatar from '../ui/Avatar';
 
 /**
  * League masthead card — real overview + standings data (name, position,
@@ -8,6 +11,19 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
   const position = you?.position;
   const points = you?.points ?? 0;
   const initials = overview?.name?.slice(0, 2).toUpperCase() || '??';
+  const joinCode = overview?.joinCode;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (!joinCode) return;
+    try {
+      await navigator.clipboard.writeText(joinCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard unavailable — ignore
+    }
+  };
 
   return (
     <div
@@ -48,6 +64,18 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
           <span className="truncate font-outfit text-2xs tracking-widest text-text-muted-1">
             2025/26 · {memberCount} · SINCE {formatMonthYear(overview?.createdAt)}
           </span>
+          {joinCode && (
+            <button
+              onClick={handleCopyCode}
+              aria-label="Copy league join code"
+              title="Copy join code"
+              className="mt-1 flex w-fit items-center gap-1.5 rounded-8 border border-border-control bg-surface-card-4/60 px-2 py-1 font-outfit text-2xs tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+            >
+              <span className="font-semibold tracking-[0.15em]" style={{ color: tone.var }}>{joinCode}</span>
+              {copied ? <Check size={12} weight="bold" /> : <Copy size={12} weight="bold" />}
+              <span>{copied ? 'COPIED' : 'COPY'}</span>
+            </button>
+          )}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-0.5 md:hidden">
           <span className="font-dmSerif text-2xl leading-none" style={{ color: tone.var }}>
@@ -82,16 +110,32 @@ export default function LeagueMasthead({ overview, you, tone, memberCount, neigh
       <div className="relative hidden h-px bg-white/10 md:block" />
 
       <div className="relative hidden items-center gap-5 md:flex">
-        <span className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="font-outfit text-2xs tracking-widest text-state-error">ABOVE</span>
+          {neighbours.above && (
+            <Avatar
+              name={neighbours.above.displayName || neighbours.above.username}
+              src={neighbours.above.avatar}
+              size={20}
+              animateFallback={false}
+            />
+          )}
           <span className="min-w-0 flex-1 truncate font-dmSerif text-sm text-text-secondary md:text-base">
             {neighbours.above ? (neighbours.above.displayName || neighbours.above.username) : 'nobody'}
           </span>
           {neighbours.above && <span className="shrink-0 font-outfit text-sm text-state-error">+{neighbours.gapAbove}</span>}
         </span>
         <span className="h-4 w-px shrink-0 bg-white/10" />
-        <span className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2">
           <span className="font-outfit text-2xs tracking-widest text-brand-teal">BELOW</span>
+          {neighbours.below && (
+            <Avatar
+              name={neighbours.below.displayName || neighbours.below.username}
+              src={neighbours.below.avatar}
+              size={20}
+              animateFallback={false}
+            />
+          )}
           <span className="min-w-0 flex-1 truncate font-dmSerif text-sm text-text-secondary md:text-base">
             {neighbours.below ? (neighbours.below.displayName || neighbours.below.username) : 'nobody'}
           </span>

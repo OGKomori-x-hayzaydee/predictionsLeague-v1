@@ -12,9 +12,7 @@ export function buildLedgerRows({ homeScore = 0, awayScore = 0, homeScorers = []
   const named = [...homeScorers, ...awayScorers].filter(Boolean);
   const perfect = totalGoals === 0 || named.length === totalGoals;
   const base = perfect ? 15 : 10;
-  const chipId = chips?.[0];
-  const chip = chipId ? CHIP_CONFIG[chipId] : null;
-
+  const chipIds = [...new Set(chips || [])];
   const rows = [
     {
       label: totalGoals === 0 ? 'EXACT 0–0' : perfect ? 'EXACT + ALL NAMED' : 'SCORELINE ONLY',
@@ -23,15 +21,16 @@ export function buildLedgerRows({ homeScore = 0, awayScore = 0, homeScorers = []
   ];
 
   if (named.length > 0) {
-    const per = chipId === 'scorerFocus' ? 4 : 2;
+    const per = chipIds.includes('scorerFocus') ? 4 : 2;
     rows.push({
       label: `${named.length} ${named.length === 1 ? 'SCORER' : 'SCORERS'}`,
       value: `+${named.length * per}`,
     });
   }
 
-  if (chip) {
-    rows.push({ label: chip.name.toUpperCase(), value: chip.icon });
+  for (const chipId of chipIds) {
+    const chip = CHIP_CONFIG[chipId];
+    if (chip) rows.push({ label: chip.name.toUpperCase(), value: chip.icon });
   }
 
   return rows;

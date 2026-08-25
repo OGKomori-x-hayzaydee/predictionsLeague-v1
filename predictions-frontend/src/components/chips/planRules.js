@@ -1,3 +1,5 @@
+import { hasSeasonCap } from '../../utils/chipStatus';
+
 /**
  * Real-data guard for the season planner's "assign a chip to a future
  * gameweek" action. useChipPlan() itself is a dumb localStorage map (by
@@ -9,7 +11,7 @@
 export function whyCannotPlan(chip, gameweek, currentGameweek) {
   if (!chip) return 'Unknown chip';
 
-  if (chip.seasonLimit != null && (chip.remainingUses ?? 0) <= 0) {
+  if (hasSeasonCap(chip) && (chip.remainingUses ?? 0) <= 0) {
     return 'Season limit reached';
   }
 

@@ -1,4 +1,5 @@
 import KickerLabel from '../ui/KickerLabel';
+import Avatar from '../ui/Avatar';
 
 /**
  * League records tiles — derived from settled gameweek prediction totals.
@@ -20,9 +21,14 @@ export default function RecordsGrid({ records }) {
       {records.map((r) => (
         <div key={r.label} className="flex flex-col gap-1.5 rounded-16 border border-border-base bg-surface-card p-4 md:p-5">
           <span className="font-outfit text-2xs tracking-widest text-text-muted-4">{r.label}</span>
-          <span className="flex items-baseline gap-2.5">
+          <span className="flex items-center gap-2.5">
             <span className="font-dmSerif text-3xl leading-none text-brand-teal md:text-4xl">{r.val}</span>
-            <span className="font-dmSerif text-lg text-text-secondary">{r.who}</span>
+            <span className="flex min-w-0 items-center gap-2">
+              {r.who && (
+                <Avatar name={r.who} src={r.avatar} size={22} animateFallback={false} />
+              )}
+              <span className="truncate font-dmSerif text-lg text-text-secondary">{r.who}</span>
+            </span>
           </span>
           <span className="text-caption leading-relaxed text-text-muted-2">{r.note}</span>
         </div>
