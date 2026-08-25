@@ -12,23 +12,23 @@ import java.util.List;
 
 @Repository
 public interface PredictionRepository extends JpaRepository<PredictionEntity, Long> {
-    List<PredictionEntity> findAllByUser_Email(String userEmail);
+    List<PredictionEntity> findAllByUser_UUID(String userUUID);
 
     Integer countByUser(UserEntity user);
 
     @Query("""
     select count(p)
     from PredictionEntity p
-    where p.user.email = :email and p.gameweek between :startGw and :endGw
+    where p.user.UUID = :uuid and p.gameweek between :startGw and :endGw
     """)
-    Integer countPredictionsSinceGameweek(@Param("email") String email, @Param("startGw") Integer startGw, @Param("endGw") Integer endGw);
+    Integer countPredictionsSinceGameweek(@Param("uuid") String uuid, @Param("startGw") Integer startGw, @Param("endGw") Integer endGw);
 
     @Query("""
     select coalesce(sum(p.points), 0)
     from PredictionEntity p
-    where p.user.email = :email and p.gameweek between :startGw and :endGw
+    where p.user.UUID = :uuid and p.gameweek between :startGw and :endGw
     """)
-    Integer getPointsSinceGameweek(@Param("email") String email, @Param("startGw") Integer startGw, @Param("endGw") Integer endGw);
+    Integer getPointsSinceGameweek(@Param("uuid") String uuid, @Param("startGw") Integer startGw, @Param("endGw") Integer endGw);
 
     @Query(value = """
     SELECT
@@ -56,10 +56,10 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     FROM teams t
     LEFT JOIN predictions p
             ON (p.home_team = t.team OR p.away_team = t.team)
-            AND p.user_id = (SELECT id FROM users WHERE email = :email)
+            AND p.user_id = (SELECT id FROM users WHERE uuid = :uuid)
     GROUP BY t.team
     """, nativeQuery = true)
-    List<TeamPerformanceProjection> getTeamPerformanceByEmail(@Param("email") String email);
+    List<TeamPerformanceProjection> getTeamPerformanceByUUID(@Param("uuid") String uuid);
 
     @Query(value = """
     WITH months AS (
@@ -73,23 +73,23 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
     FROM months m
     LEFT JOIN predictions p
             ON EXTRACT(MONTH FROM p.date) = m.month
-            AND p.user_id = (SELECT id FROM users WHERE email = :email)
+            AND p.user_id = (SELECT id FROM users WHERE uuid = :uuid)
     GROUP BY m.month
     ORDER BY m.month
     """, nativeQuery = true)
-    List<MonthlyPerformanceProjection> getMonthlyPerformance(@Param("email") String email);
+    List<MonthlyPerformanceProjection> getMonthlyPerformance(@Param("uuid") String uuid);
 
     @Query(value = """
     SELECT
             gameweek AS gameweek,
             SUM(points) AS points
     FROM predictions p
-    WHERE p.user_id = (SELECT id FROM users WHERE email = :email)
+    WHERE p.user_id = (SELECT id FROM users WHERE uuid = :uuid)
     GROUP BY gameweek
     ORDER BY points DESC
     LIMIT 1
     """, nativeQuery = true)
-    BestGameweekProjection getBestGameweek(@Param("email") String email);
+    BestGameweekProjection getBestGameweek(@Param("uuid") String uuid);
 
     @Query(value = """
     SELECT
@@ -104,16 +104,16 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, Lo
             END AS day,
             (COUNT(*) * 100.0 / (SELECT COUNT(*)
                                 FROM predictions
-                                WHERE predictions.user_id = (SELECT id FROM users WHERE email = :email))) AS percentage
+                                WHERE predictions.user_id = (SELECT id FROM users WHERE uuid = :uuid))) AS percentage
     FROM predictions p
-    WHERE p.user_id = (SELECT id FROM users WHERE email = :email)
+    WHERE p.user_id = (SELECT id FROM users WHERE uuid = :uuid)
     GROUP BY day
     ORDER BY COUNT(*) DESC
     LIMIT 1
     """, nativeQuery = true)
-    MostActiveDayProjection getMostActiveDay(@Param("email") String email);
+    MostActiveDayProjection getMostActiveDay(@Param("uuid") String uuid);
 
-    PredictionEntity findByMatchIdAndUser_Email(Long matchId, String userEmail);
+    PredictionEntity findByMatchIdAndUser_UUID(Long matchId, String userUUID);
 
     List<PredictionEntity> findAllByMatchId(Long matchId);
 

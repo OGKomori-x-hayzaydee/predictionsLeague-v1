@@ -18,8 +18,8 @@ public class ChipController {
     private final ChipService chipService;
 
     @GetMapping("/status")
-    public ResponseEntity<ChipStatus> getChipStatus(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        List<ChipStatus.UserChip> userChipList = chipService.getChipStatusForUser(email);
+    public ResponseEntity<ChipStatus> getChipStatus(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        List<ChipStatus.UserChip> userChipList = chipService.getChipStatusForUser(uuid);
         return ResponseEntity.ok(new ChipStatus(userChipList));
     }
 }

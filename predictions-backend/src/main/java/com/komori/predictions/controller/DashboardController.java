@@ -20,20 +20,20 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/me")
-    public ResponseEntity<DashboardEssentials> getCurrentUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        DashboardEssentials details = dashboardService.getDashboardDetails(email);
+    public ResponseEntity<DashboardEssentials> getCurrentUser(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        DashboardEssentials details = dashboardService.getDashboardDetails(uuid);
         return ResponseEntity.ok(details);
     }
 
     @GetMapping("/predictions/recent")
-    public ResponseEntity<Set<DashboardPredictionSummary>> getPredictions(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<DashboardPredictionSummary> predictions = dashboardService.getPredictions(email);
+    public ResponseEntity<Set<DashboardPredictionSummary>> getPredictions(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        Set<DashboardPredictionSummary> predictions = dashboardService.getPredictions(uuid);
         return ResponseEntity.ok(predictions);
     }
 
     @GetMapping("/leagues/user")
-    public ResponseEntity<Set<DashboardLeagueSummary>> getLeagues(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<DashboardLeagueSummary> leagues = dashboardService.getLeagues(email);
+    public ResponseEntity<Set<DashboardLeagueSummary>> getLeagues(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        Set<DashboardLeagueSummary> leagues = dashboardService.getLeagues(uuid);
         return ResponseEntity.ok(leagues);
     }
 }

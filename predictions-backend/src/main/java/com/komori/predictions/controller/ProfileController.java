@@ -22,26 +22,26 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
-    public ResponseEntity<ProfileOverview> viewProfile(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        ProfileOverview overview = profileService.viewProfile(email);
+    public ResponseEntity<ProfileOverview> viewProfile(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        ProfileOverview overview = profileService.viewProfile(uuid);
         return ResponseEntity.ok(overview);
     }
 
     @GetMapping("/statistics/highlights")
-    public ResponseEntity<StatsHighlights> getStatsHighlights(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        StatsHighlights highlights = profileService.getStatsHighlights(email);
+    public ResponseEntity<StatsHighlights> getStatsHighlights(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        StatsHighlights highlights = profileService.getStatsHighlights(uuid);
         return ResponseEntity.ok(highlights);
     }
 
     @GetMapping("/statistics/team-performance")
-    public ResponseEntity<StatsTeamPerformance> getTeamPerformance(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        StatsTeamPerformance performance = profileService.getTeamPerformance(email);
+    public ResponseEntity<StatsTeamPerformance> getTeamPerformance(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        StatsTeamPerformance performance = profileService.getTeamPerformance(uuid);
         return ResponseEntity.ok(performance);
     }
 
     @GetMapping("/statistics/monthly-performance")
-    public ResponseEntity<StatsMonthlyPerformance> getMonthlyPerformance(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        StatsMonthlyPerformance performance = profileService.getMonthlyPerformance(email);
+    public ResponseEntity<StatsMonthlyPerformance> getMonthlyPerformance(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        StatsMonthlyPerformance performance = profileService.getMonthlyPerformance(uuid);
         return ResponseEntity.ok(performance);
     }
 
@@ -52,16 +52,16 @@ public class ProfileController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@CurrentSecurityContext(expression = "authentication?.name") String email,
+    public ResponseEntity<String> changePassword(@CurrentSecurityContext(expression = "authentication?.name") String uuid,
                                             @RequestBody PasswordChangeRequest request) {
-        profileService.changePassword(email, request.getOldPassword(), request.getNewPassword());
+        profileService.changePassword(uuid, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.ok("Password changed successfully");
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> setProfilePicture(@CurrentSecurityContext(expression = "authentication?.name") String email,
+    public ResponseEntity<?> setProfilePicture(@CurrentSecurityContext(expression = "authentication?.name") String uuid,
                                                @RequestParam MultipartFile file) throws IOException {
-        String url = profileService.setProfilePicture(file, email);
+        String url = profileService.setProfilePicture(file, uuid);
         return ResponseEntity.ok(Map.of("url", url));
     }
 }

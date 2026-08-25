@@ -23,32 +23,32 @@ public class LeagueController {
     private final LeagueService leagueService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @RequestBody CreateLeagueRequest leagueRequest) {
-        leagueService.createLeague(email, leagueRequest);
+    public ResponseEntity<?> createLeague(@CurrentSecurityContext(expression = "authentication?.name") String uuid, @RequestBody CreateLeagueRequest leagueRequest) {
+        leagueService.createLeague(uuid, leagueRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("League created!");
     }
 
     @GetMapping("/user")
-    public ResponseEntity<Set<LeagueOverview>> getLeagueOverviewForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        Set<LeagueOverview> leagues = leagueService.getLeagueOverviewForUser(email);
+    public ResponseEntity<Set<LeagueOverview>> getLeagueOverviewForUser(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        Set<LeagueOverview> leagues = leagueService.getLeagueOverviewForUser(uuid);
         return ResponseEntity.ok().body(leagues);
     }
 
-    @GetMapping("/{uuid}/standings")
-    public ResponseEntity<LeagueStanding> getLeagueStandings(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String uuid) {
-        LeagueStanding standing = leagueService.getLeagueStanding(email, uuid);
+    @GetMapping("/{leagueUUID}/standings")
+    public ResponseEntity<LeagueStanding> getLeagueStandings(@CurrentSecurityContext(expression = "authentication?.name") String userUUID, @PathVariable String leagueUUID) {
+        LeagueStanding standing = leagueService.getLeagueStanding(userUUID, leagueUUID);
         return ResponseEntity.ok(standing);
     }
 
-    @GetMapping("{uuid}/predictions/{gameweek}")
-    public ResponseEntity<List<LeaguePredictionSummary>> getUserPredictions(@PathVariable String uuid, @PathVariable Integer gameweek) {
-        List<LeaguePredictionSummary> predictions = leagueService.getLeaguePredictions(uuid, gameweek);
+    @GetMapping("{leagueUUID}/predictions/{gameweek}")
+    public ResponseEntity<List<LeaguePredictionSummary>> getUserPredictions(@PathVariable String leagueUUID, @PathVariable Integer gameweek) {
+        List<LeaguePredictionSummary> predictions = leagueService.getLeaguePredictions(leagueUUID, gameweek);
         return ResponseEntity.ok(predictions);
     }
 
     @PostMapping("/{code}/join")
-    public ResponseEntity<?> joinLeague(@CurrentSecurityContext(expression = "authentication?.name") String email, @PathVariable String code) {
-        leagueService.joinLeague(email, code);
+    public ResponseEntity<?> joinLeague(@CurrentSecurityContext(expression = "authentication?.name") String uuid, @PathVariable String code) {
+        leagueService.joinLeague(uuid, code);
         return ResponseEntity.ok("League joined successfully!");
     }
 
@@ -70,9 +70,9 @@ public class LeagueController {
         return ResponseEntity.ok("User removed successfully!");
     }
 
-    @DeleteMapping("{uuid}/delete")
-    public ResponseEntity<?> deleteLeague(@PathVariable String uuid) {
-        leagueService.deleteLeague(uuid);
+    @DeleteMapping("{leagueUUID}/delete")
+    public ResponseEntity<?> deleteLeague(@PathVariable String leagueUUID) {
+        leagueService.deleteLeague(leagueUUID);
         return ResponseEntity.ok("League deleted successfully");
     }
 }

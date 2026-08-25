@@ -98,8 +98,8 @@ public class AuthService {
     }
 
     @Transactional
-    public void deleteUser(String email) {
-        UserEntity user = userRepository.findByEmail(email)
+    public void deleteUser(String uuid) {
+        UserEntity user = userRepository.findByUUID(uuid)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
         userRepository.delete(user);

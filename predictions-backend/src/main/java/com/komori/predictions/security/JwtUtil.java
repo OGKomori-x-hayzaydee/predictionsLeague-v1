@@ -19,30 +19,30 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String STORED_SECRET_KEY;
 
-    private String generateAccessToken(String email) {
+    private String generateAccessToken(String uuid) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims(claims)
-                .subject(email)
+                .subject(uuid)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 5 min expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
-    private String generateRefreshToken(String email) {
+    private String generateRefreshToken(String uuid) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims(claims)
-                .subject(email)
+                .subject(uuid)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 14)) // 14 day expiration
                 .signWith(Keys.hmacShaKeyFor(STORED_SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
-    public ResponseCookie createAccessTokenCookie(String email) {
-        return ResponseCookie.from("access", generateAccessToken(email))
+    public ResponseCookie createAccessTokenCookie(String uuid) {
+        return ResponseCookie.from("access", generateAccessToken(uuid))
                 .httpOnly(true)
                 .path("/")
                 .secure(true)
@@ -52,8 +52,8 @@ public class JwtUtil {
                 .build();
     }
 
-    public ResponseCookie createRefreshTokenCookie(String email) {
-        return ResponseCookie.from("refresh", generateRefreshToken(email))
+    public ResponseCookie createRefreshTokenCookie(String uuid) {
+        return ResponseCookie.from("refresh", generateRefreshToken(uuid))
                 .httpOnly(true)
                 .path("/")
                 .secure(true)
@@ -63,9 +63,9 @@ public class JwtUtil {
                 .build();
     }
 
-    public HttpHeaders createCookieHeaders(String email) {
-        ResponseCookie accessCookie = createAccessTokenCookie(email);
-        ResponseCookie refreshCookie = createRefreshTokenCookie(email);
+    public HttpHeaders createCookieHeaders(String uuid) {
+        ResponseCookie accessCookie = createAccessTokenCookie(uuid);
+        ResponseCookie refreshCookie = createRefreshTokenCookie(uuid);
         HttpHeaders cookieHeaders = new HttpHeaders();
         cookieHeaders.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
         cookieHeaders.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -80,7 +80,7 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public String extractEmailFromToken(String token) {
+    public String extractUUIDFromToken(String token) {
         Claims claims = extractAllClaims(token);
         return claims.getSubject();
     }
@@ -91,8 +91,8 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
 
-    public Boolean validateAccessToken(String token, String email) {
-        final String tokenEmail = extractEmailFromToken(token);
-        return email.equals(tokenEmail) && !isTokenExpired(token);
+    public Boolean validateAccessToken(String token, String uuid) {
+        final String tokenUUID = extractUUIDFromToken(token);
+        return uuid.equals(tokenUUID) && !isTokenExpired(token);
     }
 }

@@ -35,15 +35,15 @@ public class ProfileService {
     private final PredictionRepository predictionRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ProfileOverview viewProfile(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public ProfileOverview viewProfile(String uuid) {
+        UserEntity user = userRepository.findByUUID(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return new ProfileOverview(user);
     }
 
-    public StatsHighlights getStatsHighlights(String email) {
-        BestGameweekProjection gameweekProjection = predictionRepository.getBestGameweek(email);
+    public StatsHighlights getStatsHighlights(String uuid) {
+        BestGameweekProjection gameweekProjection = predictionRepository.getBestGameweek(uuid);
         if (gameweekProjection == null) {
             return StatsHighlights.builder()
                     .bestGameweek(StatsHighlights.StatsHighlightsGameweek.builder()
@@ -61,7 +61,7 @@ public class ProfileService {
                     .build();
         }
 
-        MostActiveDayProjection dayProjection = predictionRepository.getMostActiveDay(email);
+        MostActiveDayProjection dayProjection = predictionRepository.getMostActiveDay(uuid);
         return StatsHighlights.builder()
                 .bestGameweek(StatsHighlights.StatsHighlightsGameweek.builder()
                         .gameweek("GW" + gameweekProjection.getGameweek())
@@ -78,8 +78,8 @@ public class ProfileService {
                 .build();
     }
 
-    public StatsTeamPerformance getTeamPerformance(String email) {
-        List<TeamPerformanceProjection> projections = predictionRepository.getTeamPerformanceByEmail(email);
+    public StatsTeamPerformance getTeamPerformance(String uuid) {
+        List<TeamPerformanceProjection> projections = predictionRepository.getTeamPerformanceByUUID(uuid);
 
         return StatsTeamPerformance.builder()
                 .data(List.of(
@@ -93,8 +93,8 @@ public class ProfileService {
                 .build();
     }
 
-    public StatsMonthlyPerformance getMonthlyPerformance(String email) {
-        List<MonthlyPerformanceProjection> projections = predictionRepository.getMonthlyPerformance(email);
+    public StatsMonthlyPerformance getMonthlyPerformance(String uuid) {
+        List<MonthlyPerformanceProjection> projections = predictionRepository.getMonthlyPerformance(uuid);
 
         return StatsMonthlyPerformance.builder()
                 .data(List.of(
@@ -114,9 +114,9 @@ public class ProfileService {
                 .build();
     }
 
-    public String setProfilePicture(MultipartFile file, String email) throws IOException {
-        UserEntity currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public String setProfilePicture(MultipartFile file, String uuid) throws IOException {
+        UserEntity currentUser = userRepository.findByUUID(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String key = "profile-pictures/" + currentUser.getUUID() + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
         ObjectMetadata metadata = new ObjectMetadata();
@@ -138,9 +138,9 @@ public class ProfileService {
         emailService.sendResetPasswordEmail(email, currentUser.getFirstName());
     }
 
-    public void changePassword(String email, String oldPassword, String newPassword) {
-        UserEntity currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public void changePassword(String uuid, String oldPassword, String newPassword) {
+        UserEntity currentUser = userRepository.findByUUID(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
             throw new PasswordMismatchException();
@@ -148,6 +148,6 @@ public class ProfileService {
 
         currentUser.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(currentUser);
-        emailService.sendChangedPasswordEmail(email, currentUser.getFirstName());
+        emailService.sendChangedPasswordEmail(currentUser.getEmail(), currentUser.getFirstName());
     }
 }

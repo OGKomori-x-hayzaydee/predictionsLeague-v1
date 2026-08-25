@@ -17,8 +17,8 @@ import java.util.List;
 public class ChipService {
     private final ChipRepository chipRepository;
 
-    public List<ChipStatus.UserChip> getChipStatusForUser(String email) {
-        List<ChipEntity> chips = chipRepository.findAllByUser_Email(email);
+    public List<ChipStatus.UserChip> getChipStatusForUser(String uuid) {
+        List<ChipEntity> chips = chipRepository.findAllByUser_UUID(uuid);
         return chips.stream()
                 .map(ChipStatus.UserChip::new)
                 .toList();
@@ -37,9 +37,9 @@ public class ChipService {
     }
 
     @Transactional
-    public void updateChipStatusAfterNewPrediction(String email, PredictionRequest prediction) {
+    public void updateChipStatusAfterNewPrediction(String uuid, PredictionRequest prediction) {
         for (Chip chip : prediction.getChips()) {
-            ChipEntity chipEntity = chipRepository.findByUser_EmailAndType(email, chip);
+            ChipEntity chipEntity = chipRepository.findByUser_UUIDAndType(uuid, chip);
 
             if (chipEntity.getType() == Chip.ALL_IN_WEEK) {
                 Integer lastUsed = chipEntity.getLastUsedGameweek();

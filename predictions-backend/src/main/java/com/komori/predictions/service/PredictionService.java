@@ -34,8 +34,8 @@ public class PredictionService {
     private final UserLeagueRepository userLeagueRepository;
     private final ChipService chipService;
 
-    public List<UserPrediction> getPredictionsForUser(String email) {
-        List<PredictionEntity> predictionEntities = predictionRepository.findAllByUser_Email(email);
+    public List<UserPrediction> getPredictionsForUser(String uuid) {
+        List<PredictionEntity> predictionEntities = predictionRepository.findAllByUser_UUID(uuid);
         if (predictionEntities.isEmpty()) return new ArrayList<>();
 
         List<UserPrediction> userPredictions = new ArrayList<>();
@@ -50,11 +50,11 @@ public class PredictionService {
         return userPredictions;
     }
 
-    public void makePrediction(String email, PredictionRequest request) {
-        UserEntity user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public void makePrediction(String uuid, PredictionRequest request) {
+        UserEntity user = userRepository.findByUUID(uuid)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(request.getMatchId(), email);
+        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_UUID(request.getMatchId(), uuid);
         if (prediction == null) {
             predictionRepository.saveAndFlush(new PredictionEntity(user, request));
         } else {
@@ -66,7 +66,7 @@ public class PredictionService {
             prediction.setChips(request.getChips());
             predictionRepository.saveAndFlush(prediction);
         }
-        chipService.updateChipStatusAfterNewPrediction(email, request);
+        chipService.updateChipStatusAfterNewPrediction(uuid, request);
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class PredictionService {
         List<PredictionEntity> predictions = predictionRepository.findAllByMatchId(match.getMatchId());
         for (PredictionEntity prediction : predictions) {
             UserEntity user = prediction.getUser();
-            int points = getPredictionScore(user.getEmail(), match.getMatchId());
+            int points = getPredictionScore(user.getUUID(), match.getMatchId());
             boolean correct = isPredictionCorrect(prediction, match);
 
             // Update prediction
@@ -99,9 +99,9 @@ public class PredictionService {
     }
 
     // Scoring System
-    public Integer getPredictionScore(String email, long matchId) {
+    public Integer getPredictionScore(String uuid, long matchId) {
         MatchEntity match = matchRepository.findByMatchId(matchId);
-        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_Email(matchId, email);
+        PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_UUID(matchId, uuid);
 
         int points = 0;
         int actualHome = match.getHomeScore();
