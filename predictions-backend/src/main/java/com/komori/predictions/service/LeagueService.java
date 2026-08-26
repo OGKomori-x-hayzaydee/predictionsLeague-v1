@@ -25,7 +25,7 @@ public class LeagueService {
     private final UserLeagueRepository userLeagueRepository;
     private final PredictionRepository predictionRepository;
     private final MatchRepository matchRepository;
-    private final MatchdayService matchdayService;
+    private final APIService apiService;
 
     public void createLeague(String uuid, CreateLeagueRequest request) {
         UserEntity currentUser = userRepository.findByUUID(uuid)
@@ -49,7 +49,7 @@ public class LeagueService {
                 .build();
         leagueRepository.save(newLeague);
 
-        int points = predictionRepository.getPointsSinceGameweek(uuid, request.getFirstGameweek(), matchdayService.getCurrentMatchday());
+        int points = predictionRepository.getPointsSinceGameweek(uuid, request.getFirstGameweek(), apiService.getCurrentMatchday());
         UserLeagueEntity userLeague = new UserLeagueEntity(currentUser, newLeague, points, true, true);
         userLeagueRepository.save(userLeague);
     }
@@ -96,7 +96,7 @@ public class LeagueService {
         UserEntity user = userRepository.findByUUID(uuid)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        int points = predictionRepository.getPointsSinceGameweek(uuid, league.getFirstGameweek(), matchdayService.getCurrentMatchday());
+        int points = predictionRepository.getPointsSinceGameweek(uuid, league.getFirstGameweek(), apiService.getCurrentMatchday());
         UserLeagueEntity newEntity = new UserLeagueEntity(user, league, points, false, false);
         userLeagueRepository.save(newEntity);
     }
@@ -185,7 +185,7 @@ public class LeagueService {
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
                     .points(userLeagueEntity.getPoints())
-                    .predictions(predictionRepository.countPredictionsSinceGameweek(userEntity.getUUID(), leagueEntity.getFirstGameweek(), matchdayService.getCurrentMatchday()))
+                    .predictions(predictionRepository.countPredictionsSinceGameweek(userEntity.getUUID(), leagueEntity.getFirstGameweek(), apiService.getCurrentMatchday()))
                     .joinedAt(userLeagueEntity.getJoinedAt().toInstant())
                     .isCurrentUser(Objects.equals(userEntity.getId(), currentUser.getId()))
                     .isAdmin(userLeagueEntity.getIsAdmin())

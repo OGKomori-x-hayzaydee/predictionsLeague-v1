@@ -25,7 +25,6 @@ public class FixtureSchedulerService {
     private final PredictionService predictionService;
     private final MatchRepository matchRepository;
     private final ChipService chipService;
-    private final MatchdayService matchdayService;
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
     private final Map<Long, ScheduledFuture<?>> activePollers = new ConcurrentHashMap<>();
 
@@ -198,8 +197,8 @@ public class FixtureSchedulerService {
                         // tie-breaker by ID
                         || ((f.getDate().isEqual(fixture.getDate())) && f.getId() > fixture.getId()));
         if (isLastFixture) {
-            int newMatchday = matchdayService.getCurrentMatchday() + 1;
-            matchdayService.setCurrentMatchday(newMatchday);
+            int newMatchday = apiService.getCurrentMatchday() + 1;
+            redisTemplate.opsForValue().set("currentMatchday", newMatchday);
             chipService.updateAllGameweekCooldowns();
             apiService.updateFixtures();
         }

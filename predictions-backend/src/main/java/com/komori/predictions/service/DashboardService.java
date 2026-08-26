@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class DashboardService {
     private final UserRepository userRepository;
     private final PredictionRepository predictionRepository;
-    private final MatchdayService matchdayService;
+    private final APIService apiService;
 
     public DashboardEssentials getDashboardDetails(String uuid) {
         UserEntity user = userRepository.findByUUID(uuid)
@@ -66,7 +66,7 @@ public class DashboardService {
                         user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), predictionRepository.countByUser(user), 0
                 ))
                 .season(new DashboardEssentials.Season(
-                        matchdayService.getCurrentMatchday(), 38, "Fri 18:00"
+                        apiService.getCurrentMatchday(), 38, "Fri 18:00"
                 ))
                 .stats(new DashboardEssentials.Stats(
                         new DashboardEssentials.Stats.WeeklyPoints(
