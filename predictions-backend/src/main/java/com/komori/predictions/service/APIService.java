@@ -36,7 +36,7 @@ public class APIService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final MatchdayService matchdayService;
-    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public void updateFixtures() {
         List<FixtureDetails> response = getFixturesFromAPI();
@@ -53,11 +53,19 @@ public class APIService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        List<Fixture> existingFixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
+        List<Object> existingFixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
 
-        if (!newFixtures.equals(existingFixtures)) {
-            redisFixtureTemplate.delete("fixtures");
-            redisFixtureTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+        if (existingFixtureObjects == null || existingFixtureObjects.isEmpty()) {
+            redisTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+        }
+        else {
+            List<Fixture> existingFixtures = existingFixtureObjects.stream()
+                    .map(obj -> (Fixture) obj)
+                    .toList();
+            if (!existingFixtures.equals(newFixtures)) {
+                redisTemplate.delete("fixtures");
+                redisTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+            }
         }
     }
 

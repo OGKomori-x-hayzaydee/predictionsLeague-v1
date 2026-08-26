@@ -20,7 +20,7 @@ import java.util.concurrent.*;
 @Service
 @RequiredArgsConstructor
 public class FixtureSchedulerService {
-    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final APIService apiService;
     private final PredictionService predictionService;
     private final MatchRepository matchRepository;
@@ -59,17 +59,18 @@ public class FixtureSchedulerService {
     }
 
     private List<Fixture> getFixturesForTheDay() {
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
-        while (fixtures == null) {
+        List<Object> fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
+        while (fixtureObjects == null) {
             log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
             apiService.updateFixtures();
-            fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
+            fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
         }
 
+        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
         ZoneId zoneId = ZoneId.of("UTC");
         LocalDate today = LocalDate.now(zoneId);
 
-        return fixtures.stream()
+        return fixtureList.stream()
                 .filter(fixture -> fixture.getDate().atZoneSameInstant(zoneId).toLocalDate().isEqual(today))
                 .toList();
     }
@@ -144,14 +145,15 @@ public class FixtureSchedulerService {
     }
 
     private void updateFixtureInRedis(Fixture fixture, GameStatusAndScore gameStatusAndScore) {
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
-        if (fixtures == null) {
+        List<Object> fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
+        if (fixtureObjects == null) {
             log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
             apiService.updateFixtures();
             return;
         }
 
-        Fixture stored = fixtures.stream()
+        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
+        Fixture stored = fixtureList.stream()
                 .filter(f -> f.getId().equals(fixture.getId()))
                 .findFirst()
                 .orElse(fixture);
@@ -161,8 +163,8 @@ public class FixtureSchedulerService {
         stored.setStatus(gameStatusAndScore.getGameStatus());
 
         // Update only this fixture
-        redisFixtureTemplate.opsForList().remove("fixtures", 1, stored);
-        redisFixtureTemplate.opsForList().rightPush("fixtures", stored);
+        redisTemplate.opsForList().remove("fixtures", 1, stored);
+        redisTemplate.opsForList().rightPush("fixtures", stored);
     }
 
     private MatchEntity saveMatchToDB(Fixture fixture, GameStatusAndScore gameStatusAndScore, HomeAndAwayScorers scorers) {
@@ -183,14 +185,15 @@ public class FixtureSchedulerService {
 
     private void incrementMatchdayIfLastFixture(Fixture fixture) {
         log.info("Checking current Matchday incrementing...");
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
-        if (fixtures == null) {
+        List<Object> fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
+        if (fixtureObjects == null) {
             log.warn("Fixtures list not found in redis. Fetching latest fixtures...");
             apiService.updateFixtures();
             return;
         }
 
-        boolean isLastFixture = fixtures.stream()
+        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
+        boolean isLastFixture = fixtureList.stream()
                 .noneMatch(f -> f.getDate().isAfter(fixture.getDate())
                         // tie-breaker by ID
                         || ((f.getDate().isEqual(fixture.getDate())) && f.getId() > fixture.getId()));

@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MatchdayService {
-    private final RedisTemplate<String, Object> redisGeneralTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public int getCurrentMatchday() {
-        Object value = redisGeneralTemplate.opsForValue().get("currentMatchday");
+        Object value = redisTemplate.opsForValue().get("currentMatchday");
         if (value instanceof Integer) {
             return (int) value;
         } else if (value instanceof String) {
@@ -24,6 +24,6 @@ public class MatchdayService {
     }
 
     public void setCurrentMatchday(int matchday) {
-        redisGeneralTemplate.opsForValue().set("currentMatchday", matchday);
+        redisTemplate.opsForValue().set("currentMatchday", matchday);
     }
 }
