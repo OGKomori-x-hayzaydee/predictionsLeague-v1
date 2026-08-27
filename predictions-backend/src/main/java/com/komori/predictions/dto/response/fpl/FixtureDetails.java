@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FixtureDetails {
     private Long id;
@@ -32,6 +34,7 @@ public class FixtureDetails {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Event {
         private String identifier;
@@ -42,6 +45,7 @@ public class FixtureDetails {
 
         @Data
         @AllArgsConstructor
+        @NoArgsConstructor
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class PlayerAndGoals {
             @JsonProperty("value")
