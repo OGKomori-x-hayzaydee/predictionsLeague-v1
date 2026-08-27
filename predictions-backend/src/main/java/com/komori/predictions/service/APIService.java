@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.enumerated.GameStatus;
 import com.komori.predictions.dto.request.GameStatusAndScore;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
@@ -37,6 +38,7 @@ public class APIService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     public void updateFixtures() {
         List<FixtureDetails> response = getFixturesFromAPI();
@@ -60,7 +62,7 @@ public class APIService {
         }
         else {
             List<Fixture> existingFixtures = existingFixtureObjects.stream()
-                    .map(obj -> (Fixture) obj)
+                    .map(obj -> objectMapper.convertValue(obj, Fixture.class))
                     .toList();
             if (!existingFixtures.equals(newFixtures)) {
                 redisTemplate.delete("fixtures");

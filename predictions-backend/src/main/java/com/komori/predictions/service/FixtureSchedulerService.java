@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.enumerated.GameStatus;
 import com.komori.predictions.dto.request.GameStatusAndScore;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
@@ -27,6 +28,7 @@ public class FixtureSchedulerService {
     private final ChipService chipService;
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
     private final Map<Long, ScheduledFuture<?>> activePollers = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper;
 
     public void scheduleFixturesForTheDay() {
         List<Fixture> fixtures = getFixturesForTheDay();
@@ -65,7 +67,9 @@ public class FixtureSchedulerService {
             fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
         }
 
-        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
+        List<Fixture> fixtureList = fixtureObjects.stream()
+                .map(obj -> objectMapper.convertValue(obj, Fixture.class))
+                .toList();
         ZoneId zoneId = ZoneId.of("UTC");
         LocalDate today = LocalDate.now(zoneId);
 
@@ -151,7 +155,9 @@ public class FixtureSchedulerService {
             return;
         }
 
-        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
+        List<Fixture> fixtureList = fixtureObjects.stream()
+                .map(obj -> objectMapper.convertValue(obj, Fixture.class))
+                .toList();
         Fixture stored = fixtureList.stream()
                 .filter(f -> f.getId().equals(fixture.getId()))
                 .findFirst()
@@ -191,7 +197,9 @@ public class FixtureSchedulerService {
             return;
         }
 
-        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
+        List<Fixture> fixtureList = fixtureObjects.stream()
+                .map(obj -> objectMapper.convertValue(obj, Fixture.class))
+                .toList();
         boolean isLastFixture = fixtureList.stream()
                 .noneMatch(f -> f.getDate().isAfter(fixture.getDate())
                         // tie-breaker by ID

@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.response.Fixture;
 import com.komori.predictions.dto.response.Player;
 import com.komori.predictions.repository.PlayerRepository;
@@ -19,6 +20,7 @@ public class FixtureService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final PlayerRepository playerRepository;
     private final APIService apiService;
+    private final ObjectMapper objectMapper;
 
     public List<Fixture> getFixtures() {
         List<Object> fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
@@ -32,7 +34,9 @@ public class FixtureService {
             return new ArrayList<>();
         }
 
-        List<Fixture> fixtureList = fixtureObjects.stream().map(obj -> (Fixture) obj).toList();
+        List<Fixture> fixtureList = fixtureObjects.stream()
+                .map(obj -> objectMapper.convertValue(obj, Fixture.class))
+                .toList();
 
         fixtureList.forEach(fixture -> {
             List<Player> homePlayers = getPlayersForTeam(fixture.getHomeId());
@@ -60,7 +64,9 @@ public class FixtureService {
                 redisTemplate.expire(key, Duration.ofDays(7));
             }
         } else {
-            playerList = playerObjects.stream().map(obj -> (Player) obj).toList();
+            playerList = playerObjects.stream()
+                    .map(obj -> objectMapper.convertValue(obj, Player.class))
+                    .toList();
         }
 
         return playerList;
