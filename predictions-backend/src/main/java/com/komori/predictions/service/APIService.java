@@ -165,7 +165,9 @@ public class APIService {
             return Integer.parseInt((String) value);
         } else {
             log.error("Current matchday not set in Redis. Fetching from API...");
-            return getCurrentMatchdayFromAPI();
+            int currentMatchday = getCurrentMatchdayFromAPI();
+            redisTemplate.opsForValue().set("currentMatchday", currentMatchday);
+            return currentMatchday;
         }
     }
 
