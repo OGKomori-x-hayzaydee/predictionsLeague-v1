@@ -56,7 +56,7 @@ public class APIService {
         List<Object> existingFixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
 
         if (existingFixtureObjects == null || existingFixtureObjects.isEmpty()) {
-            redisTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+            newFixtures.forEach(f -> redisTemplate.opsForList().rightPush("fixtures", f));
         }
         else {
             List<Fixture> existingFixtures = existingFixtureObjects.stream()
@@ -64,7 +64,7 @@ public class APIService {
                     .toList();
             if (!existingFixtures.equals(newFixtures)) {
                 redisTemplate.delete("fixtures");
-                redisTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+                newFixtures.forEach(f -> redisTemplate.opsForList().rightPush("fixtures", f));
             }
         }
     }

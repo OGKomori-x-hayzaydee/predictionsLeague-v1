@@ -56,7 +56,7 @@ public class FixtureService {
                     .toList();
 
             if (!playerList.isEmpty()) {
-                redisTemplate.opsForList().rightPushAll(key, playerList);
+                playerList.forEach(player -> redisTemplate.opsForList().rightPush("fixtures", player));
                 redisTemplate.expire(key, Duration.ofDays(7));
             }
         } else {
