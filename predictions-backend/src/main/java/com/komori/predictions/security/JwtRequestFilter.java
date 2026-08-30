@@ -61,12 +61,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
 
-        // Validate the JWT, extract email, and set Security Context if user isn't already authenticated
+        // Validate the JWT, extract UUID, and set Security Context if user isn't already authenticated
         if (jwt != null) {
-            String email = jwtUtil.extractEmailFromToken(jwt);
-            if (email != null) {
-                if (jwtUtil.validateAccessToken(jwt, email)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
+            String uuid = jwtUtil.extractUUIDFromToken(jwt);
+            if (uuid != null) {
+                if (jwtUtil.validateAccessToken(jwt, uuid)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(uuid, null, new ArrayList<>());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }

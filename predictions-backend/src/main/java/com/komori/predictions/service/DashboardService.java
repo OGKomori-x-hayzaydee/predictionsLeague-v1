@@ -22,25 +22,25 @@ import java.util.stream.Collectors;
 public class DashboardService {
     private final UserRepository userRepository;
     private final PredictionRepository predictionRepository;
-    private final MatchdayService matchdayService;
+    private final APIService apiService;
 
-    public DashboardEssentials getDashboardDetails(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public DashboardEssentials getDashboardDetails(String uuid) {
+        UserEntity user = userRepository.findByUUID(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("UUID " + uuid + " not found"));
 
         return userEntityToDashboardDetails(user);
     }
 
-    public Set<DashboardPredictionSummary> getPredictions(String email) {
-        return predictionRepository.findAllByUser_Email(email).stream()
+    public Set<DashboardPredictionSummary> getPredictions(String uuid) {
+        return predictionRepository.findAllByUser_UUID(uuid).stream()
                 .map(DashboardPredictionSummary::new)
                 .collect(Collectors.toSet());
     }
 
     @Transactional(readOnly = true)
-    public Set<DashboardLeagueSummary> getLeagues(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public Set<DashboardLeagueSummary> getLeagues(String uuid) {
+        UserEntity user = userRepository.findByUUID(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("UUID " + uuid + " not found"));
 
         return Set.copyOf(user.getLeagues().stream()
                 .map(UserLeagueEntity::getLeague)
@@ -66,7 +66,7 @@ public class DashboardService {
                         user.getUsername(), user.getProfilePictureUrl(), user.getTotalPoints(), predictionRepository.countByUser(user), 0
                 ))
                 .season(new DashboardEssentials.Season(
-                        matchdayService.getCurrentMatchday(), 38, "Fri 18:00"
+                        apiService.getCurrentMatchday(), 38, "Fri 18:00"
                 ))
                 .stats(new DashboardEssentials.Stats(
                         new DashboardEssentials.Stats.WeeklyPoints(

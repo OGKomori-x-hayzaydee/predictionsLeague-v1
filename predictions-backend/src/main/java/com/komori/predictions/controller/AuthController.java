@@ -62,8 +62,8 @@ public class AuthController {
     }
 
     @DeleteMapping("/delete-user")
-    public ResponseEntity<String> deleteUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        authService.deleteUser(email);
+    public ResponseEntity<String> deleteUser(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        authService.deleteUser(uuid);
         return ResponseEntity.ok("Account deleted successfully");
     }
 
@@ -110,8 +110,8 @@ public class AuthController {
                     .body("Refresh token expired");
         }
 
-        String email = jwtUtil.extractEmailFromToken(refreshToken);
-        HttpHeaders headers = jwtUtil.createCookieHeaders(email);
+        String uuid = jwtUtil.extractUUIDFromToken(refreshToken);
+        HttpHeaders headers = jwtUtil.createCookieHeaders(uuid);
         return ResponseEntity.ok()
                 .headers(headers)
                 .body("Refresh successful");

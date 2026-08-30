@@ -31,7 +31,7 @@ public class EmailService {
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
             <p>Hello <b>%s</b>,</p>
-            <p>Welcome to the <b>Predictions League</b>\s
+            <p>Welcome to the <b>Predictions League!</b>\s
             We know you'll love your time here!</p>
             <p>Regards,<br>
             Tega from the Predictions Team</p>

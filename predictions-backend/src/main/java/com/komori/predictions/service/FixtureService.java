@@ -1,5 +1,6 @@
 package com.komori.predictions.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.response.Fixture;
 import com.komori.predictions.dto.response.Player;
 import com.komori.predictions.repository.PlayerRepository;
@@ -16,49 +17,58 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FixtureService {
-    private final RedisTemplate<String, Player> redisPlayerTemplate;
-    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final PlayerRepository playerRepository;
     private final APIService apiService;
+    private final ObjectMapper objectMapper;
 
     public List<Fixture> getFixtures() {
-        List<Fixture> fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
-        if (fixtures == null || fixtures.isEmpty()) {
+        List<Object> fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
+        if (fixtureObjects == null || fixtureObjects.isEmpty()) {
             apiService.updateFixtures();
-            fixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
+            fixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
         }
 
-        if (fixtures == null || fixtures.isEmpty()) {
+        if (fixtureObjects == null || fixtureObjects.isEmpty()) {
             log.error("Fixtures not available in redis after API refresh");
             return new ArrayList<>();
         }
 
-        fixtures.forEach(fixture -> {
+        List<Fixture> fixtureList = fixtureObjects.stream()
+                .map(obj -> objectMapper.convertValue(obj, Fixture.class))
+                .toList();
+
+        fixtureList.forEach(fixture -> {
             List<Player> homePlayers = getPlayersForTeam(fixture.getHomeId());
             List<Player> awayPlayers = getPlayersForTeam(fixture.getAwayId());
             fixture.setHomePlayers(homePlayers);
             fixture.setAwayPlayers(awayPlayers);
         });
 
-        return fixtures;
+        return fixtureList;
     }
 
     private List<Player> getPlayersForTeam(Integer teamId) {
         String key = "team:" + teamId + ":players";
-        List<Player> players = redisPlayerTemplate.opsForList().range(key, 0, -1);
+        List<Object> playerObjects = redisTemplate.opsForList().range(key, 0, -1);
+        List<Player> playerList;
 
-        if (players == null || players.isEmpty()) {
-            players = playerRepository.findAllByTeam_TeamId(teamId)
+        if (playerObjects == null || playerObjects.isEmpty()) {
+            playerList = playerRepository.findAllByTeam_TeamId(teamId)
                     .stream()
                     .map(Player::new)
                     .toList();
 
-            if (!players.isEmpty()) {
-                redisPlayerTemplate.opsForList().rightPushAll(key, players);
-                redisPlayerTemplate.expire(key, Duration.ofDays(7));
+            if (!playerList.isEmpty()) {
+                playerList.forEach(player -> redisTemplate.opsForList().rightPush(key, player));
+                redisTemplate.expire(key, Duration.ofDays(7));
             }
+        } else {
+            playerList = playerObjects.stream()
+                    .map(obj -> objectMapper.convertValue(obj, Player.class))
+                    .toList();
         }
 
-        return players;
+        return playerList;
     }
 }

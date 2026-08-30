@@ -17,14 +17,14 @@ public class PredictionController {
     private final PredictionService predictionService;
 
     @GetMapping("/user")
-    public ResponseEntity<List<UserPrediction>> getPredictionsForUser(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        List<UserPrediction> predictions = predictionService.getPredictionsForUser(email);
+    public ResponseEntity<List<UserPrediction>> getPredictionsForUser(@CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        List<UserPrediction> predictions = predictionService.getPredictionsForUser(uuid);
         return ResponseEntity.ok(predictions);
     }
 
     @PostMapping("/make-prediction")
-    public ResponseEntity<String> makePrediction(@RequestBody PredictionRequest request, @CurrentSecurityContext(expression = "authentication?.name") String email) {
-        predictionService.makePrediction(email, request);
+    public ResponseEntity<String> makePrediction(@RequestBody PredictionRequest request, @CurrentSecurityContext(expression = "authentication?.name") String uuid) {
+        predictionService.makePrediction(uuid, request);
         return ResponseEntity.ok("Prediction made successfully!");
     }
 }

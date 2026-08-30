@@ -14,5 +14,5 @@ import org.springframework.stereotype.Component;
 public class AppProperties {
     private String frontendUrl;
     private String fixtureListBaseUrl;
-    private String squadListBaseUrl;
+    private String bootstrapStaticUrl;
 }

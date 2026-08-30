@@ -39,7 +39,7 @@ server:
 app:
   frontend-url: ${FRONTEND_URL}
   fixture-list-base-url: ${FIXTURE_LIST_BASE_URL}
-  squad-list-base-url: ${SQUAD_LIST_BASE_URL}
+  bootstrap-static-url: ${BOOTSTRAP_STATIC_URL}
 brevo:
   api-key: ${BREVO_API_KEY}
   from-email: ${BREVO_FROM_EMAIL}

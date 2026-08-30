@@ -71,8 +71,8 @@ public class OAuth2Controller {
             // Incomplete registration
             response.sendRedirect(frontendUrl + "/auth/callback?email=" + email);
         } else { // User Login
-            ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(email);
-            ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(email);
+            ResponseCookie accessCookie = jwtUtil.createAccessTokenCookie(user.get().getUUID());
+            ResponseCookie refreshCookie = jwtUtil.createRefreshTokenCookie(user.get().getUUID());
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
             response.sendRedirect(frontendUrl + "/auth/callback?destination=dashboard");

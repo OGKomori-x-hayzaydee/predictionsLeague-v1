@@ -25,11 +25,11 @@ public class LeagueService {
     private final UserLeagueRepository userLeagueRepository;
     private final PredictionRepository predictionRepository;
     private final MatchRepository matchRepository;
-    private final MatchdayService matchdayService;
+    private final APIService apiService;
 
-    public void createLeague(String email, CreateLeagueRequest request) {
-        UserEntity currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+    public void createLeague(String uuid, CreateLeagueRequest request) {
+        UserEntity currentUser = userRepository.findByUUID(uuid)
+                .orElseThrow(() -> new UsernameNotFoundException("UUID " + uuid + " not found."));
 
         String leagueCode = "";
         if (request.getPublicity() == Publicity.PRIVATE) {
@@ -49,14 +49,14 @@ public class LeagueService {
                 .build();
         leagueRepository.save(newLeague);
 
-        int points = predictionRepository.getPointsSinceGameweek(email, request.getFirstGameweek(), matchdayService.getCurrentMatchday());
+        int points = predictionRepository.getPointsSinceGameweek(uuid, request.getFirstGameweek(), apiService.getCurrentMatchday());
         UserLeagueEntity userLeague = new UserLeagueEntity(currentUser, newLeague, points, true, true);
         userLeagueRepository.save(userLeague);
     }
 
     @Transactional(readOnly = true)
-    public Set<LeagueOverview> getLeagueOverviewForUser(String email) {
-        UserEntity user = userRepository.findByEmail(email)
+    public Set<LeagueOverview> getLeagueOverviewForUser(String uuid) {
+        UserEntity user = userRepository.findByUUID(uuid)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return Set.copyOf(user.getLeagues().stream()
@@ -65,18 +65,18 @@ public class LeagueService {
                 .toList());
     }
 
-    public LeagueStanding getLeagueStanding(String email, String uuid) {
-        UserEntity user = userRepository.findByEmail(email)
+    public LeagueStanding getLeagueStanding(String userUUID, String leagueUUID) {
+        UserEntity user = userRepository.findByUUID(userUUID)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        LeagueEntity league = leagueRepository.findByUUID(uuid)
+        LeagueEntity league = leagueRepository.findByUUID(leagueUUID)
                 .orElseThrow(LeagueNotFoundException::new);
 
         return leagueEntityToStanding(league, user);
     }
 
-    public List<LeaguePredictionSummary> getLeaguePredictions(String uuid, Integer gameweek) {
-        List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague_UUID(uuid);
+    public List<LeaguePredictionSummary> getLeaguePredictions(String leagueUUID, Integer gameweek) {
+        List<UserLeagueEntity> userLeagueEntities = userLeagueRepository.findAllByLeague_UUID(leagueUUID);
         List<LeaguePredictionSummary> predictions = new ArrayList<>();
         for (UserLeagueEntity entity : userLeagueEntities) {
             UserEntity user = entity.getUser();
@@ -89,14 +89,14 @@ public class LeagueService {
         return predictions;
     }
 
-    public void joinLeague(String email, String code) {
+    public void joinLeague(String uuid, String code) {
         LeagueEntity league = leagueRepository.findByLeagueCode(code)
                 .orElseThrow(LeagueNotFoundException::new);
 
-        UserEntity user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByUUID(uuid)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        int points = predictionRepository.getPointsSinceGameweek(email, league.getFirstGameweek(), matchdayService.getCurrentMatchday());
+        int points = predictionRepository.getPointsSinceGameweek(uuid, league.getFirstGameweek(), apiService.getCurrentMatchday());
         UserLeagueEntity newEntity = new UserLeagueEntity(user, league, points, false, false);
         userLeagueRepository.save(newEntity);
     }
@@ -127,8 +127,8 @@ public class LeagueService {
     }
 
     @Transactional
-    public void deleteLeague(String uuid) {
-        LeagueEntity league = leagueRepository.findByUUID(uuid)
+    public void deleteLeague(String leagueUUID) {
+        LeagueEntity league = leagueRepository.findByUUID(leagueUUID)
                 .orElseThrow(LeagueNotFoundException::new);
 
         userLeagueRepository.deleteAllByLeague(league);
@@ -185,7 +185,7 @@ public class LeagueService {
                     .displayName(userEntity.getFirstName() + " " + userEntity.getLastName())
                     .position(userRepository.findUserRankInLeague(userEntity.getId(), leagueEntity.getId()))
                     .points(userLeagueEntity.getPoints())
-                    .predictions(predictionRepository.countPredictionsSinceGameweek(userEntity.getEmail(), leagueEntity.getFirstGameweek(), matchdayService.getCurrentMatchday()))
+                    .predictions(predictionRepository.countPredictionsSinceGameweek(userEntity.getUUID(), leagueEntity.getFirstGameweek(), apiService.getCurrentMatchday()))
                     .joinedAt(userLeagueEntity.getJoinedAt().toInstant())
                     .isCurrentUser(Objects.equals(userEntity.getId(), currentUser.getId()))
                     .isAdmin(userLeagueEntity.getIsAdmin())

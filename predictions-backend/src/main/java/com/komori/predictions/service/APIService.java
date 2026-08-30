@@ -1,10 +1,12 @@
 package com.komori.predictions.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.komori.predictions.dto.enumerated.GameStatus;
 import com.komori.predictions.dto.request.GameStatusAndScore;
 import com.komori.predictions.dto.request.HomeAndAwayScorers;
 import com.komori.predictions.dto.response.Fixture;
 import com.komori.predictions.dto.response.fpl.FixtureDetails;
+import com.komori.predictions.dto.response.fpl.Gameweek;
 import com.komori.predictions.dto.response.fpl.Squad;
 import com.komori.predictions.entity.PlayerEntity;
 import com.komori.predictions.entity.TeamEntity;
@@ -30,13 +32,13 @@ import java.util.stream.Collectors;
 public class APIService {
     @Value("${app.fixture-list-base-url}")
     private String fixtureListBaseUrl;
-    @Value("${app.squad-list-base-url}")
-    private String squadListBaseUrl;
+    @Value("${app.bootstrap-static-url}")
+    private String bootstrapStaticUrl;
     private final RestTemplate restTemplate;
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
-    private final MatchdayService matchdayService;
-    private final RedisTemplate<String, Fixture> redisFixtureTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     public void updateFixtures() {
         List<FixtureDetails> response = getFixturesFromAPI();
@@ -53,11 +55,19 @@ public class APIService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        List<Fixture> existingFixtures = redisFixtureTemplate.opsForList().range("fixtures", 0, -1);
+        List<Object> existingFixtureObjects = redisTemplate.opsForList().range("fixtures", 0, -1);
 
-        if (!newFixtures.equals(existingFixtures)) {
-            redisFixtureTemplate.delete("fixtures");
-            redisFixtureTemplate.opsForList().rightPushAll("fixtures", newFixtures);
+        if (existingFixtureObjects == null || existingFixtureObjects.isEmpty()) {
+            newFixtures.forEach(f -> redisTemplate.opsForList().rightPush("fixtures", f));
+        }
+        else {
+            List<Fixture> existingFixtures = existingFixtureObjects.stream()
+                    .map(obj -> objectMapper.convertValue(obj, Fixture.class))
+                    .toList();
+            if (!existingFixtures.equals(newFixtures)) {
+                redisTemplate.delete("fixtures");
+                newFixtures.forEach(f -> redisTemplate.opsForList().rightPush("fixtures", f));
+            }
         }
     }
 
@@ -133,7 +143,7 @@ public class APIService {
 
     private List<FixtureDetails> getFixturesFromAPI() {
         ResponseEntity<List<FixtureDetails>> responseEntity = restTemplate.exchange(
-                fixtureListBaseUrl + matchdayService.getCurrentMatchday(),
+                fixtureListBaseUrl + getCurrentMatchday(),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<>() {}
@@ -147,6 +157,45 @@ public class APIService {
         return response;
     }
 
+    public int getCurrentMatchday() {
+        Object value = redisTemplate.opsForValue().get("currentMatchday");
+        if (value instanceof Integer) {
+            return (int) value;
+        } else if (value instanceof String) {
+            return Integer.parseInt((String) value);
+        } else {
+            log.error("Current matchday not set in Redis. Fetching from API...");
+            int currentMatchday = getCurrentMatchdayFromAPI();
+            redisTemplate.opsForValue().set("currentMatchday", currentMatchday);
+            return currentMatchday;
+        }
+    }
+
+    private Integer getCurrentMatchdayFromAPI() {
+        ResponseEntity<Gameweek> responseEntity = restTemplate.exchange(
+                bootstrapStaticUrl,
+                HttpMethod.GET,
+                null,
+                Gameweek.class
+        );
+
+        Gameweek response = responseEntity.getBody();
+        if (response == null || responseEntity.getStatusCode().isError()) {
+            throw new RuntimeException("Error fetching current matchday from API");
+        }
+
+        int currentMatchday = 1;
+        for (Gameweek.IndividualGameweek gw : response.getEvents()) {
+            if (gw.getFinished()) {
+                currentMatchday++;
+            } else {
+                break;
+            }
+        }
+
+        return currentMatchday;
+    }
+
     @Transactional
     public void loadPlayersIntoDatabase() {
         if (playerRepository.count() != 0) {
@@ -156,7 +205,7 @@ public class APIService {
         log.info("Players not found. Loading them in...");
 
         ResponseEntity<Squad> responseEntity = restTemplate.exchange(
-                squadListBaseUrl,
+                bootstrapStaticUrl,
                 HttpMethod.GET,
                 null,
                 Squad.class

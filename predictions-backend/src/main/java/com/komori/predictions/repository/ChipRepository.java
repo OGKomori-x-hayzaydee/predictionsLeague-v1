@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ChipRepository extends JpaRepository<ChipEntity, Long> {
-    List<ChipEntity> findAllByUser_Email(String userEmail);
+    List<ChipEntity> findAllByUser_UUID(String userUUID);
 
     @Modifying
     @Query("""
@@ -21,5 +21,5 @@ public interface ChipRepository extends JpaRepository<ChipEntity, Long> {
     """)
     void decrementGameweeksRemainingForAllUsers();
 
-    ChipEntity findByUser_EmailAndType(String userEmail, Chip type);
+    ChipEntity findByUser_UUIDAndType(String userUUID, Chip type);
 }
