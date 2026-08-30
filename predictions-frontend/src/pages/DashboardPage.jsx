@@ -157,6 +157,7 @@ export default function DashboardPage() {
           {/* Fixture preview card — fluid responsive width with subtle breathing room */}
           <div className="mt-5 w-[94%] mx-auto">
             <FixturePreviewCardFoil
+              key={selectedFixture?.id ?? selectedFixture?.matchId}
               fixture={selectedFixture}
               ceiling={selectedCeiling}
               variant="desktop"
@@ -223,6 +224,7 @@ export default function DashboardPage() {
         </div>
 
         <FixturePreviewCardFoil
+          key={selectedFixture?.id ?? selectedFixture?.matchId}
           fixture={selectedFixture}
           ceiling={selectedCeiling}
           variant="mobile"

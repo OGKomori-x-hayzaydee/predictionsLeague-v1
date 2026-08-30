@@ -179,6 +179,9 @@ export const dataMerging = {
           mergedAt: new Date().toISOString()
         }
       };
+      // #region agent log
+      fetch('http://127.0.0.1:7884/ingest/5b69a062-42cb-4709-b82f-88feef295885',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ea7fb4'},body:JSON.stringify({sessionId:'ea7fb4',runId:'post-fix',hypothesisId:'D',location:'clientSideDataMerging.js:merge',message:'merged fixture actuals',data:{matchId:fixture.matchId??fixture.id,teams:`${fixture.homeTeam} v ${fixture.awayTeam}`,predMatchId:matchingPrediction?.matchId??null,actualHomeScorers:matchingPrediction?.actualHomeScorers||null,actualAwayScorers:matchingPrediction?.actualAwayScorers||null,homeScorers:matchingPrediction?.homeScorers||null,awayScorers:matchingPrediction?.awayScorers||null},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
 
       // Mark data source if requested
       if (markSource) {

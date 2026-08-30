@@ -4,7 +4,7 @@ import TeamCrest from '../ui/TeamCrest';
 import ChipPile from './ChipPile';
 import { resolveFiledChips } from './resolveFiledChips';
 import { buildResultView, pointsLabel } from '../../utils/matchResult';
-import { namedScorers } from '../fixtures/predictionLedger';
+import { namedScorers, collapseScorerCounts } from '../fixtures/predictionLedger';
 import { isFinishedMatch } from '../../utils/fixtureUtils';
 import { formatFixtureDeadline } from '../../utils/dateUtils';
 
@@ -33,16 +33,17 @@ function formatSlot(dateStr) {
 /** Scorer pill row — the same recipe as FixtureSlip's scorer pills, not a
  * bordered box, just flat pills wrapped per side. */
 function ScorerPills({ names }) {
+  const pills = collapseScorerCounts(names);
   return (
     <div className="flex min-h-[64px] w-full flex-wrap content-center justify-center gap-1.5">
-      {names.length > 0 ? (
-        names.map((name) => (
+      {pills.length > 0 ? (
+        pills.map(({ name, label }) => (
           <span
             key={name}
             className="flex items-center gap-2 rounded-full border border-[#1c2942] bg-[#0b1626] px-3 py-1 text-xs text-[#c8d2e0]"
           >
             <span className="h-1.5 w-1.5 shrink-0 rounded-full border-[1.5px] border-brand-teal" />
-            {name}
+            {label}
           </span>
         ))
       ) : (
@@ -113,17 +114,33 @@ export default function FixturePreviewCardFoil({
   const stampSize = isMobile ? 46 : 60;
 
   const result = buildResultView(fixture, prediction);
+  const played = isFinishedMatch(fixture.status);
   const actualScorers = namedScorers(
     prediction?.actualHomeScorers || fixture?.actualHomeScorers,
     prediction?.actualAwayScorers || fixture?.actualAwayScorers,
   );
+  // #region agent log
+  {
+    const predHome = prediction?.actualHomeScorers;
+    const fixHome = fixture?.actualHomeScorers;
+    const bag = (typeof window !== 'undefined' && (window.__dbgScorerArrs = window.__dbgScorerArrs || [])) || [];
+    const matchId = fixture.id ?? fixture.matchId;
+    const share = (arr, field) => {
+      if (!Array.isArray(arr)) return null;
+      const hit = bag.find((x) => x.arr === arr);
+      if (hit && String(hit.matchId) !== String(matchId)) return { field, sharedWith: hit.matchId, sharedTeams: hit.teams };
+      if (!hit) bag.push({ arr, matchId, teams: `${homeTeam} v ${awayTeam}`, field });
+      return null;
+    };
+    fetch('http://127.0.0.1:7884/ingest/5b69a062-42cb-4709-b82f-88feef295885',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ea7fb4'},body:JSON.stringify({sessionId:'ea7fb4',runId:'post-fix',hypothesisId:'A',location:'FixturePreviewCardFoil.jsx:render',message:'foil scorers',data:{matchId,teams:`${homeTeam} v ${awayTeam}`,status:fixture.status,played,predHomeScorers:homeScorers,predAwayScorers:awayScorers,actualScorers,collapsedActual:collapseScorerCounts(actualScorers).map((p)=>p.label),collapsedPred:collapseScorerCounts([...homeScorers,...awayScorers]).map((p)=>p.label),actualUnique:new Set(actualScorers).size,actualDupes:actualScorers.filter((n,i,a)=>a.indexOf(n)!==i),predDupes:[...homeScorers,...awayScorers].filter((n,i,a)=>a.indexOf(n)!==i),usedFallbackHome:predHome==null||predHome===undefined||(Array.isArray(predHome)&&!predHome.length),predHomeSameAsFixHome:predHome!=null&&predHome===fixHome,sharedHome:share(predHome||fixHome,'actualHome'),sharedAway:share(prediction?.actualAwayScorers||fixture?.actualAwayScorers,'actualAway')},timestamp:Date.now()})}).catch(()=>{});
+  }
+  // #endregion
   const scoreLabel =
     result.actualHome != null && result.actualAway != null
       ? `${result.actualHome}–${result.actualAway}`
       : '—';
   const actualPointsLabel = predicted && result.settled ? pointsLabel(result.points) : '—';
   const ceilingLabel = predicted ? `${ceiling} pts` : '—';
-  const played = isFinishedMatch(fixture.status);
   const deadlineCaption = formatFixtureDeadline(date);
   const homeCall = predicted && prediction?.homeScore != null ? prediction.homeScore : '—';
   const awayCall = predicted && prediction?.awayScore != null ? prediction.awayScore : '—';
@@ -213,12 +230,12 @@ export default function FixturePreviewCardFoil({
             <span className="font-outfit text-2xs uppercase tracking-[0.14em] text-[#66748c]">Scorers</span>
             {actualScorers.length > 0 ? (
               <div className="flex flex-wrap items-center justify-center gap-1">
-                {actualScorers.map((name) => (
+                {collapseScorerCounts(actualScorers).map(({ name, label }) => (
                   <span
                     key={name}
                     className="rounded-full border border-[#1c2942] bg-[#0b1626] px-2 py-0.5 text-2xs text-[#c8d2e0]"
                   >
-                    {name}
+                    {label}
                   </span>
                 ))}
               </div>
