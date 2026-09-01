@@ -55,9 +55,13 @@ public class PredictionService {
                         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         PredictionEntity prediction = predictionRepository.findByMatchIdAndUser_UUID(request.getMatchId(), uuid);
+        List<Chip> oldChips = new ArrayList<>();
         if (prediction == null) {
+            // New Prediction
             predictionRepository.saveAndFlush(new PredictionEntity(user, request));
         } else {
+            oldChips = prediction.getChips();
+            // Edit Prediction
             prediction.setDate(Instant.now());
             prediction.setHomeScore(request.getHomeScore());
             prediction.setAwayScore(request.getAwayScore());
@@ -66,7 +70,8 @@ public class PredictionService {
             prediction.setChips(request.getChips());
             predictionRepository.saveAndFlush(prediction);
         }
-        chipService.updateChipStatusAfterNewPrediction(uuid, request);
+
+        chipService.updateChipStatusAfterPrediction(uuid, request, oldChips);
     }
 
     @Transactional
