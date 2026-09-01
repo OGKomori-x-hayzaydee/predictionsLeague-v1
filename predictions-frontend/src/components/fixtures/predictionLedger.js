@@ -37,7 +37,25 @@ export function buildLedgerRows({ homeScore = 0, awayScore = 0, homeScorers = []
 }
 
 export function namedScorers(homeScorers = [], awayScorers = []) {
-  return [...(homeScorers || []), ...(awayScorers || [])].filter(Boolean);
+  const out = [...(homeScorers || []), ...(awayScorers || [])].filter(Boolean);
+  // #region agent log
+  fetch('http://127.0.0.1:7884/ingest/5b69a062-42cb-4709-b82f-88feef295885',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ea7fb4'},body:JSON.stringify({sessionId:'ea7fb4',runId:'post-fix',hypothesisId:'B',location:'predictionLedger.js:namedScorers',message:'namedScorers io',data:{home:homeScorers||[],away:awayScorers||[],out,homeLen:(homeScorers||[]).length,awayLen:(awayScorers||[]).length,sameRef:homeScorers!=null&&homeScorers===awayScorers},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+  return out;
+}
+
+/** One entry per distinct name, first-seen order. Braces become count > 1. */
+export function collapseScorerCounts(names = []) {
+  const counts = new Map();
+  for (const name of names) {
+    if (!name) continue;
+    counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  return Array.from(counts, ([name, count]) => ({
+    name,
+    count,
+    label: count > 1 ? `${name} ×${count}` : name,
+  }));
 }
 
 // Placeholder scorer options (ScorerSelect.jsx's EXTRA_OPTIONS) that don't
