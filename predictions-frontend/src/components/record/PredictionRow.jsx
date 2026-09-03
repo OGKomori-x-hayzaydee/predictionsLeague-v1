@@ -20,9 +20,32 @@ const BREAKDOWN_LABELS = {
 
 const VERDICT_LABELS = { EXACT: 'EXACT', OUTCOME: 'CORRECT', MISSED: 'MISSED' };
 
-function scorerLine(scorers) {
-  const named = (scorers || []).filter(Boolean);
-  return named.length ? named.join(', ') : 'No scorer named';
+/**
+ * Own goals arrive from the feed as "<scorer> (o.g.)", but an unattributed
+ * one stringifies its null name straight into the label ("null (o.g.)").
+ * Client-side fallback — the record shouldn't print "null" at anybody.
+ */
+const OWN_GOAL_NO_NAME = /^\s*(null|undefined)\s*\(\s*o\.?\s*g\.?\s*\)\s*$/i;
+
+function cleanScorerName(raw) {
+  if (!raw) return null;
+  const name = String(raw).trim();
+  if (!name || /^(null|undefined)$/i.test(name)) return null;
+  return OWN_GOAL_NO_NAME.test(name) ? 'Own goal' : name;
+}
+
+/**
+ * Braces collapse into one "Haaland ×2" entry rather than repeating the name,
+ * which is what made the merged scorer line run to three wrapped lines.
+ */
+function scorerTally(scorers) {
+  const counts = new Map();
+  for (const raw of scorers || []) {
+    const name = cleanScorerName(raw);
+    if (!name) continue;
+    counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  return Array.from(counts, ([name, count]) => (count > 1 ? `${name} ×${count}` : name));
 }
 
 /**
@@ -63,6 +86,53 @@ function ticketTheme(isSettled, verdict) {
 }
 
 /**
+ * One scoreline half of the ticket — the score itself, then each side's
+ * scorers under their own crest (home right-aligned, away left-aligned)
+ * so it's readable *who* scored for *whom*, instead of one merged
+ * comma-run across both teams.
+ */
+function ScorelineHalf({ label, homeTeam, awayTeam, home, away, homeScorers, awayScorers, scoreColor, muted }) {
+  return (
+    <div className="flex flex-col items-center gap-2.5 px-5 py-4">
+      <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">{label}</span>
+
+      <div className="flex items-center gap-3">
+        <TeamCrest team={homeTeam} size={30} />
+        <span className="font-dmSerif text-2xl leading-none" style={{ color: scoreColor }}>
+          {home}–{away}
+        </span>
+        <TeamCrest team={awayTeam} size={30} />
+      </div>
+
+      <div className="grid w-full grid-cols-2 gap-x-3 text-2xs leading-relaxed">
+        <ul className={`flex flex-col items-end gap-0.5 text-right ${muted ? 'text-text-muted-4' : 'text-text-muted-2'}`}>
+          {homeScorers.length ? (
+            homeScorers.map((s) => (
+              <li key={s} className="max-w-full truncate">
+                {s}
+              </li>
+            ))
+          ) : (
+            <li className="text-text-muted-5">—</li>
+          )}
+        </ul>
+        <ul className={`flex flex-col items-start gap-0.5 border-l border-dashed border-border-card pl-3 ${muted ? 'text-text-muted-4' : 'text-text-muted-2'}`}>
+          {awayScorers.length ? (
+            awayScorers.map((s) => (
+              <li key={s} className="max-w-full truncate">
+                {s}
+              </li>
+            ))
+          ) : (
+            <li className="text-text-muted-5">—</li>
+          )}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/**
  * "Scoreboard ticket" prediction card — the shared unit for Season (usually
  * `defaultOpen`) and Search (collapsed by default, expands in place).
  * Two densities:
@@ -70,7 +140,13 @@ function ticketTheme(isSettled, verdict) {
  *     points pill, chevron).
  *   - Expanded: the full ticket — verdict-tinted wash, big crests, a
  *     "YOU CALLED" / "RESULT" split with a perforated notch between the
- *     halves, a rotated verdict stamp in the corner, and a chip footer strip.
+ *     halves, and the scoring breakdown alongside them on `lg`+ (stacked
+ *     below on narrower panes) so the card spends its width instead of
+ *     running tall.
+ *
+ * The verdict stamp lives in the header row rather than floating over the
+ * body — as an overlay it landed on top of the "RESULT" label whenever the
+ * ticket was narrow.
  *
  * `highlighted` — true when this row is the target of that deep link: it
  * force-expands, scrolls itself into view, and glows briefly.
@@ -87,17 +163,16 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
 
   const isSettled = prediction.actualHomeScore !== null && prediction.actualHomeScore !== undefined;
   const breakdown = isSettled ? getPointsBreakdown(prediction) : null;
+  const hasBreakdown = Boolean(breakdown && Object.keys(breakdown).length > 0);
   const verdict = isSettled ? callVerdict(prediction) : null;
   const points = isSettled ? calculatePoints(prediction) ?? 0 : null;
   const chips = prediction.chips || [];
   const theme = ticketTheme(isSettled, verdict);
-  const calledScorers = scorerLine([...(prediction.homeScorers || []), ...(prediction.awayScorers || [])]);
-  const resultScorers = scorerLine([...(prediction.actualHomeScorers || []), ...(prediction.actualAwayScorers || [])]);
 
   return (
     <div
       ref={rootRef}
-      className={`relative overflow-hidden rounded-14 border shadow-[0_16px_32px_-16px_rgba(0,0,0,0.55)] transition-shadow ${
+      className={`@container relative overflow-hidden rounded-14 border shadow-[0_16px_32px_-16px_rgba(0,0,0,0.55)] transition-shadow ${
         highlighted ? 'ring-2 ring-brand-teal-mid/70' : ''
       }`}
       style={{ background: theme.wash, borderColor: theme.border }}
@@ -117,7 +192,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
         </span>
 
         {!expanded && (
-          <span className="hidden shrink-0 items-center gap-2.5 sm:flex">
+          <span className="hidden shrink-0 items-center gap-2.5 @min-[560px]:flex">
             <span className="font-dmSerif text-base text-text-tertiary">
               {prediction.homeScore}–{prediction.awayScore}
             </span>
@@ -128,6 +203,16 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
             >
               {isSettled ? `${prediction.actualHomeScore}–${prediction.actualAwayScore}` : 'Open'}
             </span>
+          </span>
+        )}
+
+        {/* Verdict stamp — in-flow beside the points pill so nothing overlaps */}
+        {isSettled && (
+          <span
+            className="hidden shrink-0 rotate-[-6deg] rounded-md border-[2.5px] px-2 py-[3px] font-outfit text-2xs font-bold tracking-wider @min-[480px]:inline-block"
+            style={{ borderColor: verdict?.colorVar, color: verdict?.colorVar }}
+          >
+            {VERDICT_LABELS[verdict?.verdict] || verdict?.verdict}
           </span>
         )}
 
@@ -142,65 +227,82 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
       </button>
 
       {expanded && (
-        <div className="relative border-t border-dashed" style={{ borderColor: theme.border }}>
-          {/* Ticket body — "YOU CALLED" / "RESULT" halves with a faux-perforated notch on sm+ */}
-          <div className="relative grid grid-cols-1 sm:grid-cols-2">
-            <span
-              aria-hidden="true"
-              className="absolute -top-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app sm:block"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app sm:block"
-            />
+        <div className="border-t border-dashed" style={{ borderColor: theme.border }}>
+          <div className={`grid grid-cols-1 ${hasBreakdown ? '@min-[680px]:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]' : ''}`}>
+            {/* Ticket body — "YOU CALLED" / "RESULT" halves with a faux-perforated notch on sm+ */}
+            <div className="relative grid grid-cols-1 @min-[420px]:grid-cols-2">
+              <span
+                aria-hidden="true"
+                className="absolute -top-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app @min-[420px]:block"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app @min-[420px]:block"
+              />
 
-            <div className="flex flex-col items-center gap-2 px-5 py-4 text-center">
-              <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">YOU CALLED</span>
-              <div className="flex items-center gap-3">
-                <TeamCrest team={prediction.homeTeam} size={30} />
-                <span className="font-dmSerif text-2xl leading-none text-[color:var(--text-primary)]">
-                  {prediction.homeScore}–{prediction.awayScore}
-                </span>
-                <TeamCrest team={prediction.awayTeam} size={30} />
-              </div>
-              <span className="text-2xs leading-snug text-text-muted-3">{calledScorers}</span>
-            </div>
+              <ScorelineHalf
+                label="YOU CALLED"
+                homeTeam={prediction.homeTeam}
+                awayTeam={prediction.awayTeam}
+                home={prediction.homeScore}
+                away={prediction.awayScore}
+                homeScorers={scorerTally(prediction.homeScorers)}
+                awayScorers={scorerTally(prediction.awayScorers)}
+                scoreColor="var(--text-primary)"
+              />
 
-            <div className="flex flex-col items-center gap-2 border-t border-dashed px-5 py-4 text-center sm:border-t-0 sm:border-l" style={{ borderColor: theme.border }}>
-              <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">RESULT</span>
-              {isSettled ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    <TeamCrest team={prediction.homeTeam} size={30} />
-                    <span
-                      className="font-dmSerif text-2xl leading-none"
-                      style={{ color: verdict?.exact ? 'var(--brand-teal)' : 'var(--text-primary)' }}
-                    >
-                      {prediction.actualHomeScore}–{prediction.actualAwayScore}
-                    </span>
-                    <TeamCrest team={prediction.awayTeam} size={30} />
+              <div
+                className="border-t border-dashed @min-[420px]:border-l @min-[420px]:border-t-0"
+                style={{ borderColor: theme.border }}
+              >
+                {isSettled ? (
+                  <ScorelineHalf
+                    label="RESULT"
+                    homeTeam={prediction.homeTeam}
+                    awayTeam={prediction.awayTeam}
+                    home={prediction.actualHomeScore}
+                    away={prediction.actualAwayScore}
+                    homeScorers={scorerTally(prediction.actualHomeScorers)}
+                    awayScorers={scorerTally(prediction.actualAwayScorers)}
+                    scoreColor={verdict?.exact ? 'var(--brand-teal)' : 'var(--text-primary)'}
+                    muted
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 px-5 py-6">
+                    <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">RESULT</span>
+                    <span className="font-dmSerif text-lg text-brand-amber">Not played yet</span>
                   </div>
-                  <span className="text-2xs leading-snug text-text-muted-3">{resultScorers}</span>
-                </>
-              ) : (
-                <span className="mt-2 font-dmSerif text-lg text-brand-amber">Not played yet</span>
-              )}
+                )}
+              </div>
             </div>
+
+            {/* How this scored — sits beside the scorelines on lg+, under them below that */}
+            {hasBreakdown && (
+              <div
+                className="flex flex-col gap-1.5 border-t border-dashed px-5 py-4 @min-[680px]:border-l @min-[680px]:border-t-0"
+                style={{ borderColor: theme.border }}
+              >
+                <span className="font-outfit text-3xs tracking-wide text-text-muted-3">HOW THIS SCORED</span>
+                <div className="flex flex-col gap-1">
+                  {Object.entries(breakdown).map(([key, val]) => (
+                    <div key={key} className="flex items-baseline justify-between gap-3 text-xs">
+                      <span className="text-text-secondary">{BREAKDOWN_LABELS[key] || key}</span>
+                      <span className="shrink-0 font-outfit text-text-tertiary">{val}</span>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  className="mt-auto flex items-baseline justify-between gap-3 border-t border-dashed pt-2 text-xs"
+                  style={{ borderColor: theme.border }}
+                >
+                  <span className="font-outfit text-3xs tracking-wide text-text-muted-3">TOTAL</span>
+                  <span className="font-dmSerif text-lg leading-none" style={{ color: theme.pillFg }}>
+                    {points > 0 ? `+${points}` : points}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-
-          {isSettled && breakdown && Object.keys(breakdown).length > 0 && (
-            <div className="flex flex-col gap-1.5 border-t border-dashed px-5 py-3" style={{ borderColor: theme.border }}>
-              <span className="font-outfit text-3xs tracking-wide text-text-muted-3">HOW THIS SCORED</span>
-              <div className="flex flex-col gap-1">
-                {Object.entries(breakdown).map(([key, val]) => (
-                  <div key={key} className="flex items-baseline justify-between gap-3 text-xs">
-                    <span className="text-text-secondary">{BREAKDOWN_LABELS[key] || key}</span>
-                    <span className="font-outfit text-text-tertiary">{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Chip footer strip — human-readable chip names (CHIP_CONFIG), not raw camelCase ids */}
           {chips.length > 0 && (
@@ -215,18 +317,6 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
                 </span>
               ))}
             </div>
-          )}
-
-          {/* Verdict stamp — anchored to *this* wrapper (now `relative`,
-              see above), not the root card, so it no longer overlaps the
-              collapsed header's points pill/chevron. */}
-          {isSettled && (
-            <span
-              className="pointer-events-none absolute right-4 top-3 rotate-[-8deg] rounded-md border-[2.5px] px-2 py-[3px] font-outfit text-2xs font-bold tracking-wider"
-              style={{ borderColor: verdict?.colorVar, color: verdict?.colorVar }}
-            >
-              {VERDICT_LABELS[verdict?.verdict] || verdict?.verdict}
-            </span>
           )}
         </div>
       )}

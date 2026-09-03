@@ -14,10 +14,18 @@ export default function GameweekRidge({ weeks, selected, onSelect }) {
   }
 
   const max = Math.max(1, ...weeks.map((w) => w.points));
+  // Early in a season a handful of weeks stretched across the full pane read
+  // as two lonely slivers a screen apart. Below this count the bars keep a
+  // fixed width and group in the centre instead of spreading.
+  const sparse = weeks.length <= 8;
 
   return (
     <div className="relative border-b border-border-base pb-3.5">
-      <div className="flex h-[68px] items-end justify-between gap-[3px] md:h-[100px]">
+      <div
+        className={`flex h-[68px] items-end md:h-[100px] ${
+          sparse ? 'justify-center gap-3 md:gap-5' : 'justify-between gap-[3px]'
+        }`}
+      >
         {weeks.map((w) => {
           const on = w.gameweek === selected;
           const h = Math.max(6, Math.round((w.points / max) * 68));
@@ -25,26 +33,29 @@ export default function GameweekRidge({ weeks, selected, onSelect }) {
             <button
               key={w.gameweek}
               onClick={() => onSelect(on ? null : w.gameweek)}
-              className="flex h-full flex-1 flex-col items-center justify-end gap-1"
+              aria-pressed={on}
+              className={`group flex h-full cursor-pointer flex-col items-center justify-end gap-1 ${
+                sparse ? 'w-12 flex-none md:w-16' : 'flex-1'
+              }`}
             >
               <span
-                className="font-outfit text-3xs"
+                className="font-outfit text-3xs transition-colors group-hover:text-brand-teal-pale"
                 style={{ color: on ? 'var(--brand-teal)' : 'var(--text-muted-4)' }}
               >
                 {w.points}
               </span>
               <span
-                className="w-full max-w-[26px] rounded-t-[3px] transition-colors"
+                className={`w-full rounded-t-[3px] transition-colors group-hover:brightness-125 ${sparse ? '' : 'max-w-[26px]'}`}
                 style={{
                   height: `${on ? h * 1.3 : h}px`,
                   background: on ? 'var(--brand-teal)' : w.points >= max * 0.85 ? 'var(--brand-teal-deep)' : 'var(--border-control)',
                 }}
               />
               <span
-                className="h-[13px] font-outfit text-3xs"
+                className="h-[13px] font-outfit text-3xs transition-colors group-hover:text-brand-teal-pale"
                 style={{ color: on ? 'var(--brand-teal)' : 'var(--text-muted-4)' }}
               >
-                {w.gameweek % 4 === 0 || on ? w.gameweek : ''}
+                {sparse ? `GW${w.gameweek}` : w.gameweek % 4 === 0 || on ? w.gameweek : ''}
               </span>
             </button>
           );

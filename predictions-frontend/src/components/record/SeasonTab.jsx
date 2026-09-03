@@ -100,7 +100,10 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
                 CLOSE
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {/* One ticket per row: the pane caps at 820px, so a 2-up grid left
+                each expanded ticket ~190px per half — scorer lines wrapped to
+                three lines and the verdict stamp sat on the RESULT label. */}
+            <div className="flex flex-col gap-3">
               {weekPredictions.length === 0 ? (
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
