@@ -28,7 +28,7 @@ public class ChipService {
         List<ChipEntity> chips = List.of(
                 ChipEntity.builder().user(newUser).type(Chip.WILDCARD).build(),
                 ChipEntity.builder().user(newUser).type(Chip.DEFENSE_PLUS_PLUS).build(),
-                ChipEntity.builder().user(newUser).type(Chip.ALL_IN_WEEK).seasonLimit(4).build(),
+                ChipEntity.builder().user(newUser).type(Chip.ALL_IN_WEEK).seasonLimit(Chip.ALL_IN_WEEK.getValue()).build(),
                 ChipEntity.builder().user(newUser).type(Chip.SCORER_FOCUS).build(),
                 ChipEntity.builder().user(newUser).type(Chip.DOUBLE_DOWN).build()
         );
@@ -37,28 +37,34 @@ public class ChipService {
     }
 
     @Transactional
-    public void updateChipStatusAfterNewPrediction(String uuid, PredictionRequest prediction) {
-        for (Chip chip : prediction.getChips()) {
+    public void updateChipStatusAfterPrediction(String uuid, PredictionRequest prediction, List<Chip> oldChips) {
+        List<Chip> chipsToBeUpdated = prediction.getChips().stream()
+                .filter(chip -> !oldChips.contains(chip))
+                .toList();
+
+        List<Chip> chipsToBeReverted = oldChips.stream()
+                .filter(chip -> !prediction.getChips().contains(chip))
+                .toList();
+
+        for (Chip chip : chipsToBeUpdated) {
             ChipEntity chipEntity = chipRepository.findByUser_UUIDAndType(uuid, chip);
 
-            if (chipEntity.getType() == Chip.ALL_IN_WEEK) {
-                Integer lastUsed = chipEntity.getLastUsedGameweek();
-                if (lastUsed == null || !lastUsed.equals(prediction.getGameweek())) {
-                    chipEntity.setLastUsedGameweek(prediction.getGameweek());
-                    chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
-                }
-            } else {
-                chipEntity.setLastUsedGameweek(prediction.getGameweek());
-                chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
-                if (chipEntity.getType() == Chip.WILDCARD) {
-                    chipEntity.setRemainingGameweeks(8);
-                } else if (chipEntity.getType() == Chip.SCORER_FOCUS || chipEntity.getType() == Chip.DEFENSE_PLUS_PLUS) {
-                    chipEntity.setRemainingGameweeks(6);
-                } else if (chipEntity.getType() == Chip.DOUBLE_DOWN) {
-                    chipEntity.setRemainingGameweeks(1);
-                }
+            chipEntity.setPreviousLastUsedGameweek(chipEntity.getLastUsedGameweek());
+            chipEntity.setLastUsedGameweek(prediction.getGameweek());
+            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() + 1);
+            if (chipEntity.getType() != Chip.ALL_IN_WEEK) {
+                chipEntity.setRemainingGameweeks(chip.getValue());
             }
+            chipRepository.save(chipEntity);
+        }
 
+        for (Chip chip : chipsToBeReverted) {
+            ChipEntity chipEntity = chipRepository.findByUser_UUIDAndType(uuid, chip);
+
+            // Revert chip
+            chipEntity.setLastUsedGameweek(chipEntity.getPreviousLastUsedGameweek());
+            chipEntity.setRemainingGameweeks(0);
+            chipEntity.setSeasonUsageCount(chipEntity.getSeasonUsageCount() - 1);
             chipRepository.save(chipEntity);
         }
     }
