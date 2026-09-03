@@ -93,19 +93,19 @@ function ticketTheme(isSettled, verdict) {
  */
 function ScorelineHalf({ label, homeTeam, awayTeam, home, away, homeScorers, awayScorers, scoreColor, muted }) {
   return (
-    <div className="flex flex-col items-center gap-2.5 px-5 py-4">
-      <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">{label}</span>
+    <div className="flex flex-col items-center gap-3 px-6 py-5">
+      <span className="font-outfit text-2xs tracking-[0.13em] text-text-muted-4">{label}</span>
 
       <div className="flex items-center gap-3">
-        <TeamCrest team={homeTeam} size={30} />
-        <span className="font-dmSerif text-2xl leading-none" style={{ color: scoreColor }}>
+        <TeamCrest team={homeTeam} size={34} />
+        <span className="font-dmSerif text-3xl leading-none" style={{ color: scoreColor }}>
           {home}–{away}
         </span>
-        <TeamCrest team={awayTeam} size={30} />
+        <TeamCrest team={awayTeam} size={34} />
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-x-3 text-2xs leading-relaxed">
-        <ul className={`flex flex-col items-end gap-0.5 text-right ${muted ? 'text-text-muted-4' : 'text-text-muted-2'}`}>
+      <div className="grid w-full grid-cols-2 gap-x-4 text-caption leading-relaxed">
+        <ul className={`flex flex-col items-end gap-1 text-right ${muted ? 'text-text-muted-4' : 'text-text-muted-2'}`}>
           {homeScorers.length ? (
             homeScorers.map((s) => (
               <li key={s} className="max-w-full truncate">
@@ -116,7 +116,7 @@ function ScorelineHalf({ label, homeTeam, awayTeam, home, away, homeScorers, awa
             <li className="text-text-muted-5">—</li>
           )}
         </ul>
-        <ul className={`flex flex-col items-start gap-0.5 border-l border-dashed border-border-card pl-3 ${muted ? 'text-text-muted-4' : 'text-text-muted-2'}`}>
+        <ul className={`flex flex-col items-start gap-1 border-l border-dashed border-border-card pl-4 ${muted ? 'text-text-muted-4' : 'text-text-muted-2'}`}>
           {awayScorers.length ? (
             awayScorers.map((s) => (
               <li key={s} className="max-w-full truncate">
@@ -140,9 +140,13 @@ function ScorelineHalf({ label, homeTeam, awayTeam, home, away, homeScorers, awa
  *     points pill, chevron).
  *   - Expanded: the full ticket — verdict-tinted wash, big crests, a
  *     "YOU CALLED" / "RESULT" split with a perforated notch between the
- *     halves, and the scoring breakdown alongside them on `lg`+ (stacked
- *     below on narrower panes) so the card spends its width instead of
- *     running tall.
+ *     halves, and the scoring breakdown alongside them once the ticket
+ *     itself is wide enough (stacked below otherwise) so the card spends
+ *     its width instead of running tall.
+ *
+ * Layout switches on container queries (`@container` on the root), not
+ * viewport breakpoints: this pane is width-capped and narrows again beside
+ * the 400px rail, so viewport width is a poor proxy for the card's own.
  *
  * The verdict stamp lives in the header row rather than floating over the
  * body — as an overlay it landed on top of the "RESULT" label whenever the
@@ -178,27 +182,27 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
       style={{ background: theme.wash, borderColor: theme.border }}
     >
       {/* Collapsed header — always visible, toggles expansion */}
-      <button onClick={() => setExpanded((e) => !e)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">
-        <span className="w-11 shrink-0 font-outfit text-2xs tracking-wide text-text-muted-4">
+      <button onClick={() => setExpanded((e) => !e)} className="flex w-full items-center gap-3.5 px-5 py-4 text-left">
+        <span className="w-12 shrink-0 font-outfit text-caption tracking-wide text-text-muted-4">
           GW{prediction.gameweek}
         </span>
 
         <span className="flex min-w-0 flex-1 items-center gap-2">
-          <TeamCrest team={prediction.homeTeam} size={22} />
-          <span className="truncate text-sm text-text-secondary">{prediction.homeTeam}</span>
-          <span className="font-outfit text-2xs text-text-muted-5">v</span>
-          <span className="truncate text-sm text-text-secondary">{prediction.awayTeam}</span>
-          <TeamCrest team={prediction.awayTeam} size={22} />
+          <TeamCrest team={prediction.homeTeam} size={24} />
+          <span className="truncate text-base text-text-secondary">{prediction.homeTeam}</span>
+          <span className="font-outfit text-caption text-text-muted-5">v</span>
+          <span className="truncate text-base text-text-secondary">{prediction.awayTeam}</span>
+          <TeamCrest team={prediction.awayTeam} size={24} />
         </span>
 
         {!expanded && (
           <span className="hidden shrink-0 items-center gap-2.5 @min-[560px]:flex">
-            <span className="font-dmSerif text-base text-text-tertiary">
+            <span className="font-dmSerif text-lg text-text-tertiary">
               {prediction.homeScore}–{prediction.awayScore}
             </span>
-            <span className="font-outfit text-2xs text-text-muted-5">vs</span>
+            <span className="font-outfit text-caption text-text-muted-5">vs</span>
             <span
-              className="font-dmSerif text-base"
+              className="font-dmSerif text-lg"
               style={{ color: isSettled ? (verdict?.exact ? 'var(--brand-teal)' : 'var(--text-tertiary)') : 'var(--brand-amber)' }}
             >
               {isSettled ? `${prediction.actualHomeScore}–${prediction.actualAwayScore}` : 'Open'}
@@ -209,7 +213,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
         {/* Verdict stamp — in-flow beside the points pill so nothing overlaps */}
         {isSettled && (
           <span
-            className="hidden shrink-0 rotate-[-6deg] rounded-md border-[2.5px] px-2 py-[3px] font-outfit text-2xs font-bold tracking-wider @min-[480px]:inline-block"
+            className="hidden shrink-0 rotate-[-6deg] rounded-md border-[2.5px] px-2.5 py-1 font-outfit text-caption font-bold tracking-wider @min-[520px]:inline-block"
             style={{ borderColor: verdict?.colorVar, color: verdict?.colorVar }}
           >
             {VERDICT_LABELS[verdict?.verdict] || verdict?.verdict}
@@ -217,7 +221,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
         )}
 
         <span
-          className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 font-dmSerif text-sm"
+          className="flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 font-dmSerif text-base"
           style={{ background: theme.pillBg, color: theme.pillFg }}
         >
           {isSettled ? (points > 0 ? `+${points}` : '0') : '—'}
@@ -228,16 +232,16 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
 
       {expanded && (
         <div className="border-t border-dashed" style={{ borderColor: theme.border }}>
-          <div className={`grid grid-cols-1 ${hasBreakdown ? '@min-[680px]:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]' : ''}`}>
+          <div className={`grid grid-cols-1 ${hasBreakdown ? '@min-[720px]:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]' : ''}`}>
             {/* Ticket body — "YOU CALLED" / "RESULT" halves with a faux-perforated notch on sm+ */}
-            <div className="relative grid grid-cols-1 @min-[420px]:grid-cols-2">
+            <div className="relative grid grid-cols-1 @min-[460px]:grid-cols-2">
               <span
                 aria-hidden="true"
-                className="absolute -top-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app @min-[420px]:block"
+                className="absolute -top-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app @min-[460px]:block"
               />
               <span
                 aria-hidden="true"
-                className="absolute -bottom-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app @min-[420px]:block"
+                className="absolute -bottom-[7px] left-1/2 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-surface-app @min-[460px]:block"
               />
 
               <ScorelineHalf
@@ -252,7 +256,7 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
               />
 
               <div
-                className="border-t border-dashed @min-[420px]:border-l @min-[420px]:border-t-0"
+                className="border-t border-dashed @min-[460px]:border-l @min-[460px]:border-t-0"
                 style={{ borderColor: theme.border }}
               >
                 {isSettled ? (
@@ -268,9 +272,9 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
                     muted
                   />
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center gap-2 px-5 py-6">
-                    <span className="font-outfit text-3xs tracking-[0.13em] text-text-muted-4">RESULT</span>
-                    <span className="font-dmSerif text-lg text-brand-amber">Not played yet</span>
+                  <div className="flex h-full flex-col items-center justify-center gap-2.5 px-6 py-7">
+                    <span className="font-outfit text-2xs tracking-[0.13em] text-text-muted-4">RESULT</span>
+                    <span className="font-dmSerif text-xl text-brand-amber">Not played yet</span>
                   </div>
                 )}
               </div>
@@ -279,24 +283,24 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
             {/* How this scored — sits beside the scorelines on lg+, under them below that */}
             {hasBreakdown && (
               <div
-                className="flex flex-col gap-1.5 border-t border-dashed px-5 py-4 @min-[680px]:border-l @min-[680px]:border-t-0"
+                className="flex flex-col gap-2 border-t border-dashed px-6 py-5 @min-[720px]:border-l @min-[720px]:border-t-0"
                 style={{ borderColor: theme.border }}
               >
-                <span className="font-outfit text-3xs tracking-wide text-text-muted-3">HOW THIS SCORED</span>
+                <span className="font-outfit text-2xs tracking-wide text-text-muted-3">HOW THIS SCORED</span>
                 <div className="flex flex-col gap-1">
                   {Object.entries(breakdown).map(([key, val]) => (
-                    <div key={key} className="flex items-baseline justify-between gap-3 text-xs">
+                    <div key={key} className="flex items-baseline justify-between gap-3 text-caption">
                       <span className="text-text-secondary">{BREAKDOWN_LABELS[key] || key}</span>
                       <span className="shrink-0 font-outfit text-text-tertiary">{val}</span>
                     </div>
                   ))}
                 </div>
                 <div
-                  className="mt-auto flex items-baseline justify-between gap-3 border-t border-dashed pt-2 text-xs"
+                  className="mt-auto flex items-baseline justify-between gap-3 border-t border-dashed pt-2.5 text-caption"
                   style={{ borderColor: theme.border }}
                 >
-                  <span className="font-outfit text-3xs tracking-wide text-text-muted-3">TOTAL</span>
-                  <span className="font-dmSerif text-lg leading-none" style={{ color: theme.pillFg }}>
+                  <span className="font-outfit text-2xs tracking-wide text-text-muted-3">TOTAL</span>
+                  <span className="font-dmSerif text-xl leading-none" style={{ color: theme.pillFg }}>
                     {points > 0 ? `+${points}` : points}
                   </span>
                 </div>
@@ -307,12 +311,12 @@ export default function PredictionRow({ prediction, defaultOpen = false, highlig
           {/* Chip footer strip — human-readable chip names (CHIP_CONFIG), not raw camelCase ids */}
           {chips.length > 0 && (
             <div
-              className="flex flex-wrap items-center gap-1.5 border-t border-dashed px-5 py-2.5"
+              className="flex flex-wrap items-center gap-2 border-t border-dashed px-6 py-3"
               style={{ borderColor: theme.border, background: 'color-mix(in srgb, var(--surface-app) 40%, transparent)' }}
             >
-              <span className="font-outfit text-3xs tracking-wide text-text-muted-4">CHIPS</span>
+              <span className="font-outfit text-2xs tracking-wide text-text-muted-4">CHIPS</span>
               {chips.map((c) => (
-                <span key={c} className="rounded-full border border-border-card px-2 py-0.5 font-outfit text-2xs text-brand-amber">
+                <span key={c} className="rounded-full border border-border-card px-2.5 py-1 font-outfit text-caption text-brand-amber">
                   {CHIP_CONFIG[c]?.name || c}
                 </span>
               ))}

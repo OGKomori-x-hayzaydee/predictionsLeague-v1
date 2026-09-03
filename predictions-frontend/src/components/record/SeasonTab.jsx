@@ -87,23 +87,24 @@ export default function SeasonTab({ predictions, stats, selectedGameweek, onSele
         <GameweekRidge weeks={stats.pointsByGameweek} selected={selectedGameweek} onSelect={onSelectGameweek} />
 
         {selectedGameweek ? (
-          <div className="flex flex-col gap-3 overflow-hidden rounded-14 border border-border-card bg-surface-card p-4">
+          <div className="flex flex-col gap-4 overflow-hidden rounded-14 border border-border-card bg-surface-card p-5">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="font-dmSerif text-lg text-brand-teal-pale">Gameweek {selectedGameweek}</span>
-              <span className="font-outfit text-2xs tracking-wide text-text-muted-2">
+              <span className="font-dmSerif text-xl text-brand-teal-pale">Gameweek {selectedGameweek}</span>
+              <span className="font-outfit text-caption tracking-wide text-text-muted-2">
                 {weekTotal} PTS · {weekExact} EXACT
               </span>
               <button
                 onClick={() => onSelectGameweek(null)}
-                className="ml-auto font-outfit text-2xs tracking-wide text-text-muted-4 hover:text-text-secondary"
+                className="ml-auto font-outfit text-caption tracking-wide text-text-muted-4 hover:text-text-secondary"
               >
                 CLOSE
               </button>
             </div>
-            {/* One ticket per row: the pane caps at 820px, so a 2-up grid left
-                each expanded ticket ~190px per half — scorer lines wrapped to
-                three lines and the verdict stamp sat on the RESULT label. */}
-            <div className="flex flex-col gap-3">
+            {/* One ticket per row: the pane is width-capped (MAIN_PANE_CLASS),
+                so a 2-up grid left each expanded ticket ~190px per half —
+                scorer lines wrapped to three lines and the verdict stamp sat
+                on top of the RESULT label. */}
+            <div className="flex flex-col gap-3.5">
               {weekPredictions.length === 0 ? (
                 <p className="text-sm text-text-muted-2">No predictions filed for this gameweek.</p>
               ) : (
